@@ -2,7 +2,7 @@ use hdi::prelude::*;
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct Space {
-    pub title: String,
+    pub name: String,
     pub description: String,
 }
 pub fn validate_create_space(

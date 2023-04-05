@@ -19,13 +19,13 @@ export let originalSpaceHash!: ActionHash;
 export let currentRecord!: Record;
 let currentSpace: Space = decode((currentRecord.entry as any).Present.entry) as Space;
 
-let title: string | undefined = currentSpace.title;
+let name: string | undefined = currentSpace.name;
 let description: string | undefined = currentSpace.description;
 
 let errorSnackbar: Snackbar;
 
-$: title, description;
-$: isSpaceValid = true && title !== '' && description !== '';
+$: name, description;
+$: isSpaceValid = true && name !== '' && description !== '';
 
 onMount(() => {
   if (currentRecord === undefined) {
@@ -39,7 +39,7 @@ onMount(() => {
 async function updateSpace() {
 
   const space: Space = { 
-    title: title!,
+    name: name!,
     description: description!,
   };
 
@@ -70,7 +70,7 @@ async function updateSpace() {
   <span style="font-size: 18px">Edit Space</span>
   
   <div style="margin-bottom: 16px">
-    <mwc-textfield outlined label="Title" value={ title } on:input={e => { title = e.target.value; } } required></mwc-textfield>    
+    <mwc-textfield outlined label="Name" value={ name } on:input={e => { name = e.target.value; } } required></mwc-textfield>    
   </div>
 
   <div style="margin-bottom: 16px">

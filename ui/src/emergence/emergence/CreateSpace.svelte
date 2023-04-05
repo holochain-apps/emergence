@@ -14,20 +14,20 @@ let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 const dispatch = createEventDispatcher();
 
 
-let title: string = '';
+let name: string = '';
 let description: string = '';
 
 let errorSnackbar: Snackbar;
 
-$: title, description;
-$: isSpaceValid = true && title !== '' && description !== '';
+$: name, description;
+$: isSpaceValid = true && name !== '' && description !== '';
 
 onMount(() => {
 });
 
 async function createSpace() {  
   const spaceEntry: Space = { 
-    title: title!,
+    name: name!,
     description: description!,
   };
   
@@ -54,7 +54,7 @@ async function createSpace() {
   
 
   <div style="margin-bottom: 16px">
-    <mwc-textfield outlined label="Title" value={ title } on:input={e => { title = e.target.value; } } required></mwc-textfield>          
+    <mwc-textfield outlined label="Name" value={ name } on:input={e => { name = e.target.value; } } required></mwc-textfield>          
   </div>
             
   <div style="margin-bottom: 16px">

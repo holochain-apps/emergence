@@ -106,8 +106,8 @@ async function deleteSpace() {
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Title:</strong></span>
-    <span style="white-space: pre-line">{ space.title }</span>
+    <span style="margin-right: 4px"><strong>Name:</strong></span>
+    <span style="white-space: pre-line">{ space.name }</span>
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">

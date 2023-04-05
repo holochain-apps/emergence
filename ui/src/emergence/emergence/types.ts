@@ -49,7 +49,7 @@ export interface Session {
 
 
 export interface Space { 
-  title: string;
+  name: string;
 
   description: string;
 }
