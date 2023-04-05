@@ -1,0 +1,7 @@
+---
+manifest_version: "1"
+name: emergence
+ui:
+  bundled: "../ui/dist.zip"
+happ_manifest:
+  bundled: "./emergence.happ"

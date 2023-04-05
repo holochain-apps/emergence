@@ -1,0 +1,15 @@
+[package]
+name = "emergence"
+version = "0.0.1"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+name = "emergence"
+
+[dependencies]
+hdk = { workspace = true }
+
+serde = { workspace = true }
+
+emergence_integrity = { workspace = true } 
