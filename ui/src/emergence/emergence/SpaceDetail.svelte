@@ -12,6 +12,7 @@ import '@shoelace-style/shoelace/dist/components/button/button.js';
 import Fa from 'svelte-fa'
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import EditSpace from './EditSpace.svelte'; 
+  import type { EmergenceStore } from '../../emergence-store';
 
 const dispatch = createEventDispatcher();
 

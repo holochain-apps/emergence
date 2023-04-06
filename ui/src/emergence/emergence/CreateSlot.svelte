@@ -40,13 +40,18 @@ async function createSlot() {
     });
     start = undefined
     length = 60
-    dispatch('slot-created', { slotHash: actionHash });
+    dispatch('slot-created', { slot:slot, slotHash: actionHash });
   } catch (e) {
     errorSnackbar.labelText = `Error creating the slot: ${e.data.data}`;
     errorSnackbar.show();
   }
 }
 
+const setLen = (l:number) => {
+  if (l) {
+    length = l
+  }
+}
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
@@ -58,7 +63,7 @@ async function createSlot() {
     <sl-input
     label=Length
     value={length}
-    on:input={e => { length = parseInt(e.target.value); } }
+    on:input={e=>setLen(parseInt(e.target.value))}
   ></sl-input>
 
   </div>

@@ -17,15 +17,18 @@
   import "@holochain-open-dev/profiles/elements/profile-prompt.js";
   import "@holochain-open-dev/profiles/elements/my-profile.js";
 
-  import { clientContext } from './contexts';
+  import { clientContext, storeContext } from './contexts';
   import CreateSlot from './emergence/emergence/CreateSlot.svelte';
+  import { EmergenceStore } from './emergence-store';
+  import { EmergenceClient } from './emergence-client';
 
   let client: AppAgentClient | undefined;
+  let store: EmergenceStore | undefined;
   let loading = true;
   let pane = "sessions"
   let profilesStore: ProfilesStore | undefined
 
-  $: client, loading;
+  $: client, store, loading;
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
@@ -33,7 +36,12 @@
     profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
       avatarMode: "avatar-optional",
     });
+    store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, client.myPubKey)
     loading = false;
+  });
+
+  setContext(storeContext, {
+    getStore: () => store,
   });
 
   setContext(clientContext, {
@@ -76,7 +84,7 @@
       <div class="pane">
         <h3>Slots</h3>
         <Slots></Slots>
-        <CreateSlot></CreateSlot>
+        <CreateSlot on:slot-created={()=>store.fetchSlots()}></CreateSlot>
       </div>
       {/if}
 

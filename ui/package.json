@@ -15,8 +15,10 @@
     "@msgpack/msgpack": "^2.7.2",
     "@vaadin/date-time-picker": "^23.2.8",
     "@fortawesome/free-solid-svg-icons": "^6.3.0",
-    "svelte-fa": "3.0.3"
-
+    "svelte-fa": "3.0.3",
+    "@types/javascript-time-ago": "^2.0.3",
+    "emittery": "^1.0.1",
+    "javascript-time-ago": "2.3.7"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",
