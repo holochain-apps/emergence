@@ -2,13 +2,16 @@
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import type { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
 import { clientContext } from '../../contexts';
+import { storeContext } from '../../contexts';
 import type { Slot } from './types';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
+import type { EmergenceStore } from '../../emergence-store';
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 const dispatch = createEventDispatcher();
 
@@ -41,6 +44,7 @@ async function createSlot() {
     start = undefined
     length = 60
     dispatch('slot-created', { slot:slot, slotHash: actionHash });
+    store.fetchSlots()
   } catch (e) {
     errorSnackbar.labelText = `Error creating the slot: ${e.data.data}`;
     errorSnackbar.show();

@@ -10,6 +10,7 @@
   "dependencies": {
     "@holochain/client": "^0.12.2",
     "@holochain-open-dev/profiles": "^0.12.1",
+    "@holochain-open-dev/utils": "^0.12.2",
     "@shoelace-style/shoelace": "^2.3.0",
     "@material/mwc-snackbar": "^0.27.0",
     "@msgpack/msgpack": "^2.7.2",

@@ -64,7 +64,8 @@
       <div class="pane">
         <h3>Sessions List</h3>
         <AllSessions></AllSessions>
-        <div style="width:300px; border:solid 1px;padding:20px"><CreateSession></CreateSession></div>
+        <div style="width:300px; border:solid 1px;padding:20px">
+          <CreateSession></CreateSession></div>
       </div>
       {/if}
       {#if pane=="spaces"}
@@ -84,7 +85,7 @@
       <div class="pane">
         <h3>Slots</h3>
         <Slots></Slots>
-        <CreateSlot on:slot-created={()=>store.fetchSlots()}></CreateSlot>
+        <CreateSlot></CreateSlot>
       </div>
       {/if}
 

@@ -1,10 +1,12 @@
 // import {  } from './types';
 
 import type {
+    ActionHash,
     AppAgentCallZomeRequest,
     AppAgentClient,
 } from '@holochain/client';
-import type { Slot } from './emergence/emergence/types';
+import type { Session, Slot, Space } from './emergence/emergence/types';
+import { EntryRecord } from '@holochain-open-dev/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
 
@@ -29,7 +31,17 @@ export class EmergenceClient {
 //     });
 //   }
   getSlots() : Promise<Array<Slot>> {
-    return this.callZome('get_slots',null,)
+    return this.callZome('get_slots',null)
+  }
+
+  async getSessions() : Promise<Array<EntryRecord<Session>>> {
+    const records = await this.callZome('get_all_sessions',null)
+    return records.map(r => new EntryRecord(r));
+  }
+
+  async getSpaces() : Promise<Array<EntryRecord<Space>>> {
+    const records = await this.callZome('get_all_spaces',null)
+    return records.map(r => new EntryRecord(r));
   }
 
   private callZome(fn_name: string, payload: any) {

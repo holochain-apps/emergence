@@ -2,46 +2,23 @@
 import { onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
-import { clientContext } from '../../contexts';
+import { storeContext } from '../../contexts';
 import SpaceDetail from './SpaceDetail.svelte';
-import type { EmergenceSignal } from './types';
+import type { EmergenceStore } from '../../emergence-store';
 
 
-let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
-let hashes: Array<ActionHash> | undefined;
 let loading = true;
 let error: any = undefined;
 
-$: hashes, loading, error;
+$: spaces = store.spaces
+$: loading, error;
 
 onMount(async () => {
-
-  await fetchSpaces();
-  client.on('signal', signal => {
-    if (signal.zome_name !== 'emergence') return;
-    const payload = signal.payload as EmergenceSignal;
-    if (payload.type !== 'EntryCreated') return;
-    if (payload.app_entry.type !== 'Space') return;
-    hashes = [...hashes, payload.action.hashed.hash];
-  });
-});
-
-async function fetchSpaces() {
-  try {
-    const records = await client.callZome({
-      cap_secret: null,
-      role_name: 'emergence',
-      zome_name: 'emergence',
-      fn_name: 'get_all_spaces',
-      payload: null,
-    });
-    hashes = records.map(r => r.signed_action.hashed.hash);
-  } catch (e) {
-    error = e;
-  }
+  await store.fetchSpaces();
   loading = false;
-}
+});
 
 </script>
 
@@ -52,13 +29,13 @@ async function fetchSpaces() {
 </div>
 {:else if error}
 <span>Error fetching the spaces: {error.data.data}.</span>
-{:else if hashes.length === 0}
+{:else if $spaces.length === 0}
 <span>No spaces found.</span>
 {:else}
 <div style="display: flex; flex-direction: column">
-  {#each hashes as hash}
+  {#each $spaces as space}
     <div style="margin-bottom: 8px; width:500px; background:lightgray">
-      <SpaceDetail spaceHash={hash}  on:space-deleted={() => fetchSpaces()}></SpaceDetail>
+      <SpaceDetail spaceHash={space.actionHash}  on:space-deleted={() => store.fetchSpaces()}></SpaceDetail>
     </div>
   {/each}
 </div>

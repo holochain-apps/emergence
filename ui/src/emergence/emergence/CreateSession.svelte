@@ -1,14 +1,16 @@
 <script lang="ts">
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import type { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
-import { clientContext } from '../../contexts';
+import { clientContext, storeContext } from '../../contexts';
 import type { Session } from './types';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
+  import type { EmergenceStore } from '../../emergence-store';
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 const dispatch = createEventDispatcher();
 
@@ -47,6 +49,7 @@ async function createSession() {
       payload: sessionEntry,
     });
     title = ""
+    store.fetchSessions()
     dispatch('session-created', { sessionHash: record.signed_action.hashed.hash });
   } catch (e) {
     errorSnackbar.labelText = `Error creating the session: ${e.data.data}`;
