@@ -5,6 +5,8 @@ pub use session::*;
 pub mod slot;
 pub use slot::*;
 use hdi::prelude::*;
+pub mod relation;
+pub use relation::*;
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 #[hdk_entry_defs]
@@ -17,6 +19,7 @@ pub enum EntryTypes {
 #[hdk_link_types]
 pub enum LinkTypes {
     Slots,
+    Relations,
     SessionUpdates,
     AllSessions,
     SpaceUpdates,
@@ -138,7 +141,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             action,
         } => {
             match link_type {
-                LinkTypes::Slots => {
+                LinkTypes::Relations => {
+                    validate_create_link_relations(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+               LinkTypes::Slots => {
                     validate_create_link_slots(
                         action,
                         base_address,
@@ -189,6 +200,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             action,
         } => {
             match link_type {
+                LinkTypes::Relations => {
+                    validate_delete_link_relations(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
                 LinkTypes::Slots => {
                     validate_delete_link_slots(
                         action,
@@ -415,6 +435,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     action,
                 } => {
                     match link_type {
+                        LinkTypes::Relations => {
+                            validate_create_link_relations(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
                         LinkTypes::Slots => {
                             validate_create_link_slots(
                                 action,
@@ -480,6 +508,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                     };
                     match link_type {
+                        LinkTypes::Relations => {
+                            validate_delete_link_relations(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
                         LinkTypes::Slots => {
                             validate_delete_link_slots(
                                 action,

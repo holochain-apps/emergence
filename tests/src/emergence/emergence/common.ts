@@ -60,3 +60,44 @@ export async function createSlot(cell: CallableCell, slot = undefined): Promise<
     });
 }
 
+
+export async function sampleRelation(cell: CallableCell, partialRelation = {}) {
+    let record = await createSpace(cell)
+
+    return {
+        ...{
+      src: record.signed_action.hashed.hash,
+      dst: record.signed_action.hashed.hash,
+      content: {
+        path: "entry/rating",
+        data: JSON.stringify(5),
+      }
+        },
+        ...partialRelation
+    };
+}
+
+export async function sampleRelationAgent(cell: CallableCell, partialRelation = {}) {
+
+    return {
+        ...{
+      src: cell.cell_id[1],
+      dst: cell.cell_id[1],
+      content: {
+        path: "agent/rating",
+        data: JSON.stringify(5),
+      }
+        },
+        ...partialRelation
+    };
+}
+
+
+export async function createRelation(cell: CallableCell, relation = undefined): Promise<Record> {
+    return cell.callZome({
+      zome_name: "emergence",
+      fn_name: "create_relation",
+      payload: relation || await sampleRelation(cell),
+    });
+}
+

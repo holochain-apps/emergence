@@ -4,7 +4,6 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SessionDetail from './SessionDetail.svelte';
-import type { EmergenceSignal } from './types';
 import type { EmergenceStore } from '../../emergence-store';
 
 

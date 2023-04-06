@@ -30,7 +30,7 @@ pub fn validate_delete_link_slots(
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(
         ValidateCallbackResult::Invalid(
-            String::from("SessionUpdates links cannot be deleted"),
+            String::from("Slots links cannot be deleted"),
         ),
     )
 }

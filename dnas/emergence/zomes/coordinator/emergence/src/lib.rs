@@ -3,6 +3,7 @@ pub mod space;
 pub mod all_sessions;
 pub mod session;
 pub mod slot;
+pub mod relation;
 
 use hdk::prelude::*;
 use emergence_integrity::*;

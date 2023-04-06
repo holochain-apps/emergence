@@ -3,7 +3,7 @@ import { runScenario, pause, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
-import { createSlot, sampleSlot, sampleSlotInput } from './common.js';
+import { createSlot, sampleSlot } from './common.js';
 
 test('create a slot and get all slots', async () => {
   await runScenario(async scenario => {
