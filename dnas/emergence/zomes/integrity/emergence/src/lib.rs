@@ -2,8 +2,8 @@ pub mod space;
 pub use space::*;
 pub mod session;
 pub use session::*;
-pub mod slot;
-pub use slot::*;
+pub mod time_window;
+pub use time_window::*;
 use hdi::prelude::*;
 pub mod relation;
 pub use relation::*;
@@ -18,7 +18,7 @@ pub enum EntryTypes {
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
-    Slots,
+    TimeWindows,
     Relations,
     SessionUpdates,
     AllSessions,
@@ -149,8 +149,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
-               LinkTypes::Slots => {
-                    validate_create_link_slots(
+               LinkTypes::TimeWindows => {
+                    validate_create_link_time_windows(
                         action,
                         base_address,
                         target_address,
@@ -209,8 +209,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
-                LinkTypes::Slots => {
-                    validate_delete_link_slots(
+                LinkTypes::TimeWindows => {
+                    validate_delete_link_time_windows(
                         action,
                         original_action,
                         base_address,
@@ -443,8 +443,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 tag,
                             )
                         }
-                        LinkTypes::Slots => {
-                            validate_create_link_slots(
+                        LinkTypes::TimeWindows => {
+                            validate_create_link_time_windows(
                                 action,
                                 base_address,
                                 target_address,
@@ -517,8 +517,8 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 create_link.tag,
                             )
                         }
-                        LinkTypes::Slots => {
-                            validate_delete_link_slots(
+                        LinkTypes::TimeWindows => {
+                            validate_delete_link_time_windows(
                                 action,
                                 create_link.clone(),
                                 base_address,

@@ -41,22 +41,22 @@ export async function createSpace(cell: CallableCell, space = undefined): Promis
     });
 }
 
-export async function sampleSlot(cell: CallableCell, partialSlot = {}) {
+export async function sampleTimeWindow(cell: CallableCell, partialTimeWindow = {}) {
     const start: Timestamp = 10000
     return {
         ...{
 	  start,
 	  length: 30,
         },
-        ...partialSlot
+        ...partialTimeWindow
     };
 }
 
-export async function createSlot(cell: CallableCell, slot = undefined): Promise<Record> {
+export async function createTimeWindow(cell: CallableCell, timeWindow = undefined): Promise<Record> {
     return cell.callZome({
       zome_name: "emergence",
-      fn_name: "create_slot",
-      payload: slot || await sampleSlot(cell),
+      fn_name: "create_time_window",
+      payload: timeWindow || await sampleTimeWindow(cell),
     });
 }
 

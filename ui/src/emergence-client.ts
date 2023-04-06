@@ -6,7 +6,7 @@ import type {
     AppAgentCallZomeRequest,
     AppAgentClient,
 } from '@holochain/client';
-import type { Session, Slot, Space } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
@@ -32,12 +32,12 @@ export class EmergenceClient {
 //     });
 //   }
 
-  async createSlot(slot: Slot) : Promise<ActionHash> {
-    return this.callZome('create_slot', slot)
+  async createTimeWindow(timeWindow: TimeWindow) : Promise<ActionHash> {
+    return this.callZome('create_time_window', timeWindow)
   }
 
-  getSlots() : Promise<Array<Slot>> {
-    return this.callZome('get_slots',null)
+  getTimeWindows() : Promise<Array<TimeWindow>> {
+    return this.callZome('get_time_windows',null)
   }
 
   genKey = () => {

@@ -54,7 +54,7 @@ export interface Space {
   description: string;
 }
 
-export interface Slot { 
+export interface TimeWindow { 
   start: Timestamp;
   length: number;
 }
