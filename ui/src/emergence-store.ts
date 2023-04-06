@@ -23,9 +23,26 @@ export class EmergenceStore {
   spaces: Writable<Array<EntryRecord<Space>>> = writable([])
   constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {}
   
+
+  async createSlot(start: Date, length: number) : Promise<ActionHash> {
+    const slot: Slot = { 
+        start: parseInt((start.getTime()).toFixed(0)),
+        length: length!,
+      };
+    const actionHash = await this.client.createSlot(slot)
+    this.fetchSlots()
+    return actionHash
+  }
+
   async fetchSlots() {
     const slots = await this.client.getSlots()
     this.slots.update((n) => {return slots} )
+  }
+
+  async createSession(title: string): Promise<EntryRecord<Session>> {
+    const record = await this.client.createSession(title)
+    this.fetchSessions()
+    return record
   }
 
   async fetchSessions() {
@@ -38,6 +55,12 @@ export class EmergenceStore {
     }
   }
 
+  async createSpace(name: string, description: string): Promise<EntryRecord<Space>> {
+    const record = await this.client.createSpace(name, description)
+    this.fetchSpaces()
+    return record
+  }
+
   async fetchSpaces() {
     try {
         const spaces = await this.client.getSpaces()
@@ -47,19 +70,5 @@ export class EmergenceStore {
         console.log("Error fetching spaces", e)
     }
   }
-
-  /** Scene */
-
-//   scenes = new LazyHoloHashMap((sceneHash: EntryHash) =>
-//     lazyLoadAndPoll(async () => this.client.getScene(sceneHash), 1000)
-//   );
-  
-//   allScenes = lazyLoadAndPoll(async () => {
-//     const records =  await this.client.getFilteredScenes({titled_only: false});
-//     return records
-//    // return records.map(r => r.actionHash);
-//   }, 1000);
-  
-
 
 }

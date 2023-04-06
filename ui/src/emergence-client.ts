@@ -1,6 +1,7 @@
 // import {  } from './types';
 
 import type {
+    Action,
     ActionHash,
     AppAgentCallZomeRequest,
     AppAgentClient,
@@ -30,8 +31,31 @@ export class EmergenceClient {
 //       }
 //     });
 //   }
+
+  async createSlot(slot: Slot) : Promise<ActionHash> {
+    return this.callZome('create_slot', slot)
+  }
+
   getSlots() : Promise<Array<Slot>> {
     return this.callZome('get_slots',null)
+  }
+
+  genKey = () => {
+    const keyChars = 'ABCDEFGHJKLMNPQRSTVXYZ23456789';
+    let key = '';
+    for (let x = 0; x < 5; x += 1) {
+      key += keyChars[Math.floor(Math.random() * (keyChars.length - 1))];
+    }
+    return key
+  }
+  
+  async createSession(title: string) : Promise<EntryRecord<Session>> {
+    const sessionEntry: Session = { 
+        key: this.genKey(),
+        title: title!,
+      };
+    
+    return new EntryRecord(await this.callZome('create_session', sessionEntry))
   }
 
   async getSessions() : Promise<Array<EntryRecord<Session>>> {
@@ -39,6 +63,13 @@ export class EmergenceClient {
     return records.map(r => new EntryRecord(r));
   }
 
+  async createSpace(name: string, description:string) : Promise<EntryRecord<Space>> {
+    const spaceEntry: Space = { 
+        name, description
+      };
+    
+    return new EntryRecord(await this.callZome('create_space', spaceEntry))
+  }
   async getSpaces() : Promise<Array<EntryRecord<Space>>> {
     const records = await this.callZome('get_all_spaces',null)
     return records.map(r => new EntryRecord(r));

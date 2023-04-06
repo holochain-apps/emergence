@@ -29,23 +29,13 @@ onMount(() => {
 });
 
 async function createSpace() {  
-  const spaceEntry: Space = { 
-    name: name!,
-    description: description!,
-  };
-  
   try {
-    const record: Record = await client.callZome({
-      cap_secret: null,
-      role_name: 'emergence',
-      zome_name: 'emergence',
-      fn_name: 'create_space',
-      payload: spaceEntry,
-    });
+    const record = await store.createSpace(name!, description!)
+
     name = ""
     description = ""
     store.fetchSpaces()
-    dispatch('space-created', { spaceHash: record.signed_action.hashed.hash });
+    dispatch('space-created', { space: record });
   } catch (e) {
     errorSnackbar.labelText = `Error creating the space: ${e.data.data}`;
     errorSnackbar.show();
