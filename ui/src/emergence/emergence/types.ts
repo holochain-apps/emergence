@@ -9,7 +9,8 @@ import type {
   Update,
   Delete,
   CreateLink,
-  DeleteLink
+  DeleteLink,
+  Timestamp
 } from '@holochain/client';
 
 export type EmergenceSignal = {
@@ -47,10 +48,13 @@ export interface Session {
 }
 
 
-
 export interface Space { 
   name: string;
 
   description: string;
 }
 
+export interface Slot { 
+  start: Timestamp;
+  length: number;
+}

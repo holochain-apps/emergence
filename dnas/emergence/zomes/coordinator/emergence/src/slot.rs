@@ -20,8 +20,8 @@ pub fn create_slot(input: Slot) -> ExternResult<ActionHash> {
 }
 #[hdk_extern]
 pub fn delete_slot(_input: Slot) -> ExternResult<()> {
-    debug!("not implemented");
-    Ok(())
+    Err(wasm_error!(WasmErrorInner::Guest(String::from("delete slots not implmented"))))
+   // Ok(())
 }
 
 #[hdk_extern]

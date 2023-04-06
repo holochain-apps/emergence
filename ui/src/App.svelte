@@ -3,6 +3,7 @@
   import type { ActionHash, AppAgentClient } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
+  import Slots from './emergence/emergence/Slots.svelte';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
   import CreateSession from './emergence/emergence/CreateSession.svelte';
@@ -10,13 +11,14 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faTicket, faUser  } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faTicket, faUser, faGear  } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/elements/profile-prompt.js";
   import "@holochain-open-dev/profiles/elements/my-profile.js";
 
   import { clientContext } from './contexts';
+  import CreateSlot from './emergence/emergence/CreateSlot.svelte';
 
   let client: AppAgentClient | undefined;
   let loading = true;
@@ -70,6 +72,13 @@
         <my-profile></my-profile>
       </div>
       {/if}
+      {#if pane=="admin"}
+      <div class="pane">
+        <h3>Slots</h3>
+        <Slots></Slots>
+        <CreateSlot></CreateSlot>
+      </div>
+      {/if}
 
 
       <div class="nav">
@@ -94,6 +103,13 @@
           on:click={()=>{pane='you'}}
         >
            <Fa icon={faUser} size="2x"/>
+        </div>
+        <div class="nav-button {pane=="admin"?"selected":""}"
+          title="Admin"
+          on:keypress={()=>{pane='admin'}}
+          on:click={()=>{pane='admin'}}
+        >
+           <Fa icon={faGear} size="2x"/>
         </div>
       </div>
     </div>
