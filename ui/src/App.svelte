@@ -9,6 +9,8 @@
   import CreateSpace from './emergence/emergence/CreateSpace.svelte';
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
+  import Fa from 'svelte-fa'
+  import { faMap, faTicket, faUser  } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/elements/profile-prompt.js";
@@ -72,22 +74,26 @@
 
       <div class="nav">
         <div class="nav-button {pane=="spaces"?"selected":""}"
-        on:keypress={()=>{pane='spaces'}}
-        on:click={()=>{pane='spaces'}}
+          title="Spaces"
+          on:keypress={()=>{pane='spaces'}}
+          on:click={()=>{pane='spaces'}}
         >
-          Spaces
+          <Fa icon={faMap} size="2x"/>
         </div>
         <div class="nav-button {pane=="sessions"?"selected":""}"
+          title="Sessions"
           on:keypress={()=>{pane='sessions'}}
           on:click={()=>{pane='sessions'}}
         >
-          Sessions
+          <Fa icon={faTicket} size="2x"/>
+
         </div>
         <div class="nav-button {pane=="you"?"selected":""}"
+          title="You"
           on:keypress={()=>{pane='you'}}
           on:click={()=>{pane='you'}}
         >
-          You
+           <Fa icon={faUser} size="2x"/>
         </div>
       </div>
     </div>
@@ -107,14 +113,19 @@
     display: flex; flex-direction: row; flex: 1;
   }
   .nav-button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    width: 100px;
     height: 50px;
     padding: 5px;
     margin: 5px;
-    background-color: gray;
-    color: white;
+    background-color: lightgray;
+    color:white
   }
   .selected {
-    background-color:green;
+    background-color:gray;
   }
   .pane {
     width: 600px;
