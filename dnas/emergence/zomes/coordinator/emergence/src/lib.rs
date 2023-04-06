@@ -2,6 +2,8 @@ pub mod all_spaces;
 pub mod space;
 pub mod all_sessions;
 pub mod session;
+pub mod slot;
+
 use hdk::prelude::*;
 use emergence_integrity::*;
 #[hdk_extern]

@@ -89,11 +89,11 @@ test('create and update Session', async () => {
     const originalActionHash = record.signed_action.hashed.hash;
  
     // Alice updates the Session
-    let contentUpdate: any = await sampleSession(alice.cells[0]);
+    let updatedTitle = "title2";
     let updateInput = {
       original_session_hash: originalActionHash,
       previous_session_hash: originalActionHash,
-      updated_session: contentUpdate,
+      updated_title: updatedTitle,
     };
 
     let updatedRecord: Record = await alice.cells[0].callZome({
@@ -112,14 +112,15 @@ test('create and update Session', async () => {
       fn_name: "get_session",
       payload: updatedRecord.signed_action.hashed.hash,
     });
-    assert.deepEqual(contentUpdate, decode((readUpdatedOutput0.entry as any).Present.entry) as any);
+    let updatedSession = decode((readUpdatedOutput0.entry as any).Present.entry) as any
+    assert.equal(updatedTitle,updatedSession.title );
 
     // Alice updates the Session again
-    contentUpdate = await sampleSession(alice.cells[0]);
+    updatedTitle = "title3";
     updateInput = { 
       original_session_hash: originalActionHash,
       previous_session_hash: updatedRecord.signed_action.hashed.hash,
-      updated_session: contentUpdate,
+      updated_title: updatedTitle,
     };
 
     updatedRecord = await alice.cells[0].callZome({
@@ -138,8 +139,8 @@ test('create and update Session', async () => {
       fn_name: "get_session",
       payload: updatedRecord.signed_action.hashed.hash,
     });
-    assert.deepEqual(contentUpdate, decode((readUpdatedOutput1.entry as any).Present.entry) as any);
-  });
+    updatedSession = decode((readUpdatedOutput1.entry as any).Present.entry) as any
+    assert.equal(updatedTitle,updatedSession.title );  });
 });
 
 test('create and delete Session', async () => {

@@ -2,6 +2,8 @@ pub mod space;
 pub use space::*;
 pub mod session;
 pub use session::*;
+pub mod slot;
+pub use slot::*;
 use hdi::prelude::*;
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
@@ -14,6 +16,7 @@ pub enum EntryTypes {
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
+    Slots,
     SessionUpdates,
     AllSessions,
     SpaceUpdates,
@@ -135,6 +138,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             action,
         } => {
             match link_type {
+                LinkTypes::Slots => {
+                    validate_create_link_slots(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
                 LinkTypes::SessionUpdates => {
                     validate_create_link_session_updates(
                         action,
@@ -178,6 +189,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             action,
         } => {
             match link_type {
+                LinkTypes::Slots => {
+                    validate_delete_link_slots(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
                 LinkTypes::SessionUpdates => {
                     validate_delete_link_session_updates(
                         action,
@@ -395,6 +415,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     action,
                 } => {
                     match link_type {
+                        LinkTypes::Slots => {
+                            validate_create_link_slots(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
                         LinkTypes::SessionUpdates => {
                             validate_create_link_session_updates(
                                 action,
@@ -452,6 +480,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                     };
                     match link_type {
+                        LinkTypes::Slots => {
+                            validate_delete_link_slots(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
                         LinkTypes::SessionUpdates => {
                             validate_delete_link_session_updates(
                                 action,
