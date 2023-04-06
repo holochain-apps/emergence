@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount, getContext } from 'svelte';
-import '@material/mwc-circular-progress';
+import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import SpaceDetail from './SpaceDetail.svelte';
@@ -47,7 +47,8 @@ async function fetchSpaces() {
 
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
-  <mwc-circular-progress indeterminate></mwc-circular-progress>
+  <sl-spinner></sl-spinner>
+
 </div>
 {:else if error}
 <span>Error fetching the spaces: {error.data.data}.</span>

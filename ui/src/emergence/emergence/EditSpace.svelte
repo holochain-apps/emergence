@@ -4,11 +4,11 @@ import type { AppAgentClient, Record, EntryHash, AgentPubKey, DnaHash, ActionHas
 import { decode } from '@msgpack/msgpack';
 import { clientContext } from '../../contexts';
 import type { Space } from './types';
-import '@material/mwc-button';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
-import '@material/mwc-textfield';
-import '@material/mwc-textarea';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/input/input.js';
+import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
@@ -69,28 +69,33 @@ async function updateSpace() {
 <div style="display: flex; flex-direction: column">
   <span style="font-size: 18px">Edit Space</span>
   
+
   <div style="margin-bottom: 16px">
-    <mwc-textfield outlined label="Name" value={ name } on:input={e => { name = e.target.value; } } required></mwc-textfield>    
+    <sl-input
+    label=Name
+    value={name}
+    on:input={e => { name = e.target.value; } }
+     ></sl-input>
   </div>
 
   <div style="margin-bottom: 16px">
-    <mwc-textarea outlined label="Description" value={ description } on:input={e => { description = e.target.value;} } required></mwc-textarea>    
+    <sl-textarea 
+    label=Description 
+    value={ description } on:input={e => { description = e.target.value;} }
+  ></sl-textarea>
   </div>
-
 
   <div style="display: flex; flex-direction: row">
-    <mwc-button
-      outlined
+    <sl-button
       label="Cancel"
       on:click={() => dispatch('edit-canceled')}
       style="flex: 1; margin-right: 16px"
-    ></mwc-button>
-    <mwc-button 
-      raised
-      label="Save"
-      disabled={!isSpaceValid}
-      on:click={() => updateSpace()}
-      style="flex: 1;"
-    ></mwc-button>
+    >Cancel</sl-button>
+    <sl-button 
+    style="flex: 1;"
+    on:click={() => updateSpace()}
+    disabled={!isSpaceValid}
+    variant=primary>Update Space</sl-button>
+  
   </div>
 </div>

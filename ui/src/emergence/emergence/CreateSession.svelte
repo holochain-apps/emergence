@@ -3,11 +3,11 @@ import { createEventDispatcher, getContext, onMount } from 'svelte';
 import type { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { Session } from './types';
-import '@material/mwc-button';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 
-import '@material/mwc-textfield';
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
 const dispatch = createEventDispatcher();
@@ -46,6 +46,7 @@ async function createSession() {
       fn_name: 'create_session',
       payload: sessionEntry,
     });
+    title = ""
     dispatch('session-created', { sessionHash: record.signed_action.hashed.hash });
   } catch (e) {
     errorSnackbar.labelText = `Error creating the session: ${e.data.data}`;
@@ -61,14 +62,17 @@ async function createSession() {
   
 
   <div style="margin-bottom: 16px">
-    <mwc-textfield outlined label="Title" value={ title } on:input={e => { title = e.target.value; } } required></mwc-textfield>          
+    <sl-input
+    label=Title
+    value={title}
+    on:input={e => { title = e.target.value; } }
+  ></sl-input>
+
   </div>
             
+  <sl-button 
+  on:click={() => createSession()}
+  disabled={!isSessionValid}
+  variant=primary>Create Session</sl-button>
 
-  <mwc-button 
-    raised
-    label="Create Session"
-    disabled={!isSessionValid}
-    on:click={() => createSession()}
-  ></mwc-button>
 </div>

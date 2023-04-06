@@ -4,10 +4,10 @@ import type { AppAgentClient, Record, EntryHash, AgentPubKey, DnaHash, ActionHas
 import { decode } from '@msgpack/msgpack';
 import { clientContext } from '../../contexts';
 import type { Session, SessionUpdate } from './types';
-import '@material/mwc-button';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
-import '@material/mwc-textfield';
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
@@ -68,23 +68,25 @@ async function updateSession() {
   
   Key: {currentSession.key}
   <div style="margin-bottom: 16px">
-    <mwc-textfield outlined label="Title" value={ title } on:input={e => { title = e.target.value; } } required></mwc-textfield>    
+    <sl-input
+    label=Title
+    value={title}
+    on:input={e => { title = e.target.value; } }
+  ></sl-input>
   </div>
 
 
   <div style="display: flex; flex-direction: row">
-    <mwc-button
-      outlined
-      label="Cancel"
-      on:click={() => dispatch('edit-canceled')}
-      style="flex: 1; margin-right: 16px"
-    ></mwc-button>
-    <mwc-button 
-      raised
-      label="Save"
-      disabled={!isSessionValid}
-      on:click={() => updateSession()}
-      style="flex: 1;"
-    ></mwc-button>
+    <sl-button
+    label="Cancel"
+    on:click={() => dispatch('edit-canceled')}
+    style="flex: 1; margin-right: 16px"
+    >Cancel</sl-button>
+    <sl-button 
+    style="flex: 1;"
+    on:click={() => updateSession()}
+    disabled={!isSessionValid}
+    variant=primary>Save</sl-button>
+
   </div>
 </div>

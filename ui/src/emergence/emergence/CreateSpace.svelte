@@ -3,12 +3,13 @@ import { createEventDispatcher, getContext, onMount } from 'svelte';
 import type { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { Space } from './types';
-import '@material/mwc-button';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/input/input.js';
+import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
+
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 
-import '@material/mwc-textarea';
-import '@material/mwc-textfield';
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
 const dispatch = createEventDispatcher();
@@ -39,6 +40,8 @@ async function createSpace() {
       fn_name: 'create_space',
       payload: spaceEntry,
     });
+    name = ""
+    description = ""
     dispatch('space-created', { spaceHash: record.signed_action.hashed.hash });
   } catch (e) {
     errorSnackbar.labelText = `Error creating the space: ${e.data.data}`;
@@ -54,18 +57,25 @@ async function createSpace() {
   
 
   <div style="margin-bottom: 16px">
-    <mwc-textfield outlined label="Name" value={ name } on:input={e => { name = e.target.value; } } required></mwc-textfield>          
+    <sl-input
+    label=Name
+    value={name}
+    on:input={e => { name = e.target.value; } }
+  ></sl-input>
   </div>
             
   <div style="margin-bottom: 16px">
-    <mwc-textarea outlined label="Description" value={ description } on:input={e => { description = e.target.value;} } required></mwc-textarea>          
+    <sl-textarea 
+      label=Description 
+      value={ description } on:input={e => { description = e.target.value;} }
+    ></sl-textarea>
+
   </div>
             
 
-  <mwc-button 
-    raised
-    label="Create Space"
-    disabled={!isSpaceValid}
-    on:click={() => createSpace()}
-  ></mwc-button>
+  <sl-button 
+  on:click={() => createSpace()}
+  disabled={!isSpaceValid}
+  variant=primary>Create Space</sl-button>
+
 </div>

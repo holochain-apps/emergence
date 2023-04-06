@@ -1,14 +1,17 @@
 <script lang="ts">
 import { createEventDispatcher, onMount, getContext } from 'svelte';
-import '@material/mwc-circular-progress';
+import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { decode } from '@msgpack/msgpack';
 import type { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import type { Session } from './types';
-import '@material/mwc-circular-progress';
+import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
-import '@material/mwc-icon-button';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import Fa from 'svelte-fa'
+import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
+
 import EditSession from './EditSession.svelte'; 
 
 const dispatch = createEventDispatcher();
@@ -82,7 +85,8 @@ async function deleteSession() {
 
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
-  <mwc-circular-progress indeterminate></mwc-circular-progress>
+  <sl-spinner></sl-spinner>
+
 </div>
 {:else if error}
 <span>Error fetching the session: {error.data.data}</span>
@@ -101,8 +105,12 @@ async function deleteSession() {
 <div style="display: flex; flex-direction: column">
   <div style="display: flex; flex-direction: row">
     <span style="flex: 1"></span>
-    <mwc-icon-button style="margin-left: 8px" icon="edit" on:click={() => { editing = true; } }></mwc-icon-button>
-    <mwc-icon-button style="margin-left: 8px" icon="delete" on:click={() => deleteSession()}></mwc-icon-button>
+    <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
+      <Fa icon={faEdit} />
+    </sl-button>
+    <sl-button style="margin-left: 8px;" size=small on:click={() => deleteSession()} circle>
+      <Fa icon={faTrash} />
+    </sl-button>
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">

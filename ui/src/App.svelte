@@ -2,7 +2,7 @@
   import { onMount, setContext } from 'svelte';
   import type { ActionHash, AppAgentClient } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
-  import '@material/mwc-circular-progress';
+  import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
   import CreateSession from './emergence/emergence/CreateSession.svelte';
@@ -40,7 +40,8 @@
 <main>
   {#if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
-      <mwc-circular-progress indeterminate />
+      <sl-spinner
+ />
     </div>
   {:else}
   <profiles-context store="{profilesStore}">
