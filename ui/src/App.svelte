@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import type { ActionHash, AppAgentClient } from '@holochain/client';
+  import { AdminWebsocket, type ActionHash, type AppAgentClient } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import TimeWindows from './emergence/emergence/TimeWindows.svelte';
@@ -32,7 +32,18 @@
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
-    client = await AppAgentWebsocket.connect('', 'emergence');
+    console.log("VITE", import.meta.env)
+    const adminPort : string = import.meta.env.VITE_ADMIN_PORT
+    const appPort : string = import.meta.env.VITE_APP_PORT
+
+    client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, 'emergence');
+    if (adminPort) {
+      const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
+      const x = await adminWebsocket.listApps({})
+      const cellIds = await adminWebsocket.listCellIds()
+      await adminWebsocket.authorizeSigningCredentials(cellIds[0])
+    }
+
     profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
       avatarMode: "avatar-optional",
     });
