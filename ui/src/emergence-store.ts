@@ -10,7 +10,7 @@ import type { EmergenceClient } from './emergence-client';
 import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
-import type { Session, Slot, Space } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, SessionPlus } from './emergence/emergence/types';
 import { writable, type Writable } from 'svelte/store';
 import type { EntryRecord } from '@holochain-open-dev/utils';
 
@@ -18,25 +18,46 @@ TimeAgo.addDefaultLocale(en)
 
 export class EmergenceStore {
   timeAgo = new TimeAgo('en-US')
-  slots: Writable<Array<Slot>> = writable([])
-  sessions: Writable<Array<EntryRecord<Session>>> = writable([])
+  timeWindows: Writable<Array<TimeWindow>> = writable([])
+  sessions: Writable<Array<SessionPlus>> = writable([])
   spaces: Writable<Array<EntryRecord<Space>>> = writable([])
   constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {}
   
 
-  async createSlot(start: Date, length: number) : Promise<ActionHash> {
-    const slot: Slot = { 
+  async slot(session: ActionHash, space:ActionHash, time: TimeWindow) {
+    this.client.createRelation(
+        {   src: session,
+            dst: space,
+            content:  {
+                path: "session/space",
+                data: JSON.stringify(time)
+            }
+        }
+    )
+    this.client.createRelation(
+        {   src: space,
+            dst: session,
+            content:  {
+                path: "space/sessions",
+                data: JSON.stringify(time)
+            }
+        }
+    )
+  }
+
+  async createTimeWindow(start: Date, length: number) : Promise<ActionHash> {
+    const timeWindow: TimeWindow = { 
         start: parseInt((start.getTime()).toFixed(0)),
         length: length!,
       };
-    const actionHash = await this.client.createSlot(slot)
-    this.fetchSlots()
+    const actionHash = await this.client.createTimeWindow(timeWindow)
+    this.fetchTimeWindows()
     return actionHash
   }
 
-  async fetchSlots() {
-    const slots = await this.client.getSlots()
-    this.slots.update((n) => {return slots} )
+  async fetchTimeWindows() {
+    const timeWindows = await this.client.getTimeWindows()
+    this.timeWindows.update((n) => {return timeWindows} )
   }
 
   async createSession(title: string): Promise<EntryRecord<Session>> {

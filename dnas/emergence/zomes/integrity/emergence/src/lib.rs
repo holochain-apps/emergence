@@ -2,9 +2,11 @@ pub mod space;
 pub use space::*;
 pub mod session;
 pub use session::*;
-pub mod slot;
-pub use slot::*;
+pub mod time_window;
+pub use time_window::*;
 use hdi::prelude::*;
+pub mod relation;
+pub use relation::*;
 #[derive(Serialize, Deserialize)]
 #[serde(tag = "type")]
 #[hdk_entry_defs]
@@ -16,7 +18,8 @@ pub enum EntryTypes {
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
 pub enum LinkTypes {
-    Slots,
+    TimeWindows,
+    Relations,
     SessionUpdates,
     AllSessions,
     SpaceUpdates,
@@ -138,8 +141,16 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             action,
         } => {
             match link_type {
-                LinkTypes::Slots => {
-                    validate_create_link_slots(
+                LinkTypes::Relations => {
+                    validate_create_link_relations(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+               LinkTypes::TimeWindows => {
+                    validate_create_link_time_windows(
                         action,
                         base_address,
                         target_address,
@@ -189,8 +200,17 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
             action,
         } => {
             match link_type {
-                LinkTypes::Slots => {
-                    validate_delete_link_slots(
+                LinkTypes::Relations => {
+                    validate_delete_link_relations(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::TimeWindows => {
+                    validate_delete_link_time_windows(
                         action,
                         original_action,
                         base_address,
@@ -415,8 +435,16 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                     action,
                 } => {
                     match link_type {
-                        LinkTypes::Slots => {
-                            validate_create_link_slots(
+                        LinkTypes::Relations => {
+                            validate_create_link_relations(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::TimeWindows => {
+                            validate_create_link_time_windows(
                                 action,
                                 base_address,
                                 target_address,
@@ -480,8 +508,17 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                     };
                     match link_type {
-                        LinkTypes::Slots => {
-                            validate_delete_link_slots(
+                        LinkTypes::Relations => {
+                            validate_delete_link_relations(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::TimeWindows => {
+                            validate_delete_link_time_windows(
                                 action,
                                 create_link.clone(),
                                 base_address,

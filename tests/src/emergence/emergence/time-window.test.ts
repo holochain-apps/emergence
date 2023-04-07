@@ -3,9 +3,9 @@ import { runScenario, pause, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
-import { createSlot, sampleSlot, sampleSlotInput } from './common.js';
+import { createTimeWindow, sampleTimeWindow } from './common.js';
 
-test('create a slot and get all slots', async () => {
+test('create a timeWindow and get all timeWindows', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
@@ -22,29 +22,29 @@ test('create a slot and get all slots', async () => {
     // conductor of the scenario.
     await scenario.shareAllAgents();
 
-    // Bob gets all slots
+    // Bob gets all timeWindows
     let collectionOutput: any[] = await bob.cells[0].callZome({
       zome_name: "emergence",
-      fn_name: "get_slots",
+      fn_name: "get_time_windows",
       payload: null
     });
     assert.equal(collectionOutput.length, 0);
 
-    // Alice creates a Slot
-    const createdSlot = await sampleSlot(alice.cells[0])
-    const actionHash = await createSlot(alice.cells[0]);
-    assert.ok(createdSlot);
+    // Alice creates a TimeWindow
+    const createdTimeWindow = await sampleTimeWindow(alice.cells[0])
+    const actionHash = await createTimeWindow(alice.cells[0]);
+    assert.ok(createdTimeWindow);
     
     await pause(1200);
     
-    // Bob gets all slots again
+    // Bob gets all timeWindows again
     collectionOutput = await bob.cells[0].callZome({
       zome_name: "emergence",
-      fn_name: "get_slots",
+      fn_name: "get_time_windows",
       payload: null
     });
     assert.equal(collectionOutput.length, 1);
-    assert.deepEqual(createdSlot, collectionOutput[0]);    
+    assert.deepEqual(createdTimeWindow, collectionOutput[0]);    
   });
 });
 

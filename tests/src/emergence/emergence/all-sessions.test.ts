@@ -4,7 +4,7 @@ import { runScenario, pause, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
-import { createSession } from './common.js';
+import { createRelation, createSession, sampleRelation } from './common.js';
 
 test('create a Session and get all sessions', async () => {
   await runScenario(async scenario => {
@@ -31,10 +31,21 @@ test('create a Session and get all sessions', async () => {
     });
     assert.equal(collectionOutput.length, 0);
 
-    // Alice creates a Session
+    // Alice creates a Session with a relation
     const createdRecord: Record = await createSession(alice.cells[0]);
     assert.ok(createdRecord);
-    
+   
+    const originalActionHash = createdRecord.signed_action.hashed.hash
+    const createdRelation = {
+      src: originalActionHash,
+      dst: originalActionHash,
+      content: {
+        path: "session/rating",
+        data: JSON.stringify(5),
+      }
+    }
+    const _actionHash = await createRelation(alice.cells[0], createdRelation);
+
     await pause(1200);
     
     // Bob gets all sessions again
@@ -44,7 +55,37 @@ test('create a Session and get all sessions', async () => {
       payload: null
     });
     assert.equal(collectionOutput.length, 1);
-    assert.deepEqual(createdRecord, collectionOutput[0]);    
+    const sessionPlus: any = {original_session_hash: originalActionHash, session:createdRecord,relations:[createdRelation]}
+    assert.deepEqual(sessionPlus, collectionOutput[0]);
+
+    // Alice updates the session
+    let updatedTitle = "title2";
+    let updateInput = {
+      original_session_hash: originalActionHash,
+      previous_session_hash: originalActionHash,
+      updated_title: updatedTitle,
+    };
+
+    let updatedRecord: Record = await alice.cells[0].callZome({
+      zome_name: "emergence",
+      fn_name: "update_session",
+      payload: updateInput,
+    });
+    assert.ok(updatedRecord);
+
+    await pause(1200);
+    
+    // Bob gets all sessions again
+    collectionOutput = await bob.cells[0].callZome({
+      zome_name: "emergence",
+      fn_name: "get_all_sessions",
+      payload: null
+    });
+    assert.equal(collectionOutput.length, 1);
+    const sessionPlus2: any = {original_session_hash: originalActionHash, session:updatedRecord, relations:[createdRelation]}
+    assert.deepEqual(sessionPlus2, collectionOutput[0]);
+
+
   });
 });
 

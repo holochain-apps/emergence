@@ -3,7 +3,7 @@
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
   import { storeContext } from '../../contexts';
-  import SlotDetail from './SlotDetail.svelte';
+  import TimeWindowDetail from './TimeWindowDetail.svelte';
   import type { EmergenceStore } from '../../emergence-store';
 
 
@@ -12,11 +12,11 @@
   let loading = true;
   let error: any = undefined;
 
-  $: slots = store.slots
+  $: timeWindows = store.timeWindows
   $: loading, error;
 
   onMount(async () => {
-    await store.fetchSlots()
+    await store.fetchTimeWindows()
     loading = false
   });
 
@@ -27,14 +27,14 @@
   <sl-spinner></sl-spinner>
 </div>
 {:else if error}
-<span>Error fetching the slots: {error.data.data}.</span>
-{:else if $slots.length === 0}
-<span>No slots found.</span>
+<span>Error fetching the timeWindows: {error.data.data}.</span>
+{:else if $timeWindows.length === 0}
+<span>No timeWindows found.</span>
 {:else}
 <div style="display: flex; flex-direction: column">
-  {#each $slots as slot}
+  {#each $timeWindows as timeWindow}
     <div style="margin-bottom: 8px; width:500px; background:lightgray">
-      <SlotDetail slot={slot}></SlotDetail>
+      <TimeWindowDetail timeWindow={timeWindow}></TimeWindowDetail>
     </div>
   {/each}
 </div>

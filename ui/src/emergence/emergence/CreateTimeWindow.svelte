@@ -21,20 +21,20 @@ let errorSnackbar: Snackbar;
 let datePicker:any
 
 $: length, start;
-$: isSlotValid = length > 0;
+$: isTimeWindowValid = length > 0;
 
 onMount(() => {
 });
 
-async function createSlot() { 
+async function createTimeWindow() { 
   try {
-    const actionHash = store.createSlot(new Date(datePicker.value), length!)
+    const actionHash = store.createTimeWindow(new Date(datePicker.value), length!)
     start = undefined
     length = 60
-    dispatch('slot-created', { slotHash: actionHash });
+    dispatch('timeWindow-created', { timeWindowHash: actionHash });
     
   } catch (e) {
-    errorSnackbar.labelText = `Error creating the slot: ${e.data.data}`;
+    errorSnackbar.labelText = `Error creating the timeWindow: ${e.data.data}`;
     errorSnackbar.show();
   }
 }
@@ -48,7 +48,7 @@ const setLen = (l:number) => {
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 <div style="display: flex; flex-direction: column">
-  <span style="font-size: 18px">Create Slot</span>
+  <span style="font-size: 18px">Create TimeWindow</span>
   
   <vaadin-date-time-picker bind:this={datePicker}></vaadin-date-time-picker>
   <div style="margin-bottom: 16px">
@@ -61,8 +61,8 @@ const setLen = (l:number) => {
   </div>
             
   <sl-button 
-  on:click={() => createSlot()}
-  disabled={!isSlotValid}
-  variant=primary>Create Slot</sl-button>
+  on:click={() => createTimeWindow()}
+  disabled={!isTimeWindowValid}
+  variant=primary>Create TimeWindow</sl-button>
 
 </div>

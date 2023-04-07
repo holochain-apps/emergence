@@ -3,7 +3,7 @@
   import type { ActionHash, AppAgentClient } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import Slots from './emergence/emergence/Slots.svelte';
+  import TimeWindows from './emergence/emergence/TimeWindows.svelte';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
   import CreateSession from './emergence/emergence/CreateSession.svelte';
@@ -18,7 +18,7 @@
   import "@holochain-open-dev/profiles/elements/my-profile.js";
 
   import { clientContext, storeContext } from './contexts';
-  import CreateSlot from './emergence/emergence/CreateSlot.svelte';
+  import CreateTimeWindow from './emergence/emergence/CreateTimeWindow.svelte';
   import { EmergenceStore } from './emergence-store';
   import { EmergenceClient } from './emergence-client';
 
@@ -83,9 +83,9 @@
       {/if}
       {#if pane=="admin"}
       <div class="pane">
-        <h3>Slots</h3>
-        <Slots></Slots>
-        <CreateSlot></CreateSlot>
+        <h3>TimeWindows</h3>
+        <TimeWindows></TimeWindows>
+        <CreateTimeWindow></CreateTimeWindow>
       </div>
       {/if}
 

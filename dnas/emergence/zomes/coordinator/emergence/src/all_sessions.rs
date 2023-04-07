@@ -1,17 +1,52 @@
+
+use std::collections::HashMap;
+
 use hdk::prelude::*;
 use emergence_integrity::*;
+
+use crate::{relation::get_relations, session::get_session};
+
+
+#[derive(Serialize, Deserialize, Debug, SerializedBytes, Clone)]
+pub struct SessionPlus {
+    pub original_session_hash: ActionHash,
+    pub session: Record,
+    pub relations: Vec<Relation>,
+}
+
+
 #[hdk_extern]
-pub fn get_all_sessions(_: ()) -> ExternResult<Vec<Record>> {
+pub fn get_all_sessions(_: ()) -> ExternResult<Vec<SessionPlus>> {
     let path = Path::from("all_sessions");
     let links = get_links(path.path_entry_hash()?, LinkTypes::AllSessions, None)?;
-    let get_input: Vec<GetInput> = links
-        .into_iter()
-        .map(|link| GetInput::new(
-            ActionHash::from(link.target).into(),
-            GetOptions::default(),
-        ))
-        .collect();
-    let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
-    let records: Vec<Record> = records.into_iter().filter_map(|r| r).collect();
-    Ok(records)
+
+    let mut records: Vec<Record> = Vec::new();
+    let mut hashes: HashMap<ActionHash,ActionHash>= HashMap::new();
+    for link in links {
+        if let Some(record) = get_session(ActionHash::from(link.target.clone()))? {
+            hashes.insert(record.action_address().clone(), ActionHash::from(link.target));
+            records.push(record);
+        }
+    }
+
+    // let get_input: Vec<GetInput> = links
+    //     .into_iter()
+    //     .map(|link| GetInput::new(
+    //         ActionHash::from(link.target).into(),
+    //         GetOptions::default(),
+    //     ))
+    //     .collect();
+    // let records = HDK.with(|hdk| hdk.borrow().get(get_input))?;
+    let mut sessions: Vec<SessionPlus> = Vec::new();
+    for r in records {
+        let hash = r.action_address().clone();
+        let original_session_hash = hashes.get(&hash).unwrap().clone();
+        let relations = get_relations(AnyLinkableHash::from(original_session_hash.clone()))?;
+        sessions.push(SessionPlus {
+            original_session_hash,
+            session: r,
+            relations
+        })
+    };
+    Ok(sessions)
 }
