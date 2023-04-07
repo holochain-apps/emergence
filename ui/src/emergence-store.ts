@@ -10,7 +10,7 @@ import type { EmergenceClient } from './emergence-client';
 import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
-import type { Session, TimeWindow, Space } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, SessionPlus } from './emergence/emergence/types';
 import { writable, type Writable } from 'svelte/store';
 import type { EntryRecord } from '@holochain-open-dev/utils';
 
@@ -19,10 +19,31 @@ TimeAgo.addDefaultLocale(en)
 export class EmergenceStore {
   timeAgo = new TimeAgo('en-US')
   timeWindows: Writable<Array<TimeWindow>> = writable([])
-  sessions: Writable<Array<EntryRecord<Session>>> = writable([])
+  sessions: Writable<Array<SessionPlus>> = writable([])
   spaces: Writable<Array<EntryRecord<Space>>> = writable([])
   constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {}
   
+
+  async slot(session: ActionHash, space:ActionHash, time: TimeWindow) {
+    this.client.createRelation(
+        {   src: session,
+            dst: space,
+            content:  {
+                path: "session/space",
+                data: JSON.stringify(time)
+            }
+        }
+    )
+    this.client.createRelation(
+        {   src: space,
+            dst: session,
+            content:  {
+                path: "space/sessions",
+                data: JSON.stringify(time)
+            }
+        }
+    )
+  }
 
   async createTimeWindow(start: Date, length: number) : Promise<ActionHash> {
     const timeWindow: TimeWindow = { 

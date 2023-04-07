@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { decode } from '@msgpack/msgpack';
 import type { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
 import { clientContext } from '../../contexts';
-import type { TimeWindow } from './types';
+import { timeWindowStartToStr, timeWindowDurationToStr, type TimeWindow } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
@@ -18,12 +18,7 @@ const dispatch = createEventDispatcher();
 
 export let timeWindow: TimeWindow;
 
-let start: Date| undefined = undefined
-
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
-onMount(async () => {
-  start = new Date(timeWindow.start)
-});
 
 async function deleteTimeWindow() {
   try {
@@ -40,6 +35,7 @@ async function deleteTimeWindow() {
     errorSnackbar.show();
   }
 }
+
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -55,12 +51,12 @@ async function deleteTimeWindow() {
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Start:</strong></span>
-    <span style="white-space: pre-line">{ start ? `${start.toDateString()} @ ${start.toTimeString().slice(0,5)}` : "" }</span>
+    <span style="white-space: pre-line">{ timeWindowStartToStr(timeWindow) }</span>
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Length:</strong></span>
-    <span style="white-space: pre-line">{ timeWindow.length >=60 ? `${timeWindow.length/60} hour${timeWindow.length>60?'s':''}` : `${timeWindow.length} minutes` } </span>
+    <span style="white-space: pre-line">{ timeWindowDurationToStr(timeWindow) } </span>
   </div>
 
 </div>

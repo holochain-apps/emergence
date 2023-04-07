@@ -2,7 +2,7 @@
   "name": "tests",
   "private": true,
   "scripts": {
-    "test": "vitest run time-window.test.ts"
+    "test": "vitest run sessions.test.ts"
   },
   "dependencies": {
     "@msgpack/msgpack": "^2.7.0",

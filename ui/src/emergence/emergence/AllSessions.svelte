@@ -36,7 +36,7 @@ onMount(async () => {
 <div style="display: flex; flex-direction: column">
   {#each $sessions as session}
     <div style="margin-bottom: 8px; width:500px; background:lightgray">
-      <SessionDetail sessionHash={session.actionHash}  on:session-deleted={() => store.fetchSessions()}></SessionDetail>
+      <SessionDetail session={session}  on:session-deleted={() => store.fetchSessions()}></SessionDetail>
     </div>
   {/each}
 </div>

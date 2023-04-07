@@ -1,3 +1,4 @@
+import type { EntryRecord } from '@holochain-open-dev/utils';
 import type { 
   Record, 
   ActionHash,
@@ -10,7 +11,8 @@ import type {
   Delete,
   CreateLink,
   DeleteLink,
-  Timestamp
+  Timestamp,
+  HoloHash
 } from '@holochain/client';
 
 export type EmergenceSignal = {
@@ -47,6 +49,11 @@ export interface Session {
   title: string;
 }
 
+export interface SessionPlus {
+  original_session_hash: ActionHash,
+  session: EntryRecord<Session>,
+  relations: Array<Relation>,
+}
 
 export interface Space { 
   name: string;
@@ -57,4 +64,24 @@ export interface Space {
 export interface TimeWindow { 
   start: Timestamp;
   length: number;
+}
+
+export const timeWindowStartToStr = (window: TimeWindow) : string => {
+  const start = new Date(window.start)
+  return `${start.toDateString()} @ ${start.toTimeString().slice(0,5)}`
+}
+
+export const timeWindowDurationToStr = (window: TimeWindow) : string => {
+  return window.length >=60 ? `${window.length/60} hour${window.length>60?'s':''}` : `${window.length} minutes`
+}
+
+export interface RelationContent {
+  path: string
+  data: string
+}
+
+export interface Relation {
+    src: HoloHash,
+    dst: HoloHash,
+    content: RelationContent,
 }
