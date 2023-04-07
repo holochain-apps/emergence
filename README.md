@@ -4,10 +4,14 @@
 
 > PREREQUISITE: set up the [holochain development environment](https://developer.holochain.org/docs/install/).
 
+Outside of nix shell you will need rust installed:
+
+https://www.rust-lang.org/tools/install or https://rustup.rs/
+
 Enter the nix shell by running this in the root folder of the repository: 
 
 ```bash
-nix-shell
+nix develop
 npm install
 ```
 
