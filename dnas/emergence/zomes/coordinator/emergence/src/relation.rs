@@ -1,16 +1,12 @@
 use emergence_integrity::*;
 use hdk::prelude::*;
+use crate::utils::*;
 
 #[hdk_extern]
 pub fn create_relation(input: Relation) -> ExternResult<ActionHash> {
     let serialized: SerializedBytes = input.content.clone().try_into().map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert relation"))))?;
     let tag :LinkTag = LinkTag::new(serialized.bytes().clone());
-    let action_hash = create_link(
-        input.src,
-        input.dst,
-        LinkTypes::Relations,
-        tag,
-    )?;
+    let action_hash = create_link_relaxed(input.src, input.dst, LinkTypes::Relations, tag)?;
     Ok(action_hash)
 }
 #[hdk_extern]

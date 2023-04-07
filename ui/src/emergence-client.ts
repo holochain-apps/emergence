@@ -7,7 +7,7 @@ import type {
     AppAgentClient,
     HoloHash,
 } from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, SessionPlus } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, Relation, SessionPlus, UpdateSessionInput } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
@@ -68,9 +68,20 @@ export class EmergenceClient {
     return new EntryRecord(await this.callZome('create_session', sessionEntry))
   }
 
+  async updateSession(update: UpdateSessionInput) : Promise<EntryRecord<Session>> {
+    return new EntryRecord(await this.callZome('update_session', update))
+  }
+
+
   async getSessions() : Promise<Array<SessionPlus>> {
     const sessions = await this.callZome('get_all_sessions',null)
-    return sessions.map(r => {return {session: new EntryRecord(r.session), relations: r.relations}});
+    return sessions.map(r => {
+        const session: SessionPlus = {
+        original_session_hash: r.original_session_hash,
+        session: new EntryRecord(r.session), 
+        relations: r.relations}
+        return session
+    });
   }
 
   async createSpace(name: string, description:string) : Promise<EntryRecord<Space>> {

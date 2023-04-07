@@ -4,6 +4,7 @@ pub mod all_sessions;
 pub mod session;
 pub mod time_window;
 pub mod relation;
+pub mod utils;
 
 use hdk::prelude::*;
 use emergence_integrity::*;

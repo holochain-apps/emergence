@@ -1,11 +1,10 @@
 <script lang="ts">
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import { decode } from '@msgpack/msgpack';
-import { type Record, type ActionHash, type AppAgentClient, type EntryHash, type AgentPubKey, type DnaHash, encodeHashToBase64 } from '@holochain/client';
+  import type { AppAgentClient } from '@holochain/client';
 import { clientContext, storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { timeWindowStartToStr, type Session, type SessionPlus, type TimeWindow, timeWindowDurationToStr } from './types';
+import { timeWindowStartToStr, type SessionPlus, type Slot, timeWindowDurationToStr } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
@@ -13,7 +12,7 @@ import '@shoelace-style/shoelace/dist/components/button/button.js';
 import Fa from 'svelte-fa'
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 
-import EditSession from './EditSession.svelte'; 
+import SessionCrud from './SessionCrud.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -28,7 +27,7 @@ let error: any = undefined;
 let editing = false;
 
 let errorSnackbar: Snackbar;
-let slot = ""
+let slot:Slot|undefined = undefined
 $: editing,  error, loading, session, slot;
 $: spaces = store.spaces
 
@@ -36,16 +35,7 @@ onMount(async () => {
   if (session === undefined) {
     throw new Error(`The session input is required for the SessionDetail element`);
   }
-  for (const r of session.relations) {
-    if (r.content.path == "session/space") {
-      const destB64 = encodeHashToBase64(r.dst)
-      const space = $spaces.find((s)=> encodeHashToBase64(s.actionHash) === destB64)
-      if (space) {
-        const window = JSON.parse(r.content.data) as TimeWindow
-        slot = `Scheduled in ${space.entry.name} on ${timeWindowStartToStr(window)} for ${timeWindowDurationToStr(window)}`
-      }
-    }
-  }
+  slot = store.getSessionSlot(session)
 });
 
 
@@ -77,14 +67,14 @@ async function deleteSession() {
 {:else if error}
 <span>Error fetching the session: {error.data.data}</span>
 {:else if editing}
-<EditSession
+<SessionCrud
   session={ session}
   on:session-updated={async () => {
     editing = false;
   //  await fetchSession()
   } }
   on:edit-canceled={() => { editing = false; } }
-></EditSession>
+></SessionCrud>
 {:else}
 
 <div style="display: flex; flex-direction: column">
@@ -97,7 +87,6 @@ async function deleteSession() {
       <Fa icon={faTrash} />
     </sl-button>
   </div>
-
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Key:</strong></span>
     <span style="white-space: pre-line">{ session.session.entry.key }</span>
@@ -108,8 +97,9 @@ async function deleteSession() {
     <span style="white-space: pre-line">{ session.session.entry.title }</span>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    {slot}
-
+    {#if slot}
+    Scheduled in {store.getSpace(slot.space) ? store.getSpace(slot.space).entry.name : "Unknown"} on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
+    {/if}
   </div>
 
 </div>

@@ -43,7 +43,6 @@ export type EntryTypes =
  | ({  type: 'Session'; } & Session);
 
 
-
 export interface Session { 
   key: string;
   title: string;
@@ -55,10 +54,21 @@ export interface SessionPlus {
   relations: Array<Relation>,
 }
 
+export interface UpdateSessionInput {
+  original_session_hash: ActionHash,
+  previous_session_hash: ActionHash,
+  updated_title: String,
+}
+
 export interface Space { 
   name: string;
 
   description: string;
+}
+
+export interface Slot {
+  space: ActionHash
+  window: TimeWindow
 }
 
 export interface TimeWindow { 

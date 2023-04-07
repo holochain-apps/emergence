@@ -6,7 +6,7 @@
   import TimeWindows from './emergence/emergence/TimeWindows.svelte';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
-  import CreateSession from './emergence/emergence/CreateSession.svelte';
+  import SessionCrud from './emergence/emergence/SessionCrud.svelte';
   import CreateSpace from './emergence/emergence/CreateSpace.svelte';
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
@@ -32,7 +32,6 @@
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
-    console.log("VITE", import.meta.env)
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
     const appPort : string = import.meta.env.VITE_APP_PORT
 
@@ -76,7 +75,7 @@
         <h3>Sessions List</h3>
         <AllSessions></AllSessions>
         <div style="width:300px; border:solid 1px;padding:20px">
-          <CreateSession></CreateSession></div>
+          <SessionCrud></SessionCrud></div>
       </div>
       {/if}
       {#if pane=="spaces"}

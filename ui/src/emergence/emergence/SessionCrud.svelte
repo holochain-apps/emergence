@@ -8,13 +8,15 @@ import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import { timeWindowDurationToStr, timeWindowStartToStr } from './types';
+import { timeWindowDurationToStr, timeWindowStartToStr, type SessionPlus, type UpdateSessionInput } from './types';
 import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
 import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 const dispatch = createEventDispatcher();
+
+export let session: SessionPlus|undefined = undefined;  // set this if update
 
 let title: string = '';
 
@@ -31,7 +33,26 @@ $: spaces = store.spaces
 $: windows = store.timeWindows
 
 onMount(() => {
+  if (session) {
+    title = session.session.entry.title
+    const slot = store.getSessionSlot(session)
+    if (slot) {
+      spaceSelect.value = encodeHashToBase64(slot.space)
+      windowSelect.value = JSON.stringify(slot.window)
+    }
+  }
 });
+
+async function updateSession() {
+  if (session) {
+    const updateRecord = await store.updateSession(session.original_session_hash, title!)
+    if (selectedSpace && selectedWindow) {
+      const window = JSON.parse(selectedWindow)
+      await store.slot(session.original_session_hash, decodeHashFromBase64(selectedSpace), window)
+    }
+    dispatch('session-updated', { actionHash: updateRecord.actionHash });
+  }
+}
 
 async function createSession() {    
   try {
@@ -43,7 +64,7 @@ async function createSession() {
     title = ""
     spaceSelect.value = ""
     windowSelect.value = ""
-    
+
     dispatch('session-created', { session: record });
   } catch (e) {
     errorSnackbar.labelText = `Error creating the session: ${e.data.data}`;
@@ -56,8 +77,13 @@ async function createSession() {
 </mwc-snackbar>
 
 <div style="display: flex; flex-direction: column">
-  <span style="font-size: 18px">Create Session</span>
   
+  {#if session}
+    <span style="font-size: 18px">Edit Session</span>
+    Key: {session.session.entry.key}
+  {:else}
+    <span style="font-size: 18px">Create Session</span>
+  {/if}
   <div style="margin-bottom: 16px">
     <sl-input
     label=Title
@@ -88,9 +114,25 @@ async function createSession() {
     {/each}
     </sl-select>
   </div>
-  <sl-button 
-  on:click={() => createSession()}
-  disabled={!isSessionValid}
-  variant=primary>Create Session</sl-button>
+  {#if session}
+  <div style="display: flex; flex-direction: row">
+    <sl-button
+    label="Cancel"
+    on:click={() => dispatch('edit-canceled')}
+    style="flex: 1; margin-right: 16px"
+    >Cancel</sl-button>
+    <sl-button 
+    style="flex: 1;"
+    on:click={() => updateSession()}
+    disabled={!isSessionValid}
+    variant=primary>Save</sl-button>
+  </div>
+
+  {:else}
+    <sl-button 
+    on:click={() => createSession()}
+    disabled={!isSessionValid}
+    variant=primary>Create Session</sl-button>
+  {/if}
 
 </div>
