@@ -4,7 +4,7 @@ import { runScenario, pause, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
-import { createRelation, createSession, sampleRelation } from './common.js';
+import { createRelations, createSession, sampleRelation } from './common.js';
 
 test('create a Session and get all sessions', async () => {
   await runScenario(async scenario => {
@@ -44,7 +44,7 @@ test('create a Session and get all sessions', async () => {
         data: JSON.stringify(5),
       }
     }
-    const _actionHash = await createRelation(alice.cells[0], createdRelation);
+    const _actionHashes = await createRelations(alice.cells[0], [createdRelation]);
 
     await pause(1200);
     
@@ -64,6 +64,7 @@ test('create a Session and get all sessions', async () => {
       original_session_hash: originalActionHash,
       previous_session_hash: originalActionHash,
       updated_title: updatedTitle,
+      updated_amenities: 1,
     };
 
     let updatedRecord: Record = await alice.cells[0].callZome({

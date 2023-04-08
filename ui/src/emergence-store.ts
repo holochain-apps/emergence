@@ -61,19 +61,35 @@ export class EmergenceStore {
     }
     return undefined
   }
-    
+//   getSessionAmenities(session: SessionPlus) : number {
+//     for (const r of session.relations) {
+//         if (r.content.path == "session/amenities") {
+//             return JSON.parse(r.content.data) as number
+//         }
+//     }
+//     return undefined
+//   }    
+//   async setAmenities(session: ActionHash, amenities:number) {
+//     this.client.createRelations(
+//         [{   src: session,
+//             dst: session,
+//             content:  {
+//                 path: "session/amenities",
+//                 data: JSON.stringify(amenities)
+//             }
+//         }]
+//     )
+//   }
 
   async slot(session: ActionHash, space:ActionHash, time: TimeWindow) {
-    this.client.createRelation(
+    this.client.createRelations([
         {   src: session,
             dst: space,
             content:  {
                 path: "session/space",
                 data: JSON.stringify(time)
             }
-        }
-    )
-    this.client.createRelation(
+        },
         {   src: space,
             dst: session,
             content:  {
@@ -81,6 +97,7 @@ export class EmergenceStore {
                 data: JSON.stringify(time)
             }
         }
+    ]
     )
   }
 
@@ -99,21 +116,22 @@ export class EmergenceStore {
     this.timeWindows.update((n) => {return timeWindows} )
   }
 
-  async createSession(title: string): Promise<EntryRecord<Session>> {  
-    const record = await this.client.createSession(title)
+  async createSession(title: string, amenities: number): Promise<EntryRecord<Session>> {  
+    const record = await this.client.createSession(title, amenities)
     this.fetchSessions()
     return record
   }
 
 
-  async updateSession(sessionHash: ActionHash, title: string): Promise<EntryRecord<Session>> {
+  async updateSession(sessionHash: ActionHash, title: string, amenities: number): Promise<EntryRecord<Session>> {
     const sessionIdx = this.getSessionIdx(sessionHash)
     if (sessionIdx >= 0) {
         const session = get(this.sessions)[sessionIdx]
         const update: UpdateSessionInput = { 
             original_session_hash: session.original_session_hash,
             previous_session_hash: session.session.record.signed_action.hashed.hash,
-            updated_title: title!
+            updated_title: title!,
+            updated_amenities: amenities,
         };
         const record = await this.client.updateSession(update)
         this.sessions.update((sessions) => {
@@ -138,8 +156,8 @@ export class EmergenceStore {
     }
   }
 
-  async createSpace(name: string, description: string): Promise<EntryRecord<Space>> {
-    const record = await this.client.createSpace(name, description)
+  async createSpace(name: string, description: string, amenities: number): Promise<EntryRecord<Space>> {
+    const record = await this.client.createSpace(name, description, amenities)
     this.fetchSpaces()
     return record
   }

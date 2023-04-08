@@ -8,6 +8,7 @@ export async function sampleSession(cell: CallableCell, partialSession = {}) {
         ...{
 	  key: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
 	  title: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      amenities: 1,
         },
         ...partialSession
     };
@@ -28,6 +29,7 @@ export async function sampleSpace(cell: CallableCell, partialSpace = {}) {
         ...{
 	  name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
 	  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      amenities: 1,
         },
         ...partialSpace
     };
@@ -93,11 +95,11 @@ export async function sampleRelationAgent(cell: CallableCell, partialRelation = 
 }
 
 
-export async function createRelation(cell: CallableCell, relation = undefined): Promise<Record> {
+export async function createRelations(cell: CallableCell, relations = undefined): Promise<Record> {
     return cell.callZome({
       zome_name: "emergence",
-      fn_name: "create_relation",
-      payload: relation || await sampleRelation(cell),
+      fn_name: "create_relations",
+      payload: relations || [await sampleRelation(cell)],
     });
 }
 

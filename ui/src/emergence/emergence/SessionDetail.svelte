@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import type { AppAgentClient } from '@holochain/client';
 import { clientContext, storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { timeWindowStartToStr, type SessionPlus, type Slot, timeWindowDurationToStr } from './types';
+import { timeWindowStartToStr, type SessionPlus, type Slot, timeWindowDurationToStr, Amenities, amenitiesList } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
@@ -28,6 +28,7 @@ let editing = false;
 
 let errorSnackbar: Snackbar;
 let slot:Slot|undefined = undefined
+
 $: editing,  error, loading, session, slot;
 $: spaces = store.spaces
 
@@ -37,7 +38,6 @@ onMount(async () => {
   }
   slot = store.getSessionSlot(session)
 });
-
 
 async function deleteSession() {
   try {
@@ -95,6 +95,12 @@ async function deleteSession() {
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Title:</strong></span>
     <span style="white-space: pre-line">{ session.session.entry.title }</span>
+  </div>
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Required Amenities:</strong></span>
+    <span style="white-space: pre-line">
+      {amenitiesList(session.session.entry.amenities).join(", ")}
+    </span>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     {#if slot}

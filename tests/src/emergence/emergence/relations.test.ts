@@ -3,7 +3,7 @@ import { runScenario, pause, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
-import { createRelation, sampleRelation, sampleRelationAgent } from './common.js';
+import { createRelations, sampleRelation, sampleRelationAgent } from './common.js';
 
 test('create a relation and get all relations', async () => {
   await runScenario(async scenario => {
@@ -33,8 +33,8 @@ test('create a relation and get all relations', async () => {
     assert.equal(collectionOutput.length, 0);
 
     // Alice creates a Relation
-    const actionHash = await createRelation(alice.cells[0], createdRelation);
-    assert.ok(actionHash);
+    const actions = await createRelations(alice.cells[0], [createdRelation]);
+    assert.ok(actions);
     
     await pause(1200);
     

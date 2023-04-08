@@ -5,20 +5,27 @@ import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
+import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import { timeWindowDurationToStr, timeWindowStartToStr, type SessionPlus, type UpdateSessionInput } from './types';
+import { timeWindowDurationToStr, timeWindowStartToStr, type SessionPlus, type UpdateSessionInput, Amenities } from './types';
 import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
 import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
+  import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
+let amenityElems: Array<SlCheckbox> = []
 
 const dispatch = createEventDispatcher();
 
 export let session: SessionPlus|undefined = undefined;  // set this if update
 
 let title: string = '';
+let smallest: number = 2;
+let largest: number = 100;
+let duration: string = ""
+let amenities: number = 0;
 
 let errorSnackbar: Snackbar;
 let spaceSelect: SlSelect;
@@ -27,7 +34,7 @@ let windowSelect: SlSelect;
 let selectedSpace: string = ""
 let selectedWindow: string = ""
 
-$: title, selectedSpace, selectedWindow;
+$: title, selectedSpace, selectedWindow, amenities;
 $: isSessionValid = title !== '' && ((selectedSpace && selectedWindow) || (!selectedSpace && !selectedWindow));
 $: spaces = store.spaces
 $: windows = store.timeWindows
@@ -35,6 +42,7 @@ $: windows = store.timeWindows
 onMount(() => {
   if (session) {
     title = session.session.entry.title
+    amenities = session.session.entry.amenities
     const slot = store.getSessionSlot(session)
     if (slot) {
       spaceSelect.value = encodeHashToBase64(slot.space)
@@ -45,7 +53,7 @@ onMount(() => {
 
 async function updateSession() {
   if (session) {
-    const updateRecord = await store.updateSession(session.original_session_hash, title!)
+    const updateRecord = await store.updateSession(session.original_session_hash, title!, amenities)
     if (selectedSpace && selectedWindow) {
       const window = JSON.parse(selectedWindow)
       await store.slot(session.original_session_hash, decodeHashFromBase64(selectedSpace), window)
@@ -56,11 +64,12 @@ async function updateSession() {
 
 async function createSession() {    
   try {
-    const record = await store.createSession(title!)
+    const record = await store.createSession(title!, amenities)
     if (selectedSpace && selectedWindow) {
       const window = JSON.parse(selectedWindow)
       await store.slot(record.actionHash, decodeHashFromBase64(selectedSpace), window)
     }
+
     title = ""
     spaceSelect.value = ""
     windowSelect.value = ""
@@ -69,6 +78,14 @@ async function createSession() {
   } catch (e) {
     errorSnackbar.labelText = `Error creating the session: ${e.data.data}`;
     errorSnackbar.show();
+  }
+}
+
+const setAmenity = (i:number, value:boolean) => {
+  if (value) {
+    amenities |= 1 << i
+  } else {
+    amenities &= ~(1 << i)
   }
 }
 
@@ -90,6 +107,16 @@ async function createSession() {
     value={title}
     on:input={e => { title = e.target.value; } }
   ></sl-input>
+  </div>
+  <div style="margin-bottom: 16px">
+    <div style="font-size: 16px">Required Amenities </div>
+    {#each Amenities as amenity, i}
+      <sl-checkbox 
+        bind:this={amenityElems[i]}
+        checked={session && (amenities >> i)&1}
+        on:sl-change={e => { setAmenity(i, e.target.checked)} }
+      >{amenity}</sl-checkbox>
+    {/each}
   </div>
   <div style="margin-bottom: 16px">
     <sl-select bind:this={spaceSelect}

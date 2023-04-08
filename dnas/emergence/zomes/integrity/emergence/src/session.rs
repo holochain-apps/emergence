@@ -4,6 +4,7 @@ use hdi::prelude::*;
 pub struct Session {
     pub key: String,
     pub title: String,
+    pub amenities: u32,
 }
 pub fn validate_create_session(
     _action: EntryCreationAction,

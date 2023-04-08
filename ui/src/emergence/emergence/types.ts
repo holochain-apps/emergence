@@ -46,6 +46,7 @@ export type EntryTypes =
 export interface Session { 
   key: string;
   title: string;
+  amenities: number;
 }
 
 export interface SessionPlus {
@@ -58,12 +59,13 @@ export interface UpdateSessionInput {
   original_session_hash: ActionHash,
   previous_session_hash: ActionHash,
   updated_title: String,
+  updated_amenities: number,
 }
 
 export interface Space { 
   name: string;
-
   description: string;
+  amenities: number;
 }
 
 export interface Slot {
@@ -95,3 +97,22 @@ export interface Relation {
     dst: HoloHash,
     content: RelationContent,
 }
+
+export const Amenities = [
+  "Electricty",
+  "Whiteboard",
+  "Screen/Proj",
+  "Seating",
+  "Wifi",
+  "Indoor",
+  "Outdoor",]
+
+export const amenitiesList = (bits: number) : Array<string> => {
+  const a = []
+  for (let  i=0; i<32; i+=1) {
+    if (bits & 1) a.push(Amenities[i])
+    bits = bits >> 1
+  }
+  return a
+}
+  

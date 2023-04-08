@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { decode } from '@msgpack/msgpack';
 import type { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
 import { clientContext } from '../../contexts';
-import type { Space } from './types';
+import { amenitiesList, type Space } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
@@ -121,6 +121,13 @@ async function deleteSpace() {
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Description:</strong></span>
     <span style="white-space: pre-line">{ space.description }</span>
+  </div>
+  
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Available Amenities:</strong></span>
+    <span style="white-space: pre-line">
+      {amenitiesList(space.amenities).join(", ")}
+    </span>
   </div>
 
 </div>

@@ -3,11 +3,14 @@ use hdk::prelude::*;
 use crate::utils::*;
 
 #[hdk_extern]
-pub fn create_relation(input: Relation) -> ExternResult<ActionHash> {
-    let serialized: SerializedBytes = input.content.clone().try_into().map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert relation"))))?;
-    let tag :LinkTag = LinkTag::new(serialized.bytes().clone());
-    let action_hash = create_link_relaxed(input.src, input.dst, LinkTypes::Relations, tag)?;
-    Ok(action_hash)
+pub fn create_relations(input: Vec<Relation>) -> ExternResult<Vec<ActionHash>> {
+    let mut actions: Vec<ActionHash> = Vec::new();
+    for relation in input {
+        let serialized: SerializedBytes = relation.content.clone().try_into().map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert relation"))))?;
+        let tag :LinkTag = LinkTag::new(serialized.bytes().clone());
+        actions.push(create_link_relaxed(relation.src, relation.dst, LinkTypes::Relations, tag)?);
+    }
+    Ok(actions)
 }
 #[hdk_extern]
 pub fn delete_relation(_input: Relation) -> ExternResult<()> {

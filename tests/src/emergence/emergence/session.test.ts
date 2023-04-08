@@ -90,10 +90,12 @@ test('create and update Session', async () => {
  
     // Alice updates the Session
     let updatedTitle = "title2";
+    let updatedAmenities = 6;
     let updateInput = {
       original_session_hash: originalActionHash,
       previous_session_hash: originalActionHash,
       updated_title: updatedTitle,
+      updated_amenities: updatedAmenities,
     };
 
     let updatedRecord: Record = await alice.cells[0].callZome({
@@ -114,13 +116,16 @@ test('create and update Session', async () => {
     });
     let updatedSession = decode((readUpdatedOutput0.entry as any).Present.entry) as any
     assert.equal(updatedTitle,updatedSession.title );
+    assert.equal(updatedAmenities,updatedSession.amenities );
 
     // Alice updates the Session again
     updatedTitle = "title3";
+    updatedAmenities = 10;
     updateInput = { 
       original_session_hash: originalActionHash,
       previous_session_hash: updatedRecord.signed_action.hashed.hash,
       updated_title: updatedTitle,
+      updated_amenities: updatedAmenities,
     };
 
     updatedRecord = await alice.cells[0].callZome({
@@ -140,7 +145,9 @@ test('create and update Session', async () => {
       payload: updatedRecord.signed_action.hashed.hash,
     });
     updatedSession = decode((readUpdatedOutput1.entry as any).Present.entry) as any
-    assert.equal(updatedTitle,updatedSession.title );  });
+    assert.equal(updatedTitle,updatedSession.title );  
+    assert.equal(updatedAmenities,updatedSession.amenities );
+  });
 });
 
 test('create and delete Session', async () => {

@@ -34,8 +34,8 @@ export class EmergenceClient {
 //   }
 
 
-  async createRelation(relation: Relation) : Promise<ActionHash> {
-    return this.callZome('create_relation', relation)
+  async createRelations(relations: Array<Relation>) : Promise<ActionHash> {
+    return this.callZome('create_relations', relations)
   }
 
   getRelations(hash: HoloHash) : Promise<Array<Relation>> {
@@ -59,10 +59,11 @@ export class EmergenceClient {
     return key
   }
   
-  async createSession(title: string) : Promise<EntryRecord<Session>> {
+  async createSession(title: string, amenities: number) : Promise<EntryRecord<Session>> {
     const sessionEntry: Session = { 
         key: this.genKey(),
-        title: title!,
+        title: title,
+        amenities: amenities,
       };
     
     return new EntryRecord(await this.callZome('create_session', sessionEntry))
@@ -84,9 +85,9 @@ export class EmergenceClient {
     });
   }
 
-  async createSpace(name: string, description:string) : Promise<EntryRecord<Space>> {
+  async createSpace(name: string, description:string, amenities: number) : Promise<EntryRecord<Space>> {
     const spaceEntry: Space = { 
-        name, description
+        name, description, amenities
       };
     
     return new EntryRecord(await this.callZome('create_space', spaceEntry))

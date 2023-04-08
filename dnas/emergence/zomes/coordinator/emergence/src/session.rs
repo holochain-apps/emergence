@@ -39,6 +39,7 @@ pub struct UpdateSessionInput {
     pub original_session_hash: ActionHash,
     pub previous_session_hash: ActionHash,
     pub updated_title: String,
+    pub updated_amenities: u32,
 }
 #[hdk_extern]
 pub fn update_session(input: UpdateSessionInput) -> ExternResult<Record> {
@@ -54,6 +55,7 @@ pub fn update_session(input: UpdateSessionInput) -> ExternResult<Record> {
         &Session {
             key: session.key,
             title: input.updated_title,
+            amenities: input.updated_amenities,
         },
     )?;
     create_link(
