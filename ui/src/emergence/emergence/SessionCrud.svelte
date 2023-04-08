@@ -12,7 +12,7 @@ import type { EmergenceStore } from '../../emergence-store';
 import { timeWindowDurationToStr, timeWindowStartToStr, type SessionPlus, type UpdateSessionInput, Amenities } from './types';
 import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
 import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
-  import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
+import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []

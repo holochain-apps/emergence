@@ -115,4 +115,16 @@ export const amenitiesList = (bits: number) : Array<string> => {
   }
   return a
 }
-  
+
+export enum FeedType {
+   SessionNew = 1,
+   SessionUpdate,
+   SpaceNew,
+   SpaceUpdate,
+}
+
+export interface FeedElem {
+  author: AgentPubKey,
+  type: FeedType,
+  detail: any,
+}

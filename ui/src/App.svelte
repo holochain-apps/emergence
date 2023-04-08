@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faTicket, faUser, faGear  } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faTicket, faUser, faGear, faRss } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/elements/profile-prompt.js";
@@ -21,6 +21,7 @@
   import CreateTimeWindow from './emergence/emergence/CreateTimeWindow.svelte';
   import { EmergenceStore } from './emergence-store';
   import { EmergenceClient } from './emergence-client';
+  import Feed from './emergence/emergence/Feed.svelte';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -98,6 +99,12 @@
         <CreateTimeWindow></CreateTimeWindow>
       </div>
       {/if}
+      {#if pane=="feed"}
+      <div class="pane">
+        <h3>Feed</h3>
+        <Feed></Feed>
+      </div>
+      {/if}
 
 
       <div class="nav">
@@ -122,6 +129,13 @@
           on:click={()=>{pane='you'}}
         >
            <Fa icon={faUser} size="2x"/>
+        </div>
+        <div class="nav-button {pane=="feed"?"selected":""}"
+          title="Feed"
+          on:keypress={()=>{pane='feed'}}
+          on:click={()=>{pane='feed'}}
+        >
+           <Fa icon={faRss} size="2x"/>
         </div>
         <div class="nav-button {pane=="admin"?"selected":""}"
           title="Admin"

@@ -11,7 +11,7 @@ import type { EmergenceClient } from './emergence-client';
 import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
-import type { Session, TimeWindow, Space, SessionPlus, UpdateSessionInput, Slot } from './emergence/emergence/types';
+import { type Session, type TimeWindow, type Space, type SessionPlus, type UpdateSessionInput, type Slot, type FeedElem, FeedType } from './emergence/emergence/types';
 import { get, writable, type Writable } from 'svelte/store';
 import type { EntryRecord } from '@holochain-open-dev/utils';
 
@@ -22,6 +22,7 @@ export class EmergenceStore {
   timeWindows: Writable<Array<TimeWindow>> = writable([])
   sessions: Writable<Array<SessionPlus>> = writable([])
   spaces: Writable<Array<EntryRecord<Space>>> = writable([])
+  feed: Writable<Array<FeedElem>> = writable([])
   constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {}
   
   getSessionIdx(sessionHash: ActionHash) : number {
@@ -116,8 +117,17 @@ export class EmergenceStore {
     this.timeWindows.update((n) => {return timeWindows} )
   }
 
-  async createSession(title: string, amenities: number): Promise<EntryRecord<Session>> {  
+  async createSession(title: string, amenities: number): Promise<EntryRecord<Session>> {
     const record = await this.client.createSession(title, amenities)
+    this.feed.update((feed) => {
+        feed.push({
+            author: this.client.client.myPubKey,
+            type: FeedType.SessionNew,
+            detail: record.actionHash
+        })
+        return feed
+    } )
+
     this.fetchSessions()
     return record
   }
