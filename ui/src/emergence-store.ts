@@ -11,7 +11,7 @@ import type { EmergenceClient } from './emergence-client';
 import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
-import { type Session, type TimeWindow, type Space, type SessionPlus, type UpdateSessionInput, type Slot, type FeedElem, FeedType } from './emergence/emergence/types';
+import { type Session, type TimeWindow, type Space, type SessionPlus, type UpdateSessionInput, type Slot, type FeedElem, FeedType, type UpdateSpaceInput } from './emergence/emergence/types';
 import { get, writable, type Writable } from 'svelte/store';
 import type { EntryRecord } from '@holochain-open-dev/utils';
 
@@ -61,25 +61,6 @@ export class EmergenceStore {
     }
     return undefined
   }
-//   getSessionAmenities(session: SessionPlus) : number {
-//     for (const r of session.relations) {
-//         if (r.content.path == "session.amenities") {
-//             return JSON.parse(r.content.data) as number
-//         }
-//     }
-//     return undefined
-//   }    
-//   async setAmenities(session: ActionHash, amenities:number) {
-//     this.client.createRelations(
-//         [{   src: session,
-//             dst: session,
-//             content:  {
-//                 path: "session/amenities",
-//                 data: JSON.stringify(amenities)
-//             }
-//         }]
-//     )
-//   }
 
   async slot(session: ActionHash, space:ActionHash, window: TimeWindow) {
     this.client.createRelations([
@@ -134,15 +115,6 @@ export class EmergenceStore {
             }
         },
     ])
-    // this.feed.update((feed) => {
-    //     feed.push({
-    //         author: this.client.client.myPubKey,
-    //         type: FeedType.SessionNew,
-    //         about: record.actionHash,
-    //         detail: ""
-    //     })
-    //     return feed
-    // } )
 
     this.fetchSessions()
     return record
@@ -184,6 +156,49 @@ export class EmergenceStore {
         return record
     } else {
         throw new Error(`could not find session`)
+    }
+  }
+
+  async updateSpace(spaceHash: ActionHash, name: string, description: string, amenities: number): Promise<EntryRecord<Space>> {
+    const idx = this.getSpaceIdx(spaceHash)
+    if (idx >= 0) {
+        const space = get(this.spaces)[idx]
+
+        const updatedSpace: UpdateSpaceInput = {
+            original_space_hash: spaceHash,
+            previous_space_hash: space.record.signed_action.hashed.hash,
+            updated_space: {
+                name,description,amenities
+            }
+        }
+        const record = await this.client.updateSpace(updatedSpace)
+        const spaceEntry = space.entry
+        let changes = []
+        if (spaceEntry.name != name) {
+            changes.push(`name -> ${name}`)
+        }
+        if (spaceEntry.description != description) {
+            changes.push(`description`)
+        }
+        if (spaceEntry.amenities != amenities) {
+            changes.push(`amenities`)
+        }
+        this.client.createRelations([
+            {   src: record.actionHash, // should be agent key
+                dst: record.actionHash,
+                content:  {
+                    path: `feed.${FeedType.SpaceUpdate}`,
+                    data: JSON.stringify({name: spaceEntry.name, changes})
+                }
+            },
+        ])
+        this.spaces.update((spaces) => {
+            spaces[idx] = record
+            return spaces
+        })
+        return record
+    } else {
+        throw new Error(`could not find space`)
     }
   }
 

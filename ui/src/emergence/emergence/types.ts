@@ -68,6 +68,14 @@ export interface Space {
   amenities: number;
 }
 
+
+export interface UpdateSpaceInput {
+  original_space_hash: ActionHash,
+  previous_space_hash: ActionHash,
+  updated_space: Space,
+}
+
+
 export interface Slot {
   space: ActionHash
   window: TimeWindow
@@ -126,6 +134,7 @@ export enum FeedType {
 
 export interface FeedElem {
   author: AgentPubKey,
+  about: ActionHash,
   type: FeedType,
   detail: any,
 }

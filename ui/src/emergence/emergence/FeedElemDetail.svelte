@@ -8,6 +8,7 @@ import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
   import SpaceDetail from './SpaceDetail.svelte';
+  import { get_slot_changes } from 'svelte/internal';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -21,13 +22,13 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
       {feedElem.detail}
     {/if}
     {#if feedElem.type === FeedType.SessionUpdate}
-      {feedElem.detail.title}  changed: {JSON.stringify(feedElem.detail.changes)}
+      {feedElem.detail.title}  get_slot_changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SpaceNew}
       {feedElem.detail}
     {/if}
     {#if feedElem.type === FeedType.SpaceUpdate}
-      named {feedElem.detail}
+    {feedElem.detail.name}  changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SlotSession}
        into {store.getSpace(decodeHashFromBase64(feedElem.detail.space)).entry.name} for {timeWindowStartToStr(feedElem.detail.window)} @ {timeWindowDurationToStr(feedElem.detail.window)} 

@@ -2,7 +2,7 @@
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import type { AppAgentClient, Record, EntryHash, AgentPubKey, DnaHash, ActionHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
-import { clientContext } from '../../contexts';
+import { clientContext, storeContext } from '../../contexts';
 import { Amenities, type Space } from './types';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
@@ -12,8 +12,11 @@ import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
+  import type { EmergenceStore } from '../../emergence-store';
+  import type { EntryRecord } from '@holochain-open-dev/utils';
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
 
 const dispatch = createEventDispatcher();
@@ -43,26 +46,10 @@ onMount(() => {
 
 async function updateSpace() {
 
-  const space: Space = { 
-    name: name!,
-    description: description!,
-    amenities: amenities,
-  };
-
   try {
-    const updateRecord: Record = await client.callZome({
-      cap_secret: null,
-      role_name: 'emergence',
-      zome_name: 'emergence',
-      fn_name: 'update_space',
-      payload: {
-        original_space_hash: originalSpaceHash,
-        previous_space_hash: currentRecord.signed_action.hashed.hash,
-        updated_space: space
-      }
-    });
+    const updatedSpace: EntryRecord<Space> = await store.updateSpace(originalSpaceHash, name!,description!,amenities!)
   
-    dispatch('space-updated', { actionHash: updateRecord.signed_action.hashed.hash });
+    dispatch('space-updated', { actionHash: updatedSpace.actionHash });
   } catch (e) {
     errorSnackbar.labelText = `Error updating the space: ${e.data.data}`;
     errorSnackbar.show();
