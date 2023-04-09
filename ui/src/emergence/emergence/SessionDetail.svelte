@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import type { AppAgentClient } from '@holochain/client';
 import { clientContext, storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { timeWindowStartToStr, type SessionPlus, type Slot, timeWindowDurationToStr, Amenities, amenitiesList } from './types';
+import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
@@ -16,7 +16,7 @@ import SessionCrud from './SessionCrud.svelte';
 
 const dispatch = createEventDispatcher();
 
-export let session: SessionPlus;
+export let session: Info<Session>;
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -46,9 +46,9 @@ async function deleteSession() {
       role_name: 'emergence',
       zome_name: 'emergence',
       fn_name: 'delete_session',
-      payload: session.session.actionHash,
+      payload: session.record.actionHash,
     });
-    dispatch('session-deleted', { sessionHash: session.session.actionHash });
+    dispatch('session-deleted', { sessionHash: session.record.actionHash });
   } catch (e: any) {
     errorSnackbar.labelText = `Error deleting the session: ${e.data.data}`;
     errorSnackbar.show();
@@ -89,17 +89,17 @@ async function deleteSession() {
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Key:</strong></span>
-    <span style="white-space: pre-line">{ session.session.entry.key }</span>
+    <span style="white-space: pre-line">{ session.record.entry.key }</span>
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Title:</strong></span>
-    <span style="white-space: pre-line">{ session.session.entry.title }</span>
+    <span style="white-space: pre-line">{ session.record.entry.title }</span>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Required Amenities:</strong></span>
     <span style="white-space: pre-line">
-      {amenitiesList(session.session.entry.amenities).join(", ")}
+      {amenitiesList(session.record.entry.amenities).join(", ")}
     </span>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">

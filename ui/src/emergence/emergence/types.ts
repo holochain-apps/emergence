@@ -49,9 +49,9 @@ export interface Session {
   amenities: number;
 }
 
-export interface SessionPlus {
-  original_session_hash: ActionHash,
-  session: EntryRecord<Session>,
+export interface Info<T> {
+  original_hash: ActionHash,
+  record: EntryRecord<T>,
   relations: Array<Relation>,
 }
 

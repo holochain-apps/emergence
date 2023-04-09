@@ -55,8 +55,8 @@ test('create a Session and get all sessions', async () => {
       payload: null
     });
     assert.equal(collectionOutput.length, 1);
-    const sessionPlus: any = {original_session_hash: originalActionHash, session:createdRecord,relations:[createdRelation]}
-    assert.deepEqual(sessionPlus, collectionOutput[0]);
+    const sessionInfo: any = {original_hash: originalActionHash, record:createdRecord, relations:[createdRelation]}
+    assert.deepEqual(sessionInfo, collectionOutput[0]);
 
     // Alice updates the session
     let updatedTitle = "title2";
@@ -83,8 +83,8 @@ test('create a Session and get all sessions', async () => {
       payload: null
     });
     assert.equal(collectionOutput.length, 1);
-    const sessionPlus2: any = {original_session_hash: originalActionHash, session:updatedRecord, relations:[createdRelation]}
-    assert.deepEqual(sessionPlus2, collectionOutput[0]);
+    const sessionInfo2: any = {original_hash: originalActionHash, record:updatedRecord, relations:[createdRelation]}
+    assert.deepEqual(sessionInfo2, collectionOutput[0]);
 
 
   });

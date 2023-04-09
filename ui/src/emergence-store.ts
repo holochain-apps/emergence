@@ -11,16 +11,16 @@ import type { EmergenceClient } from './emergence-client';
 import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
-import { type Session, type TimeWindow, type Space, type SessionPlus, type UpdateSessionInput, type Slot, type FeedElem, FeedType, type UpdateSpaceInput } from './emergence/emergence/types';
 import { get, writable, type Writable } from 'svelte/store';
 import type { EntryRecord } from '@holochain-open-dev/utils';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput } from './emergence/emergence/types';
 
 TimeAgo.addDefaultLocale(en)
 
 export class EmergenceStore {
   timeAgo = new TimeAgo('en-US')
   timeWindows: Writable<Array<TimeWindow>> = writable([])
-  sessions: Writable<Array<SessionPlus>> = writable([])
+  sessions: Writable<Array<Info<Session>>> = writable([])
   spaces: Writable<Array<EntryRecord<Space>>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
   constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {}
@@ -28,10 +28,10 @@ export class EmergenceStore {
   getSessionIdx(sessionHash: ActionHash) : number {
     const b64 = encodeHashToBase64(sessionHash)
     const sessions = get(this.sessions)
-    return sessions.findIndex((s)=> encodeHashToBase64(s.original_session_hash) === b64)
+    return sessions.findIndex((s)=> encodeHashToBase64(s.original_hash) === b64)
   }
 
-  getSession(sessionHash: ActionHash) : SessionPlus | undefined {
+  getSession(sessionHash: ActionHash) : Info<Session> | undefined {
     const sessionIdx = this.getSessionIdx(sessionHash)
     if (sessionIdx == -1) return undefined
     return get(this.sessions)[sessionIdx]
@@ -49,7 +49,7 @@ export class EmergenceStore {
     return get(this.spaces)[spaceIdx]
   }
 
-  getSessionSlot(session: SessionPlus) : Slot|undefined {
+  getSessionSlot(session: Info<Session>) : Slot|undefined {
     for (const r of session.relations) {
         if (r.content.path == "session.space") {
             const window = JSON.parse(r.content.data) as TimeWindow
@@ -126,13 +126,13 @@ export class EmergenceStore {
     if (sessionIdx >= 0) {
         const session = get(this.sessions)[sessionIdx]
         const update: UpdateSessionInput = { 
-            original_session_hash: session.original_session_hash,
-            previous_session_hash: session.session.record.signed_action.hashed.hash,
+            original_session_hash: session.original_hash,
+            previous_session_hash: session.record.record.signed_action.hashed.hash,
             updated_title: title!,
             updated_amenities: amenities,
         };
         const record = await this.client.updateSession(update)
-        const sessionEntry = session.session.entry
+        const sessionEntry = session.record.entry
         let changes = []
         if (sessionEntry.title != title) {
             changes.push(`title -> ${title}`)
@@ -150,7 +150,7 @@ export class EmergenceStore {
             },
         ])
         this.sessions.update((sessions) => {
-            sessions[sessionIdx].session = record
+            sessions[sessionIdx].record = record
             return sessions
         })
         return record

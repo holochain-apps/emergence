@@ -1,7 +1,7 @@
 <script lang="ts">
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import type { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
-import { clientContext, storeContext } from '../../contexts';
+import { storeContext } from '../../contexts';
 import { Amenities, type Space } from './types';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
@@ -18,7 +18,6 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
 
 const dispatch = createEventDispatcher();
-
 
 let name: string = '';
 let description: string = '';

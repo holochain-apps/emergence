@@ -9,7 +9,7 @@ import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import { timeWindowDurationToStr, timeWindowStartToStr, type SessionPlus, type UpdateSessionInput, Amenities } from './types';
+import { timeWindowDurationToStr, timeWindowStartToStr,  type UpdateSessionInput, Amenities, type Info, type Session } from './types';
 import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
 import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
@@ -19,7 +19,7 @@ let amenityElems: Array<SlCheckbox> = []
 
 const dispatch = createEventDispatcher();
 
-export let session: SessionPlus|undefined = undefined;  // set this if update
+export let session: Info<Session>|undefined = undefined;  // set this if update
 
 let title: string = '';
 let smallest: number = 2;
@@ -41,8 +41,8 @@ $: windows = store.timeWindows
 
 onMount(() => {
   if (session) {
-    title = session.session.entry.title
-    amenities = session.session.entry.amenities
+    title = session.record.entry.title
+    amenities = session.record.entry.amenities
     const slot = store.getSessionSlot(session)
     if (slot) {
       spaceSelect.value = encodeHashToBase64(slot.space)
@@ -53,10 +53,10 @@ onMount(() => {
 
 async function updateSession() {
   if (session) {
-    const updateRecord = await store.updateSession(session.original_session_hash, title!, amenities)
+    const updateRecord = await store.updateSession(session.original_hash, title!, amenities)
     if (selectedSpace && selectedWindow) {
       const window = JSON.parse(selectedWindow)
-      await store.slot(session.original_session_hash, decodeHashFromBase64(selectedSpace), window)
+      await store.slot(session.original_hash, decodeHashFromBase64(selectedSpace), window)
     }
     dispatch('session-updated', { actionHash: updateRecord.actionHash });
   }
@@ -97,7 +97,7 @@ const setAmenity = (i:number, value:boolean) => {
   
   {#if session}
     <span style="font-size: 18px">Edit Session</span>
-    Key: {session.session.entry.key}
+    Key: {session.record.entry.key}
   {:else}
     <span style="font-size: 18px">Create Session</span>
   {/if}
