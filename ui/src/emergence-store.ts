@@ -45,14 +45,13 @@ export class EmergenceStore {
 
   getSpace(spaceHash: ActionHash) : EntryRecord<Space> | undefined {
     const spaceIdx = this.getSpaceIdx(spaceHash)
-    console.log("XX",spaceIdx)
     if (spaceIdx == -1) return undefined
     return get(this.spaces)[spaceIdx]
   }
 
   getSessionSlot(session: SessionPlus) : Slot|undefined {
     for (const r of session.relations) {
-        if (r.content.path == "session/space") {
+        if (r.content.path == "session.space") {
             const window = JSON.parse(r.content.data) as TimeWindow
             return {
                 space: r.dst,
@@ -64,7 +63,7 @@ export class EmergenceStore {
   }
 //   getSessionAmenities(session: SessionPlus) : number {
 //     for (const r of session.relations) {
-//         if (r.content.path == "session/amenities") {
+//         if (r.content.path == "session.amenities") {
 //             return JSON.parse(r.content.data) as number
 //         }
 //     }
@@ -82,22 +81,29 @@ export class EmergenceStore {
 //     )
 //   }
 
-  async slot(session: ActionHash, space:ActionHash, time: TimeWindow) {
+  async slot(session: ActionHash, space:ActionHash, window: TimeWindow) {
     this.client.createRelations([
         {   src: session,
             dst: space,
             content:  {
-                path: "session/space",
-                data: JSON.stringify(time)
+                path: "session.space",
+                data: JSON.stringify(window)
             }
         },
         {   src: space,
             dst: session,
             content:  {
-                path: "space/sessions",
-                data: JSON.stringify(time)
+                path: "space.sessions",
+                data: JSON.stringify(window)
             }
-        }
+        },
+        {   src: session, // should be agent key
+            dst: session,
+            content:  {
+                path: `feed.${FeedType.SlotSession}`,
+                data: JSON.stringify({space:encodeHashToBase64(space),window})
+            }
+        },
     ]
     )
   }
@@ -119,14 +125,24 @@ export class EmergenceStore {
 
   async createSession(title: string, amenities: number): Promise<EntryRecord<Session>> {
     const record = await this.client.createSession(title, amenities)
-    this.feed.update((feed) => {
-        feed.push({
-            author: this.client.client.myPubKey,
-            type: FeedType.SessionNew,
-            detail: record.actionHash
-        })
-        return feed
-    } )
+    this.client.createRelations([
+        {   src: record.actionHash, // should be agent key
+            dst: record.actionHash,
+            content:  {
+                path: `feed.${FeedType.SessionNew}`,
+                data: JSON.stringify(title)
+            }
+        },
+    ])
+    // this.feed.update((feed) => {
+    //     feed.push({
+    //         author: this.client.client.myPubKey,
+    //         type: FeedType.SessionNew,
+    //         about: record.actionHash,
+    //         detail: ""
+    //     })
+    //     return feed
+    // } )
 
     this.fetchSessions()
     return record
@@ -144,6 +160,23 @@ export class EmergenceStore {
             updated_amenities: amenities,
         };
         const record = await this.client.updateSession(update)
+        const sessionEntry = session.session.entry
+        let changes = []
+        if (sessionEntry.title != title) {
+            changes.push(`title -> ${title}`)
+        }
+        if (sessionEntry.amenities != amenities) {
+            changes.push(`amenities`)
+        }
+        this.client.createRelations([
+            {   src: record.actionHash, // should be agent key
+                dst: record.actionHash,
+                content:  {
+                    path: `feed.${FeedType.SessionUpdate}`,
+                    data: JSON.stringify({title: sessionEntry.title, changes})
+                }
+            },
+        ])
         this.sessions.update((sessions) => {
             sessions[sessionIdx].session = record
             return sessions
@@ -168,6 +201,15 @@ export class EmergenceStore {
 
   async createSpace(name: string, description: string, amenities: number): Promise<EntryRecord<Space>> {
     const record = await this.client.createSpace(name, description, amenities)
+    this.client.createRelations([
+        {   src: record.actionHash, // should be agent key
+            dst: record.actionHash,
+            content:  {
+                path: `feed.${FeedType.SpaceNew}`,
+                data: JSON.stringify(name)
+            }
+        },
+    ])
     this.fetchSpaces()
     return record
   }
@@ -176,6 +218,16 @@ export class EmergenceStore {
     try {
         const spaces = await this.client.getSpaces()
         this.spaces.update((n) => {return spaces} )
+    }
+    catch (e) {
+        console.log("Error fetching spaces", e)
+    }
+  }
+
+  async fetchFeed() {
+    try {
+        const feed = await this.client.getFeed()
+        this.feed.update((n) => {return feed} )
     }
     catch (e) {
         console.log("Error fetching spaces", e)

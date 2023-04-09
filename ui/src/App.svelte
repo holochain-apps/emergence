@@ -16,6 +16,8 @@
   import "@holochain-open-dev/profiles/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/elements/profile-prompt.js";
   import "@holochain-open-dev/profiles/elements/my-profile.js";
+  import "@holochain-open-dev/profiles/elements/agent-avatar.js";
+  import "@holochain-open-dev/profiles/elements/list-profiles.js";
 
   import { clientContext, storeContext } from './contexts';
   import CreateTimeWindow from './emergence/emergence/CreateTimeWindow.svelte';
@@ -69,7 +71,6 @@
   {:else}
   <profiles-context store="{profilesStore}">
     <profile-prompt>
-
     <div id="content" style="display: flex; flex-direction: column; flex: 1;">
       {#if pane=="sessions"}
       <div class="pane">

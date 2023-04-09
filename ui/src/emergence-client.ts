@@ -7,7 +7,7 @@ import type {
     AppAgentClient,
     HoloHash,
 } from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, SessionPlus, UpdateSessionInput } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, Relation, SessionPlus, UpdateSessionInput, FeedElem } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
@@ -40,6 +40,17 @@ export class EmergenceClient {
 
   getRelations(hash: HoloHash) : Promise<Array<Relation>> {
     return this.callZome('get_relations', hash)
+  }
+
+  async getFeed() : Promise<Array<FeedElem>> {
+    const relations: Array<Relation> = await this.callZome('get_feed', {filter: 0})
+    return relations.map(r => {return {
+        author: r.src,
+        about: r.dst,
+        type: parseInt(r.content.path.split(".")[1]),
+        detail: JSON.parse(r.content.data)
+    }});
+
   }
 
   async createTimeWindow(timeWindow: TimeWindow) : Promise<ActionHash> {

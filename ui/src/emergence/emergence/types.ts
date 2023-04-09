@@ -121,10 +121,21 @@ export enum FeedType {
    SessionUpdate,
    SpaceNew,
    SpaceUpdate,
+   SlotSession,
 }
 
 export interface FeedElem {
   author: AgentPubKey,
   type: FeedType,
   detail: any,
+}
+
+export const getTypeName = (type: FeedType) : string  => {
+  switch(type) {
+    case FeedType.SessionNew: return "New Session"
+    case FeedType.SessionUpdate: return "Update Session"
+    case FeedType.SpaceNew: return "New Space"
+    case FeedType.SpaceUpdate: return "Update Space"
+    case FeedType.SlotSession: return "Scheduled Session"
+  }
 }
