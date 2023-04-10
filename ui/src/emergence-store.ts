@@ -13,7 +13,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { get, writable, type Writable } from 'svelte/store';
 import type { EntryRecord } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual } from './emergence/emergence/types';
 
 TimeAgo.addDefaultLocale(en)
 
@@ -109,8 +109,12 @@ export class EmergenceStore {
     this.timeWindows.update((n) => {return timeWindows} )
   }
 
-  async createSession(title: string, amenities: number): Promise<EntryRecord<Session>> {
+  async createSession(title: string, amenities: number, slot: Slot|undefined): Promise<EntryRecord<Session>> {
     const record = await this.client.createSession(title, amenities)
+    if (slot) {
+        await this.slot(record.actionHash, slot)
+    }
+  
     this.client.createRelations([
         {   src: record.actionHash, // should be agent key
             dst: record.actionHash,
@@ -126,39 +130,65 @@ export class EmergenceStore {
   }
 
 
-  async updateSession(sessionHash: ActionHash, title: string, amenities: number): Promise<EntryRecord<Session>> {
+  async updateSession(sessionHash: ActionHash, props:any): Promise<EntryRecord<Session>> {
     const sessionIdx = this.getSessionIdx(sessionHash)
     if (sessionIdx >= 0) {
         const session = get(this.sessions)[sessionIdx]
+        const sessionEntry = session.record.entry
+
+        const changes = []
         const update: UpdateSessionInput = { 
             original_session_hash: session.original_hash,
             previous_session_hash: session.record.record.signed_action.hashed.hash,
-            updated_title: title!,
-            updated_amenities: amenities,
+            updated_title: sessionEntry.title,
+            updated_amenities: sessionEntry.amenities,
         };
-        const record = await this.client.updateSession(update)
-        const sessionEntry = session.record.entry
-        let changes = []
-        if (sessionEntry.title != title) {
-            changes.push(`title -> ${title}`)
+
+        if (props.hasOwnProperty("title")) {
+            if (sessionEntry.title != props.title) {
+                update.updated_title = props.title
+                changes.push(`title -> ${props.title}`)
+            }
         }
-        if (sessionEntry.amenities != amenities) {
-            changes.push(`amenities`)
+        if (props.hasOwnProperty("amenities")) {
+            if (sessionEntry.amenities != props.amenities) {
+                update.updated_amenities = props.amenities
+                changes.push(`amenities ${props.amenities}`)
+            }
         }
-        this.client.createRelations([
-            {   src: record.actionHash, // should be agent key
-                dst: record.actionHash,
-                content:  {
-                    path: `feed.${FeedType.SessionUpdate}`,
-                    data: JSON.stringify({title: sessionEntry.title, changes})
+        let doSlot = false
+        if (props.hasOwnProperty("slot")) {
+            const slot = this.getSessionSlot(session)
+            if (!slotEqual(slot, props.slot)) {
+                changes.push(`slot`)
+                doSlot = true
+            }
+        }
+        if (changes.length > 0) {
+            const record = await this.client.updateSession(update)
+            this.client.createRelations([
+                {   src: record.actionHash, // should be agent key
+                    dst: record.actionHash,
+                    content:  {
+                        path: `feed.${FeedType.SessionUpdate}`,
+                        data: JSON.stringify({title: sessionEntry.title, changes})
+                    }
+                },
+            ])
+            if (doSlot) {
+                if (props.slot !== undefined) {
+                    await this.slot(session.original_hash, props.slot)
                 }
-            },
-        ])
-        this.sessions.update((sessions) => {
-            sessions[sessionIdx].record = record
-            return sessions
-        })
-        return record
+            }
+
+            this.sessions.update((sessions) => {
+                sessions[sessionIdx].record = record
+                return sessions
+            })
+            return record
+        } else {
+            console.log("No changes detected ignoring...")
+        }
     } else {
         throw new Error(`could not find session`)
     }
@@ -225,7 +255,6 @@ export class EmergenceStore {
                 name,description,amenities
             }
         }
-        const record = await this.client.updateSpace(updatedSpace)
         const spaceEntry = space.record.entry
         let changes = []
         if (spaceEntry.name != name) {
@@ -235,22 +264,28 @@ export class EmergenceStore {
             changes.push(`description`)
         }
         if (spaceEntry.amenities != amenities) {
-            changes.push(`amenities`)
+            changes.push(`amenities ${amenities}`)
         }
-        this.client.createRelations([
-            {   src: record.actionHash, // should be agent key
-                dst: record.actionHash,
-                content:  {
-                    path: `feed.${FeedType.SpaceUpdate}`,
-                    data: JSON.stringify({name: spaceEntry.name, changes})
-                }
-            },
-        ])
-        this.spaces.update((spaces) => {
-            spaces[idx].record = record
-            return spaces
-        })
-        return record
+        if (changes.length > 0) {
+            const record = await this.client.updateSpace(updatedSpace)
+            this.client.createRelations([
+                {   src: record.actionHash, // should be agent key
+                    dst: record.actionHash,
+                    content:  {
+                        path: `feed.${FeedType.SpaceUpdate}`,
+                        data: JSON.stringify({name: spaceEntry.name, changes})
+                    }
+                },
+            ])
+            this.spaces.update((spaces) => {
+                spaces[idx].record = record
+                return spaces
+            })
+            return record
+        }
+        else {
+            console.log("No changes detected ignoring...")
+        }
     } else {
         throw new Error(`could not find space`)
     }

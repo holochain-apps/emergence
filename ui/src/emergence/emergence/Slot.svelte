@@ -21,14 +21,21 @@
 
   $: spaces = store.spaces
   $: windows = store.timeWindows
-  $: selectedSpace, selectedWindow, 
+  $: selectedSpace, selectedWindow, slot
+  $: slot && updateSelects()
 
   onMount(() => {
-    if (slot) {
-      spaceSelect.value = encodeHashToBase64(slot.space)
-      windowSelect.value = JSON.stringify(slot.window)
-    }
   });
+
+  const updateSelects = () => {
+    if (slot) {
+      selectedSpace= spaceSelect.value = encodeHashToBase64(slot.space)
+      selectedWindow= windowSelect.value = JSON.stringify(slot.window)
+    } else {
+      selectedSpace= spaceSelect.value = ""
+      selectedWindow= windowSelect.value = ""
+    }
+  }
 
   const doSelectSpace = (s: string)=> {
     selectedSpace = s

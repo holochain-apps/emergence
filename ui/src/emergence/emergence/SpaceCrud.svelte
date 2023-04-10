@@ -2,7 +2,7 @@
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import type { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
 import { storeContext } from '../../contexts';
-import { Amenities, type Info, type Space } from './types';
+import { Amenities, type Info, type Space, setAmenity } from './types';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
@@ -40,7 +40,11 @@ onMount(() => {
 async function updateSpace() {
   if (space) {
     const updateRecord = await store.updateSpace(space.original_hash, name!, description, amenities)
-    dispatch('space-updated', { actionHash: updateRecord.actionHash });
+    if (updateRecord) {
+      dispatch('space-updated', { actionHash: updateRecord.actionHash });
+    } else {
+      dispatch('edit-canceled')
+    }
   }
 }
 
@@ -51,19 +55,11 @@ async function createSpace() {
     name = ""
     description = ""
     amenities = 0
-    store.fetchSpaces()
     dispatch('space-created', { space: record });
   } catch (e) {
+    console.log("CREATE SPACE ERROR", e)
     errorSnackbar.labelText = `Error creating the space: ${e.data.data}`;
     errorSnackbar.show();
-  }
-}
-
-const setAmenity = (i:number, value:boolean) => {
-  if (value) {
-    amenities |= 1 << i
-  } else {
-    amenities &= ~(1 << i)
   }
 }
 
@@ -100,7 +96,7 @@ const setAmenity = (i:number, value:boolean) => {
       <sl-checkbox 
         bind:this={amenityElems[i]}
         checked={(amenities >> i)&1}
-        on:sl-change={e => { setAmenity(i, e.target.checked)} }
+        on:sl-change={e => { amenities = setAmenity(amenities, i, e.target.checked)} }
       >{amenity}</sl-checkbox>
     {/each}
   </div>

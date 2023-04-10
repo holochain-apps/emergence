@@ -7,9 +7,7 @@ import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import { timeWindowDurationToStr, timeWindowStartToStr,  type UpdateSessionInput, Amenities, type Info, type Session, type Slot } from './types';
-import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
-import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
+import {  Amenities, setAmenity, type Info, type Session, type Slot } from './types';
 import SlotSelect from './Slot.svelte';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 
@@ -30,8 +28,6 @@ let errorSnackbar: Snackbar;
 
 let slot: Slot | undefined
 let slotValid: boolean = true
-let spaceSelect: SlSelect;
-let windowSelect: SlSelect;
 
 $: title, amenities, slot, slotValid;
 $: isSessionValid = title !== '' && slotValid;
@@ -46,37 +42,27 @@ onMount(() => {
 
 async function updateSession() {
   if (session) {
-    const updateRecord = await store.updateSession(session.original_hash, title!, amenities)
-    if (slot) {
-      await store.slot(session.original_hash, slot)
+    const updateRecord = await store.updateSession(session.original_hash, {title, amenities, slot})
+    if (updateRecord) {
+      dispatch('session-updated', { actionHash: updateRecord.actionHash });
+    } else {
+      dispatch('edit-canceled')
     }
-    dispatch('session-updated', { actionHash: updateRecord.actionHash });
   }
 }
 
 async function createSession() {    
   try {
-    const record = await store.createSession(title!, amenities)
-    if (slot) {
-      await store.slot(session.original_hash, slot)
-    }
+    const record = await store.createSession(title!, amenities, slot)
 
     title = ""
-    spaceSelect.value = ""
-    windowSelect.value = ""
-
+    amenities = 0
+    slot = undefined
     dispatch('session-created', { session: record });
   } catch (e) {
+    console.log("CREATE SESSION ERROR", e)
     errorSnackbar.labelText = `Error creating the session: ${e.data.data}`;
     errorSnackbar.show();
-  }
-}
-
-const setAmenity = (i:number, value:boolean) => {
-  if (value) {
-    amenities |= 1 << i
-  } else {
-    amenities &= ~(1 << i)
   }
 }
 
@@ -85,7 +71,6 @@ const setAmenity = (i:number, value:boolean) => {
 </mwc-snackbar>
 
 <div style="display: flex; flex-direction: column">
-  
   {#if session}
     <span style="font-size: 18px">Edit Session</span>
     Key: {session.record.entry.key}
@@ -100,12 +85,12 @@ const setAmenity = (i:number, value:boolean) => {
   ></sl-input>
   </div>
   <div style="margin-bottom: 16px">
-    <div style="font-size: 16px">Required Amenities </div>
+    <div style="font-size: 16px" on:click={()=>amenities = 0}>Required Amenities </div>
     {#each Amenities as amenity, i}
       <sl-checkbox 
         bind:this={amenityElems[i]}
-        checked={session && (amenities >> i)&1}
-        on:sl-change={e => { setAmenity(i, e.target.checked)} }
+        checked={(amenities >> i)&1}
+        on:sl-change={e => { amenities = setAmenity(amenities, i, e.target.checked)} }
       >{amenity}</sl-checkbox>
     {/each}
   </div>

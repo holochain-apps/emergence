@@ -24,7 +24,7 @@ const slotSummary = (detail: any) => {
       {feedElem.detail}
     {/if}
     {#if feedElem.type === FeedType.SessionUpdate}
-      {feedElem.detail.title}  get_slot_changes: {feedElem.detail.changes.join("; ")}
+      {feedElem.detail.title}  changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SessionDelete}
       {feedElem.detail}

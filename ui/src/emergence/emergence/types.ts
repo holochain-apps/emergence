@@ -1,18 +1,19 @@
 import type { EntryRecord } from '@holochain-open-dev/utils';
-import type { 
-  Record, 
-  ActionHash,
-  DnaHash,
-  SignedActionHashed,
-  EntryHash, 
-  AgentPubKey,
-  Create,
-  Update,
-  Delete,
-  CreateLink,
-  DeleteLink,
-  Timestamp,
-  HoloHash
+import { 
+  type Record, 
+  type ActionHash,
+  type DnaHash,
+  type SignedActionHashed,
+  type EntryHash, 
+  type AgentPubKey,
+  type Create,
+  type Update,
+  type Delete,
+  type CreateLink,
+  type DeleteLink,
+  type Timestamp,
+  type HoloHash,
+  encodeHashToBase64
 } from '@holochain/client';
 
 export type EmergenceSignal = {
@@ -81,6 +82,14 @@ export interface Slot {
   window: TimeWindow
 }
 
+export const slotEqual = (slota: Slot| undefined, slotb: Slot|undefined) : boolean => {
+  if (slota === undefined && slotb !== undefined) return false
+  if (slotb === undefined && slota !== undefined) return false
+  if (slota === undefined && slotb === undefined) return true
+  return encodeHashToBase64(slota.space) === encodeHashToBase64(slotb.space)  &&
+    JSON.stringify(slota.window) === JSON.stringify(slotb.window)
+}
+
 export interface TimeWindow { 
   start: Timestamp;
   length: number;
@@ -122,6 +131,15 @@ export const amenitiesList = (bits: number) : Array<string> => {
     bits = bits >> 1
   }
   return a
+}
+
+export const setAmenity = (amenities:number, i:number, value:boolean) : number => {
+  if (value) {
+    amenities |= 1 << i
+  } else {
+    amenities &= ~(1 << i)
+  }
+  return amenities
 }
 
 export enum FeedType {
