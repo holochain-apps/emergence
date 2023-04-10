@@ -2,7 +2,7 @@
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import type { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
 import { storeContext } from '../../contexts';
-import { Amenities, type Space } from './types';
+import { Amenities, type Info, type Space } from './types';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
@@ -18,6 +18,7 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
 
 const dispatch = createEventDispatcher();
+export let space: Info<Space>|undefined = undefined;  // set this if update
 
 let name: string = '';
 let description: string = '';
@@ -29,7 +30,19 @@ $: name, description, amenities;
 $: isSpaceValid = true && name !== '' && description !== '';
 
 onMount(() => {
+  if (space) {
+    name = space.record.entry.name
+    amenities = space.record.entry.amenities
+    description = space.record.entry.description
+  }
 });
+
+async function updateSpace() {
+  if (space) {
+    const updateRecord = await store.updateSpace(space.original_hash, name!, description, amenities)
+    dispatch('space-updated', { actionHash: updateRecord.actionHash });
+  }
+}
 
 async function createSpace() {  
   try {
@@ -58,7 +71,11 @@ const setAmenity = (i:number, value:boolean) => {
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 <div style="display: flex; flex-direction: column">
-  <span style="font-size: 18px">Create Space</span>
+  {#if space}
+    <span style="font-size: 18px">Edit Space</span>
+  {:else}
+    <span style="font-size: 18px">Create Space</span>
+  {/if}
   
 
   <div style="margin-bottom: 16px">
@@ -87,10 +104,24 @@ const setAmenity = (i:number, value:boolean) => {
       >{amenity}</sl-checkbox>
     {/each}
   </div>
-
-  <sl-button 
-  on:click={() => createSpace()}
-  disabled={!isSpaceValid}
-  variant=primary>Create Space</sl-button>
+  {#if space}
+    <div style="display: flex; flex-direction: row">
+      <sl-button
+      label="Cancel"
+      on:click={() => dispatch('edit-canceled')}
+      style="flex: 1; margin-right: 16px"
+      >Cancel</sl-button>
+      <sl-button 
+      style="flex: 1;"
+      on:click={() => updateSpace()}
+      disabled={!isSpaceValid}
+      variant=primary>Save</sl-button>
+    </div>
+  {:else}
+    <sl-button 
+    on:click={() => createSpace()}
+    disabled={!isSpaceValid}
+    variant=primary>Create Space</sl-button>
+  {/if}
 
 </div>

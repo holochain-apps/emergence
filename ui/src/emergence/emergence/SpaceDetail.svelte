@@ -3,65 +3,39 @@ import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { decode } from '@msgpack/msgpack';
 import type { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
-import { clientContext } from '../../contexts';
-import { amenitiesList, type Space } from './types';
+import { clientContext, storeContext } from '../../contexts';
+import { amenitiesList, timeWindowDurationToStr, type Info, type Relation, type Space, timeWindowStartToStr } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import Fa from 'svelte-fa'
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
-import EditSpace from './EditSpace.svelte'; 
+import SpaceCrud from './SpaceCrud.svelte'; 
   import type { EmergenceStore } from '../../emergence-store';
 
 const dispatch = createEventDispatcher();
 
-export let spaceHash: ActionHash;
+export let space: Info<Space>;
 
 let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 let loading = true;
 let error: any = undefined;
-
-let record: Record | undefined;
-let space: Space | undefined;
 
 let editing = false;
 
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, record, space;
+$: editing,  error, loading, space;
 
 onMount(async () => {
-  if (spaceHash === undefined) {
-    throw new Error(`The spaceHash input is required for the SpaceDetail element`);
+  if (space === undefined) {
+    throw new Error(`The space input is required for the SpaceDetail element`);
   }
-  await fetchSpace();
+  loading=false
 });
-
-async function fetchSpace() {
-  loading = true;
-  error = undefined;
-  record = undefined;
-  space = undefined;
-  
-  try {
-    record = await client.callZome({
-      cap_secret: null,
-      role_name: 'emergence',
-      zome_name: 'emergence',
-      fn_name: 'get_space',
-      payload: spaceHash,
-    });
-    if (record) {
-      space = decode((record.entry as any).Present.entry) as Space;
-    }
-  } catch (e) {
-    error = e;
-  }
-
-  loading = false;
-}
 
 async function deleteSpace() {
   try {
@@ -70,12 +44,26 @@ async function deleteSpace() {
       role_name: 'emergence',
       zome_name: 'emergence',
       fn_name: 'delete_space',
-      payload: spaceHash,
+      payload: space.record.actionHash,
     });
-    dispatch('space-deleted', { spaceHash: spaceHash });
+    dispatch('space-deleted', { spaceHash: space.record.actionHash });
   } catch (e: any) {
     errorSnackbar.labelText = `Error deleting the space: ${e.data.data}`;
     errorSnackbar.show();
+  }
+}
+const relationSummary = (relation: Relation) : string => {
+  switch (relation.content.path) {
+    case "space.sessions":
+      const session = store.getSession(relation.dst)
+      if (session) {
+        const slot = store.getSessionSlot(session)
+        return `${session.record.entry.title} ${timeWindowStartToStr(slot.window)} for ${timeWindowDurationToStr(slot.window)}`
+      }
+      return "unknown session"
+    default: {
+      return JSON.stringify(relation.content)
+    }
   }
 }
 </script>
@@ -91,15 +79,14 @@ async function deleteSpace() {
 {:else if error}
 <span>Error fetching the space: {error.data.data}</span>
 {:else if editing}
-<EditSpace
-  originalSpaceHash={ spaceHash}
-  currentRecord={record}
+<SpaceCrud
+  space={ space }
   on:space-updated={async () => {
     editing = false;
-    await fetchSpace()
+//    await fetchSpace()
   } }
   on:edit-canceled={() => { editing = false; } }
-></EditSpace>
+></SpaceCrud>
 {:else}
 
 <div style="display: flex; flex-direction: column">
@@ -115,19 +102,28 @@ async function deleteSpace() {
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Name:</strong></span>
-    <span style="white-space: pre-line">{ space.name }</span>
+    <span style="white-space: pre-line">{ space.record.entry.name }</span>
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Description:</strong></span>
-    <span style="white-space: pre-line">{ space.description }</span>
+    <span style="white-space: pre-line">{ space.record.entry.description }</span>
   </div>
   
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Available Amenities:</strong></span>
     <span style="white-space: pre-line">
-      {amenitiesList(space.amenities).join(", ")}
+      {amenitiesList(space.record.entry.amenities).join(", ")}
     </span>
+  </div>
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Secheduled Sessions:</strong></span>
+
+    <ul>
+      {#each space.relations as relation}
+        <li>{relationSummary(relation)}</li>
+      {/each}
+    </ul>
   </div>
 
 </div>

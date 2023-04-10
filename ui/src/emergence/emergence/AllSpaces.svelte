@@ -35,7 +35,7 @@ onMount(async () => {
 <div style="display: flex; flex-direction: column">
   {#each $spaces as space}
     <div style="margin-bottom: 8px; width:500px; background:lightgray">
-      <SpaceDetail spaceHash={space.record.actionHash}  on:space-deleted={() => store.fetchSpaces()}></SpaceDetail>
+      <SpaceDetail space={space}  on:space-deleted={() => store.fetchSpaces()}></SpaceDetail>
     </div>
   {/each}
 </div>

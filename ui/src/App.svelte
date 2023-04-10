@@ -7,7 +7,7 @@
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
   import SessionCrud from './emergence/emergence/SessionCrud.svelte';
-  import CreateSpace from './emergence/emergence/CreateSpace.svelte';
+  import SpaceCrud from './emergence/emergence/SpaceCrud.svelte';
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
@@ -84,7 +84,7 @@
       <div class="pane">
         <h3>Spaces List</h3>
         <AllSpaces></AllSpaces>
-        <div style="width:300px; border:solid 1px;padding:20px"><CreateSpace></CreateSpace></div>
+        <div style="width:300px; border:solid 1px;padding:20px"><SpaceCrud></SpaceCrud></div>
       </div>
       {/if}
       {#if pane=="you"}
