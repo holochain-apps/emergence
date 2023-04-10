@@ -104,7 +104,7 @@ async function deleteSession() {
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     {#if slot}
-    Scheduled in {store.getSpace(slot.space) ? store.getSpace(slot.space).entry.name : "Unknown"} on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
+    Scheduled in {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"} on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
     {/if}
   </div>
 

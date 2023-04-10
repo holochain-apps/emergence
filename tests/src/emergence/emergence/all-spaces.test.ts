@@ -33,6 +33,7 @@ test('create a Space and get all spaces', async () => {
 
     // Alice creates a Space
     const createdRecord: Record = await createSpace(alice.cells[0]);
+    const originalActionHash = createdRecord.signed_action.hashed.hash
     assert.ok(createdRecord);
     
     await pause(1200);
@@ -44,7 +45,9 @@ test('create a Space and get all spaces', async () => {
       payload: null
     });
     assert.equal(collectionOutput.length, 1);
-    assert.deepEqual(createdRecord, collectionOutput[0]);    
+    const spaceInfo: any = {original_hash: originalActionHash, record:createdRecord, relations:[]}
+
+    assert.deepEqual(spaceInfo, collectionOutput[0]);    
   });
 });
 

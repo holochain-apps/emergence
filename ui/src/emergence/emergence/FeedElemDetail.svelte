@@ -31,7 +31,7 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     {feedElem.detail.name}  changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SlotSession}
-       into {store.getSpace(decodeHashFromBase64(feedElem.detail.space)).entry.name} for {timeWindowStartToStr(feedElem.detail.window)} @ {timeWindowDurationToStr(feedElem.detail.window)} 
+       into {store.getSpace(decodeHashFromBase64(feedElem.detail.space)).record.entry.name} for {timeWindowStartToStr(feedElem.detail.window)} @ {timeWindowDurationToStr(feedElem.detail.window)} 
     {/if}
 
     by <div style="margin:0 10px 0 10px; border:solid 1px; border-radius:50%; width:40px; height:40px;     display: flex;

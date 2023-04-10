@@ -21,7 +21,7 @@ export class EmergenceStore {
   timeAgo = new TimeAgo('en-US')
   timeWindows: Writable<Array<TimeWindow>> = writable([])
   sessions: Writable<Array<Info<Session>>> = writable([])
-  spaces: Writable<Array<EntryRecord<Space>>> = writable([])
+  spaces: Writable<Array<Info<Space>>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
   constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {}
   
@@ -40,10 +40,10 @@ export class EmergenceStore {
   getSpaceIdx(spaceHash: ActionHash) : number {
     const b64 = encodeHashToBase64(spaceHash)
     const spaces = get(this.spaces)
-    return spaces.findIndex((s)=> encodeHashToBase64(s.actionHash) === b64)
+    return spaces.findIndex((s)=> encodeHashToBase64(s.original_hash) === b64)
   }
 
-  getSpace(spaceHash: ActionHash) : EntryRecord<Space> | undefined {
+  getSpace(spaceHash: ActionHash) : Info<Space> | undefined {
     const spaceIdx = this.getSpaceIdx(spaceHash)
     if (spaceIdx == -1) return undefined
     return get(this.spaces)[spaceIdx]
@@ -166,13 +166,13 @@ export class EmergenceStore {
 
         const updatedSpace: UpdateSpaceInput = {
             original_space_hash: spaceHash,
-            previous_space_hash: space.record.signed_action.hashed.hash,
+            previous_space_hash: space.record.actionHash,
             updated_space: {
                 name,description,amenities
             }
         }
         const record = await this.client.updateSpace(updatedSpace)
-        const spaceEntry = space.entry
+        const spaceEntry = space.record.entry
         let changes = []
         if (spaceEntry.name != name) {
             changes.push(`name -> ${name}`)
@@ -193,7 +193,7 @@ export class EmergenceStore {
             },
         ])
         this.spaces.update((spaces) => {
-            spaces[idx] = record
+            spaces[idx].record = record
             return spaces
         })
         return record

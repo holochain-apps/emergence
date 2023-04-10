@@ -14,7 +14,6 @@ pub struct SessionInfo{
     pub relations: Vec<Relation>,
 }
 
-
 #[hdk_extern]
 pub fn get_all_sessions(_: ()) -> ExternResult<Vec<SessionInfo>> {
     let path = Path::from("all_sessions");

@@ -126,7 +126,7 @@ const setAmenity = (i:number, value:boolean) => {
     >
     <sl-option value="">No Space Selected</sl-option>
     {#each $spaces as space}
-    <sl-option value={encodeHashToBase64(space.actionHash)}>{space.entry.name}</sl-option>
+    <sl-option value={encodeHashToBase64(space.record.actionHash)}>{space.record.entry.name}</sl-option>
     {/each}
     </sl-select>
   </div>

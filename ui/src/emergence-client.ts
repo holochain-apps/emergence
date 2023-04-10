@@ -88,11 +88,11 @@ export class EmergenceClient {
   async getSessions() : Promise<Array<Info<Session>>> {
     const sessions = await this.callZome('get_all_sessions',null)
     return sessions.map(r => {
-        const session: Info<Session> = {
+        const info: Info<Session> = {
         original_hash: r.original_hash,
         record: new EntryRecord(r.record), 
         relations: r.relations}
-        return session
+        return info
     });
   }
 
@@ -108,9 +108,15 @@ export class EmergenceClient {
     return new EntryRecord(await this.callZome('update_space', update))
   }
 
-  async getSpaces() : Promise<Array<EntryRecord<Space>>> {
-    const records = await this.callZome('get_all_spaces',null)
-    return records.map(r => new EntryRecord(r));
+  async getSpaces() : Promise<Array<Info<Space>>> {
+    const spaces = await this.callZome('get_all_spaces',null)
+    return spaces.map(r => {
+        const info: Info<Space> = {
+        original_hash: r.original_hash,
+        record: new EntryRecord(r.record), 
+        relations: r.relations}
+        return info
+    });
   }
 
   private callZome(fn_name: string, payload: any) {
