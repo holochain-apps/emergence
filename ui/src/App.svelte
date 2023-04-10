@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faTicket, faUser, faGear, faRss, faCalendar } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faTicket, faUser, faGear, faRss, faCalendar, faPlusCircle, faPlus } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/elements/profile-prompt.js";
@@ -31,8 +31,10 @@
   let loading = true;
   let pane = "sessions"
   let profilesStore: ProfilesStore | undefined
+  let creatingSpace = false
+  let creatingSession = false
 
-  $: client, store, loading;
+  $: client, store, loading, creatingSession, creatingSpace;
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
@@ -77,15 +79,32 @@
       <div class="pane">
         <h3>Sessions List</h3>
         <AllSessions></AllSessions>
-        <div style="width:300px; border:solid 1px;padding:20px">
-          <SessionCrud></SessionCrud></div>
+        <sl-button on:click={() => {creatingSession = true; } } circle>
+          <Fa icon={faPlus} />
+        </sl-button>
+
+        {#if creatingSession}
+          <div class="create"><SessionCrud
+            on:session-created={() => {creatingSession = false;} }
+            on:edit-canceled={() => { creatingSession = false; } }
+            ></SessionCrud></div>
+        #{/if}
       </div>
       {/if}
       {#if pane=="spaces"}
       <div class="pane">
         <h3>Spaces List</h3>
         <AllSpaces></AllSpaces>
-        <div style="width:300px; border:solid 1px;padding:20px"><SpaceCrud></SpaceCrud></div>
+        <sl-button on:click={() => {creatingSpace = true; } } circle>
+          <Fa icon={faPlus} />
+        </sl-button>
+    
+        {#if creatingSpace}
+          <div class="create"><SpaceCrud
+            on:space-created={() => {creatingSpace = false;} }
+            on:edit-canceled={() => { creatingSpace = false; } }
+            ></SpaceCrud></div>
+        {/if}
       </div>
       {/if}
       {#if pane=="you"}
@@ -174,6 +193,18 @@
     padding: 1em;
     max-width: 240px;
     margin: 0 auto;
+  }
+  .pane {
+    position: relative;
+  }
+  .create {
+    background-color: white;
+    padding: 10px;
+    position: absolute;
+    top: 5px;
+
+    border: solid 1px;
+    display: flex; flex-direction: column
   }
   .nav {
     display: flex; flex-direction: row; flex: 1;

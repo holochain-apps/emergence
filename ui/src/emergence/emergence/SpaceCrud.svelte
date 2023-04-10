@@ -114,10 +114,17 @@ async function createSpace() {
       variant=primary>Save</sl-button>
     </div>
   {:else}
+  <div style="display: flex; flex-direction: row">
+    <sl-button
+    label="Cancel"
+    on:click={() => dispatch('edit-canceled')}
+    style="flex: 1; margin-right: 16px"
+    >Cancel</sl-button>
     <sl-button 
     on:click={() => createSpace()}
     disabled={!isSpaceValid}
     variant=primary>Create Space</sl-button>
+    </div>
   {/if}
 
 </div>
