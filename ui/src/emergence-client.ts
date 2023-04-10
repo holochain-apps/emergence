@@ -84,6 +84,9 @@ export class EmergenceClient {
     return new EntryRecord(await this.callZome('update_session', update))
   }
 
+  deleteSession(actionHash: ActionHash) {
+    return this.callZome('delete_session', actionHash)
+  }
 
   async getSessions() : Promise<Array<Info<Session>>> {
     const sessions = await this.callZome('get_all_sessions',null)
@@ -106,6 +109,10 @@ export class EmergenceClient {
 
   async updateSpace(update: UpdateSpaceInput) : Promise<EntryRecord<Space>> {
     return new EntryRecord(await this.callZome('update_space', update))
+  }
+
+  deleteSpace(actionHash: ActionHash) {
+    return this.callZome('delete_space', actionHash)
   }
 
   async getSpaces() : Promise<Array<Info<Space>>> {

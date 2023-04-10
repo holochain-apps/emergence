@@ -1,8 +1,7 @@
 <script lang="ts">
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import type { AppAgentClient } from '@holochain/client';
-import { clientContext, storeContext } from '../../contexts';
+import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
 import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
@@ -18,7 +17,6 @@ const dispatch = createEventDispatcher();
 
 export let session: Info<Session>;
 
-let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 let loading = false;
@@ -30,7 +28,6 @@ let errorSnackbar: Snackbar;
 let slot:Slot|undefined = undefined
 
 $: editing,  error, loading, session, slot;
-$: spaces = store.spaces
 
 onMount(async () => {
   if (session === undefined) {
@@ -41,14 +38,8 @@ onMount(async () => {
 
 async function deleteSession() {
   try {
-    await client.callZome({
-      cap_secret: null,
-      role_name: 'emergence',
-      zome_name: 'emergence',
-      fn_name: 'delete_session',
-      payload: session.record.actionHash,
-    });
-    dispatch('session-deleted', { sessionHash: session.record.actionHash });
+    await store.deleteSession(session.original_hash)
+    dispatch('session-deleted', { sessionHash: session.original_hash });
   } catch (e: any) {
     errorSnackbar.labelText = `Error deleting the session: ${e.data.data}`;
     errorSnackbar.show();

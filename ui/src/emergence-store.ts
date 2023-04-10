@@ -62,31 +62,36 @@ export class EmergenceStore {
     return undefined
   }
 
-  async slot(session: ActionHash, space:ActionHash, window: TimeWindow) {
-    this.client.createRelations([
-        {   src: session,
-            dst: space,
-            content:  {
-                path: "session.space",
-                data: JSON.stringify(window)
-            }
-        },
-        {   src: space,
-            dst: session,
-            content:  {
-                path: "space.sessions",
-                data: JSON.stringify(window)
-            }
-        },
-        {   src: session, // should be agent key
-            dst: session,
-            content:  {
-                path: `feed.${FeedType.SlotSession}`,
-                data: JSON.stringify({space:encodeHashToBase64(space),window})
-            }
-        },
-    ]
-    )
+  async slot(session: ActionHash, spaceHash:ActionHash, window: TimeWindow) {
+    const space = this.getSpace(spaceHash)
+    if (space) {
+        this.client.createRelations([
+            {   src: session,
+                dst: spaceHash,
+                content:  {
+                    path: "session.space",
+                    data: JSON.stringify(window)
+                }
+            },
+            {   src: spaceHash,
+                dst: session,
+                content:  {
+                    path: "space.sessions",
+                    data: JSON.stringify(window)
+                }
+            },
+            {   src: session, // should be agent key
+                dst: session,
+                content:  {
+                    path: `feed.${FeedType.SlotSession}`,
+                    data: JSON.stringify({space:space.record.entry.name, window})
+                }
+            },
+        ]
+        )
+    } else {
+        console.log("Couldn't find space", encodeHashToBase64(spaceHash))
+    }
   }
 
   async createTimeWindow(start: Date, length: number) : Promise<ActionHash> {
@@ -159,6 +164,55 @@ export class EmergenceStore {
     }
   }
 
+  async deleteSession(sessionHash: ActionHash) {
+    const idx = this.getSessionIdx(sessionHash)
+    if (idx >= 0) {
+        const session = get(this.sessions)[idx]
+        await this.client.deleteSession(session.record.actionHash)
+        this.sessions.update((sessions) => {
+            sessions.splice(idx, 1);
+            return sessions
+        })
+        this.client.createRelations([
+            {   src: session.original_hash, // should be agent key
+                dst: session.original_hash,
+                content:  {
+                    path: `feed.${FeedType.SessionDelete}`,
+                    data: JSON.stringify(session.record.entry.title)
+                }
+            },
+        ])
+    }
+  }
+
+
+  async fetchSessions() {
+    try {
+        this.fetchSpaces()
+        this.fetchTimeWindows()
+        const sessions = await this.client.getSessions()
+        this.sessions.update((n) => {return sessions} )
+    }
+    catch (e) {
+        console.log("Error fetching sessions", e)
+    }
+  }
+
+  async createSpace(name: string, description: string, amenities: number): Promise<EntryRecord<Space>> {
+    const record = await this.client.createSpace(name, description, amenities)
+    this.client.createRelations([
+        {   src: record.actionHash, // should be agent key
+            dst: record.actionHash,
+            content:  {
+                path: `feed.${FeedType.SpaceNew}`,
+                data: JSON.stringify(name)
+            }
+        },
+    ])
+    this.fetchSpaces()
+    return record
+  }
+
   async updateSpace(spaceHash: ActionHash, name: string, description: string, amenities: number): Promise<EntryRecord<Space>> {
     const idx = this.getSpaceIdx(spaceHash)
     if (idx >= 0) {
@@ -202,31 +256,25 @@ export class EmergenceStore {
     }
   }
 
-  async fetchSessions() {
-    try {
-        this.fetchSpaces()
-        this.fetchTimeWindows()
-        const sessions = await this.client.getSessions()
-        this.sessions.update((n) => {return sessions} )
+  async deleteSpace(spaceHash: ActionHash) {
+    const idx = this.getSpaceIdx(spaceHash)
+    if (idx >= 0) {
+        const space = get(this.spaces)[idx]
+        await this.client.deleteSpace(space.record.actionHash)
+        this.spaces.update((spaces) => {
+            spaces.splice(idx, 1);
+            return spaces
+        })
+        this.client.createRelations([
+            {   src: space.original_hash, // should be agent key
+                dst: space.original_hash,
+                content:  {
+                    path: `feed.${FeedType.SpaceDelete}`,
+                    data: JSON.stringify(space.record.entry.name)
+                }
+            },
+        ])
     }
-    catch (e) {
-        console.log("Error fetching sessions", e)
-    }
-  }
-
-  async createSpace(name: string, description: string, amenities: number): Promise<EntryRecord<Space>> {
-    const record = await this.client.createSpace(name, description, amenities)
-    this.client.createRelations([
-        {   src: record.actionHash, // should be agent key
-            dst: record.actionHash,
-            content:  {
-                path: `feed.${FeedType.SpaceNew}`,
-                data: JSON.stringify(name)
-            }
-        },
-    ])
-    this.fetchSpaces()
-    return record
   }
 
   async fetchSpaces() {

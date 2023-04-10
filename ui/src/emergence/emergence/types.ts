@@ -127,8 +127,10 @@ export const amenitiesList = (bits: number) : Array<string> => {
 export enum FeedType {
    SessionNew = 1,
    SessionUpdate,
+   SessionDelete,
    SpaceNew,
    SpaceUpdate,
+   SpaceDelete,
    SlotSession,
 }
 
@@ -143,8 +145,11 @@ export const getTypeName = (type: FeedType) : string  => {
   switch(type) {
     case FeedType.SessionNew: return "New Session"
     case FeedType.SessionUpdate: return "Update Session"
+    case FeedType.SessionDelete: return "Delete Session"
     case FeedType.SpaceNew: return "New Space"
     case FeedType.SpaceUpdate: return "Update Space"
+    case FeedType.SpaceDelete: return "Delete Space"
     case FeedType.SlotSession: return "Scheduled Session"
   }
+  return "Unknown feed type"
 }

@@ -142,19 +142,18 @@ const setAmenity = (i:number, value:boolean) => {
     </sl-select>
   </div>
   {#if session}
-  <div style="display: flex; flex-direction: row">
-    <sl-button
-    label="Cancel"
-    on:click={() => dispatch('edit-canceled')}
-    style="flex: 1; margin-right: 16px"
-    >Cancel</sl-button>
-    <sl-button 
-    style="flex: 1;"
-    on:click={() => updateSession()}
-    disabled={!isSessionValid}
-    variant=primary>Save</sl-button>
-  </div>
-
+    <div style="display: flex; flex-direction: row">
+      <sl-button
+      label="Cancel"
+      on:click={() => dispatch('edit-canceled')}
+      style="flex: 1; margin-right: 16px"
+      >Cancel</sl-button>
+      <sl-button 
+      style="flex: 1;"
+      on:click={() => updateSession()}
+      disabled={!isSessionValid}
+      variant=primary>Save</sl-button>
+    </div>
   {:else}
     <sl-button 
     on:click={() => createSession()}

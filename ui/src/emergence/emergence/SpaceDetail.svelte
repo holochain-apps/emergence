@@ -1,9 +1,7 @@
 <script lang="ts">
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import { decode } from '@msgpack/msgpack';
-import type { Record, ActionHash, AppAgentClient, EntryHash, AgentPubKey, DnaHash } from '@holochain/client';
-import { clientContext, storeContext } from '../../contexts';
+import { storeContext } from '../../contexts';
 import { amenitiesList, timeWindowDurationToStr, type Info, type Relation, type Space, timeWindowStartToStr } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
@@ -12,13 +10,12 @@ import '@shoelace-style/shoelace/dist/components/button/button.js';
 import Fa from 'svelte-fa'
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import SpaceCrud from './SpaceCrud.svelte'; 
-  import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../emergence-store';
 
 const dispatch = createEventDispatcher();
 
 export let space: Info<Space>;
 
-let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 let loading = true;
@@ -39,19 +36,14 @@ onMount(async () => {
 
 async function deleteSpace() {
   try {
-    await client.callZome({
-      cap_secret: null,
-      role_name: 'emergence',
-      zome_name: 'emergence',
-      fn_name: 'delete_space',
-      payload: space.record.actionHash,
-    });
-    dispatch('space-deleted', { spaceHash: space.record.actionHash });
+    await store.deleteSpace(space.original_hash)
+    dispatch('space-deleted', { spaceHash: space.original_hash });
   } catch (e: any) {
     errorSnackbar.labelText = `Error deleting the space: ${e.data.data}`;
     errorSnackbar.show();
   }
 }
+
 const relationSummary = (relation: Relation) : string => {
   switch (relation.content.path) {
     case "space.sessions":
