@@ -4,6 +4,11 @@ use hdi::prelude::*;
 pub struct Session {
     pub key: String,
     pub title: String,
+    pub description: String,
+    pub leaders: Vec<AgentPubKey>,
+    pub smallest: u32,
+    pub largest: u32,
+    pub duration: u32,
     pub amenities: u32,
 }
 pub fn validate_create_session(

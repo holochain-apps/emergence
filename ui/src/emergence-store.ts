@@ -109,8 +109,8 @@ export class EmergenceStore {
     this.timeWindows.update((n) => {return timeWindows} )
   }
 
-  async createSession(title: string, amenities: number, slot: Slot|undefined): Promise<EntryRecord<Session>> {
-    const record = await this.client.createSession(title, amenities)
+  async createSession(title: string, description: string, leaders:Array<AgentPubKey>,  smallest: number, largest: number, duration: number, amenities: number, slot: Slot|undefined): Promise<EntryRecord<Session>> {
+    const record = await this.client.createSession(title, amenities, description, leaders, smallest, largest, duration)
     if (slot) {
         await this.slot(record.actionHash, slot)
     }
@@ -141,6 +141,11 @@ export class EmergenceStore {
             original_session_hash: session.original_hash,
             previous_session_hash: session.record.record.signed_action.hashed.hash,
             updated_title: sessionEntry.title,
+            updated_description: sessionEntry.description,
+            updated_leaders: sessionEntry.leaders,
+            updated_smallest: sessionEntry.smallest,
+            updated_largest: sessionEntry.largest,
+            updated_duration: sessionEntry.duration,
             updated_amenities: sessionEntry.amenities,
         };
 
@@ -148,6 +153,36 @@ export class EmergenceStore {
             if (sessionEntry.title != props.title) {
                 update.updated_title = props.title
                 changes.push(`title -> ${props.title}`)
+            }
+        }
+        if (props.hasOwnProperty("description")) {
+            if (sessionEntry.description != props.description) {
+                update.updated_description = props.description
+                changes.push(`description`)
+            }
+        }
+        if (props.hasOwnProperty("smallest")) {
+            if (sessionEntry.smallest != props.smallest) {
+                update.updated_smallest = props.smallest
+                changes.push(`smallest`)
+            }
+        }
+        if (props.hasOwnProperty("largest")) {
+            if (sessionEntry.largest != props.largest) {
+                update.updated_largest = props.largest
+                changes.push(`largest`)
+            }
+        }
+        if (props.hasOwnProperty("duration")) {
+            if (sessionEntry.duration != props.duration) {
+                update.updated_duration = props.duration
+                changes.push(`duration`)
+            }
+        }
+        if (props.hasOwnProperty("amenities")) {
+            if (sessionEntry.amenities != props.amenities) {
+                update.updated_amenities = props.amenities
+                changes.push(`amenities`)
             }
         }
         if (props.hasOwnProperty("amenities")) {

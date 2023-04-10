@@ -3,6 +3,7 @@
 import type {
     Action,
     ActionHash,
+    AgentPubKey,
     AppAgentCallZomeRequest,
     AppAgentClient,
     HoloHash,
@@ -70,11 +71,16 @@ export class EmergenceClient {
     return key
   }
   
-  async createSession(title: string, amenities: number) : Promise<EntryRecord<Session>> {
+  async createSession(title: string, amenities: number, description: string, leaders:Array<AgentPubKey>, smallest: number, largest: number, duration: number) : Promise<EntryRecord<Session>> {
     const sessionEntry: Session = { 
         key: this.genKey(),
-        title: title,
-        amenities: amenities,
+        title,
+        description,
+        leaders,
+        smallest,
+        largest,
+        duration,
+        amenities,
       };
     
     return new EntryRecord(await this.callZome('create_session', sessionEntry))

@@ -47,6 +47,11 @@ export type EntryTypes =
 export interface Session { 
   key: string;
   title: string;
+  description: string;
+  leaders: Array<AgentPubKey>,
+  smallest: number;
+  largest: number;
+  duration: number;
   amenities: number;
 }
 
@@ -59,7 +64,12 @@ export interface Info<T> {
 export interface UpdateSessionInput {
   original_session_hash: ActionHash,
   previous_session_hash: ActionHash,
-  updated_title: String,
+  updated_title: string,
+  updated_description: string;
+  updated_leaders: Array<AgentPubKey>,
+  updated_smallest: number;
+  updated_largest: number;
+  updated_duration: number;
   updated_amenities: number,
 }
 
@@ -101,7 +111,11 @@ export const timeWindowStartToStr = (window: TimeWindow) : string => {
 }
 
 export const timeWindowDurationToStr = (window: TimeWindow) : string => {
-  return window.length >=60 ? `${window.length/60} hour${window.length>60?'s':''}` : `${window.length} minutes`
+  return durationToStr(window.length)
+}
+
+export const durationToStr = (duration: number) : string => {
+  return duration >=60 ? `${duration/60} hour${duration>60?'s':''}` : `${duration} minutes`
 }
 
 export interface RelationContent {

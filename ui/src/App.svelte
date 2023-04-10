@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faTicket, faUser, faGear, faRss } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faTicket, faUser, faGear, faRss, faCalendar } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/elements/profile-prompt.js";
@@ -24,6 +24,7 @@
   import { EmergenceStore } from './emergence-store';
   import { EmergenceClient } from './emergence-client';
   import Feed from './emergence/emergence/Feed.svelte';
+  import Schedule from './emergence/emergence/Schedule.svelte';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -107,14 +108,20 @@
       </div>
       {/if}
 
+      {#if pane=="schedule"}
+      <div class="pane">
+        <h3>Schedule</h3>
+        <Schedule></Schedule>
+      </div>
+      {/if}
 
       <div class="nav">
-        <div class="nav-button {pane=="spaces"?"selected":""}"
-          title="Spaces"
-          on:keypress={()=>{pane='spaces'}}
-          on:click={()=>{pane='spaces'}}
+        <div class="nav-button {pane=="feed"?"selected":""}"
+          title="Activity"
+          on:keypress={()=>{pane='feed'}}
+          on:click={()=>{pane='feed'}}
         >
-          <Fa icon={faMap} size="2x"/>
+           <Fa icon={faRss} size="2x"/>
         </div>
         <div class="nav-button {pane=="sessions"?"selected":""}"
           title="Sessions"
@@ -122,7 +129,23 @@
           on:click={()=>{pane='sessions'}}
         >
           <Fa icon={faTicket} size="2x"/>
+        </div>
+        <div class="nav-button {pane=="schedule"?"selected":""}"
+          title="Schedule"
+          on:keypress={()=>{pane='schedule'}}
+          on:click={()=>{pane='schedule'}}
+        >
+          <Fa icon={faCalendar} size="2x"/>
 
+        </div>
+
+
+        <div class="nav-button {pane=="spaces"?"selected":""}"
+          title="Spaces"
+          on:keypress={()=>{pane='spaces'}}
+          on:click={()=>{pane='spaces'}}
+        >
+          <Fa icon={faMap} size="2x"/>
         </div>
         <div class="nav-button {pane=="you"?"selected":""}"
           title="You"
@@ -130,13 +153,6 @@
           on:click={()=>{pane='you'}}
         >
            <Fa icon={faUser} size="2x"/>
-        </div>
-        <div class="nav-button {pane=="feed"?"selected":""}"
-          title="Feed"
-          on:keypress={()=>{pane='feed'}}
-          on:click={()=>{pane='feed'}}
-        >
-           <Fa icon={faRss} size="2x"/>
         </div>
         <div class="nav-button {pane=="admin"?"selected":""}"
           title="Admin"

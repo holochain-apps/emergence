@@ -3,15 +3,17 @@ import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info } from './types';
+import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info, durationToStr } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import Fa from 'svelte-fa'
-import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit, faRecordVinyl } from '@fortawesome/free-solid-svg-icons';
 
 import SessionCrud from './SessionCrud.svelte';
+  import { action_destroyer } from 'svelte/internal';
+  import { encodeHashToBase64 } from '@holochain/client';
 
 const dispatch = createEventDispatcher();
 
@@ -87,6 +89,35 @@ async function deleteSession() {
     <span style="margin-right: 4px"><strong>Title:</strong></span>
     <span style="white-space: pre-line">{ session.record.entry.title }</span>
   </div>
+
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Description:</strong></span>
+    <span style="white-space: pre-line">{ session.record.entry.description }</span>
+  </div>
+
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Leaders:</strong></span>
+    {#each session.record.entry.leaders as leader}
+    <div style="margin:0 10px 0 10px; border:solid 1px; border-radius:50%; width:40px; height:40px;     display: flex;
+      justify-content: center;
+      flex-direction: column;
+      ">{encodeHashToBase64(leader).slice(-5)}</div>
+      {/each}
+  </div>
+
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Smallest Group- ize:</strong></span>
+    <span style="white-space: pre-line">{ session.record.entry.smallest }</span>
+  </div>
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Largest Group Size:</strong></span>
+    <span style="white-space: pre-line">{ session.record.entry.largest }</span>
+  </div>
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Duration:</strong></span>
+    <span style="white-space: pre-line">{ durationToStr(session.record.entry.duration) }</span>
+  </div>
+  
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Required Amenities:</strong></span>
     <span style="white-space: pre-line">

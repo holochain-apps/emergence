@@ -27,7 +27,7 @@
 {:else if error}
 <span>Error fetching the feed: {error.data.data}.</span>
 {:else if $feed.length === 0}
-<span>Feed empty</span>
+<span>No Activity</span>
 {:else}
 <div style="display: flex; flex-direction: column">
   {#each $feed as f}
