@@ -4,6 +4,7 @@ use hdi::prelude::*;
 pub struct Space {
     pub name: String,
     pub description: String,
+    pub capacity: u32,
     pub amenities: u32,
 }
 pub fn validate_create_space(

@@ -105,9 +105,9 @@ export class EmergenceClient {
     });
   }
 
-  async createSpace(name: string, description:string, amenities: number) : Promise<EntryRecord<Space>> {
+  async createSpace(name: string, description:string, capacity:number, amenities: number) : Promise<EntryRecord<Space>> {
     const spaceEntry: Space = { 
-        name, description, amenities
+        name, description, capacity, amenities
       };
     
     return new EntryRecord(await this.callZome('create_space', spaceEntry))

@@ -101,7 +101,12 @@ const relationSummary = (relation: Relation) : string => {
     <span style="margin-right: 4px"><strong>Description:</strong></span>
     <span style="white-space: pre-line">{ space.record.entry.description }</span>
   </div>
-  
+
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Capacity:</strong></span>
+    <span style="white-space: pre-line">{ space.record.entry.capacity }</span>
+  </div>
+
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Available Amenities:</strong></span>
     <span style="white-space: pre-line">

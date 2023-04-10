@@ -23,23 +23,25 @@ export let space: Info<Space>|undefined = undefined;  // set this if update
 let name: string = '';
 let description: string = '';
 let amenities: number = 0;
+let capacity: number = 0;
 
 let errorSnackbar: Snackbar;
 
 $: name, description, amenities;
-$: isSpaceValid = true && name !== '' && description !== '';
+$: isSpaceValid = true && name !== '' && description !== '' && capacity > 0;
 
 onMount(() => {
   if (space) {
     name = space.record.entry.name
     amenities = space.record.entry.amenities
     description = space.record.entry.description
+    capacity = space.record.entry.capacity
   }
 });
 
 async function updateSpace() {
   if (space) {
-    const updateRecord = await store.updateSpace(space.original_hash, name!, description, amenities)
+    const updateRecord = await store.updateSpace(space.original_hash, name!, description, capacity, amenities)
     if (updateRecord) {
       dispatch('space-updated', { actionHash: updateRecord.actionHash });
     } else {
@@ -50,11 +52,12 @@ async function updateSpace() {
 
 async function createSpace() {  
   try {
-    const record = await store.createSpace(name!, description!, amenities!)
+    const record = await store.createSpace(name, description, capacity, amenities)
 
     name = ""
     description = ""
     amenities = 0
+    capacity = 0
     dispatch('space-created', { space: record });
   } catch (e) {
     console.log("CREATE SPACE ERROR", e)
@@ -87,9 +90,16 @@ async function createSpace() {
       label=Description 
       value={ description } on:input={e => { description = e.target.value;} }
     ></sl-textarea>
-
   </div>
-            
+
+  <div style="margin-bottom: 16px">
+    <sl-input
+    label="Capacity"
+    value={`${capacity}`}
+    on:input={e => { capacity = parseInt(e.target.value); } }
+    ></sl-input>
+  </div>
+
   <div style="margin-bottom: 16px">
     <div style="font-size: 16px">Amenities Available </div>
     {#each Amenities as amenity, i}
