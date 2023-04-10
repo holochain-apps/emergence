@@ -6,7 +6,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import "@holochain-open-dev/profiles/elements/agent-avatar.js";
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
-import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
+import { encodeHashToBase64 } from '@holochain/client';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();

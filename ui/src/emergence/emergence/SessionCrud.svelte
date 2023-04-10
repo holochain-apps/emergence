@@ -3,15 +3,14 @@ import { createEventDispatcher, getContext, onMount } from 'svelte';
 import { storeContext } from '../../contexts';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
-import '@shoelace-style/shoelace/dist/components/select/select.js';
-import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import { timeWindowDurationToStr, timeWindowStartToStr,  type UpdateSessionInput, Amenities, type Info, type Session } from './types';
+import { timeWindowDurationToStr, timeWindowStartToStr,  type UpdateSessionInput, Amenities, type Info, type Session, type Slot } from './types';
 import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
 import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
+import SlotSelect from './Slot.svelte';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -28,35 +27,28 @@ let duration: string = ""
 let amenities: number = 0;
 
 let errorSnackbar: Snackbar;
+
+let slot: Slot | undefined
+let slotValid: boolean = true
 let spaceSelect: SlSelect;
 let windowSelect: SlSelect;
 
-let selectedSpace: string = ""
-let selectedWindow: string = ""
-
-$: title, selectedSpace, selectedWindow, amenities;
-$: isSessionValid = title !== '' && ((selectedSpace && selectedWindow) || (!selectedSpace && !selectedWindow));
-$: spaces = store.spaces
-$: windows = store.timeWindows
+$: title, amenities, slot, slotValid;
+$: isSessionValid = title !== '' && slotValid;
 
 onMount(() => {
   if (session) {
     title = session.record.entry.title
     amenities = session.record.entry.amenities
-    const slot = store.getSessionSlot(session)
-    if (slot) {
-      spaceSelect.value = encodeHashToBase64(slot.space)
-      windowSelect.value = JSON.stringify(slot.window)
-    }
+    slot = store.getSessionSlot(session)
   }
 });
 
 async function updateSession() {
   if (session) {
     const updateRecord = await store.updateSession(session.original_hash, title!, amenities)
-    if (selectedSpace && selectedWindow) {
-      const window = JSON.parse(selectedWindow)
-      await store.slot(session.original_hash, decodeHashFromBase64(selectedSpace), window)
+    if (slot) {
+      await store.slot(session.original_hash, slot)
     }
     dispatch('session-updated', { actionHash: updateRecord.actionHash });
   }
@@ -65,9 +57,8 @@ async function updateSession() {
 async function createSession() {    
   try {
     const record = await store.createSession(title!, amenities)
-    if (selectedSpace && selectedWindow) {
-      const window = JSON.parse(selectedWindow)
-      await store.slot(record.actionHash, decodeHashFromBase64(selectedSpace), window)
+    if (slot) {
+      await store.slot(session.original_hash, slot)
     }
 
     title = ""
@@ -118,29 +109,8 @@ const setAmenity = (i:number, value:boolean) => {
       >{amenity}</sl-checkbox>
     {/each}
   </div>
-  <div style="margin-bottom: 16px">
-    <sl-select bind:this={spaceSelect}
-      label="Space"
-      value={selectedSpace}
-      on:sl-change={e => {selectedSpace = e.target.value; } }
-    >
-    <sl-option value="">No Space Selected</sl-option>
-    {#each $spaces as space}
-    <sl-option value={encodeHashToBase64(space.record.actionHash)}>{space.record.entry.name}</sl-option>
-    {/each}
-    </sl-select>
-  </div>
-  <div style="margin-bottom: 16px">
-    <sl-select bind:this={windowSelect}
-      label="Time Window"
-      on:sl-change={e => {selectedWindow = e.target.value; } }
-    >
-    <sl-option value="">No Time Window Selected</sl-option>
-    {#each $windows as window}
-      <sl-option value={JSON.stringify(window)}>{timeWindowStartToStr(window)} {timeWindowDurationToStr(window)}</sl-option>
-    {/each}
-    </sl-select>
-  </div>
+  <SlotSelect bind:slot={slot} bind:valid={slotValid}></SlotSelect>
+  {#if !slotValid} *You must select both a time and a space or neither {/if}
   {#if session}
     <div style="display: flex; flex-direction: row">
       <sl-button

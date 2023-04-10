@@ -62,35 +62,35 @@ export class EmergenceStore {
     return undefined
   }
 
-  async slot(session: ActionHash, spaceHash:ActionHash, window: TimeWindow) {
-    const space = this.getSpace(spaceHash)
+  async slot(session: ActionHash, slot: Slot) {
+    const space = this.getSpace(slot.space)
     if (space) {
         this.client.createRelations([
             {   src: session,
-                dst: spaceHash,
+                dst: slot.space,
                 content:  {
                     path: "session.space",
-                    data: JSON.stringify(window)
+                    data: JSON.stringify(slot.window)
                 }
             },
-            {   src: spaceHash,
+            {   src: slot.space,
                 dst: session,
                 content:  {
                     path: "space.sessions",
-                    data: JSON.stringify(window)
+                    data: JSON.stringify(slot.window)
                 }
             },
             {   src: session, // should be agent key
                 dst: session,
                 content:  {
                     path: `feed.${FeedType.SlotSession}`,
-                    data: JSON.stringify({space:space.record.entry.name, window})
+                    data: JSON.stringify({space:space.record.entry.name, window: slot.window})
                 }
             },
         ]
         )
     } else {
-        console.log("Couldn't find space", encodeHashToBase64(spaceHash))
+        console.log("Couldn't find space", encodeHashToBase64(slot.space))
     }
   }
 
