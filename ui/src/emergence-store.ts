@@ -153,7 +153,7 @@ export class EmergenceStore {
         if (props.hasOwnProperty("amenities")) {
             if (sessionEntry.amenities != props.amenities) {
                 update.updated_amenities = props.amenities
-                changes.push(`amenities ${props.amenities}`)
+                changes.push(`amenities`)
             }
         }
         let doSlot = false
@@ -264,7 +264,7 @@ export class EmergenceStore {
             changes.push(`description`)
         }
         if (spaceEntry.amenities != amenities) {
-            changes.push(`amenities ${amenities}`)
+            changes.push(`amenities`)
         }
         if (changes.length > 0) {
             const record = await this.client.updateSpace(updatedSpace)
