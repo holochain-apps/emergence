@@ -13,7 +13,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { get, writable, type Writable } from 'svelte/store';
 import type { EntryRecord } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note } from './emergence/emergence/types';
 
 TimeAgo.addDefaultLocale(en)
 
@@ -22,6 +22,8 @@ export class EmergenceStore {
   timeWindows: Writable<Array<TimeWindow>> = writable([])
   sessions: Writable<Array<Info<Session>>> = writable([])
   spaces: Writable<Array<Info<Space>>> = writable([])
+  notes: Writable<Array<Info<Note>>> = writable([])
+  noteHashes: Writable<Array<ActionHash>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
   constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {}
   
@@ -49,6 +51,18 @@ export class EmergenceStore {
     return get(this.spaces)[spaceIdx]
   }
 
+  getNoteIdx(noteHash: ActionHash) : number {
+    const b64 = encodeHashToBase64(noteHash)
+    const notes = get(this.notes)
+    return notes.findIndex((s)=> encodeHashToBase64(s.original_hash) === b64)
+  }
+
+  getNote(noteHash: ActionHash) : Info<Note> | undefined {
+    const noteIdx = this.getNoteIdx(noteHash)
+    if (noteIdx == -1) return undefined
+    return get(this.notes)[noteIdx]
+  }
+
   getSessionSlot(session: Info<Session>) : Slot|undefined {
     for (const r of session.relations) {
         if (r.content.path == "session.space") {
@@ -60,6 +74,17 @@ export class EmergenceStore {
         }
     }
     return undefined
+  }
+
+  getSessionNotes(session: Info<Session>) : Array<Info<Note>> {
+    const notes: Array<Info<Note>> = []
+    for (const r of session.relations) {
+        if (r.content.path == "session.note") {
+            const note = this.getNote(r.dst)
+            if (note) notes.push(note)
+        }
+    }
+    return notes
   }
 
   async slot(session: ActionHash, slot: Slot) {
@@ -257,6 +282,10 @@ export class EmergenceStore {
         this.fetchTimeWindows()
         const sessions = await this.client.getSessions()
         this.sessions.update((n) => {return sessions} )
+        const noteHashes = []
+        sessions.forEach(s=>s.relations.filter(r=>r.content.path === "session.space").forEach(r=>noteHashes.push(r.dst)))
+        this.noteHashes.update((n) => {return noteHashes} )
+
     }
     catch (e) {
         console.log("Error fetching sessions", e)
@@ -346,6 +375,103 @@ export class EmergenceStore {
         ])
     }
   }
+
+  async createNote(sessionHash: ActionHash, text: string): Promise<EntryRecord<Note>> {
+    const record = await this.client.createNote(text)
+    this.notes.update((notes) => {
+        notes.push({
+            original_hash: record.actionHash,
+            record,
+            relations: []
+        })
+        return notes
+    })
+
+    this.client.createRelations([
+        {   src: sessionHash,
+            dst: record.actionHash,
+            content:  {
+                path: "session.note",
+                data: ""
+            }
+        },
+        {   src: record.actionHash, // should be agent key
+            dst: record.actionHash,
+            content:  {
+                path: `feed.${FeedType.NoteNew}`,
+                data: ""
+            }
+        },
+    ])
+    //this.fetchNotes()
+    return record
+  }
+
+  async updateNote(noteHash: ActionHash, text: string): Promise<EntryRecord<Note>> {
+    const idx = this.getNoteIdx(noteHash)
+    if (idx >= 0) {
+        const note = get(this.notes)[idx]
+
+        const updatedNote: UpdateNoteInput = {
+            original_note_hash: noteHash,
+            previous_note_hash: note.record.actionHash,
+            updated_note: {
+                text
+            }
+        }
+        const noteEntry = note.record.entry
+        let changes = []
+        if (noteEntry.text != text) {
+            changes.push(`text`)
+        }
+        if (changes.length > 0) {
+            const record = await this.client.updateNote(updatedNote)
+            this.client.createRelations([
+                {   src: record.actionHash, // should be agent key
+                    dst: record.actionHash,
+                    content:  {
+                        path: `feed.${FeedType.NoteUpdate}`,
+                        data: ""
+                    }
+                },
+            ])
+            this.notes.update((notes) => {
+                notes[idx].record = record
+                return notes
+            })
+            return record
+        }
+        else {
+            console.log("No changes detected ignoring...")
+        }
+    } else {
+        throw new Error(`could not find note`)
+    }
+  }
+
+  async deleteNote(noteHash: ActionHash) {
+    const idx = this.getNoteIdx(noteHash)
+    if (idx >= 0) {
+        const note = get(this.notes)[idx]
+        await this.client.deleteNote(note.record.actionHash)
+        this.notes.update((notes) => {
+            notes.splice(idx, 1);
+            return notes
+        })
+        this.client.createRelations([
+            {   src: note.original_hash, // should be agent key
+                dst: note.original_hash,
+                content:  {
+                    path: `feed.${FeedType.NoteDelete}`,
+                    data: ""
+                }
+            },
+        ])
+    }
+  }
+
+
+
 
   async fetchSpaces() {
     try {

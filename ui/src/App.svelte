@@ -11,12 +11,11 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faTicket, faUser, faGear, faRss, faCalendar, faPlusCircle, faPlus } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faTicket, faUser, faGear, faRss, faCalendar, faPlus } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/elements/profile-prompt.js";
   import "@holochain-open-dev/profiles/elements/my-profile.js";
-  import "@holochain-open-dev/profiles/elements/agent-avatar.js";
   import "@holochain-open-dev/profiles/elements/list-profiles.js";
 
   import { clientContext, storeContext } from './contexts';
@@ -25,6 +24,8 @@
   import { EmergenceClient } from './emergence-client';
   import Feed from './emergence/emergence/Feed.svelte';
   import Schedule from './emergence/emergence/Schedule.svelte';
+  import SessionDetail from './emergence/emergence/SessionDetail.svelte';
+  import type { Info, Session } from './emergence/emergence/types';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -33,6 +34,7 @@
   let profilesStore: ProfilesStore | undefined
   let creatingSpace = false
   let creatingSession = false
+  let selectedSession: Info<Session>|undefined = undefined
 
   $: client, store, loading, creatingSession, creatingSpace;
 
@@ -78,7 +80,8 @@
       {#if pane=="sessions"}
       <div class="pane">
         <h3>Sessions List</h3>
-        <AllSessions></AllSessions>
+        <AllSessions on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}></AllSessions>
+        Create Session:
         <sl-button on:click={() => {creatingSession = true; } } circle>
           <Fa icon={faPlus} />
         </sl-button>
@@ -91,10 +94,22 @@
         #{/if}
       </div>
       {/if}
+
+      {#if pane==="sessions.detail"}
+        <div class="pane">
+          asdfasdf
+          <SessionDetail 
+          on:session-deleted={()=>pane= "sessions"}
+          on:session-close={()=>pane= "sessions"}
+          session={selectedSession}></SessionDetail>
+        </div>
+      {/if}
+
       {#if pane=="spaces"}
       <div class="pane">
         <h3>Spaces List</h3>
         <AllSpaces></AllSpaces>
+        Create Space:
         <sl-button on:click={() => {creatingSpace = true; } } circle>
           <Fa icon={faPlus} />
         </sl-button>
@@ -107,6 +122,7 @@
         {/if}
       </div>
       {/if}
+
       {#if pane=="you"}
       <div class="pane">
         <h3>You</h3>
@@ -135,14 +151,14 @@
       {/if}
 
       <div class="nav">
-        <div class="nav-button {pane=="feed"?"selected":""}"
+        <div class="nav-button {pane === "feed" ? "selected":""}"
           title="Activity"
           on:keypress={()=>{pane='feed'}}
           on:click={()=>{pane='feed'}}
         >
            <Fa icon={faRss} size="2x"/>
         </div>
-        <div class="nav-button {pane=="sessions"?"selected":""}"
+        <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
           title="Sessions"
           on:keypress={()=>{pane='sessions'}}
           on:click={()=>{pane='sessions'}}
@@ -197,7 +213,7 @@
   .pane {
     position: relative;
   }
-  .create {
+  :global(.create) {
     background-color: white;
     padding: 10px;
     position: absolute;

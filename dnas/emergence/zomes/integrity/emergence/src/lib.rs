@@ -1,5 +1,7 @@
 pub mod space;
 pub use space::*;
+pub mod note;
+pub use note::*;
 pub mod session;
 pub use session::*;
 pub mod time_window;
@@ -14,6 +16,7 @@ pub use relation::*;
 pub enum EntryTypes {
     Session(Session),
     Space(Space),
+    Note(Note),
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
@@ -23,6 +26,7 @@ pub enum LinkTypes {
     SessionUpdates,
     AllSessions,
     SpaceUpdates,
+    NoteUpdates,
     AllSpaces,
 }
 #[hdk_extern]
@@ -56,6 +60,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 space,
                             )
                         }
+                        EntryTypes::Note(note) => {
+                            validate_create_note(
+                                EntryCreationAction::Create(action),
+                                note,
+                            )
+                        }
                     }
                 }
                 OpEntry::UpdateEntry { app_entry, action, .. } => {
@@ -70,6 +80,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_space(
                                 EntryCreationAction::Update(action),
                                 space,
+                            )
+                        }
+                        EntryTypes::Note(note) => {
+                            validate_create_note(
+                                EntryCreationAction::Update(action),
+                                note,
                             )
                         }
                     }
@@ -128,6 +144,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         EntryTypes::Space(space) => {
                             validate_delete_space(action, original_action, space)
                         }
+                        EntryTypes::Note(note) => {
+                            validate_delete_note(action, original_action, note)
+                        }
                     }
                 }
                 _ => Ok(ValidateCallbackResult::Valid),
@@ -151,6 +170,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                LinkTypes::TimeWindows => {
                     validate_create_link_time_windows(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::NoteUpdates => {
+                    validate_create_link_note_updates(
                         action,
                         base_address,
                         target_address,
@@ -218,6 +245,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::NoteUpdates => {
+                    validate_delete_link_note_updates(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
                 LinkTypes::SessionUpdates => {
                     validate_delete_link_session_updates(
                         action,
@@ -270,6 +306,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_space(
                                 EntryCreationAction::Create(action),
                                 space,
+                            )
+                        }
+                        EntryTypes::Note(note) => {
+                            validate_create_note(
+                                EntryCreationAction::Create(action),
+                                note,
                             )
                         }
                     }
@@ -357,6 +399,37 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 Ok(result)
                             }
                         }
+                        EntryTypes::Note(note) => {
+                            let result = validate_create_note(
+                                EntryCreationAction::Update(action.clone()),
+                                note.clone(),
+                            )?;
+                            if let ValidateCallbackResult::Valid = result {
+                                let original_note: Option<Note> = original_record
+                                    .entry()
+                                    .to_app_option()
+                                    .map_err(|e| wasm_error!(e))?;
+                                let original_note = match original_note {
+                                    Some(note) => note,
+                                    None => {
+                                        return Ok(
+                                            ValidateCallbackResult::Invalid(
+                                                "The updated entry type must be the same as the original entry type"
+                                                    .to_string(),
+                                            ),
+                                        );
+                                    }
+                                };
+                                validate_update_note(
+                                    action,
+                                    note,
+                                    original_action,
+                                    original_note,
+                                )
+                            } else {
+                                Ok(result)
+                            }
+                        }
                     }
                 }
                 OpRecord::DeleteEntry { original_action_hash, action, .. } => {
@@ -425,6 +498,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 original_space,
                             )
                         }
+                        EntryTypes::Note(original_note) => {
+                            validate_delete_note(
+                                action,
+                                original_action,
+                                original_note,
+                            )
+                        }
                     }
                 }
                 OpRecord::CreateLink {
@@ -445,6 +525,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::TimeWindows => {
                             validate_create_link_time_windows(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::NoteUpdates => {
+                            validate_create_link_note_updates(
                                 action,
                                 base_address,
                                 target_address,
@@ -519,6 +607,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::TimeWindows => {
                             validate_delete_link_time_windows(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::NoteUpdates => {
+                            validate_delete_link_note_updates(
                                 action,
                                 create_link.clone(),
                                 base_address,

@@ -1,5 +1,6 @@
 pub mod all_spaces;
 pub mod space;
+pub mod note;
 pub mod all_sessions;
 pub mod session;
 pub mod time_window;

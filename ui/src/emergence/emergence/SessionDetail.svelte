@@ -3,17 +3,17 @@ import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info, durationToStr } from './types';
+import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info, durationToStr, type Note } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import Fa from 'svelte-fa'
-import { faTrash, faEdit, faRecordVinyl } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit, faPlus, faBackward, faCircleArrowLeft,  } from '@fortawesome/free-solid-svg-icons';
 
 import SessionCrud from './SessionCrud.svelte';
-  import { action_destroyer } from 'svelte/internal';
-  import { encodeHashToBase64 } from '@holochain/client';
+import NoteCrud from './NoteCrud.svelte';
+import { encodeHashToBase64 } from '@holochain/client';
 
 const dispatch = createEventDispatcher();
 
@@ -25,17 +25,20 @@ let loading = false;
 let error: any = undefined;
 
 let editing = false;
+let creatingNote = false;
 
 let errorSnackbar: Snackbar;
 let slot:Slot|undefined = undefined
+let notes: Array<Info<Note>> = []
 
-$: editing,  error, loading, session, slot;
+$: editing,  error, loading, session, slot, notes;
 
 onMount(async () => {
   if (session === undefined) {
     throw new Error(`The session input is required for the SessionDetail element`);
   }
   slot = store.getSessionSlot(session)
+  notes = store.getSessionNotes(session)
 });
 
 async function deleteSession() {
@@ -73,6 +76,9 @@ async function deleteSession() {
 <div style="display: flex; flex-direction: column">
   <div style="display: flex; flex-direction: row">
     <span style="flex: 1"></span>
+    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('session-close') } } circle>
+      <Fa icon={faCircleArrowLeft} />
+    </sl-button>
     <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
       <Fa icon={faEdit} />
     </sl-button>
@@ -106,7 +112,7 @@ async function deleteSession() {
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Smallest Group- ize:</strong></span>
+    <span style="margin-right: 4px"><strong>Smallest Group Size:</strong></span>
     <span style="white-space: pre-line">{ session.record.entry.smallest }</span>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
@@ -129,6 +135,23 @@ async function deleteSession() {
     Scheduled in {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"} on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
     {/if}
   </div>
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Notes:</strong></span>
+    {#each notes as note}
+      <div style="border: solid, 1px">{note.record.entry.text}</div>
+    {/each}
+  </div>
+    Create Note:  <sl-button on:click={() => {creatingNote = true; } } circle>
+    <Fa icon={faPlus} />
+  </sl-button>
+  {#if creatingNote}
+  <div class="create">
+    <NoteCrud sessionHash={session.original_hash}
+      on:note-created={() => {creatingNote = false;} }
+      on:edit-canceled={() => { creatingNote = false; } }
+    ></NoteCrud>
+    </div>
+  {/if}
 
 </div>
 {/if}

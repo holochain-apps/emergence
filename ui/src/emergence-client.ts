@@ -8,7 +8,7 @@ import type {
     AppAgentClient,
     HoloHash,
 } from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
@@ -45,8 +45,11 @@ export class EmergenceClient {
 
   async getFeed() : Promise<Array<FeedElem>> {
     const relations: Array<Relation> = await this.callZome('get_feed', {filter: 0})
-    return relations.map(r => {return {
-        author: r.src,
+    return relations.map(r => {
+      const author = r.src
+      author[1] =32
+        return {
+        author,
         about: r.dst,
         type: parseInt(r.content.path.split(".")[1]),
         detail: JSON.parse(r.content.data)
@@ -131,6 +134,24 @@ export class EmergenceClient {
         return info
     });
   }
+
+  async createNote(text: string) : Promise<EntryRecord<Note>> {
+    const noteEntry: Note = { 
+        text
+      };
+    
+    return new EntryRecord(await this.callZome('create_note', noteEntry))
+  }
+
+  async updateNote(update: UpdateNoteInput) : Promise<EntryRecord<Note>> {
+    return new EntryRecord(await this.callZome('update_space', update))
+  }
+
+  deleteNote(actionHash: ActionHash) {
+    return this.callZome('delete_space', actionHash)
+  }
+
+
 
   private callZome(fn_name: string, payload: any) {
     const req: AppAgentCallZomeRequest = {

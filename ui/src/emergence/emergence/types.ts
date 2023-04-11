@@ -87,6 +87,17 @@ export interface UpdateSpaceInput {
   updated_space: Space,
 }
 
+export interface Note {
+  text: string,
+}
+
+
+export interface UpdateNoteInput {
+  original_note_hash: ActionHash,
+  previous_note_hash: ActionHash,
+  updated_note: Note,
+}
+
 
 export interface Slot {
   space: ActionHash
@@ -165,6 +176,9 @@ export enum FeedType {
    SpaceUpdate,
    SpaceDelete,
    SlotSession,
+   NoteNew,
+   NoteUpdate,
+   NoteDelete,
 }
 
 export interface FeedElem {
@@ -182,6 +196,9 @@ export const getTypeName = (type: FeedType) : string  => {
     case FeedType.SpaceNew: return "New Space"
     case FeedType.SpaceUpdate: return "Update Space"
     case FeedType.SpaceDelete: return "Delete Space"
+    case FeedType.NoteNew: return "New Note"
+    case FeedType.NoteUpdate: return "Update Note"
+    case FeedType.NoteDelete: return "Delete Note"
     case FeedType.SlotSession: return "Scheduled Session"
   }
   return "Unknown feed type"
