@@ -74,11 +74,14 @@ async function deleteSession() {
 {:else}
 
 <div style="display: flex; flex-direction: column">
-  <div style="display: flex; flex-direction: row">
-    <span style="flex: 1"></span>
+  <div style="display: flex; flex-direction: row; justify-content:space-around; align-items: center;">
     <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('session-close') } } circle>
       <Fa icon={faCircleArrowLeft} />
     </sl-button>
+    <h2 style="margin-left: 10px">{ session.record.entry.title }</h2>
+
+    <span style="flex: 1"></span>
+   
     <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
       <Fa icon={faEdit} />
     </sl-button>
@@ -91,10 +94,7 @@ async function deleteSession() {
     <span style="white-space: pre-line">{ session.record.entry.key }</span>
   </div>
 
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Title:</strong></span>
-    <span style="white-space: pre-line">{ session.record.entry.title }</span>
-  </div>
+
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Description:</strong></span>

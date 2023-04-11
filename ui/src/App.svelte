@@ -97,7 +97,6 @@
 
       {#if pane==="sessions.detail"}
         <div class="pane">
-          asdfasdf
           <SessionDetail 
           on:session-deleted={()=>pane= "sessions"}
           on:session-close={()=>pane= "sessions"}
