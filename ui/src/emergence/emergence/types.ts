@@ -203,3 +203,15 @@ export const getTypeName = (type: FeedType) : string  => {
   }
   return "Unknown feed type"
 }
+
+export interface GetStuffInput {
+  sessions?: Array<ActionHash>,
+  spaces?: Array<ActionHash>,
+  notes?: Array<ActionHash>,
+}
+
+export interface GetStuffOutput {
+  sessions?: Array<Info<Session>|undefined>,
+  spaces?: Array<Info<Space>|undefined>,
+  notes?: Array<Info<Note>|undefined>,
+}

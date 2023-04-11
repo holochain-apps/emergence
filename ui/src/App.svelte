@@ -100,7 +100,7 @@
           <SessionDetail 
           on:session-deleted={()=>pane= "sessions"}
           on:session-close={()=>pane= "sessions"}
-          session={selectedSession}></SessionDetail>
+          sessionHash={selectedSession.original_hash}></SessionDetail>
         </div>
       {/if}
 

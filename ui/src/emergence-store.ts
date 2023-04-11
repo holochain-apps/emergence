@@ -11,9 +11,9 @@ import type { EmergenceClient } from './emergence-client';
 import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
-import { get, writable, type Writable } from 'svelte/store';
+import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import type { EntryRecord } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput } from './emergence/emergence/types';
 
 TimeAgo.addDefaultLocale(en)
 
@@ -25,6 +25,8 @@ export class EmergenceStore {
   notes: Writable<Array<Info<Note>>> = writable([])
   noteHashes: Writable<Array<ActionHash>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
+  neededStuff: GetStuffInput = {}
+
   constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {}
   
   getSessionIdx(sessionHash: ActionHash) : number {
@@ -37,6 +39,10 @@ export class EmergenceStore {
     const sessionIdx = this.getSessionIdx(sessionHash)
     if (sessionIdx == -1) return undefined
     return get(this.sessions)[sessionIdx]
+  }
+
+  sessionStore(sessionHash) : Readable<Info<Session>>{
+    return derived(this.sessions, $sessions => $sessions.find(s=>encodeHashToBase64(sessionHash) == encodeHashToBase64(s.original_hash)))
   }
 
   getSpaceIdx(spaceHash: ActionHash) : number {
@@ -74,6 +80,30 @@ export class EmergenceStore {
         }
     }
     return undefined
+  }
+
+  sessionSlotStore(sessionStore: Readable<Info<Session>>) : Readable<Slot|undefined> {
+    return derived(sessionStore, $session=> {
+        const spaces = $session.relations.filter(r=>r.content.path == "session.space")
+        if (spaces.length > 0) {
+          let r = spaces[spaces.length-1]
+          const window = JSON.parse(r.content.data) as TimeWindow
+                  return {
+                      space: r.dst,
+                      window
+                  }
+        }
+        return undefined
+      })
+  }
+
+  sessionNoteStore(sessionStore: Readable<Info<Session>>) : Readable<Array<Info<Note>|undefined>> {
+    return derived(sessionStore, $session=> {
+        return $session.relations.filter(r=>r.content.path == "session.note").map(r=> {
+            const note = this.getNote(r.dst)
+            if (note) return note
+            return undefined
+      })})
   }
 
   getSessionNotes(session: Info<Session>) : Array<Info<Note>> {
@@ -387,7 +417,7 @@ export class EmergenceStore {
         return notes
     })
 
-    this.client.createRelations([
+    await this.client.createRelations([
         {   src: sessionHash,
             dst: record.actionHash,
             content:  {
@@ -399,11 +429,11 @@ export class EmergenceStore {
             dst: record.actionHash,
             content:  {
                 path: `feed.${FeedType.NoteNew}`,
-                data: ""
+                data: JSON.stringify("")
             }
         },
     ])
-    //this.fetchNotes()
+    this.fetchSessions()
     return record
   }
 
@@ -431,7 +461,7 @@ export class EmergenceStore {
                     dst: record.actionHash,
                     content:  {
                         path: `feed.${FeedType.NoteUpdate}`,
-                        data: ""
+                        data: JSON.stringify("")
                     }
                 },
             ])
@@ -463,15 +493,42 @@ export class EmergenceStore {
                 dst: note.original_hash,
                 content:  {
                     path: `feed.${FeedType.NoteDelete}`,
-                    data: ""
+                    data: JSON.stringify("")
                 }
             },
         ])
     }
   }
 
+  async fetchStuff() {
+    let stuff = await this.client.getStuff(this.neededStuff)
+    if (stuff.notes) {
+        stuff.notes.map(note=>{
+            const idx = this.getNoteIdx(note.original_hash)
+            if (idx >= 0) {
+                this.notes.update((notes) => {
+                    notes.splice(idx, 1);
+                    return notes
+                })
+            } else {
+                this.notes.update((notes) => {
+                    notes.push(note);
+                    return notes
+                })
 
+            }
+        })
+        this.neededStuff.notes = undefined
+    }
+  }
 
+  needNote(hash:ActionHash) {
+    if (this.neededStuff.notes) {
+        this.neededStuff.notes.push(hash)
+    } else {
+        this.neededStuff.notes = [hash]
+    }
+  }
 
   async fetchSpaces() {
     try {

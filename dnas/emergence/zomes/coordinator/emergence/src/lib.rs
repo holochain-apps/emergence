@@ -7,8 +7,14 @@ pub mod time_window;
 pub mod relation;
 pub mod utils;
 
+use all_sessions::SessionInfo;
+use all_spaces::SpaceInfo;
 use hdk::prelude::*;
 use emergence_integrity::*;
+use note::get_note;
+use relation::get_relations;
+use session::get_session;
+use space::get_space;
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
     Ok(InitCallbackResult::Pass)
@@ -143,4 +149,89 @@ fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTy
             entry,
         )?,
     )
+}
+
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetStuffInput {
+    sessions: Option<Vec<ActionHash>>,
+    spaces: Option<Vec<ActionHash>>,
+    notes: Option<Vec<ActionHash>>,
+}
+
+#[derive(Serialize, Deserialize, Debug, SerializedBytes, Clone)]
+pub struct NoteInfo {
+    pub original_hash: ActionHash,
+    pub record: Record,
+    pub relations: Vec<Relation>,
+}
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetStuffOutput {
+    sessions: Option<Vec<Option<SessionInfo>>>,
+    spaces: Option<Vec<Option<SpaceInfo>>>,
+    notes: Option<Vec<Option<NoteInfo>>>,
+}
+
+#[hdk_extern]
+pub fn get_stuff(input: GetStuffInput) -> ExternResult<GetStuffOutput> {
+    let mut output = GetStuffOutput {
+        sessions: None,
+        spaces: None,
+        notes: None, 
+    };
+    if let Some(sessions) = input.sessions{
+        let mut infos = Vec::new();
+        for original_hash in sessions {
+            let maybe_record = get_session(original_hash.clone())?;
+            match maybe_record {
+                Some(record) => {
+                    let relations = get_relations(AnyLinkableHash::from(original_hash.clone()))?;
+                    infos.push(Some(SessionInfo{
+                        original_hash: original_hash,
+                        record,
+                        relations
+                    }))
+                }
+                None => infos.push(None)
+            }
+        };
+        output.sessions = Some(infos);
+    }
+    if let Some(spaces) = input.spaces{
+        let mut infos = Vec::new();
+        for original_hash in spaces {
+            let maybe_record = get_space(original_hash.clone())?;
+            match maybe_record {
+                Some(record) => {
+                    let relations = get_relations(AnyLinkableHash::from(original_hash.clone()))?;
+                    infos.push(Some(SpaceInfo{
+                        original_hash: original_hash,
+                        record,
+                        relations
+                    }))
+                }
+                None => infos.push(None)
+            }
+        };
+        output.spaces = Some(infos);
+    }
+    if let Some(notes) = input.notes{
+        let mut infos = Vec::new();
+        for original_hash in notes {
+            let maybe_record = get_note(original_hash.clone())?;
+            match maybe_record {
+                Some(record) => {
+                    let relations = get_relations(AnyLinkableHash::from(original_hash.clone()))?;
+                    infos.push(Some(NoteInfo{
+                        original_hash: original_hash,
+                        record,
+                        relations
+                    }))
+                }
+                None => infos.push(None)
+            }
+        };
+        output.notes = Some(infos);
+    }
+    Ok(output)
 }

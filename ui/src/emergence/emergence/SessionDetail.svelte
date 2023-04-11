@@ -3,7 +3,7 @@ import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info, durationToStr, type Note } from './types';
+import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info, durationToStr, type Note, type TimeWindow } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
@@ -13,11 +13,13 @@ import { faTrash, faEdit, faPlus, faBackward, faCircleArrowLeft,  } from '@forta
 
 import SessionCrud from './SessionCrud.svelte';
 import NoteCrud from './NoteCrud.svelte';
-import { encodeHashToBase64 } from '@holochain/client';
+import { encodeHashToBase64, type ActionHash } from '@holochain/client';
+  import Avatar from './Avatar.svelte';
+  import NoteDetail from './NoteDetail.svelte';
 
 const dispatch = createEventDispatcher();
 
-export let session: Info<Session>;
+export let sessionHash: ActionHash;
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -28,8 +30,51 @@ let editing = false;
 let creatingNote = false;
 
 let errorSnackbar: Snackbar;
-let slot:Slot|undefined = undefined
-let notes: Array<Info<Note>> = []
+
+$: session = store.sessionStore(sessionHash)
+$: entry = $session.record.entry
+$: slot = sessionSlot($session)
+$: notes = sessionNotes($session)
+
+const sessionSlot = (session: Info<Session>): Slot | undefined => {
+  const spaces = session.relations.filter(r=>r.content.path == "session.space")
+        if (spaces.length > 0) {
+          let r = spaces[spaces.length-1]
+          const window = JSON.parse(r.content.data) as TimeWindow
+                  return {
+                      space: r.dst,
+                      window
+                  }
+        }
+        return undefined
+}
+
+const sessionNotes = (session: Info<Session>):Array<ActionHash> => {
+  return session.relations.filter(r=>r.content.path == "session.note").map(r=> r.dst)
+}
+
+
+// $: sessions = store.sessions
+// $: session = derived(sessions, $sessions => $sessions.find(s=>encodeHashToBase64(sessionHash) == encodeHashToBase64(s.original_hash)))
+// $: entry = derived(session, $session => $session.record.entry)
+// $: relations = derived(session, $session => $session.relations)
+// $: slot = derived(relations, $relations=> {
+//   const r = $relations.find(r=>r.content.path == "session.space")
+//   if (r) {
+//     const window = JSON.parse(r.content.data) as TimeWindow
+//             return {
+//                 space: r.dst,
+//                 window
+//             }
+//   }
+//   return undefined
+// })
+// $: notes = derived(relations, $relations=> 
+//   $relations.filter(r=>r.content.path == "session.note").map(r=> {
+//     const note = store.getNote(r.dst)
+//     if (note) return note
+//     return undefined
+//   }))
 
 $: editing,  error, loading, session, slot, notes;
 
@@ -37,14 +82,12 @@ onMount(async () => {
   if (session === undefined) {
     throw new Error(`The session input is required for the SessionDetail element`);
   }
-  slot = store.getSessionSlot(session)
-  notes = store.getSessionNotes(session)
 });
 
 async function deleteSession() {
   try {
-    await store.deleteSession(session.original_hash)
-    dispatch('session-deleted', { sessionHash: session.original_hash });
+    await store.deleteSession($session.original_hash)
+    dispatch('session-deleted', { sessionHash: $session.original_hash });
   } catch (e: any) {
     errorSnackbar.labelText = `Error deleting the session: ${e.data.data}`;
     errorSnackbar.show();
@@ -64,7 +107,7 @@ async function deleteSession() {
 <span>Error fetching the session: {error.data.data}</span>
 {:else if editing}
 <SessionCrud
-  session={ session}
+  session={ $session}
   on:session-updated={async () => {
     editing = false;
   //  await fetchSession()
@@ -78,7 +121,7 @@ async function deleteSession() {
     <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('session-close') } } circle>
       <Fa icon={faCircleArrowLeft} />
     </sl-button>
-    <h2 style="margin-left: 10px">{ session.record.entry.title }</h2>
+    <h2 style="margin-left: 10px">{ entry.title }</h2>
 
     <span style="flex: 1"></span>
    
@@ -91,19 +134,19 @@ async function deleteSession() {
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Key:</strong></span>
-    <span style="white-space: pre-line">{ session.record.entry.key }</span>
+    <span style="white-space: pre-line">{ entry.key }</span>
   </div>
 
 
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Description:</strong></span>
-    <span style="white-space: pre-line">{ session.record.entry.description }</span>
+    <span style="white-space: pre-line">{ entry.description }</span>
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Leaders:</strong></span>
-    {#each session.record.entry.leaders as leader}
+    {#each entry.leaders as leader}
     <div style="margin:0 10px 0 10px; border:solid 1px; border-radius:50%; width:40px; height:40px;     display: flex;
       justify-content: center;
       flex-direction: column;
@@ -113,21 +156,21 @@ async function deleteSession() {
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Smallest Group Size:</strong></span>
-    <span style="white-space: pre-line">{ session.record.entry.smallest }</span>
+    <span style="white-space: pre-line">{ entry.smallest }</span>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Largest Group Size:</strong></span>
-    <span style="white-space: pre-line">{ session.record.entry.largest }</span>
+    <span style="white-space: pre-line">{ entry.largest }</span>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Duration:</strong></span>
-    <span style="white-space: pre-line">{ durationToStr(session.record.entry.duration) }</span>
+    <span style="white-space: pre-line">{ durationToStr(entry.duration) }</span>
   </div>
   
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Required Amenities:</strong></span>
     <span style="white-space: pre-line">
-      {amenitiesList(session.record.entry.amenities).join(", ")}
+      {amenitiesList(entry.amenities).join(", ")}
     </span>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
@@ -135,18 +178,24 @@ async function deleteSession() {
     Scheduled in {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"} on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
     {/if}
   </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Notes:</strong></span>
+  <div class="notes">
     {#each notes as note}
-      <div style="border: solid, 1px">{note.record.entry.text}</div>
+      <div class="note">
+        <NoteDetail noteHash={note}></NoteDetail>
+      </div>
     {/each}
   </div>
     Create Note:  <sl-button on:click={() => {creatingNote = true; } } circle>
     <Fa icon={faPlus} />
   </sl-button>
+
+  Fetch Notes:  <sl-button on:click={() => {store.fetchStuff() } } circle>
+    <Fa icon={faPlus} />
+  </sl-button>
+
   {#if creatingNote}
   <div class="create">
-    <NoteCrud sessionHash={session.original_hash}
+    <NoteCrud sessionHash={$session.original_hash}
       on:note-created={() => {creatingNote = false;} }
       on:edit-canceled={() => { creatingNote = false; } }
     ></NoteCrud>
@@ -156,3 +205,14 @@ async function deleteSession() {
 </div>
 {/if}
 
+<style>
+  .notes{
+    border-top: solid 1px;
+  }
+
+  .note{
+    display: flex;
+    align-items: center;
+    margin: 10px;
+  }
+</style>

@@ -8,7 +8,7 @@ use crate::{relation::get_relations, session::get_session};
 
 
 #[derive(Serialize, Deserialize, Debug, SerializedBytes, Clone)]
-pub struct SessionInfo{
+pub struct SessionInfo {
     pub original_hash: ActionHash,
     pub record: Record,
     pub relations: Vec<Relation>,

@@ -8,7 +8,7 @@ import type {
     AppAgentClient,
     HoloHash,
 } from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
@@ -46,6 +46,8 @@ export class EmergenceClient {
   async getFeed() : Promise<Array<FeedElem>> {
     const relations: Array<Relation> = await this.callZome('get_feed', {filter: 0})
     return relations.map(r => {
+      console.log("feed item", r.content)
+
       const author = r.src
       author[1] =32
         return {
@@ -151,6 +153,46 @@ export class EmergenceClient {
     return this.callZome('delete_space', actionHash)
   }
 
+  async getStuff(input: GetStuffInput) : Promise<GetStuffOutput> {
+    const stuff = await this.callZome('get_stuff', input)
+    if (stuff.sessions) {
+      stuff.sessions = stuff.sessions.map(s => {
+        if (s) {
+          const info: Info<Session> = {
+          original_hash: s.original_hash,
+          record: new EntryRecord(s.record), 
+          relations: s.relations}
+          return info
+          }
+          return undefined
+    })      
+    }
+    if (stuff.spaces) {
+      stuff.spaces = stuff.spaces.map(s => {
+        if (s) {
+          const info: Info<Space> = {
+          original_hash: s.original_hash,
+          record: new EntryRecord(s.record), 
+          relations: s.relations}
+          return info
+          }
+          return undefined
+    })      
+    }
+    if (stuff.notes) {
+      stuff.notes = stuff.notes.map(s => {
+        if (s) {
+          const info: Info<Note> = {
+          original_hash: s.original_hash,
+          record: new EntryRecord(s.record), 
+          relations: s.relations}
+          return info
+          }
+          return undefined
+    })      
+    }
+    return stuff
+  }
 
 
   private callZome(fn_name: string, payload: any) {
