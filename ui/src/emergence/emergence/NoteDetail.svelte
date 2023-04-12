@@ -5,19 +5,26 @@
     import { createEventDispatcher, onMount, getContext } from 'svelte';
     import Avatar from './Avatar.svelte';
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
+  import { onDestroy } from 'svelte';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
     export let noteHash: ActionHash
-    $: note = store.getNote(noteHash)
+    $: note = store.neededStuffStore.notes.get(noteHash)
+    onDestroy(() => {
+        store.neededStuffStore.notes.clear(noteHash)
+    });
 </script>
 
-{#if note}
-<div class="avatar"><Avatar agentPubKey={note.record.action.author}></Avatar></div>
-{note.record.entry.text}
-{:else}
+{#if $note.status=== "pending"}
 <sl-spinner></sl-spinner>
-{store.needNote(noteHash)}
+{:else}
+    {#if $note.value}
+        <div class="avatar"><Avatar agentPubKey={$note.value.record.action.author}></Avatar></div>
+        {$note.value.record.entry.text}
+    {:else}
+        Not found on DHT
+    {/if}
 {/if}
 
 <style>

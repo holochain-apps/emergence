@@ -12,10 +12,61 @@ import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
-import type { EntryRecord } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput } from './emergence/emergence/types';
+import { HoloHashMap, type EntryRecord, LazyHoloHashMap } from '@holochain-open-dev/utils';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo } from './emergence/emergence/types';
+import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 
 TimeAgo.addDefaultLocale(en)
+
+export const neededStuffStore = (client: EmergenceClient) => {
+    const notes = writable(new HoloHashMap<ActionHash, Info<Note>| undefined>())
+    const neededStuff: GetStuffInput = {}
+
+    setInterval(async ()=>{
+        if(neededStuff.notes ? true : false) {
+        const stuff = await client.getStuff(neededStuff)
+        if (stuff.notes) {
+            notes.update(oldNotes=>{
+                stuff.notes.forEach(n=>{
+                    
+                   oldNotes.set(n.original_hash,n)
+                })
+                return oldNotes
+            })
+            neededStuff.notes = undefined
+        }
+        }}
+    , 1000);
+    return {
+        notes: {
+            get: (actionHash:ActionHash) : AsyncReadable<Info<Note>|undefined> =>{
+                if (neededStuff.notes) {
+                    neededStuff.notes.push(actionHash)
+                } else {
+                    neededStuff.notes = [actionHash]
+                }
+                return derived(notes, map=> {
+                    const hasAction = map.has(actionHash)
+                    if (hasAction) return {
+                        status: "complete",
+                        value: map.get(actionHash) 
+                    } as AsyncStatus<Info<Note>|undefined>
+                    return {status: "pending"} as AsyncStatus<Info<Note>|undefined>
+                }
+            )},
+            clear: (actionHashes: Array<ActionHash>)=>{
+                console.log("CLEARING", actionHashes)
+                notes.update(notes =>{
+                     actionHashes.forEach(h=>notes.delete(h))
+                     return notes
+                    }
+                )
+            }
+        },
+    }
+}
+
+
 
 export class EmergenceStore {
   timeAgo = new TimeAgo('en-US')
@@ -27,13 +78,14 @@ export class EmergenceStore {
   feed: Writable<Array<FeedElem>> = writable([])
   neededStuff: GetStuffInput = {}
   loader = undefined
-
+  neededStuffStore =undefined
   stuffIsNeeded() {
     return this.neededStuff.notes ? true : false
   }
   
   constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {
     this.loader = setInterval(()=>{if(this.stuffIsNeeded()) this.fetchStuff()}, 1000);
+    this.neededStuffStore =  neededStuffStore(client)
   }
   
   getSessionIdx(sessionHash: ActionHash) : number {
@@ -48,7 +100,7 @@ export class EmergenceStore {
     return get(this.sessions)[sessionIdx]
   }
 
-  sessionStore(sessionHash) : Readable<Info<Session>>{
+  sessionStore(sessionHash) : Readable<Info<Session>|undefined>{
     return derived(this.sessions, $sessions => $sessions.find(s=>encodeHashToBase64(sessionHash) == encodeHashToBase64(s.original_hash)))
   }
 

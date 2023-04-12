@@ -61,6 +61,13 @@ export interface Info<T> {
   relations: Array<Relation>,
 }
 
+export interface RawInfo {
+  original_hash: ActionHash,
+  record: Record,
+  relations: Array<Relation>,
+}
+
+
 export interface UpdateSessionInput {
   original_session_hash: ActionHash,
   previous_session_hash: ActionHash,
