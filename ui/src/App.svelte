@@ -26,7 +26,7 @@
   import Schedule from './emergence/emergence/Schedule.svelte';
   import SessionDetail from './emergence/emergence/SessionDetail.svelte';
   import type { Info, Session } from './emergence/emergence/types';
-  import { get } from 'svelte/store';
+  import You from './emergence/emergence/You.svelte'
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -133,9 +133,7 @@
 
       {#if pane=="you"}
       <div class="pane">
-        <h3>You</h3>
-        <p><b>Emergence</b> is a decentralized hApp for discovery, scheduling, connecting and remembering </p>
-        <my-profile></my-profile>
+        <You></You>
       </div>
       {/if}
       {#if pane=="admin"}

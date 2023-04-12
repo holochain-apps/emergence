@@ -1,15 +1,14 @@
 <script lang="ts">
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
 import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info, durationToStr, type Note, type TimeWindow } from './types';
-import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
-import '@shoelace-style/shoelace/dist/components/button/button.js';
 import Fa from 'svelte-fa'
-import { faTrash, faEdit, faPlus, faBackward, faCircleArrowLeft,  } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit, faPlus, faCircleArrowLeft,  } from '@fortawesome/free-solid-svg-icons';
 
 import SessionCrud from './SessionCrud.svelte';
 import NoteCrud from './NoteCrud.svelte';
