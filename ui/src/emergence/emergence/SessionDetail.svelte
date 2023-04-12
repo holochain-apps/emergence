@@ -189,10 +189,6 @@ async function deleteSession() {
     <Fa icon={faPlus} />
   </sl-button>
 
-  Fetch Notes:  <sl-button on:click={() => {store.fetchStuff() } } circle>
-    <Fa icon={faPlus} />
-  </sl-button>
-
   {#if creatingNote}
   <div class="create">
     <NoteCrud sessionHash={$session.original_hash}

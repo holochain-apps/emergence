@@ -26,8 +26,15 @@ export class EmergenceStore {
   noteHashes: Writable<Array<ActionHash>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
   neededStuff: GetStuffInput = {}
+  loader = undefined
 
-  constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {}
+  stuffIsNeeded() {
+    return this.neededStuff.notes ? true : false
+  }
+  
+  constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {
+    this.loader = setInterval(()=>{if(this.stuffIsNeeded()) this.fetchStuff()}, 1000);
+  }
   
   getSessionIdx(sessionHash: ActionHash) : number {
     const b64 = encodeHashToBase64(sessionHash)
@@ -408,14 +415,14 @@ export class EmergenceStore {
 
   async createNote(sessionHash: ActionHash, text: string): Promise<EntryRecord<Note>> {
     const record = await this.client.createNote(text)
-    this.notes.update((notes) => {
-        notes.push({
-            original_hash: record.actionHash,
-            record,
-            relations: []
-        })
-        return notes
-    })
+    // this.notes.update((notes) => {
+    //     notes.push({
+    //         original_hash: record.actionHash,
+    //         record,
+    //         relations: []
+    //     })
+    //     return notes
+    // })
 
     await this.client.createRelations([
         {   src: sessionHash,
