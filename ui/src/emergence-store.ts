@@ -12,7 +12,7 @@ import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
-import { HoloHashMap, type EntryRecord, LazyHoloHashMap } from '@holochain-open-dev/utils';
+import { HoloHashMap, type EntryRecord } from '@holochain-open-dev/utils';
 import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 
@@ -76,6 +76,7 @@ export class EmergenceStore {
   notes: Writable<Array<Info<Note>>> = writable([])
   noteHashes: Writable<Array<ActionHash>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
+  myNotes: Writable<Array<ActionHash>> = writable([])
   neededStuff: GetStuffInput = {}
   loader = undefined
   neededStuffStore =undefined
@@ -603,6 +604,12 @@ export class EmergenceStore {
     try {
         const feed = await this.client.getFeed()
         this.feed.update((n) => {return feed} )
+
+        // this will move elsewhere when we load in the feed by scrolling...
+        this.myNotes.update((n) => {
+            const meB64 = encodeHashToBase64(this.myPubKey)
+            return feed.filter(f=>f.type == FeedType.NoteNew && encodeHashToBase64(f.author) === meB64 ).map(f=>f.about)
+        } )
     }
     catch (e) {
         console.log("Error fetching spaces", e)
