@@ -148,6 +148,18 @@ export interface Relation {
     content: RelationContent,
 }
 
+export enum SessionInterest {
+  Interested = 1,
+  Going
+}
+
+export const sessionInterestToString = (interest: SessionInterest) : string=> {
+  switch(interest) {
+    case SessionInterest.Interested: return "Interested"
+    case SessionInterest.Going: return "Going"
+  }
+}
+
 export const Amenities = [
   "Electricty",
   "Whiteboard",
@@ -179,6 +191,7 @@ export enum FeedType {
    SessionNew = 1,
    SessionUpdate,
    SessionDelete,
+   SessionSetInterest,
    SpaceNew,
    SpaceUpdate,
    SpaceDelete,
@@ -200,6 +213,7 @@ export const getTypeName = (type: FeedType) : string  => {
     case FeedType.SessionNew: return "New Session"
     case FeedType.SessionUpdate: return "Update Session"
     case FeedType.SessionDelete: return "Delete Session"
+    case FeedType.SessionSetInterest: return "Set Session Interest"
     case FeedType.SpaceNew: return "New Space"
     case FeedType.SpaceUpdate: return "Update Space"
     case FeedType.SpaceDelete: return "Delete Space"

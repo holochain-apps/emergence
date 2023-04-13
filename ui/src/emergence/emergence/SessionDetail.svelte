@@ -4,17 +4,16 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info, durationToStr, type Note, type TimeWindow } from './types';
+import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info, durationToStr, type Note, type TimeWindow, SessionInterest } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
-import { faTrash, faEdit, faPlus, faCircleArrowLeft,  } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit, faPlus, faCircleArrowLeft, faBookmark } from '@fortawesome/free-solid-svg-icons';
 
 import SessionCrud from './SessionCrud.svelte';
 import NoteCrud from './NoteCrud.svelte';
 import { encodeHashToBase64, type ActionHash } from '@holochain/client';
-  import Avatar from './Avatar.svelte';
-  import NoteDetail from './NoteDetail.svelte';
+import NoteDetail from './NoteDetail.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -83,6 +82,17 @@ onMount(async () => {
   }
 });
 
+async function attendSession() {
+  try {
+    await store.setSessionInterest($session.original_hash, SessionInterest.Going)
+  } catch (e: any) {
+    console.log("E", e)
+
+    errorSnackbar.labelText = `Error attending the session: ${e.data.data}`;
+    errorSnackbar.show();
+  }
+}
+
 async function deleteSession() {
   try {
     await store.deleteSession($session.original_hash)
@@ -123,11 +133,16 @@ async function deleteSession() {
     <h2 style="margin-left: 10px">{ entry.title }</h2>
 
     <span style="flex: 1"></span>
-   
+
+    <sl-button style="margin-left: 8px; " size=small on:click={attendSession} circle>
+      <Fa icon={faBookmark} />
+    </sl-button>
+
     <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
       <Fa icon={faEdit} />
     </sl-button>
-    <sl-button style="margin-left: 8px;" size=small on:click={() => deleteSession()} circle>
+
+    <sl-button style="margin-left: 8px;" size=small on:click={deleteSession} circle>
       <Fa icon={faTrash} />
     </sl-button>
   </div>

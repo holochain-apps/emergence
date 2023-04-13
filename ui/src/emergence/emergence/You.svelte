@@ -12,6 +12,7 @@
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
   import NoteDetail from './NoteDetail.svelte';
+  import SessionSummary from './SessionSummary.svelte';
   
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
   
@@ -22,6 +23,7 @@
     let editProfile = false
     $: myProfile = store.profilesStore.myProfile
     $: myNotes = store.myNotes
+    $: mySessions = store.mySessions
 
 </script>
 {#if $myProfile.status === "complete"  && $myProfile.value}
@@ -37,7 +39,8 @@
     <sl-tab-group>
         <sl-tab slot="nav" panel="notes">SynapShots
         </sl-tab>
-        <sl-tab slot="nav" panel="sessions">Sessions</sl-tab>
+        <sl-tab slot="nav" panel="sessions">Sessions
+        </sl-tab>
         <sl-tab slot="nav" panel="updates">Updates</sl-tab>
     
         <sl-tab-panel name="notes">
@@ -47,7 +50,11 @@
             
         </sl-tab-panel>
         <sl-tab-panel name="sessions">
-            TBD
+
+            {#each Array.from($mySessions.keys()) as session}
+            <SessionSummary session={store.getSession(session)}></SessionSummary>
+            {/each}
+
 
         </sl-tab-panel>
         <sl-tab-panel name="updates">

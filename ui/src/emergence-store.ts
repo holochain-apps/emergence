@@ -13,7 +13,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 
 TimeAgo.addDefaultLocale(en)
@@ -77,6 +77,7 @@ export class EmergenceStore {
   noteHashes: Writable<Array<ActionHash>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
   myNotes: Writable<Array<ActionHash>> = writable([])
+  mySessions: Writable<HoloHashMap<ActionHash,SessionInterest>> = writable(new HoloHashMap())
   neededStuff: GetStuffInput = {}
   loader = undefined
   neededStuffStore =undefined
@@ -365,6 +366,28 @@ export class EmergenceStore {
     }
   }
 
+  async setSessionInterest(sessionHash: ActionHash, interest: SessionInterest) {
+    const me = this.myPubKey
+    me[1] =33
+
+    await this.client.createRelations([
+        {   src: sessionHash,
+            dst: me,
+            content:  {
+                path: "session.interest",
+                data: JSON.stringify(interest)
+            }
+        },
+        {   src: sessionHash, // should be agent key
+            dst: sessionHash,
+            content:  {
+                path: `feed.${FeedType.SessionSetInterest}`,
+                data: JSON.stringify(interest)
+            }
+        },
+    ])
+    this.fetchSessions()
+  }
 
   async fetchSessions() {
     try {
@@ -605,10 +628,19 @@ export class EmergenceStore {
         const feed = await this.client.getFeed()
         this.feed.update((n) => {return feed} )
 
-        // this will move elsewhere when we load in the feed by scrolling...
+        // these will move elsewhere when we load in the feed by scrolling...
+        const meB64 = encodeHashToBase64(this.myPubKey)
         this.myNotes.update((n) => {
-            const meB64 = encodeHashToBase64(this.myPubKey)
             return feed.filter(f=>f.type == FeedType.NoteNew && encodeHashToBase64(f.author) === meB64 ).map(f=>f.about)
+        } )
+        this.mySessions.update((n) => {
+            feed.forEach(f=>{
+                if (f.type == FeedType.SessionSetInterest && encodeHashToBase64(f.author) === meB64) {
+                    n.set(f.about,f.detail)
+                }
+            }
+            )
+            return n
         } )
     }
     catch (e) {
