@@ -4,6 +4,7 @@ import {
     encodeHashToBase64,
     type ActionHash,
     type AgentPubKey,
+    decodeHashFromBase64,
 } from '@holochain/client';
 
 import type { EmergenceClient } from './emergence-client';
@@ -79,6 +80,7 @@ export class EmergenceStore {
   myNotes: Writable<Array<ActionHash>> = writable([])
   mySessions: Writable<HoloHashMap<ActionHash,SessionInterest>> = writable(new HoloHashMap())
   neededStuff: GetStuffInput = {}
+  myPubKeyBase64: string
   loader = undefined
   neededStuffStore =undefined
   stuffIsNeeded() {
@@ -88,6 +90,7 @@ export class EmergenceStore {
   constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {
     this.loader = setInterval(()=>{if(this.stuffIsNeeded()) this.fetchStuff()}, 1000);
     this.neededStuffStore =  neededStuffStore(client)
+    this.myPubKeyBase64 = encodeHashToBase64(myPubKey)
   }
   
   getSessionIdx(sessionHash: ActionHash) : number {
@@ -142,6 +145,21 @@ export class EmergenceStore {
     }
     return undefined
   }
+
+  sessionInterestStore(sessionStore: Readable<Info<Session>>) : Readable<SessionInterest> {
+    return derived(sessionStore, $session=> {
+        let interest = SessionInterest.NoOpinion
+        for (const r of $session.relations ) {
+            const who = r.dst
+            who[1] = 32 //temporary workaround because of linkable hash problem
+            if (r.content.path == "session.interest"  && encodeHashToBase64(who) === this.myPubKeyBase64) {
+                interest = JSON.parse(r.content.data)
+            }
+        }
+        return interest    
+      })
+  }
+
 
   sessionSlotStore(sessionStore: Readable<Info<Session>>) : Readable<Slot|undefined> {
     return derived(sessionStore, $session=> {
@@ -629,13 +647,12 @@ export class EmergenceStore {
         this.feed.update((n) => {return feed} )
 
         // these will move elsewhere when we load in the feed by scrolling...
-        const meB64 = encodeHashToBase64(this.myPubKey)
         this.myNotes.update((n) => {
-            return feed.filter(f=>f.type == FeedType.NoteNew && encodeHashToBase64(f.author) === meB64 ).map(f=>f.about)
+            return feed.filter(f=>f.type == FeedType.NoteNew && encodeHashToBase64(f.author) === this.myPubKeyBase64 ).map(f=>f.about)
         } )
         this.mySessions.update((n) => {
             feed.forEach(f=>{
-                if (f.type == FeedType.SessionSetInterest && encodeHashToBase64(f.author) === meB64) {
+                if (f.type == FeedType.SessionSetInterest && encodeHashToBase64(f.author) === this.myPubKeyBase64) {
                     n.set(f.about,f.detail)
                 }
             }

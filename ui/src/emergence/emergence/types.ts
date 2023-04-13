@@ -149,12 +149,14 @@ export interface Relation {
 }
 
 export enum SessionInterest {
-  Interested = 1,
+  NoOpinion = 0,
+  Interested,
   Going
 }
 
 export const sessionInterestToString = (interest: SessionInterest) : string=> {
   switch(interest) {
+    case SessionInterest.NoOpinion: return "No Opinion"
     case SessionInterest.Interested: return "Interested"
     case SessionInterest.Going: return "Going"
   }

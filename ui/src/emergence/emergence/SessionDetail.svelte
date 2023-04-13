@@ -8,7 +8,7 @@ import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, am
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
-import { faTrash, faEdit, faPlus, faCircleArrowLeft, faBookmark } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit, faPlus, faCircleArrowLeft, faBookmark, faStar } from '@fortawesome/free-solid-svg-icons';
 
 import SessionCrud from './SessionCrud.svelte';
 import NoteCrud from './NoteCrud.svelte';
@@ -33,6 +33,7 @@ $: session = store.sessionStore(sessionHash)
 $: entry = $session.record.entry
 $: slot = sessionSlot($session)
 $: notes = sessionNotes($session)
+
 
 const sessionSlot = (session: Info<Session>): Slot | undefined => {
   const spaces = session.relations.filter(r=>r.content.path == "session.space")
@@ -74,7 +75,16 @@ const sessionNotes = (session: Info<Session>):Array<ActionHash> => {
 //     return undefined
 //   }))
 
-$: editing,  error, loading, session, slot, notes;
+$: editing,  error, loading, slot, notes;
+$: myInterest = store.sessionInterestStore(session)
+
+const interestIcon = (interest) => {
+  switch (interest) {
+    case SessionInterest.NoOpinion: return faBookmark
+    case SessionInterest.Going: return faStar
+    case SessionInterest.Interested: return faBookmark
+  }
+}
 
 onMount(async () => {
   if (session === undefined) {
@@ -84,7 +94,7 @@ onMount(async () => {
 
 async function attendSession() {
   try {
-    await store.setSessionInterest($session.original_hash, SessionInterest.Going)
+    await store.setSessionInterest($session.original_hash, $myInterest == SessionInterest.NoOpinion ? SessionInterest.Going : SessionInterest.NoOpinion )
   } catch (e: any) {
     console.log("E", e)
 
@@ -133,9 +143,8 @@ async function deleteSession() {
     <h2 style="margin-left: 10px">{ entry.title }</h2>
 
     <span style="flex: 1"></span>
-
     <sl-button style="margin-left: 8px; " size=small on:click={attendSession} circle>
-      <Fa icon={faBookmark} />
+      <Fa icon={interestIcon($myInterest)} />
     </sl-button>
 
     <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
