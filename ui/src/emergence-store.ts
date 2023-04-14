@@ -252,6 +252,15 @@ export class EmergenceStore {
         length: length!,
       };
     const actionHash = await this.client.createTimeWindow(timeWindow)
+    await this.client.createRelations([
+        {   src: actionHash, // should be agent key
+            dst: actionHash,
+            content:  {
+                path: `feed.${FeedType.TimeWindowNew}`,
+                data: JSON.stringify(timeWindow)
+            }
+        },
+    ])
     this.fetchTimeWindows()
     return actionHash
   }
@@ -407,7 +416,6 @@ export class EmergenceStore {
 
     const me = this.myPubKey
     me[1] =33
-console.log("setting iterest to ", interest)
     await this.client.createRelations([
         {   src: sessionHash,
             dst: me,

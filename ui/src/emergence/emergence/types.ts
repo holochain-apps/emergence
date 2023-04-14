@@ -211,6 +211,7 @@ export enum FeedType {
    NoteNew,
    NoteUpdate,
    NoteDelete,
+   TimeWindowNew,
 }
 
 export interface FeedElem {
@@ -233,6 +234,7 @@ export const getTypeName = (type: FeedType) : string  => {
     case FeedType.NoteUpdate: return "Update Note"
     case FeedType.NoteDelete: return "Delete Note"
     case FeedType.SlotSession: return "Scheduled Session"
+    case FeedType.TimeWindowNew: return "New Slot"
   }
   return "Unknown feed type"
 }

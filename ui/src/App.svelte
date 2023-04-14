@@ -88,7 +88,6 @@
     <div id="content" style="display: flex; flex-direction: column; flex: 1;">
       {#if pane=="sessions"}
       <div class="pane">
-        <h3>Sessions List</h3>
         <AllSessions on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}></AllSessions>
         Create Session:
         <sl-button on:click={() => {creatingSession = true; } } circle>
@@ -115,7 +114,6 @@
 
       {#if pane=="spaces"}
       <div class="pane">
-        <h3>Spaces List</h3>
         <AllSpaces></AllSpaces>
         Create Space:
         <sl-button on:click={() => {creatingSpace = true; } } circle>
@@ -145,14 +143,12 @@
       {/if}
       {#if pane=="feed"}
       <div class="pane">
-        <h3>Feed</h3>
         <Feed></Feed>
       </div>
       {/if}
 
       {#if pane=="schedule"}
       <div class="pane">
-        <h3>Schedule</h3>
         <Schedule></Schedule>
       </div>
       {/if}
@@ -196,13 +192,13 @@
         >
            <Fa icon={faUser} size="2x"/>
         </div>
-        <div class="nav-button {pane=="admin"?"selected":""}"
+        <!-- <div class="nav-button {pane=="admin"?"selected":""}"
           title="Admin"
           on:keypress={()=>{pane='admin'}}
           on:click={()=>{pane='admin'}}
         >
            <Fa icon={faGear} size="2x"/>
-        </div>
+        </div> -->
       </div>
     </div>
     </profile-prompt>
@@ -229,6 +225,14 @@
     border: solid 1px;
     display: flex; flex-direction: column
   }
+  :global(.pane-contents) {
+    display: flex; flex-direction: column;
+  }
+  :global(.pane-header){
+    display: flex; flex-direction: row; justify-content:space-around; align-items: center;
+  }
+
+
   .nav {
     display: flex; flex-direction: row; flex: 1;
   }

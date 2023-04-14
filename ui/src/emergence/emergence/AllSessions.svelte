@@ -24,7 +24,11 @@ onMount(async () => {
 
 </script>
 
-{#if loading}
+<div class="pane-content">
+  <div class="pane-header">
+    <h3>Sessions List</h3>
+  </div>
+  {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
   <sl-spinner></sl-spinner>
 
@@ -34,12 +38,11 @@ onMount(async () => {
 {:else if $sessions.length === 0}
 <span>No sessions found.</span>
 {:else}
-<div style="display: flex; flex-direction: column">
   {#each $sessions as session}
     <div style="margin-bottom: 8px; width:500px">
       <SessionSummary on:session-selected={(event)=>{dispatch('session-selected', event.detail)}} session={session}></SessionSummary>
     </div>
   {/each}
-</div>
 {/if}
+</div>
 

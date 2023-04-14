@@ -1,19 +1,21 @@
 <script lang="ts">
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import { getTypeName, type FeedElem, FeedType, timeWindowStartToStr, timeWindowDurationToStr, sessionInterestToString } from './types';
+import { getTypeName, type FeedElem, FeedType, sessionInterestToString, timeWindowDurationToStr, timeWindowStartToStr } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
   import Avatar from './Avatar.svelte';
   import type { ActionHash } from '@holochain/client';
   import NoteDetail from './NoteDetail.svelte';
+  import Feed from './Feed.svelte';
+  import TimeWindowSummary from './TimeWindowSummary.svelte';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 const slotSummary = (detail: any) => {
-  return `into ${detail.space} for ${timeWindowStartToStr(feedElem.detail.window)} @ ${timeWindowDurationToStr(feedElem.detail.window)} `
+  return `into ${detail.space} for  `
 }
 
 const sessionTitle = (sessionHash: ActionHash) => {
@@ -49,10 +51,14 @@ const sessionTitle = (sessionHash: ActionHash) => {
     deleted space {feedElem.detail}
   {/if}
   {#if feedElem.type === FeedType.SlotSession}
-    scheduled {slotSummary(feedElem.detail)}
+    scheduled {sessionTitle(feedElem.about)} into {feedElem.detail.space} for <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary>
   {/if}
   {#if feedElem.type === FeedType.NoteNew}
   created note:
     <NoteDetail noteHash={feedElem.about} showAvatar={false}></NoteDetail>
+  {/if}
+  {#if feedElem.type === FeedType.TimeWindowNew}
+  created slot:
+    <TimeWindowSummary timeWindow={feedElem.detail}></TimeWindowSummary>
   {/if}
 </div>

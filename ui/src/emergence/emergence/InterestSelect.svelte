@@ -20,13 +20,12 @@ $: session = store.sessionStore(sessionHash)
 $: relData = store.sessionReleationDataStore(session)
 
 async function setSessionInterest(interest: SessionInterest) {
-  console.log("intyeXXXXXX",typeof(interest), interest)
 
   try {
     if (interest !== $relData.myInterest)
       await store.setSessionInterest($session.original_hash, interest )
   } catch (e: any) {
-    console.log("E", e)
+    console.log("SET SESSION INTEREST ERROR", e)
 
     errorSnackbar.labelText = `Error attending the session: ${e.data.data}`;
     errorSnackbar.show();

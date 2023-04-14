@@ -122,8 +122,8 @@ async function deleteSession() {
 ></SessionCrud>
 {:else}
 
-<div style="display: flex; flex-direction: column">
-  <div style="display: flex; flex-direction: row; justify-content:space-around; align-items: center;">
+<div class="pane-contents">
+  <div class="pane-header">
     <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('session-close') } } circle>
       <Fa icon={faCircleArrowLeft} />
     </sl-button>

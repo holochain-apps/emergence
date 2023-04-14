@@ -4,23 +4,34 @@
   import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import { timeWindowDurationToStr, timeWindowStartToStr, type Space, type TimeWindow, type Info } from './types';
+  import type {Space, TimeWindow, Info } from './types';
+  import CreateTimeWindow from './CreateTimeWindow.svelte';
+  import Fa from 'svelte-fa';
+  import { faCalendarPlus } from '@fortawesome/free-solid-svg-icons';
+  import TimeWindowSummary from './TimeWindowSummary.svelte';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
   let loading = true;
   let error: any = undefined;
-  let days: Array<Date> = []
+  let creatingTimeWindow = false
 
-  $: loading, error, days;
+  $: loading, error, creatingTimeWindow;
   $: spaces = store.spaces
   $: windows = store.timeWindows
-  onMount(async () => {
+  $: days = calcDays($windows) 
+
+  const calcDays = (windows): Array<Date> => {
+    const days = []
     const dayStrings = {}
     
-    $windows.forEach(w=>dayStrings[new Date(w.start).toDateString()] = new Date(w.start))
+    windows.forEach(w=>dayStrings[new Date(w.start).toDateString()] = new Date(w.start))
     Object.values(dayStrings).forEach((d:Date)=>days.push(d))
-    days.sort()
+    days.sort((a,b)=> a-b)
+    return days
+  }
+
+  onMount(async () => {
     loading = false
   });
   const sessionsInSpace = (window: TimeWindow, space: Info<Space>) => {
@@ -44,34 +55,51 @@
 {:else if error}
 <span>Error fetching the wall: {error.data.data}.</span>
 {:else}
-  {#each days.sort() as day}
-    {day.toDateString()}
-    <div style="display:grid; grid-template-columns:repeat({$spaces.length+1},1fr); ">
-      <div class="space-title"></div>
-      {#each $spaces as space}
-        <div class="space-title">
-        {space.record.entry.name}
-        </div>
-      {/each}
-      {#each $windows.filter(w=>{
-        // @ts-ignore
-        return new Date(w.start).toDateString()  == day.toDateString()
-      }).sort(sortWindows) as window}
-        <div class="time-title">{timeWindowStartToStr(window)} for {timeWindowDurationToStr(window)}</div>
+  <div class="pane-content">
+    <div class="pane-header">
+      <h3>Schedule</h3>
+      <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
+        <Fa icon={faCalendarPlus} />
+      </sl-button>
+      </div>
+
+    {#if creatingTimeWindow}
+    <div class="create">
+      <CreateTimeWindow on:timeWindow-created={()=>creatingTimeWindow=false}></CreateTimeWindow>
+    </div>
+    {/if}
+    {#each days as day}
+      {day.toDateString()}
+      <div style="display:grid; grid-template-columns:repeat({$spaces.length+1},1fr); ">
+        <div class="empty"></div>
         {#each $spaces as space}
-          <div class="scheduled-items">
-            {sessionsInSpace(window, space)}
+          <div class="space-title">
+          {space.record.entry.name}
           </div>
         {/each}
-      {/each}
-    </div>
-  {/each}
-{/if}
+        {#each $windows.filter(w=>{
+          // @ts-ignore
+          return new Date(w.start).toDateString()  == day.toDateString()
+        }).sort(sortWindows) as window}
+          <div class="time-title"><TimeWindowSummary timeWindow={window}></TimeWindowSummary></div>
+          {#each $spaces as space}
+            <div class="scheduled-items">
+              {sessionsInSpace(window, space)}
+            </div>
+          {/each}
+        {/each}
+      </div>
+    {/each}
+  </div>
+  {/if}
 <style>
  .space-title {
-  border: solid 1px
+  outline: solid 1px
  }
  .time-title {
-  border: solid 1px
+  outline: solid 1px;
+ }
+ .scheduled-items {
+  outline: solid 1px;
  }
 </style>

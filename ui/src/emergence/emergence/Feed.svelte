@@ -29,7 +29,10 @@
 {:else if $feed.length === 0}
 <span>No Activity</span>
 {:else}
-<div style="display: flex; flex-direction: column">
+<div class="pane-content">
+  <div class="pane-header">
+    <h3>Feed</h3>
+  </div>
   {#each $feed as f}
     <div style="margin-bottom: 8px; width:500px; background:lightgray">
       <FeedElemDetail feedElem={f}></FeedElemDetail>

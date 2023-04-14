@@ -32,7 +32,10 @@ onMount(async () => {
 {:else if $spaces.length === 0}
 <span>No spaces found.</span>
 {:else}
-<div style="display: flex; flex-direction: column">
+<div class="pane-content">
+  <div class="pane-header">
+    <h3>Spaces List</h3>
+  </div>
   {#each $spaces as space}
     <div style="margin-bottom: 8px; width:500px; background:lightgray">
       <SpaceDetail space={space}  on:space-deleted={() => store.fetchSpaces()}></SpaceDetail>

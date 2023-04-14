@@ -3,12 +3,10 @@ import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info, durationToStr, type Note } from './types';
+import type { Slot, Session, Info } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
-import Fa from 'svelte-fa'
-import { faTrash, faEdit, faPlus,  } from '@fortawesome/free-solid-svg-icons';
 
 const dispatch = createEventDispatcher();
 
@@ -41,9 +39,21 @@ onMount(async () => {
 <div class="summary" on:click={()=>{dispatch('session-selected', session); }}>
   <div class="slot">
     {#if slot}
-    Scheduled in {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"} on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
+    <div class="date">
+      {new Date(slot.window.start).toDateString().slice(0,10)}
+    </div>
+    <div class="time">
+      {new Date(slot.window.start).toTimeString().slice(0,5)}
+    </div>
+    <div class="space">
+      {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"} 
+    </div>
     {:else}
-    Space and Time TBA
+    <div class="date">
+      Slot TBA
+    </div>
+    <div class="time">--:--</div>
+    <div class="space">Space TBA</div>
     {/if}
   </div>
   <div class="info">
@@ -55,6 +65,12 @@ onMount(async () => {
 {/if}
 
 <style>
+  .time {
+    font-size: 1.6em;
+  }
+  .date, .space {
+    font-size: .9em;
+  }
   .summary {
     display: flex; flex-direction: row;
     border: solid 1px;
