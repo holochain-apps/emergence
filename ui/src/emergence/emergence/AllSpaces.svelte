@@ -22,25 +22,26 @@ onMount(async () => {
 
 </script>
 
-{#if loading}
-<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-  <sl-spinner></sl-spinner>
-
-</div>
-{:else if error}
-<span>Error fetching the spaces: {error.data.data}.</span>
-{:else if $spaces.length === 0}
-<span>No spaces found.</span>
-{:else}
 <div class="pane-content">
   <div class="pane-header">
     <h3>Spaces List</h3>
   </div>
-  {#each $spaces as space}
-    <div style="margin-bottom: 8px; width:500px; background:lightgray">
-      <SpaceDetail space={space}  on:space-deleted={() => store.fetchSpaces()}></SpaceDetail>
+
+  {#if loading}
+    <div style="display: flex; flex: 1; align-items: center; justify-content: center">
+      <sl-spinner></sl-spinner>
+
     </div>
-  {/each}
+  {:else if error}
+    <span>Error fetching the spaces: {error.data.data}.</span>
+  {:else if $spaces.length === 0}
+    <span>No spaces found.</span>
+  {:else}
+    {#each $spaces as space}
+      <div style="margin-bottom: 8px; width:500px; background:lightgray">
+        <SpaceDetail space={space}  on:space-deleted={() => store.fetchSpaces()}></SpaceDetail>
+      </div>
+    {/each}
+  {/if}
 </div>
-{/if}
 

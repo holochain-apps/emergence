@@ -95,7 +95,7 @@
         </sl-button>
 
         {#if creatingSession}
-          <div class="create"><SessionCrud
+          <div class="modal"><SessionCrud
             on:session-created={() => {creatingSession = false;} }
             on:edit-canceled={() => { creatingSession = false; } }
             ></SessionCrud></div>
@@ -121,7 +121,7 @@
         </sl-button>
     
         {#if creatingSpace}
-          <div class="create"><SpaceCrud
+          <div class="modal"><SpaceCrud
             on:space-created={() => {creatingSpace = false;} }
             on:edit-canceled={() => { creatingSpace = false; } }
             ></SpaceCrud></div>
@@ -216,7 +216,7 @@
   .pane {
     position: relative;
   }
-  :global(.create) {
+  :global(.modal) {
     background-color: white;
     padding: 10px;
     position: absolute;

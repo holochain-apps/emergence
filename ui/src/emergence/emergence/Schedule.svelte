@@ -64,7 +64,7 @@
       </div>
 
     {#if creatingTimeWindow}
-    <div class="create">
+    <div class="modal">
       <CreateTimeWindow on:timeWindow-created={()=>creatingTimeWindow=false}></CreateTimeWindow>
     </div>
     {/if}

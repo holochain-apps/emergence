@@ -1,16 +1,16 @@
 <script lang="ts">
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
 import { storeContext } from '../../contexts';
 import { amenitiesList, timeWindowDurationToStr, type Info, type Relation, type Space, timeWindowStartToStr } from './types';
-import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
-import '@shoelace-style/shoelace/dist/components/button/button.js';
 import Fa from 'svelte-fa'
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import SpaceCrud from './SpaceCrud.svelte'; 
 import type { EmergenceStore } from '../../emergence-store';
+import Confirm from './Confirm.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -22,10 +22,11 @@ let loading = true;
 let error: any = undefined;
 
 let editing = false;
+let showConfirm = false
 
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, space;
+$: editing,  error, loading, space, showConfirm;
 
 onMount(async () => {
   if (space === undefined) {
@@ -81,6 +82,13 @@ const relationSummary = (relation: Relation) : string => {
   on:edit-canceled={() => { editing = false; } }
 ></SpaceCrud>
 {:else}
+{#if showConfirm}
+<div class="modal">
+  <Confirm message="This will remove this space for everyone!" 
+    on:confirm-canceled={()=>showConfirm=false} 
+    on:confirm-confirmed={deleteSpace}></Confirm>
+</div>
+{/if}
 
 <div style="display: flex; flex-direction: column">
   <div style="display: flex; flex-direction: row">
@@ -88,7 +96,7 @@ const relationSummary = (relation: Relation) : string => {
     <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
       <Fa icon={faEdit} />
     </sl-button>
-    <sl-button style="margin-left: 8px;" size=small on:click={() => deleteSpace()} circle>
+    <sl-button style="margin-left: 8px;" size=small on:click={() => showConfirm=true} circle>
       <Fa icon={faTrash} />
     </sl-button>
   </div>

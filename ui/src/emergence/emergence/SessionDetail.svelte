@@ -16,6 +16,7 @@ import type { ActionHash } from '@holochain/client';
 import NoteDetail from './NoteDetail.svelte';
 import Avatar from './Avatar.svelte';
   import InterestSelect from './InterestSelect.svelte';
+  import Confirm from './Confirm.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -28,6 +29,7 @@ let error: any = undefined;
 
 let editing = false;
 let creatingNote = false;
+let showConfirm = false
 
 let errorSnackbar: Snackbar;
 
@@ -137,11 +139,15 @@ async function deleteSession() {
       <Fa icon={faEdit} />
     </sl-button>
 
-    <sl-button style="margin-left: 8px;" size=small on:click={deleteSession} circle>
+    <sl-button style="margin-left: 8px;" size=small on:click={()=>showConfirm=true} circle>
       <Fa icon={faTrash} />
     </sl-button>
   </div>
-
+  {#if showConfirm}
+    <div class="modal">
+      <Confirm message="This will remove this session for everyone!" on:confirm-canceled={()=>showConfirm=false} on:confirm-confirmed={deleteSession}></Confirm>
+    </div>
+  {/if}
   <div class="details">
     <div class="properties">
       <div style="display: flex; flex-direction: row; margin-bottom: 16px">
@@ -210,7 +216,7 @@ async function deleteSession() {
   </sl-button>
 
   {#if creatingNote}
-  <div class="create">
+  <div class="modal">
     <NoteCrud sessionHash={$session.original_hash}
       on:note-created={() => {creatingNote = false;} }
       on:edit-canceled={() => { creatingNote = false; } }
