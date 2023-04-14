@@ -14,7 +14,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 
 TimeAgo.addDefaultLocale(en)
@@ -146,20 +146,41 @@ export class EmergenceStore {
     return undefined
   }
 
-  sessionInterestStore(sessionStore: Readable<Info<Session>>) : Readable<SessionInterest> {
+  sessionReleationDataStore(sessionStore: Readable<Info<Session>>) : Readable<SessionRelationData> {
     return derived(sessionStore, $session=> {
-        let interest = SessionInterest.NoOpinion
-        for (const r of $session.relations ) {
+        const rel: SessionRelationData = {
+            myInterest: SessionInterest.NoOpinion,
+            interest: new HoloHashMap(),
+            slot: undefined
+        }
+        const spaces = $session.relations.filter(r=>r.content.path === "session.space")
+        if (spaces.length > 0) {
+          let r = spaces[spaces.length-1]
+          const window = JSON.parse(r.content.data) as TimeWindow
+                  rel.slot = {
+                      space: r.dst,
+                      window
+                  }
+        }
+
+        const interest = $session.relations.filter(r=>r.content.path === "session.interest")
+        interest.forEach(r=>{
             const who = r.dst
             who[1] = 32 //temporary workaround because of linkable hash problem
-            if (r.content.path == "session.interest"  && encodeHashToBase64(who) === this.myPubKeyBase64) {
-                interest = JSON.parse(r.content.data)
+            const whoB64 = encodeHashToBase64(who)
+            const i : SessionInterest = JSON.parse(r.content.data)
+            if (whoB64 === this.myPubKeyBase64) {
+                rel.myInterest = i
             }
-        }
-        return interest    
+            console.log("Interested party:", whoB64, r.content,i )
+            rel.interest.set(who, i)
+            console.log("get party:", rel.interest.get(who))
+
+        })
+
+        return rel
       })
   }
-
 
   sessionSlotStore(sessionStore: Readable<Info<Session>>) : Readable<Slot|undefined> {
     return derived(sessionStore, $session=> {
@@ -387,7 +408,7 @@ export class EmergenceStore {
   async setSessionInterest(sessionHash: ActionHash, interest: SessionInterest) {
     const me = this.myPubKey
     me[1] =33
-
+console.log("setting iterest to ", interest)
     await this.client.createRelations([
         {   src: sessionHash,
             dst: me,

@@ -8,12 +8,14 @@ import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, am
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
-import { faTrash, faEdit, faPlus, faCircleArrowLeft, faBookmark, faStar } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit, faPlus, faCircleArrowLeft, faBookmark, faStar, faUserGroup } from '@fortawesome/free-solid-svg-icons';
 
 import SessionCrud from './SessionCrud.svelte';
 import NoteCrud from './NoteCrud.svelte';
-import { encodeHashToBase64, type ActionHash } from '@holochain/client';
+import {  encodeHashToBase64, type ActionHash } from '@holochain/client';
 import NoteDetail from './NoteDetail.svelte';
+import Avatar from './Avatar.svelte';
+  import InterestSelect from './InterestSelect.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -75,11 +77,12 @@ const sessionNotes = (session: Info<Session>):Array<ActionHash> => {
 //     return undefined
 //   }))
 
-$: editing,  error, loading, slot, notes;
-$: myInterest = store.sessionInterestStore(session)
+$: editing,  error, loading, slot, notes, session;
+$: relData = store.sessionReleationDataStore(session)
 
 const interestIcon = (interest) => {
   switch (interest) {
+    case undefined:
     case SessionInterest.NoOpinion: return faBookmark
     case SessionInterest.Going: return faStar
     case SessionInterest.Interested: return faBookmark
@@ -92,9 +95,15 @@ onMount(async () => {
   }
 });
 
-async function attendSession() {
+async function setSessionInterest(interest: SessionInterest) {
   try {
-    await store.setSessionInterest($session.original_hash, $myInterest == SessionInterest.NoOpinion ? SessionInterest.Going : SessionInterest.NoOpinion )
+    if ($relData.interest.size >0) {
+    console.log("Current keys", Array.from($relData.interest.keys())[0], encodeHashToBase64(Array.from($relData.interest.keys())[0]))
+    }
+    console.log("Current Interest", $relData.interest.get(store.myPubKey), encodeHashToBase64(store.myPubKey))
+    console.log("New Interest", interest)
+    if (interest !== $relData.interest.get(store.myPubKey))
+      await store.setSessionInterest($session.original_hash, interest )
   } catch (e: any) {
     console.log("E", e)
 
@@ -112,6 +121,8 @@ async function deleteSession() {
     errorSnackbar.show();
   }
 }
+
+
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -143,9 +154,8 @@ async function deleteSession() {
     <h2 style="margin-left: 10px">{ entry.title }</h2>
 
     <span style="flex: 1"></span>
-    <sl-button style="margin-left: 8px; " size=small on:click={attendSession} circle>
-      <Fa icon={interestIcon($myInterest)} />
-    </sl-button>
+    <InterestSelect sessionHash={sessionHash}></InterestSelect>
+  
 
     <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
       <Fa icon={faEdit} />
@@ -155,51 +165,62 @@ async function deleteSession() {
       <Fa icon={faTrash} />
     </sl-button>
   </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Key:</strong></span>
-    <span style="white-space: pre-line">{ entry.key }</span>
-  </div>
 
+  <div class="details">
+    <div class="properties">
+      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+        <span style="margin-right: 4px"><strong>Key:</strong></span>
+        <span style="white-space: pre-line">{ entry.key }</span>
+      </div>
 
+      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+        <span style="margin-right: 4px"><strong>Description:</strong></span>
+        <span style="white-space: pre-line">{ entry.description }</span>
+      </div>
 
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Description:</strong></span>
-    <span style="white-space: pre-line">{ entry.description }</span>
-  </div>
+      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+        <span style="margin-right: 4px"><strong>Leaders:</strong></span>
+        {#each entry.leaders as leader}
+          <Avatar agentPubKey={leader}></Avatar>
+        {/each}
+      </div>
 
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Leaders:</strong></span>
-    {#each entry.leaders as leader}
-    <div style="margin:0 10px 0 10px; border:solid 1px; border-radius:50%; width:40px; height:40px;     display: flex;
-      justify-content: center;
-      flex-direction: column;
-      ">{encodeHashToBase64(leader).slice(-5)}</div>
-      {/each}
-  </div>
+      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+        <span style="margin-right: 4px"><strong>Smallest Group Size:</strong></span>
+        <span style="white-space: pre-line">{ entry.smallest }</span>
+      </div>
+      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+        <span style="margin-right: 4px"><strong>Largest Group Size:</strong></span>
+        <span style="white-space: pre-line">{ entry.largest }</span>
+      </div>
+      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+        <span style="margin-right: 4px"><strong>Duration:</strong></span>
+        <span style="white-space: pre-line">{ durationToStr(entry.duration) }</span>
+      </div>
+      
+      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+        <span style="margin-right: 4px"><strong>Required Amenities:</strong></span>
+        <span style="white-space: pre-line">
+          {amenitiesList(entry.amenities).join(", ")}
+        </span>
+      </div>
+      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+        {#if slot}
+        Scheduled in {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"} on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
+        {/if}
+      </div>
+    </div>
 
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Smallest Group Size:</strong></span>
-    <span style="white-space: pre-line">{ entry.smallest }</span>
-  </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Largest Group Size:</strong></span>
-    <span style="white-space: pre-line">{ entry.largest }</span>
-  </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Duration:</strong></span>
-    <span style="white-space: pre-line">{ durationToStr(entry.duration) }</span>
-  </div>
-  
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Required Amenities:</strong></span>
-    <span style="white-space: pre-line">
-      {amenitiesList(entry.amenities).join(", ")}
-    </span>
-  </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    {#if slot}
-    Scheduled in {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"} on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
-    {/if}
+    <div class="stats">
+      <div>
+        Total Interested: <Fa icon={faUserGroup} /> {$relData.interest.size} 
+      </div>
+      <div>
+        Attenders: {#each Array.from($relData.interest.entries()).filter(([key,value])=>value==SessionInterest.Going) as [key,value]}
+          <Avatar agentPubKey={key}></Avatar>
+        {/each}
+      </div>
+    </div>
   </div>
   <div class="notes">
     {#each notes as note}
@@ -227,6 +248,24 @@ async function deleteSession() {
 <style>
   .notes{
     border-top: solid 1px;
+  }
+  .details {
+    display: flex;
+    flex-direction: row; 
+    align-items: flex-start;
+    margin-bottom: 16px;
+    justify-content: space-between;
+  }
+  .properties {
+    display: flex;
+    flex-direction: column; 
+    margin-bottom: 16px;
+  }
+  .stats {
+    display: flex;
+    flex-direction: column; 
+    align-items: center;
+    margin-bottom: 16px;
   }
 
   .note{

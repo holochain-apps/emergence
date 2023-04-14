@@ -1,4 +1,4 @@
-import type { EntryRecord } from '@holochain-open-dev/utils';
+import type { EntryRecord, HoloHashMap } from '@holochain-open-dev/utils';
 import { 
   type Record, 
   type ActionHash,
@@ -160,6 +160,7 @@ export const sessionInterestToString = (interest: SessionInterest) : string=> {
     case SessionInterest.Interested: return "Interested"
     case SessionInterest.Going: return "Going"
   }
+  return "FISH"
 }
 
 export const Amenities = [
@@ -187,6 +188,12 @@ export const setAmenity = (amenities:number, i:number, value:boolean) : number =
     amenities &= ~(1 << i)
   }
   return amenities
+}
+
+export interface SessionRelationData {
+  myInterest: SessionInterest
+  interest: HoloHashMap<AgentPubKey,SessionInterest>,
+  slot: undefined | Slot
 }
 
 export enum FeedType {

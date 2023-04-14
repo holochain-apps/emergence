@@ -13,6 +13,7 @@
     import type { EmergenceStore } from '../../emergence-store';
   import NoteDetail from './NoteDetail.svelte';
   import SessionSummary from './SessionSummary.svelte';
+  import Avatar from './Avatar.svelte';
   
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
   
@@ -27,7 +28,7 @@
 
 </script>
 {#if $myProfile.status === "complete"  && $myProfile.value}
-    <div class="header"><h3>{$myProfile.value.nickname}</h3>
+    <div class="header"><h3><Avatar agentPubKey={store.myPubKey}></Avatar>{$myProfile.value.nickname}</h3>
         <sl-button style="margin-left: 8px;" size=small on:click={() => editProfile=true} circle>
             <Fa icon={faEdit} />
         </sl-button>
