@@ -72,10 +72,10 @@
 </div>
 <div style="margin-bottom: 16px">
   <sl-select bind:this={windowSelect}
-    label="Time Window"
+    label="Time Slot"
     on:sl-change={(e) => doSelectWindow(e.target.value) }
   >
-  <sl-option value="">No Time Window Selected</sl-option>
+  <sl-option value="">No Slot Selected</sl-option>
   {#each $windows as window}
     <sl-option value={JSON.stringify(window)}>{timeWindowStartToStr(window)} {timeWindowDurationToStr(window)}</sl-option>
   {/each}
