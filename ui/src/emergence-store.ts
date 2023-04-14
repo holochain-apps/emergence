@@ -172,10 +172,7 @@ export class EmergenceStore {
             if (whoB64 === this.myPubKeyBase64) {
                 rel.myInterest = i
             }
-            console.log("Interested party:", whoB64, r.content,i )
             rel.interest.set(who, i)
-            console.log("get party:", rel.interest.get(who))
-
         })
 
         return rel
@@ -302,6 +299,7 @@ export class EmergenceStore {
             updated_largest: sessionEntry.largest,
             updated_duration: sessionEntry.duration,
             updated_amenities: sessionEntry.amenities,
+            updated_trashed: sessionEntry.trashed,
         };
 
         if (props.hasOwnProperty("title")) {
@@ -340,10 +338,10 @@ export class EmergenceStore {
                 changes.push(`amenities`)
             }
         }
-        if (props.hasOwnProperty("amenities")) {
-            if (sessionEntry.amenities != props.amenities) {
-                update.updated_amenities = props.amenities
-                changes.push(`amenities`)
+        if (props.hasOwnProperty("trashed")) {
+            if (sessionEntry.trashed != props.trashed) {
+                update.updated_trashed = props.trashed
+                changes.push(`trashed`)
             }
         }
         let doSlot = false
@@ -406,6 +404,8 @@ export class EmergenceStore {
   }
 
   async setSessionInterest(sessionHash: ActionHash, interest: SessionInterest) {
+    console.log("intyeXXXXXX",typeof(interest))
+
     const me = this.myPubKey
     me[1] =33
 console.log("setting iterest to ", interest)
@@ -459,31 +459,56 @@ console.log("setting iterest to ", interest)
     return record
   }
 
-  async updateSpace(spaceHash: ActionHash, name: string, description: string, capacity: number, amenities: number): Promise<EntryRecord<Space>> {
+  async updateSpace(spaceHash: ActionHash, props:any): Promise<EntryRecord<Space>> {
     const idx = this.getSpaceIdx(spaceHash)
     if (idx >= 0) {
         const space = get(this.spaces)[idx]
+        const spaceEntry = space.record.entry
 
-        const updatedSpace: UpdateSpaceInput = {
+        let changes = []
+        const update: UpdateSpaceInput = {
             original_space_hash: spaceHash,
             previous_space_hash: space.record.actionHash,
             updated_space: {
-                name,description,amenities,capacity
+                name:spaceEntry.name,
+                description: spaceEntry.description,
+                amenities: spaceEntry.amenities,
+                capacity: spaceEntry.capacity,
+                trashed: spaceEntry.trashed,
             }
         }
-        const spaceEntry = space.record.entry
-        let changes = []
-        if (spaceEntry.name != name) {
-            changes.push(`name -> ${name}`)
+        if (props.hasOwnProperty("name")) {
+            if (spaceEntry.name != props.name) {
+                update.updated_space.name = props.name
+                changes.push(`name -> ${props.name}`)
+            }
         }
-        if (spaceEntry.description != description) {
-            changes.push(`description`)
+        if (props.hasOwnProperty("description")) {
+            if (spaceEntry.description != props.description) {
+                update.updated_space.description = props.description
+                changes.push(`description -> ${props.description}`)
+            }
         }
-        if (spaceEntry.amenities != amenities) {
-            changes.push(`amenities`)
+        if (props.hasOwnProperty("amenities")) {
+            if (spaceEntry.amenities != props.amenities) {
+                update.updated_space.amenities = props.amenities
+                changes.push(`amenities -> ${props.amenities}`)
+            }
+        }
+        if (props.hasOwnProperty("capacity")) {
+            if (spaceEntry.capacity != props.capacity) {
+                update.updated_space.capacity = props.capacity
+                changes.push(`capacity -> ${props.capacity}`)
+            }
+        }
+        if (props.hasOwnProperty("trashed")) {
+            if (spaceEntry.trashed != props.trashed) {
+                update.updated_space.trashed = props.trashed
+                changes.push(`trashed -> ${props.trashed}`)
+            }
         }
         if (changes.length > 0) {
-            const record = await this.client.updateSpace(updatedSpace)
+            const record = await this.client.updateSpace(update)
             this.client.createRelations([
                 {   src: record.actionHash, // should be agent key
                     dst: record.actionHash,

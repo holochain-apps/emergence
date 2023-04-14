@@ -6,6 +6,7 @@ pub struct Space {
     pub description: String,
     pub capacity: u32,
     pub amenities: u32,
+    pub trashed: bool,
 }
 pub fn validate_create_space(
     _action: EntryCreationAction,

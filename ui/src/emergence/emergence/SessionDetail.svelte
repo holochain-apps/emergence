@@ -8,11 +8,11 @@ import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, am
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
-import { faTrash, faEdit, faPlus, faCircleArrowLeft, faBookmark, faStar, faUserGroup } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit, faPlus, faCircleArrowLeft,faUserGroup } from '@fortawesome/free-solid-svg-icons';
 
 import SessionCrud from './SessionCrud.svelte';
 import NoteCrud from './NoteCrud.svelte';
-import {  encodeHashToBase64, type ActionHash } from '@holochain/client';
+import type { ActionHash } from '@holochain/client';
 import NoteDetail from './NoteDetail.svelte';
 import Avatar from './Avatar.svelte';
   import InterestSelect from './InterestSelect.svelte';
@@ -80,41 +80,17 @@ const sessionNotes = (session: Info<Session>):Array<ActionHash> => {
 $: editing,  error, loading, slot, notes, session;
 $: relData = store.sessionReleationDataStore(session)
 
-const interestIcon = (interest) => {
-  switch (interest) {
-    case undefined:
-    case SessionInterest.NoOpinion: return faBookmark
-    case SessionInterest.Going: return faStar
-    case SessionInterest.Interested: return faBookmark
-  }
-}
-
 onMount(async () => {
   if (session === undefined) {
     throw new Error(`The session input is required for the SessionDetail element`);
   }
 });
 
-async function setSessionInterest(interest: SessionInterest) {
-  try {
-    if ($relData.interest.size >0) {
-    console.log("Current keys", Array.from($relData.interest.keys())[0], encodeHashToBase64(Array.from($relData.interest.keys())[0]))
-    }
-    console.log("Current Interest", $relData.interest.get(store.myPubKey), encodeHashToBase64(store.myPubKey))
-    console.log("New Interest", interest)
-    if (interest !== $relData.interest.get(store.myPubKey))
-      await store.setSessionInterest($session.original_hash, interest )
-  } catch (e: any) {
-    console.log("E", e)
-
-    errorSnackbar.labelText = `Error attending the session: ${e.data.data}`;
-    errorSnackbar.show();
-  }
-}
-
 async function deleteSession() {
   try {
-    await store.deleteSession($session.original_hash)
+    //await store.deleteSession($session.original_hash)
+    const updateRecord = await store.updateSession($session.original_hash, {trashed: true})
+
     dispatch('session-deleted', { sessionHash: $session.original_hash });
   } catch (e: any) {
     errorSnackbar.labelText = `Error deleting the session: ${e.data.data}`;

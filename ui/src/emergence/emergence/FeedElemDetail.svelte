@@ -36,7 +36,7 @@ const sessionTitle = (sessionHash: ActionHash) => {
     Deleted session: {feedElem.detail}
   {/if}
   {#if feedElem.type === FeedType.SessionSetInterest}
-    set interest in {sessionTitle(feedElem.about)} to {sessionInterestToString(feedElem.detail)} 
+    set interest in {sessionTitle(feedElem.about)} to {sessionInterestToString(feedElem.detail)}
   {/if}
   {#if feedElem.type === FeedType.SpaceNew}
     created space: {feedElem.detail}

@@ -45,6 +45,7 @@ pub struct UpdateSessionInput {
     pub updated_smallest: u32,
     pub updated_largest: u32,
     pub updated_duration: u32,
+    pub updated_trashed: bool,
 }
 #[hdk_extern]
 pub fn update_session(input: UpdateSessionInput) -> ExternResult<Record> {
@@ -66,6 +67,7 @@ pub fn update_session(input: UpdateSessionInput) -> ExternResult<Record> {
             smallest: input.updated_smallest,
             largest: input.updated_largest,
             duration: input.updated_duration,
+            trashed: input.updated_trashed,
         },
     )?;
     create_link(

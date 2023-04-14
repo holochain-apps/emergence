@@ -36,7 +36,8 @@ onMount(async () => {
 
 async function deleteSpace() {
   try {
-    await store.deleteSpace(space.original_hash)
+    // await store.deleteSpace(space.original_hash)
+    await store.updateSpace(space.original_hash, {trashed:true})
     dispatch('space-deleted', { spaceHash: space.original_hash });
   } catch (e: any) {
     errorSnackbar.labelText = `Error deleting the space: ${e.data.data}`;

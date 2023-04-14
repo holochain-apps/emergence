@@ -20,6 +20,8 @@ $: session = store.sessionStore(sessionHash)
 $: relData = store.sessionReleationDataStore(session)
 
 async function setSessionInterest(interest: SessionInterest) {
+  console.log("intyeXXXXXX",typeof(interest), interest)
+
   try {
     if (interest !== $relData.myInterest)
       await store.setSessionInterest($session.original_hash, interest )
@@ -35,8 +37,8 @@ async function setSessionInterest(interest: SessionInterest) {
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 <sl-select 
-value={$relData.myInterest}
-on:sl-change={(e) => setSessionInterest(e.target.value) }
+value={`${$relData.myInterest}`}
+on:sl-change={(e) => setSessionInterest(parseInt(e.target.value)) }
 >
   <sl-option value={SessionInterest.NoOpinion}><Fa slot="prefix" icon={faBookmark} /> No Opinion</sl-option>
   <sl-option value={SessionInterest.Going}><Fa slot="prefix" icon={faStar} />Going</sl-option>

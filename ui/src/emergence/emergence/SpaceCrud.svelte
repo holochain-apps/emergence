@@ -41,7 +41,7 @@ onMount(() => {
 
 async function updateSpace() {
   if (space) {
-    const updateRecord = await store.updateSpace(space.original_hash, name!, description, capacity, amenities)
+    const updateRecord = await store.updateSpace(space.original_hash, {name, description, capacity, amenities})
     if (updateRecord) {
       dispatch('space-updated', { actionHash: updateRecord.actionHash });
     } else {

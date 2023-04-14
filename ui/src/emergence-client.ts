@@ -86,6 +86,7 @@ export class EmergenceClient {
         largest,
         duration,
         amenities,
+        trashed: false
       };
     
     return new EntryRecord(await this.callZome('create_session', sessionEntry))
@@ -107,12 +108,12 @@ export class EmergenceClient {
         record: new EntryRecord(r.record), 
         relations: r.relations}
         return info
-    });
+    }).filter(r=>!r.record.entry.trashed);
   }
 
   async createSpace(name: string, description:string, capacity:number, amenities: number) : Promise<EntryRecord<Space>> {
     const spaceEntry: Space = { 
-        name, description, capacity, amenities
+        name, description, capacity, amenities, trashed: false
       };
     
     return new EntryRecord(await this.callZome('create_space', spaceEntry))
@@ -134,7 +135,7 @@ export class EmergenceClient {
         record: new EntryRecord(r.record), 
         relations: r.relations}
         return info
-    });
+    }).filter(r=>!r.record.entry.trashed);
   }
 
   async createNote(text: string) : Promise<EntryRecord<Note>> {

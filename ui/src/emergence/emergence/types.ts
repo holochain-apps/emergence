@@ -53,6 +53,7 @@ export interface Session {
   largest: number;
   duration: number;
   amenities: number;
+  trashed: boolean;
 }
 
 export interface Info<T> {
@@ -78,6 +79,7 @@ export interface UpdateSessionInput {
   updated_largest: number;
   updated_duration: number;
   updated_amenities: number,
+  updated_trashed: boolean,
 }
 
 export interface Space { 
@@ -85,6 +87,7 @@ export interface Space {
   description: string;
   capacity: number;
   amenities: number;
+  trashed: boolean;
 }
 
 
@@ -160,7 +163,7 @@ export const sessionInterestToString = (interest: SessionInterest) : string=> {
     case SessionInterest.Interested: return "Interested"
     case SessionInterest.Going: return "Going"
   }
-  return "FISH"
+  return `unknown session interest type:${interest}`
 }
 
 export const Amenities = [
