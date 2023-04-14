@@ -404,7 +404,6 @@ export class EmergenceStore {
   }
 
   async setSessionInterest(sessionHash: ActionHash, interest: SessionInterest) {
-    console.log("intyeXXXXXX",typeof(interest))
 
     const me = this.myPubKey
     me[1] =33

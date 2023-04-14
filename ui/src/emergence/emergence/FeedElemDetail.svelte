@@ -7,6 +7,7 @@ import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
   import Avatar from './Avatar.svelte';
   import type { ActionHash } from '@holochain/client';
+  import NoteDetail from './NoteDetail.svelte';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -49,5 +50,9 @@ const sessionTitle = (sessionHash: ActionHash) => {
   {/if}
   {#if feedElem.type === FeedType.SlotSession}
     scheduled {slotSummary(feedElem.detail)}
+  {/if}
+  {#if feedElem.type === FeedType.NoteNew}
+  created note:
+    <NoteDetail noteHash={feedElem.about} showAvatar={false}></NoteDetail>
   {/if}
 </div>
