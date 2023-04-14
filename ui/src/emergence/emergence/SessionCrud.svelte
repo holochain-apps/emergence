@@ -48,6 +48,8 @@ onMount(() => {
     duration = session.record.entry.duration
 
     slot = store.getSessionSlot(session)
+  } else {
+    leaders = [store.myPubKey]
   }
 });
 

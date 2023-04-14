@@ -7,6 +7,7 @@ import type { Slot, Session, Info } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
+  import Avatar from './Avatar.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -57,8 +58,16 @@ onMount(async () => {
     {/if}
   </div>
   <div class="info">
-    <span style="margin-right: 4px"><strong>Title:</strong></span>
-    <span style="white-space: pre-line">{ session.record.entry.title }</span>
+    <div>
+      <span style="margin-right: 4px"><strong>Title:</strong></span>
+      <span style="white-space: pre-line">{ session.record.entry.title }</span>
+    </div>
+    <div>
+      <span style="margin-right: 4px"><strong>Leaders:</strong></span>
+        {#each session.record.entry.leaders as leader}
+         <Avatar agentPubKey={leader}></Avatar>
+        {/each}
+    </div>
   </div>
 
 </div>

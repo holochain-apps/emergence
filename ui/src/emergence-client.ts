@@ -111,9 +111,9 @@ export class EmergenceClient {
     }).filter(r=>!r.record.entry.trashed);
   }
 
-  async createSpace(name: string, description:string, capacity:number, amenities: number) : Promise<EntryRecord<Space>> {
+  async createSpace(name: string, description:string, stewards:Array<AgentPubKey>, capacity:number, amenities: number) : Promise<EntryRecord<Space>> {
     const spaceEntry: Space = { 
-        name, description, capacity, amenities, trashed: false
+        name, description, stewards, capacity, amenities, trashed: false
       };
     
     return new EntryRecord(await this.callZome('create_space', spaceEntry))

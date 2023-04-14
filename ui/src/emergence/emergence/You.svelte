@@ -11,9 +11,9 @@
     import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
-  import NoteDetail from './NoteDetail.svelte';
-  import SessionSummary from './SessionSummary.svelte';
-  import Avatar from './Avatar.svelte';
+    import NoteDetail from './NoteDetail.svelte';
+    import SessionSummary from './SessionSummary.svelte';
+    import Avatar from './Avatar.svelte';
   
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
   

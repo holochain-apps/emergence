@@ -11,6 +11,7 @@ import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import SpaceCrud from './SpaceCrud.svelte'; 
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
+  import Avatar from './Avatar.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -109,6 +110,13 @@ const relationSummary = (relation: Relation) : string => {
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Description:</strong></span>
     <span style="white-space: pre-line">{ space.record.entry.description }</span>
+  </div>
+
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Stewards:</strong></span>
+    {#each space.record.entry.stewards as steward}
+      <Avatar agentPubKey={steward}></Avatar>
+    {/each}
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">

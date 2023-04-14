@@ -85,6 +85,7 @@ export interface UpdateSessionInput {
 export interface Space { 
   name: string;
   description: string;
+  stewards: Array<AgentPubKey>;
   capacity: number;
   amenities: number;
   trashed: boolean;

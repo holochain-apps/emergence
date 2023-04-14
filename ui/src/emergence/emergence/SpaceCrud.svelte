@@ -22,12 +22,13 @@ export let space: Info<Space>|undefined = undefined;  // set this if update
 
 let name: string = '';
 let description: string = '';
+let stewards:Array<AgentPubKey> = []
 let amenities: number = 0;
 let capacity: number = 0;
 
 let errorSnackbar: Snackbar;
 
-$: name, description, amenities;
+$: name, description, stewards, amenities;
 $: isSpaceValid = true && name !== '' && description !== '' && capacity > 0;
 
 onMount(() => {
@@ -35,13 +36,14 @@ onMount(() => {
     name = space.record.entry.name
     amenities = space.record.entry.amenities
     description = space.record.entry.description
+    stewards = space.record.entry.stewards
     capacity = space.record.entry.capacity
   }
 });
 
 async function updateSpace() {
   if (space) {
-    const updateRecord = await store.updateSpace(space.original_hash, {name, description, capacity, amenities})
+    const updateRecord = await store.updateSpace(space.original_hash, {name, description, stewards, capacity, amenities})
     if (updateRecord) {
       dispatch('space-updated', { actionHash: updateRecord.actionHash });
     } else {
@@ -52,7 +54,7 @@ async function updateSpace() {
 
 async function createSpace() {  
   try {
-    const record = await store.createSpace(name, description, capacity, amenities)
+    const record = await store.createSpace(name, description, stewards, capacity, amenities)
 
     name = ""
     description = ""
