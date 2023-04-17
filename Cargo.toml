@@ -24,3 +24,9 @@ path = "dnas/emergence/zomes/coordinator/profiles"
 
 [workspace.dependencies.profiles_integrity]
 path = "dnas/emergence/zomes/integrity/profiles"
+
+[workspace.dependencies.file_storage]
+path = "dnas/emergence/zomes/coordinator/file_storage"
+
+[workspace.dependencies.file_storage_integrity]
+path = "dnas/emergence/zomes/integrity/file_storage"

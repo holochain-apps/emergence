@@ -13,10 +13,12 @@
   import Fa from 'svelte-fa'
   import { faMap, faTicket, faUser, faGear, faRss, faCalendar, faPlus } from '@fortawesome/free-solid-svg-icons';
 
-  import "@holochain-open-dev/profiles/elements/profiles-context.js";
-  import "@holochain-open-dev/profiles/elements/profile-prompt.js";
-  import "@holochain-open-dev/profiles/elements/my-profile.js";
-  import "@holochain-open-dev/profiles/elements/list-profiles.js";
+  import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
+  import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
+  import "@holochain-open-dev/profiles/dist/elements/my-profile.js";
+  import "@holochain-open-dev/profiles/dist/elements/list-profiles.js";
+  import "@holochain-open-dev/file-storage/dist/elements/file-storage-context.js";
+  import { FileStorageClient } from "@holochain-open-dev/file-storage";
 
   import { clientContext, storeContext } from './contexts';
   import CreateTimeWindow from './emergence/emergence/CreateTimeWindow.svelte';
@@ -30,6 +32,7 @@
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
+  let fileStorageClient: FileStorageClient | undefined;
   let loading = true;
   let pane = "sessions"
   let profilesStore: ProfilesStore | undefined
@@ -37,7 +40,7 @@
   let creatingSession = false
   let selectedSession: Info<Session>|undefined = undefined
 
-  $: client, store, loading, creatingSession, creatingSpace;
+  $: client, fileStorageClient, store, loading, creatingSession, creatingSpace;
   $: prof = profilesStore ? profilesStore.myProfile : undefined
 
   onMount(async () => {
@@ -56,6 +59,9 @@
     profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
       avatarMode: "avatar-optional",
     });
+
+    fileStorageClient = new FileStorageClient(client, 'emergence');
+
     store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, client.myPubKey)
     loading = false;
   });
@@ -85,6 +91,7 @@
     {/if}
 
     <profile-prompt>
+      <file-storage-context client={fileStorageClient}>
     <div id="content" style="display: flex; flex-direction: column; flex: 1;">
       {#if pane=="sessions"}
       <div class="pane">
@@ -201,6 +208,7 @@
         </div> -->
       </div>
     </div>
+    </file-storage-context>
     </profile-prompt>
   </profiles-context>
   {/if}

@@ -5,18 +5,15 @@ import { getTypeName, type FeedElem, FeedType, sessionInterestToString, timeWind
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
-  import Avatar from './Avatar.svelte';
-  import type { ActionHash } from '@holochain/client';
-  import NoteDetail from './NoteDetail.svelte';
-  import Feed from './Feed.svelte';
-  import TimeWindowSummary from './TimeWindowSummary.svelte';
+import Avatar from './Avatar.svelte';
+import type { ActionHash } from '@holochain/client';
+import NoteDetail from './NoteDetail.svelte';
+import TimeWindowSummary from './TimeWindowSummary.svelte';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
-const slotSummary = (detail: any) => {
-  return `into ${detail.space} for  `
-}
+$: profiles = store.profilesStore
 
 const sessionTitle = (sessionHash: ActionHash) => {
   const session = store.getSession(sessionHash)
@@ -25,10 +22,13 @@ const sessionTitle = (sessionHash: ActionHash) => {
   }
   return "<deleted session>"
 }
+
+
 </script>
 
 <div style="display: flex; flex-direction: row; align-items :center">
   <Avatar agentPubKey={feedElem.author} size={25}></Avatar> 
+  <!-- {JSON.stringify(profiles.profiles.get(feedElem.author))} -->
   {#if feedElem.type === FeedType.SessionNew}
     created session: {feedElem.detail}
   {/if}

@@ -5,6 +5,7 @@ import {
     type ActionHash,
     type AgentPubKey,
     decodeHashFromBase64,
+    type EntryHash,
 } from '@holochain/client';
 
 import type { EmergenceClient } from './emergence-client';
@@ -574,16 +575,8 @@ export class EmergenceStore {
     }
   }
 
-  async createNote(sessionHash: ActionHash, text: string): Promise<EntryRecord<Note>> {
-    const record = await this.client.createNote(text)
-    // this.notes.update((notes) => {
-    //     notes.push({
-    //         original_hash: record.actionHash,
-    //         record,
-    //         relations: []
-    //     })
-    //     return notes
-    // })
+  async createNote(sessionHash: ActionHash, text: string, pic: EntryHash | undefined): Promise<EntryRecord<Note>> {
+    const record = await this.client.createNote(text, pic)
 
     await this.client.createRelations([
         {   src: sessionHash,
@@ -605,7 +598,7 @@ export class EmergenceStore {
     return record
   }
 
-  async updateNote(noteHash: ActionHash, text: string): Promise<EntryRecord<Note>> {
+  async updateNote(noteHash: ActionHash, text: string, pic: EntryHash | undefined): Promise<EntryRecord<Note>> {
     const idx = this.getNoteIdx(noteHash)
     if (idx >= 0) {
         const note = get(this.notes)[idx]
@@ -621,6 +614,9 @@ export class EmergenceStore {
         let changes = []
         if (noteEntry.text != text) {
             changes.push(`text`)
+        }
+        if (noteEntry.pic != pic) {
+            changes.push(`pic`)
         }
         if (changes.length > 0) {
             const record = await this.client.updateNote(updatedNote)

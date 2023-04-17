@@ -6,6 +6,7 @@ import type {
     AgentPubKey,
     AppAgentCallZomeRequest,
     AppAgentClient,
+    EntryHash,
     HoloHash,
 } from '@holochain/client';
 import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput } from './emergence/emergence/types';
@@ -138,9 +139,10 @@ export class EmergenceClient {
     }).filter(r=>!r.record.entry.trashed);
   }
 
-  async createNote(text: string) : Promise<EntryRecord<Note>> {
+  async createNote(text: string, pic: EntryHash | undefined) : Promise<EntryRecord<Note>> {
     const noteEntry: Note = { 
-        text
+        text,
+        pic
       };
     
     return new EntryRecord(await this.callZome('create_note', noteEntry))

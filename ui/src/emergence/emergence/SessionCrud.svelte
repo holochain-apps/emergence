@@ -5,7 +5,7 @@ import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
-import "@holochain-open-dev/profiles/elements/search-agent.js";
+import "@holochain-open-dev/profiles/dist/elements/search-agent.js";
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
