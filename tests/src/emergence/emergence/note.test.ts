@@ -4,9 +4,9 @@ import { runScenario, pause, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource, fakeDnaHash, fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
-import { createSession, sampleSession } from './common.js';
+import { createNote, sampleNote } from './common.js';
 
-test('create Session', async () => {
+test('create Note', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
@@ -23,13 +23,13 @@ test('create Session', async () => {
     // conductor of the scenario.
     await scenario.shareAllAgents();
 
-    // Alice creates a Session
-    const record: Record = await createSession(alice.cells[0]);
+    // Alice creates a Note
+    const record: Record = await createNote(alice.cells[0]);
     assert.ok(record);
   });
 });
 
-test('create and read Session', async () => {
+test('create and read Note', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
@@ -46,26 +46,28 @@ test('create and read Session', async () => {
     // conductor of the scenario.
     await scenario.shareAllAgents();
 
-    const sample = await sampleSession(alice.cells[0]);
+    const sample = await sampleNote(alice.cells[0]);
 
-    // Alice creates a Session
-    const record: Record = await createSession(alice.cells[0], sample);
+    // Alice creates a Note
+    const record: Record = await createNote(alice.cells[0], sample);
     assert.ok(record);
 
     // Wait for the created entry to be propagated to the other node.
     await pause(1200);
 
-    // Bob gets the created Session
+    // Bob gets the created Note
     const createReadOutput: Record = await bob.cells[0].callZome({
       zome_name: "emergence",
-      fn_name: "get_session",
+      fn_name: "get_note",
       payload: record.signed_action.hashed.hash,
     });
+    console.log(JSON.stringify(sample))
+    console.log(JSON.stringify(decode((createReadOutput.entry as any).Present.entry) as any))
     assert.deepEqual(sample, decode((createReadOutput.entry as any).Present.entry) as any);
   });
 });
 
-test('create and update Session', async () => {
+test('create and update Note', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
@@ -82,32 +84,23 @@ test('create and update Session', async () => {
     // conductor of the scenario.
     await scenario.shareAllAgents();
 
-    // Alice creates a Session
-    const record: Record = await createSession(alice.cells[0]);
+    // Alice creates a Note
+    const record: Record = await createNote(alice.cells[0]);
     assert.ok(record);
-    let sessionRecord = decode((record.entry as any).Present.entry) as any
-
+        
     const originalActionHash = record.signed_action.hashed.hash;
  
-    // Alice updates the Session
-    let updatedTitle = "title2";
-    let updatedAmenities = 6;
+    // Alice updates the Note
+    let contentUpdate: any = await sampleNote(alice.cells[0]);
     let updateInput = {
-      original_session_hash: originalActionHash,
-      previous_session_hash: originalActionHash,
-      updated_title: updatedTitle,
-      updated_amenities: updatedAmenities,
-      updated_description: sessionRecord.description,
-      updated_leaders: sessionRecord.leaders,
-      updated_smallest: sessionRecord.smallest,
-      updated_largest: sessionRecord.largest,
-      updated_duration: sessionRecord.duration,
-      updated_trashed: sessionRecord.trashed,
-      };
+      original_note_hash: originalActionHash,
+      previous_note_hash: originalActionHash,
+      updated_note: contentUpdate,
+    };
 
     let updatedRecord: Record = await alice.cells[0].callZome({
       zome_name: "emergence",
-      fn_name: "update_session",
+      fn_name: "update_note",
       payload: updateInput,
     });
     assert.ok(updatedRecord);
@@ -115,35 +108,25 @@ test('create and update Session', async () => {
     // Wait for the updated entry to be propagated to the other node.
     await pause(1200);
         
-    // Bob gets the updated Session
+    // Bob gets the updated Note
     const readUpdatedOutput0: Record = await bob.cells[0].callZome({
       zome_name: "emergence",
-      fn_name: "get_session",
+      fn_name: "get_note",
       payload: updatedRecord.signed_action.hashed.hash,
     });
-    let updatedSession = decode((readUpdatedOutput0.entry as any).Present.entry) as any
-    assert.equal(updatedTitle,updatedSession.title );
-    assert.equal(updatedAmenities,updatedSession.amenities );
+    assert.deepEqual(contentUpdate, decode((readUpdatedOutput0.entry as any).Present.entry) as any);
 
-    // Alice updates the Session again
-    updatedTitle = "title3";
-    updatedAmenities = 10;
+    // Alice updates the Note again
+    contentUpdate = await sampleNote(alice.cells[0]);
     updateInput = { 
-      original_session_hash: originalActionHash,
-      previous_session_hash: updatedRecord.signed_action.hashed.hash,
-      updated_title: updatedTitle,
-      updated_amenities: updatedAmenities,
-      updated_description: sessionRecord.description,
-      updated_leaders: sessionRecord.leaders,
-      updated_smallest: sessionRecord.smallest,
-      updated_largest: sessionRecord.largest,
-      updated_duration: sessionRecord.duration,
-      updated_trashed: sessionRecord.trashed,
+      original_note_hash: originalActionHash,
+      previous_note_hash: updatedRecord.signed_action.hashed.hash,
+      updated_note: contentUpdate,
     };
 
     updatedRecord = await alice.cells[0].callZome({
       zome_name: "emergence",
-      fn_name: "update_session",
+      fn_name: "update_note",
       payload: updateInput,
     });
     assert.ok(updatedRecord);
@@ -151,19 +134,17 @@ test('create and update Session', async () => {
     // Wait for the updated entry to be propagated to the other node.
     await pause(1200);
         
-    // Bob gets the updated Session
+    // Bob gets the updated Note
     const readUpdatedOutput1: Record = await bob.cells[0].callZome({
       zome_name: "emergence",
-      fn_name: "get_session",
+      fn_name: "get_note",
       payload: updatedRecord.signed_action.hashed.hash,
     });
-    updatedSession = decode((readUpdatedOutput1.entry as any).Present.entry) as any
-    assert.equal(updatedTitle,updatedSession.title );  
-    assert.equal(updatedAmenities,updatedSession.amenities );
+    assert.deepEqual(contentUpdate, decode((readUpdatedOutput1.entry as any).Present.entry) as any);
   });
 });
 
-test('create and delete Session', async () => {
+test('create and delete Note', async () => {
   await runScenario(async scenario => {
     // Construct proper paths for your app.
     // This assumes app bundle created by the `hc app pack` command.
@@ -180,14 +161,14 @@ test('create and delete Session', async () => {
     // conductor of the scenario.
     await scenario.shareAllAgents();
 
-    // Alice creates a Session
-    const record: Record = await createSession(alice.cells[0]);
+    // Alice creates a Note
+    const record: Record = await createNote(alice.cells[0]);
     assert.ok(record);
         
-    // Alice deletes the Session
+    // Alice deletes the Note
     const deleteActionHash = await alice.cells[0].callZome({
       zome_name: "emergence",
-      fn_name: "delete_session",
+      fn_name: "delete_note",
       payload: record.signed_action.hashed.hash,
     });
     assert.ok(deleteActionHash);
@@ -195,10 +176,10 @@ test('create and delete Session', async () => {
     // Wait for the entry deletion to be propagated to the other node.
     await pause(1200);
         
-    // Bob tries to get the deleted Session
+    // Bob tries to get the deleted Note
     const readDeletedOutput = await bob.cells[0].callZome({
       zome_name: "emergence",
-      fn_name: "get_session",
+      fn_name: "get_note",
       payload: record.signed_action.hashed.hash,
     });
     assert.notOk(readDeletedOutput);

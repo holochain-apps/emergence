@@ -121,6 +121,17 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 original_session,
                             )
                         }
+                        (
+                            EntryTypes::Note(session),
+                            EntryTypes::Note(original_session),
+                        ) => {
+                            validate_update_note(
+                                action,
+                                session,
+                                original_action,
+                                original_session,
+                            )
+                        }
                         _ => {
                             Ok(
                                 ValidateCallbackResult::Invalid(

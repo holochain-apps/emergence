@@ -34,7 +34,8 @@ test('create a Session and get all sessions', async () => {
     // Alice creates a Session with a relation
     const createdRecord: Record = await createSession(alice.cells[0]);
     assert.ok(createdRecord);
-   
+    let sessionRecord = decode((createdRecord.entry as any).Present.entry) as any
+
     const originalActionHash = createdRecord.signed_action.hashed.hash
     const createdRelation = {
       src: originalActionHash,
@@ -65,6 +66,12 @@ test('create a Session and get all sessions', async () => {
       previous_session_hash: originalActionHash,
       updated_title: updatedTitle,
       updated_amenities: 1,
+      updated_description: sessionRecord.description,
+      updated_leaders: sessionRecord.leaders,
+      updated_smallest: sessionRecord.smallest,
+      updated_largest: sessionRecord.largest,
+      updated_duration: sessionRecord.duration,
+      updated_trashed: sessionRecord.trashed,
     };
 
     let updatedRecord: Record = await alice.cells[0].callZome({

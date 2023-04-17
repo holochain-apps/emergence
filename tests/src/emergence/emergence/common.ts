@@ -1,15 +1,19 @@
 import { CallableCell } from '@holochain/tryorama';
 import { Timestamp, NewEntryAction, ActionHash, Record, AppBundleSource, fakeActionHash, fakeAgentPubKey, fakeEntryHash, fakeDnaHash } from '@holochain/client';
 
-
-
 export async function sampleSession(cell: CallableCell, partialSession = {}) {
     return {
         ...{
-	  key: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+	  key: "ABCD",
 	  title: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      amenities: 1,
-        },
+    description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+    leaders: [cell.cell_id[1]],
+    smallest: 2,
+    largest: 50,
+    duration: 60,
+    amenities: 1,
+    trashed: false,
+          },
         ...partialSession
     };
 }
@@ -29,7 +33,11 @@ export async function sampleSpace(cell: CallableCell, partialSpace = {}) {
         ...{
 	  name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
 	  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-      amenities: 1,
+    amenities: 1,
+    stewards: [cell.cell_id[1]],
+    capacity: 10,
+    trashed: false
+
         },
         ...partialSpace
     };
@@ -43,12 +51,31 @@ export async function createSpace(cell: CallableCell, space = undefined): Promis
     });
 }
 
+export async function sampleNote(cell: CallableCell, partialNote = {}) {
+  return {
+      ...{
+  text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  pic: null,
+      },
+      ...partialNote
+  };
+}
+
+export async function createNote(cell: CallableCell, note = undefined): Promise<Record> {
+  return cell.callZome({
+    zome_name: "emergence",
+    fn_name: "create_note",
+    payload: note || await sampleNote(cell),
+  });
+}
+
+
 export async function sampleTimeWindow(cell: CallableCell, partialTimeWindow = {}) {
     const start: Timestamp = 10000
     return {
         ...{
 	  start,
-	  length: 30,
+	  duration: 30,
         },
         ...partialTimeWindow
     };
