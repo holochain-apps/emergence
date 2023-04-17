@@ -323,6 +323,13 @@ export class EmergenceStore {
                 changes.push(`description`)
             }
         }
+        if (props.hasOwnProperty("leaders")) {
+
+           // if (sessionEntry.leaders != props.leaders) {
+                update.updated_leaders = props.leaders
+                changes.push(`leaders`)
+          //  }
+        }
         if (props.hasOwnProperty("smallest")) {
             if (sessionEntry.smallest != props.smallest) {
                 update.updated_smallest = props.smallest
@@ -498,10 +505,10 @@ export class EmergenceStore {
             }
         }
         if (props.hasOwnProperty("stewards")) {
-            if (spaceEntry.stewards != props.stewards) {
+           // if (spaceEntry.stewards != props.stewards) {
                 update.updated_space.stewards = props.stewards
                 changes.push(`stewards`)
-            }
+           // }
         }
         if (props.hasOwnProperty("amenities")) {
             if (spaceEntry.amenities != props.amenities) {

@@ -4,13 +4,18 @@ import { storeContext } from '../../contexts';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
+import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
+import "@holochain-open-dev/profiles/elements/search-agent.js";
+
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import {  Amenities, setAmenity, type Info, type Session, type Slot } from './types';
 import SlotSelect from './Slot.svelte';
-import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
-  import type { AgentPubKey } from '@holochain/client';
+import { encodeHashToBase64, type AgentPubKey } from '@holochain/client';
+import Avatar from './Avatar.svelte';
+  import { faTrash } from '@fortawesome/free-solid-svg-icons';
+  import Fa from 'svelte-fa';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -49,13 +54,13 @@ onMount(() => {
 
     slot = store.getSessionSlot(session)
   } else {
-    leaders = [store.myPubKey]
+    leaders = []
   }
 });
 
 async function updateSession() {
   if (session) {
-    const updateRecord = await store.updateSession(session.original_hash, {title, amenities, slot, description, smallest, largest, duration})
+    const updateRecord = await store.updateSession(session.original_hash, {title, amenities, slot, description, leaders, smallest, largest, duration})
     if (updateRecord) {
       dispatch('session-updated', { actionHash: updateRecord.actionHash });
     } else {
@@ -83,6 +88,17 @@ async function createSession() {
   }
 }
 
+function addleader(agent: AgentPubKey) {
+  const agentB64 = encodeHashToBase64(agent)
+  if (leaders.findIndex(l=>encodeHashToBase64(l)=== agentB64) == -1 ) {
+    leaders.push(agent)
+    leaders = leaders
+  }
+}
+function deleteLeader(index: number) {
+  leaders.splice(index, 1)
+  leaders = leaders
+}
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
@@ -106,6 +122,21 @@ async function createSession() {
       label=Description 
       value={ description } on:input={e => { description = e.target.value;} }
     ></sl-textarea>
+  </div>
+  <div style="margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Leaders:</strong></span>
+    {#each leaders as leader, i}
+    <div style="display:flex;">
+      <Avatar agentPubKey={leader}></Avatar>
+      <sl-button style="margin-left: 8px;" size=small on:click={() => deleteLeader(i)} circle>
+        <Fa icon={faTrash} />
+      </sl-button>
+
+    </div>
+      
+    {/each}
+
+    <search-agent field-label="Add Leader" include-myself={true} clear-on-select={true} on:agent-selected={(e)=>addleader(e.detail.agentPubKey)}></search-agent>
   </div>
   <div style="margin-bottom: 16px">
     <sl-input

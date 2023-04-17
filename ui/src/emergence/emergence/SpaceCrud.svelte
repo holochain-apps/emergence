@@ -1,6 +1,6 @@
 <script lang="ts">
 import { createEventDispatcher, getContext, onMount } from 'svelte';
-import type { AppAgentClient, Record, EntryHash, AgentPubKey, ActionHash, DnaHash } from '@holochain/client';
+import { type AppAgentClient, type Record, type EntryHash, type AgentPubKey, type ActionHash, type DnaHash, encodeHashToBase64 } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import { Amenities, type Info, type Space, setAmenity } from './types';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -13,6 +13,9 @@ import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
+import Avatar from './Avatar.svelte';
+  import { faTrash } from '@fortawesome/free-solid-svg-icons';
+  import Fa from 'svelte-fa';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -67,7 +70,17 @@ async function createSpace() {
     errorSnackbar.show();
   }
 }
-
+function addSteward(agent: AgentPubKey) {
+  const agentB64 = encodeHashToBase64(agent)
+  if (stewards.findIndex(l=>encodeHashToBase64(l)=== agentB64) == -1 ) {
+    stewards.push(agent)
+    stewards = stewards
+  }
+}
+function deleteSteward(index: number) {
+  stewards.splice(index, 1)
+  stewards = stewards
+}
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
@@ -92,6 +105,21 @@ async function createSpace() {
       label=Description 
       value={ description } on:input={e => { description = e.target.value;} }
     ></sl-textarea>
+  </div>
+  <div style="margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Stewards:</strong></span>
+    {#each stewards as steward, i}
+    <div style="display:flex;">
+      <Avatar agentPubKey={steward}></Avatar>
+      <sl-button style="margin-left: 8px;" size=small on:click={() => deleteSteward(i)} circle>
+        <Fa icon={faTrash} />
+      </sl-button>
+
+    </div>
+      
+    {/each}
+
+    <search-agent field-label="Add Steward" include-myself={true} clear-on-select={true} on:agent-selected={(e)=>addSteward(e.detail.agentPubKey)}></search-agent>
   </div>
 
   <div style="margin-bottom: 16px">

@@ -12,11 +12,11 @@ import { faTrash, faEdit, faPlus, faCircleArrowLeft,faUserGroup } from '@fortawe
 
 import SessionCrud from './SessionCrud.svelte';
 import NoteCrud from './NoteCrud.svelte';
-import type { ActionHash } from '@holochain/client';
+import type { ActionHash, AgentPubKey } from '@holochain/client';
 import NoteDetail from './NoteDetail.svelte';
 import Avatar from './Avatar.svelte';
-  import InterestSelect from './InterestSelect.svelte';
-  import Confirm from './Confirm.svelte';
+import InterestSelect from './InterestSelect.svelte';
+import Confirm from './Confirm.svelte';
 
 const dispatch = createEventDispatcher();
 
