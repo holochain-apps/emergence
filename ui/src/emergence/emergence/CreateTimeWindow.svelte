@@ -13,24 +13,24 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 const dispatch = createEventDispatcher();
 
-let length: number = 60;
+let duration: number = 60;
 let start: Date|undefined;
 
 let errorSnackbar: Snackbar;
 
 let datePicker:any
 
-$: length, start;
-$: isTimeWindowValid = length > 0;
+$: duration, start;
+$: isTimeWindowValid = duration > 0;
 
 onMount(() => {
 });
 
 async function createTimeWindow() { 
   try {
-    const actionHash = store.createTimeWindow(new Date(datePicker.value), length!)
+    const actionHash = store.createTimeWindow(new Date(datePicker.value), duration!)
     start = undefined
-    length = 60
+    duration = 60
     dispatch('timeWindow-created', { timeWindowHash: actionHash });
     
   } catch (e) {
@@ -41,20 +41,20 @@ async function createTimeWindow() {
 
 const setLen = (l:number) => {
   if (l) {
-    length = l
+    duration = l
   }
 }
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 <div style="display: flex; flex-direction: column">
-  <span style="font-size: 18px">Create TimeWindow</span>
+  <span style="font-size: 18px">Slot Add</span>
   
   <vaadin-date-time-picker bind:this={datePicker}></vaadin-date-time-picker>
   <div style="margin-bottom: 16px">
     <sl-input
-    label=Length
-    value={length}
+    label=Duration
+    value={duration}
     on:input={e=>setLen(parseInt(e.target.value))}
   ></sl-input>
 
@@ -63,6 +63,6 @@ const setLen = (l:number) => {
   <sl-button 
   on:click={() => createTimeWindow()}
   disabled={!isTimeWindowValid}
-  variant=primary>Create TimeWindow</sl-button>
+  variant=primary>Add Slot</sl-button>
 
 </div>

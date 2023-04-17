@@ -4,11 +4,11 @@ use std::fmt;
 #[derive(Serialize, Deserialize, Debug, SerializedBytes, Clone)]
 pub struct TimeWindow {
     start: Timestamp,
-    length: u32,
+    duration: u32,
 }
 impl fmt::Display for TimeWindow {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}/{}", self.start, self.length)
+        write!(f, "{}/{}", self.start, self.duration)
     }
 }
 

@@ -125,7 +125,7 @@ export const slotEqual = (slota: Slot| undefined, slotb: Slot|undefined) : boole
 
 export interface TimeWindow { 
   start: Timestamp;
-  length: number;
+  duration: number;
 }
 
 export const timeWindowStartToStr = (window: TimeWindow) : string => {
@@ -134,7 +134,7 @@ export const timeWindowStartToStr = (window: TimeWindow) : string => {
 }
 
 export const timeWindowDurationToStr = (window: TimeWindow) : string => {
-  return durationToStr(window.length)
+  return durationToStr(window.duration)
 }
 
 export const durationToStr = (duration: number) : string => {

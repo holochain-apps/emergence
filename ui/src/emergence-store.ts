@@ -246,10 +246,10 @@ export class EmergenceStore {
     }
   }
 
-  async createTimeWindow(start: Date, length: number) : Promise<ActionHash> {
+  async createTimeWindow(start: Date, duration: number) : Promise<ActionHash> {
     const timeWindow: TimeWindow = { 
         start: parseInt((start.getTime()).toFixed(0)),
-        length: length!,
+        duration,
       };
     const actionHash = await this.client.createTimeWindow(timeWindow)
     await this.client.createRelations([
