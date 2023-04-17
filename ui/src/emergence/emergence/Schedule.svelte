@@ -4,7 +4,7 @@
   import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import type {Space, TimeWindow, Info } from './types';
+  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr } from './types';
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
   import { faCalendarPlus } from '@fortawesome/free-solid-svg-icons';
@@ -68,28 +68,30 @@
       <CreateTimeWindow on:timeWindow-created={()=>creatingTimeWindow=false}></CreateTimeWindow>
     </div>
     {/if}
-    {#each days as day}
-      {day.toDateString()}
-      <div style="display:grid; grid-template-columns:repeat({$spaces.length+1},1fr); ">
-        <div class="empty"></div>
-        {#each $spaces as space}
-          <div class="space-title">
-          {space.record.entry.name}
-          </div>
-        {/each}
-        {#each $windows.filter(w=>{
-          // @ts-ignore
-          return new Date(w.start).toDateString()  == day.toDateString()
-        }).sort(sortWindows) as window}
-          <div class="time-title"><TimeWindowSummary timeWindow={window}></TimeWindowSummary></div>
-          {#each $spaces as space}
-            <div class="scheduled-items">
-              {sessionsInSpace(window, space)}
-            </div>
+    <div style="display:grid; grid-template-columns:repeat({$spaces.length+1},1fr); ">
+      <div class="empty"></div>
+      {#each $spaces as space}
+        <div class="space-title">
+        {space.record.entry.name}
+        </div>
+      {/each}
+      {#each days as day}
+      <div style="grid-column-start:0; grid-column-end: span {$spaces.length+1}">{day.toDateString()}</div>
+
+
+          {#each $windows.filter(w=>{
+            // @ts-ignore
+            return new Date(w.start).toDateString()  == day.toDateString()
+          }).sort(sortWindows) as window}
+            <div class="time-title" title={timeWindowDurationToStr(window)}>{new Date(window.start).toTimeString().slice(0,5)}</div>
+            {#each $spaces as space}
+              <div class="scheduled-items">
+                {sessionsInSpace(window, space)}
+              </div>
+            {/each}
           {/each}
-        {/each}
-      </div>
-    {/each}
+      {/each}
+  </div>
   </div>
   {/if}
 <style>
@@ -98,6 +100,7 @@
  }
  .time-title {
   outline: solid 1px;
+  cursor: pointer;
  }
  .scheduled-items {
   outline: solid 1px;
