@@ -89,6 +89,7 @@ export interface Space {
   capacity: number;
   amenities: number;
   trashed: boolean;
+  pic?: EntryHash;
 }
 
 

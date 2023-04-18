@@ -8,6 +8,8 @@ import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
+import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
+import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
@@ -28,6 +30,7 @@ let description: string = '';
 let stewards:Array<AgentPubKey> = []
 let amenities: number = 0;
 let capacity: number = 0;
+let pic: EntryHash | undefined = undefined;
 
 let errorSnackbar: Snackbar;
 
@@ -41,12 +44,13 @@ onMount(() => {
     description = space.record.entry.description
     stewards = space.record.entry.stewards
     capacity = space.record.entry.capacity
+    pic = space.record.entry.pic
   }
 });
 
 async function updateSpace() {
   if (space) {
-    const updateRecord = await store.updateSpace(space.original_hash, {name, description, stewards, capacity, amenities})
+    const updateRecord = await store.updateSpace(space.original_hash, {name, description, stewards, capacity, amenities, pic})
     if (updateRecord) {
       dispatch('space-updated', { actionHash: updateRecord.actionHash });
     } else {
@@ -57,12 +61,13 @@ async function updateSpace() {
 
 async function createSpace() {  
   try {
-    const record = await store.createSpace(name, description, stewards, capacity, amenities)
+    const record = await store.createSpace(name, description, stewards, capacity, amenities, pic)
 
     name = ""
     description = ""
     amenities = 0
     capacity = 0
+    pic = undefined
     dispatch('space-created', { space: record });
   } catch (e) {
     console.log("CREATE SPACE ERROR", e)
@@ -140,6 +145,24 @@ function deleteSteward(index: number) {
       >{amenity}</sl-checkbox>
     {/each}
   </div>
+
+  <div style="margin-bottom: 16px">
+    {#if pic}
+    <div class="pic">
+    <show-image image-hash={encodeHashToBase64(pic)}></show-image>
+    </div>
+    {/if}
+
+    <span>Add a pic (optional):</span >
+    <upload-files
+    one-file
+    accepted-files="image/jpeg,image/png,image/gif"
+    on:file-uploaded={(e) => {
+      pic = e.detail.file.hash;
+    }}
+  ></upload-files>
+  </div>
+
   {#if space}
     <div style="display: flex; flex-direction: row">
       <sl-button
@@ -168,3 +191,8 @@ function deleteSteward(index: number) {
   {/if}
 
 </div>
+<style>
+  .pic {
+   width: 50px;
+  }
+</style> 

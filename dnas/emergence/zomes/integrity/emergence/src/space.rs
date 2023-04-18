@@ -8,6 +8,7 @@ pub struct Space {
     pub capacity: u32,
     pub amenities: u32,
     pub trashed: bool,
+    pub pic: Option<EntryHash>,
 }
 pub fn validate_create_space(
     _action: EntryCreationAction,

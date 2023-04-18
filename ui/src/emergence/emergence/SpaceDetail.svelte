@@ -2,6 +2,7 @@
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
+import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import { storeContext } from '../../contexts';
 import { amenitiesList, timeWindowDurationToStr, type Info, type Relation, type Space, timeWindowStartToStr } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
@@ -12,6 +13,7 @@ import SpaceCrud from './SpaceCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
   import Avatar from './Avatar.svelte';
+  import { encodeHashToBase64 } from '@holochain/client';
 
 const dispatch = createEventDispatcher();
 
@@ -130,6 +132,17 @@ const relationSummary = (relation: Relation) : string => {
       {amenitiesList(space.record.entry.amenities).join(", ")}
     </span>
   </div>
+
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Picture</strong></span>
+
+    {#if space.record.entry.pic}
+    <div class="pic">
+    <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
+    </div>
+    {/if}
+  </div>
+
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Secheduled Sessions:</strong></span>
 
@@ -143,3 +156,8 @@ const relationSummary = (relation: Relation) : string => {
 </div>
 {/if}
 
+<style>
+  .pic {
+   max-width: 300px;
+  }
+</style> 
