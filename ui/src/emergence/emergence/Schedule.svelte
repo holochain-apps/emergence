@@ -1,14 +1,14 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
+  import { type EntryHash, type Record, type AgentPubKey, type ActionHash, type AppAgentClient, type NewEntryAction, encodeHashToBase64 } from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import {type Space, type TimeWindow, type Info, timeWindowDurationToStr } from './types';
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
   import { faCalendarPlus } from '@fortawesome/free-solid-svg-icons';
-  import TimeWindowSummary from './TimeWindowSummary.svelte';
+  import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -72,8 +72,13 @@
       <div class="empty"></div>
       {#each $spaces as space}
         <div class="space-title">
-        {space.record.entry.name}
-        </div>
+            {space.record.entry.name}
+            {#if space.record.entry.pic}
+              <div class="space-pic">
+                <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
+              </div>
+            {/if}
+            </div>
       {/each}
       {#each days as day}
       <div style="grid-column-start:0; grid-column-end: span {$spaces.length+1}">{day.toDateString()}</div>
@@ -97,6 +102,9 @@
 <style>
  .space-title {
   outline: solid 1px
+ }
+ .space-title {
+  width: 50px;
  }
  .time-title {
   outline: solid 1px;

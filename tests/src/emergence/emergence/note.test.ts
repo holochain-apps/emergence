@@ -61,8 +61,6 @@ test('create and read Note', async () => {
       fn_name: "get_note",
       payload: record.signed_action.hashed.hash,
     });
-    console.log(JSON.stringify(sample))
-    console.log(JSON.stringify(decode((createReadOutput.entry as any).Present.entry) as any))
     assert.deepEqual(sample, decode((createReadOutput.entry as any).Present.entry) as any);
   });
 });

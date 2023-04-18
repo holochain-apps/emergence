@@ -459,8 +459,8 @@ export class EmergenceStore {
     }
   }
 
-  async createSpace(name: string, description: string, stewards:Array<AgentPubKey>, capacity: number, amenities: number): Promise<EntryRecord<Space>> {
-    const record = await this.client.createSpace(name, description, stewards, capacity, amenities)
+  async createSpace(name: string, description: string, stewards:Array<AgentPubKey>, capacity: number, amenities: number, pic: EntryHash | undefined): Promise<EntryRecord<Space>> {
+    const record = await this.client.createSpace(name, description, stewards, capacity, amenities, pic)
     this.client.createRelations([
         {   src: record.actionHash, // should be agent key
             dst: record.actionHash,
@@ -527,6 +527,12 @@ export class EmergenceStore {
             if (spaceEntry.trashed != props.trashed) {
                 update.updated_space.trashed = props.trashed
                 changes.push(`trashed -> ${props.trashed}`)
+            }
+        }
+        if (props.hasOwnProperty("pic")) {
+            if (spaceEntry.pic != props.pic) {
+                update.updated_space.pic = props.pic
+                changes.push(`pic`)
             }
         }
         if (changes.length > 0) {
