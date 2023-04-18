@@ -26,6 +26,14 @@ npm start
 This will create a network of 2 nodes connected to each other and their respective UIs.
 It will also bring up the Holochain Playground for advanced introspection of the conductors.
 
+## Running solo dev environment
+
+```bash
+npm run dev
+```
+
+This will not launch a UI, you will have to open a browser window and navigate to the Local address provided by VITE. It can take a moment for the UI to come up after visiting the URL, let it load. 
+
 ## Running the backend tests
 
 ```bash

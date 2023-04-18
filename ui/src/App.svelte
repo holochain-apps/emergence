@@ -217,9 +217,11 @@
 <style>
   main {
     text-align: center;
-    padding: 1em;
-    max-width: 240px;
+    padding: 0em;
+    max-width: 100%;
     margin: 0 auto;
+  }
+  body {
   }
   .pane {
     position: relative;
@@ -260,14 +262,14 @@
     background-color:gray;
   }
   .pane {
-    width: 600px;
+    width: 100%;
     border: solid 1px;
     padding: 10px;
     margin: 10px;
   }
-  @media (min-width: 640px) {
+  @media (min-width: 500px) {
     main {
-      max-width: none;
+      max-width: 500px;
     }
   }
 </style>
