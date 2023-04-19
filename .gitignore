@@ -10,3 +10,4 @@
 .hc*
 .hc
 .running
+*.code-workspace
