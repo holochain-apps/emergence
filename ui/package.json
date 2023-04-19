@@ -21,6 +21,7 @@
     "svelte-fa": "3.0.3",
     "@types/javascript-time-ago": "^2.0.3",
     "emittery": "^1.0.1",
+    "svelte-multiselect": "^8.6.0",
     "javascript-time-ago": "2.3.7"
   },
   "devDependencies": {

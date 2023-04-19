@@ -3,6 +3,7 @@ use hdi::prelude::*;
 #[derive(Clone, PartialEq)]
 pub struct Note {
     pub text: String,
+    pub tags: Vec<String>,
     pub pic: Option<EntryHash>,
 }
 pub fn validate_create_note(

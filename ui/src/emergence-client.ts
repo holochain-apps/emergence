@@ -139,10 +139,11 @@ export class EmergenceClient {
     }).filter(r=>!r.record.entry.trashed);
   }
 
-  async createNote(text: string, pic: EntryHash | undefined) : Promise<EntryRecord<Note>> {
+  async createNote(text: string, tags: Array<string>, pic: EntryHash | undefined) : Promise<EntryRecord<Note>> {
     const noteEntry: Note = { 
         text,
-        pic
+        pic,
+        tags,
       };
     
     return new EntryRecord(await this.callZome('create_note', noteEntry))

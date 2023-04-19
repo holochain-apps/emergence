@@ -33,6 +33,11 @@
         <show-image image-hash={encodeHashToBase64($note.value.record.entry.pic)}></show-image>
         </div>
         {/if}
+        <div class="tags">
+            {#each $note.value.record.entry.tags as tag}
+                <div class="tag">{tag}</div>
+            {/each}
+        </div>
     {:else}
         Not found on DHT
     {/if}
@@ -44,5 +49,16 @@
   }
   .pic {
     max-width: 100px;
+  }
+  .tags {
+    display: flex;
+    margin-left: 5px;
+  }
+  .tag {
+    color: white;
+    background-color: gray;
+    border-radius: 7px;
+    padding: 5px;
+    margin-right: 5px;
   }
 </style>

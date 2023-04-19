@@ -581,8 +581,8 @@ export class EmergenceStore {
     }
   }
 
-  async createNote(sessionHash: ActionHash, text: string, pic: EntryHash | undefined): Promise<EntryRecord<Note>> {
-    const record = await this.client.createNote(text, pic)
+  async createNote(sessionHash: ActionHash, text: string, tags: Array<string>, pic: EntryHash | undefined): Promise<EntryRecord<Note>> {
+    const record = await this.client.createNote(text, tags, pic)
 
     await this.client.createRelations([
         {   src: sessionHash,
@@ -604,7 +604,7 @@ export class EmergenceStore {
     return record
   }
 
-  async updateNote(noteHash: ActionHash, text: string, pic: EntryHash | undefined): Promise<EntryRecord<Note>> {
+  async updateNote(noteHash: ActionHash, text: string, tags: Array<string>, pic: EntryHash | undefined): Promise<EntryRecord<Note>> {
     const idx = this.getNoteIdx(noteHash)
     if (idx >= 0) {
         const note = get(this.notes)[idx]
@@ -613,7 +613,8 @@ export class EmergenceStore {
             original_note_hash: noteHash,
             previous_note_hash: note.record.actionHash,
             updated_note: {
-                text
+                text,
+                tags,
             }
         }
         const noteEntry = note.record.entry

@@ -14,6 +14,8 @@ import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import type { ActionHash, EntryHash } from '@holochain/client';
+import MultiSelect from 'svelte-multiselect'
+import type { ObjectOption } from 'svelte-multiselect'
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -24,21 +26,36 @@ export let sessionHash: ActionHash;
 
 let text: string = '';
 let pic: EntryHash | undefined = undefined;
+let selectedTags = []
+let tags = []
 
 let errorSnackbar: Snackbar;
 
-$: text
+$: text, tags
 $: isNoteValid = text !== ""
+
+$: allTags = ["this", "that", "foo"]
+
+const tagOptions = () : ObjectOption[] => {
+  const options:ObjectOption[] = allTags.map(tag => 
+  {return {label: `${tag}`, value: tag}} )
+  return options
+}
+const setTags = () => {
+    tags = selectedTags.map(o => o.label)
+}
 
 onMount(() => {
   if (note) {
     text = note.record.entry.text
+    pic = note.record.entry.pic
+    tags = note.record.entry.tags
   }
 });
 
 async function updateNote() {
   if (note) {
-    const updateRecord = await store.updateNote(note.original_hash, text, pic)
+    const updateRecord = await store.updateNote(note.original_hash, text, selectedTags, pic)
     if (updateRecord) {
       dispatch('note-updated', { actionHash: updateRecord.actionHash });
     } else {
@@ -49,7 +66,8 @@ async function updateNote() {
 
 async function createNote() {  
   try {
-    const record = await store.createNote(sessionHash, text, pic)
+    console.log("FISH", tags)
+    const record = await store.createNote(sessionHash, text, tags, pic)
 
     text = ""
     pic = undefined
@@ -76,6 +94,17 @@ async function createNote() {
       label=Text 
       value={ text } on:input={e => { text = e.target.value;} }
     ></sl-textarea>
+  </div>
+
+  <div style="margin-bottom: 16px">
+    <span>Tags:</span >
+
+    <MultiSelect 
+      bind:selected={selectedTags} 
+      options={tagOptions()} 
+      on:change={(_event)=>setTags()}
+      allowUserOptions={true}
+      />
   </div>
 
   <div style="margin-bottom: 16px">

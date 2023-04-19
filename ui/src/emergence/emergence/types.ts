@@ -102,6 +102,7 @@ export interface UpdateSpaceInput {
 export interface Note {
   text: string,
   pic?: EntryHash,
+  tags: Array<string>;
 }
 
 
