@@ -278,7 +278,7 @@ export class EmergenceStore {
         await this.slot(record.actionHash, slot)
     }
   
-    this.client.createRelations([
+    await this.client.createRelations([
         {   src: record.actionHash, // should be agent key
             dst: record.actionHash,
             content:  {
@@ -462,7 +462,7 @@ export class EmergenceStore {
 
   async createSpace(name: string, description: string, stewards:Array<AgentPubKey>, capacity: number, amenities: number, pic: EntryHash | undefined): Promise<EntryRecord<Space>> {
     const record = await this.client.createSpace(name, description, stewards, capacity, amenities, pic)
-    this.client.createRelations([
+    await this.client.createRelations([
         {   src: record.actionHash, // should be agent key
             dst: record.actionHash,
             content:  {

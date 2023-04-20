@@ -178,7 +178,7 @@ test('scale testing', async () => {
       })
     };
     await addAllAgentsToAllConductors(conductors);
-   
+
     const spaces = []
     // agent 1 creates a bunch of spaces
     for (let x=0; x< spacesCount; x=x+1) {
@@ -268,22 +268,65 @@ test('scale testing', async () => {
   test('scale test using scenario', async () => {
     await runScenario(async scenario => {
 
+      const conductorCount = 2
+      const agentsPerConductor = 10
+      const spacesCount = 5
+      const sessionsCount = 5
+      const windowsCount = 4
+      const notesPerMin = 10
+      const minuntesOfNotes = 2
+  
+
       const testAppPath = process.cwd() + '/../workdir/emergence.happ';
 
       // Set up the app to be installed 
       const appSource = { appBundleSource: { path: testAppPath } };
-  
-      // Add 2 players with the test app to the Scenario. The returned players
-      // can be destructured.
-      const [alice, bob] = await scenario.addPlayersWithApps([appSource, appSource]);
-      const aliceAppAgentWs = alice.conductor.appAgentWs();
-      const store = new EmergenceStore(new EmergenceClient(aliceAppAgentWs, "emergence"), undefined, aliceAppAgentWs.myPubKey)
-      
-      await store.createSession("dance", "slam for fun",[],1,100,60,1, undefined)
+      const appSources = []
+      for (let x=0; x< conductorCount; x=x+1) {
+        appSources.push(appSource)
+      };
+      const players = await scenario.addPlayersWithApps(appSources);
 
-      await store.fetchSessions()
-      const sessions = get(store.sessions)
-      assert.equal(sessions.length, 1);
+
+      const appDef = { path: testAppPath } ;
+
+      const appDefs = []
+      for (let x=1; x< agentsPerConductor; x=x+1) {
+        appDefs.push({app: appDef})
+      }
+      for (let x=0; x< conductorCount; x=x+1) {
+        try {
+          await players[x].conductor.installAgentsApps({
+            agentsApps: appDefs,
+          })
+        } catch(e) {
+          console.log("ERROR installAgentsApps",e )
+        }
+      }
+      await scenario.shareAllAgents();
+
+      const aliceAppAgentWs = players[0].conductor.appAgentWs();
+      const store = new EmergenceStore(new EmergenceClient(aliceAppAgentWs, "emergence"), undefined, aliceAppAgentWs.myPubKey)
+
+      const spaces = []
+      // agent 1 creates a bunch of spaces
+      for (let x=0; x< spacesCount; x=x+1) {
+        const space = await store.createSpace(`space ${x}`,"description",[], 10,1, undefined);
+        assert.ok(space);
+        spaces.push(space)
+      }
+
+      const sessions = []
+      // agent 1 creates a bunch of sessions
+      for (let x=0; x< sessionsCount; x=x+1) {
+        const leaders = []
+        const session = await store.createSession(`session ${x}`,"description",leaders, 2,10,60,1,undefined)
+        assert.ok(session);
+        sessions.push(session)
+      }
+      await pause(4000)  // we wait here because creating sessions calls fetcSessions and doesn't await t
+
+      assert.equal(get(store.sessions).length, sessionsCount);
 
     });
 
