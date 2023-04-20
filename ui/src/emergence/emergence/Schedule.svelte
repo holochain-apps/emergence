@@ -9,6 +9,7 @@
   import Fa from 'svelte-fa';
   import { faCalendarPlus } from '@fortawesome/free-solid-svg-icons';
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
+  import SessionSummary from './SessionSummary.svelte';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -20,6 +21,7 @@
   $: spaces = store.spaces
   $: windows = store.timeWindows
   $: days = calcDays($windows) 
+  $: sessions = store.sessions
 
   const calcDays = (windows): Array<Date> => {
     const days = []
@@ -68,43 +70,79 @@
       <CreateTimeWindow on:timeWindow-created={()=>creatingTimeWindow=false}></CreateTimeWindow>
     </div>
     {/if}
-    <div style="display:grid; grid-template-columns:repeat({$spaces.length+1},1fr); ">
-      <div class="empty"></div>
-      {#each $spaces as space}
-        <div class="space-title">
-            {space.record.entry.name}
-            {#if space.record.entry.pic}
-              <div class="space-pic">
-                <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
-              </div>
-            {/if}
-            </div>
-      {/each}
-      {#each days as day}
-      <div style="grid-column-start:0; grid-column-end: span {$spaces.length+1}">{day.toDateString()}</div>
 
+    <div class="sections">
 
-          {#each $windows.filter(w=>{
-            // @ts-ignore
-            return new Date(w.start).toDateString()  == day.toDateString()
-          }).sort(sortWindows) as window}
-            <div class="time-title" title={timeWindowDurationToStr(window)}>{new Date(window.start).toTimeString().slice(0,5)}</div>
-            {#each $spaces as space}
-              <div class="scheduled-items">
-                {sessionsInSpace(window, space)}
-              </div>
+      <div class="orphans">
+        <div><strong>Orphan Sessions</strong></div>
+        {#each $sessions.filter((s)=>!store.getSessionSlot(s)) as session}
+          <div style="margin-bottom: 8px;">
+            <SessionSummary 
+              showAmenities={true}
+              session={session}>
+            </SessionSummary>
+          </div>
+        {/each}
+
+      </div>
+
+      <div class="schedule-grid">
+        <div style="display:grid; grid-template-columns:repeat({$spaces.length+1},1fr); ">
+          <div class="empty"></div>
+          {#each $spaces as space}
+            <div class="space-title">
+                {space.record.entry.name}
+                {#if space.record.entry.pic}
+                  <div class="space-pic">
+                    <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
+                  </div>
+                {/if}
+                </div>
+          {/each}
+          {#each days as day}
+            <div style="grid-column-start:0; grid-column-end: span {$spaces.length+1}">{day.toDateString()}</div>
+
+            {#each $windows.filter(w=>{
+                // @ts-ignore
+                return new Date(w.start).toDateString()  == day.toDateString()
+              }).sort(sortWindows) as window}
+              <div class="time-title" title={timeWindowDurationToStr(window)}>{new Date(window.start).toTimeString().slice(0,5)}</div>
+              {#each $spaces as space}
+                <div class="scheduled-items">
+                  {sessionsInSpace(window, space)}
+                </div>
+              {/each}
             {/each}
           {/each}
-      {/each}
-  </div>
+        </div>
+      </div>
+    </div>
+
+
   </div>
   {/if}
 <style>
+ .sections {
+  display:flex;
+  flex-direction: row;
+  }
+ .orphans {
+  display:flex;
+  flex-direction: column;
+  align-items: self-start;
+  flex: 0;
+  margin: 5px;
+
+}
+ .schedule-grid {
+  flex: 2;
+  margin: 5px;
+ }
  .space-title {
   outline: solid 1px
  }
  .space-title {
-  width: 50px;
+  width: 100%;
  }
  .time-title {
   outline: solid 1px;

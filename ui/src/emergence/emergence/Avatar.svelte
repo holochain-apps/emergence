@@ -11,21 +11,33 @@
 
   export let agentPubKey: AgentPubKey
   export let size = 32
+  export let namePosition = "column"
+  export let showAvatar = true
+  export let showNickname = true
 
   $: agentPubKey
   $: s = store.profilesStore.profiles.get(agentPubKey)
   $: nickname = $s.status == "complete" ? $s.value?.nickname : "..."
 </script>
 
-<div class="avatar">
-<agent-avatar size={size} agent-pub-key="{encodeHashToBase64(agentPubKey)}"></agent-avatar>
-{nickname}
+<div class="avatar-{namePosition}">
+    {#if showAvatar}
+        <agent-avatar size={size} agent-pub-key="{encodeHashToBase64(agentPubKey)}"></agent-avatar>
+    {/if}
+    {#if showNickname}
+        {nickname}
+    {/if}
 </div>
 
 <style>
-    .avatar {
+    .avatar-column {
         display:flex;
         flex-direction: column;
+        align-items: center;
+    }
+    .avatar-row {
+        display:flex;
+        flex-direction: row;
         align-items: center;
     }
 </style>

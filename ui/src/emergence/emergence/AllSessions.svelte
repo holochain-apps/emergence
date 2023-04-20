@@ -40,7 +40,13 @@ onMount(async () => {
   {:else}
       {#each $sessions as session}
         <div style="margin-bottom: 8px; width:500px">
-          <SessionSummary allowSetIntention={true} on:session-selected={(event)=>{dispatch('session-selected', event.detail)}} session={session}></SessionSummary>
+          <SessionSummary 
+            showTags={true}
+            showSlot={true}
+            allowSetIntention={true} 
+            on:session-selected={(event)=>{dispatch('session-selected', event.detail)}} 
+            session={session}>
+          </SessionSummary>
         </div>
       {/each}
   {/if}
