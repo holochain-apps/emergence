@@ -9,6 +9,10 @@ import { createNote, createSession, createSpace, sampleNote, sampleSession, samp
 
 //import { FileStorageClient } from "@holochain-open-dev/file-storage";
 
+import { EmergenceClient } from '../../../../ui/src/emergence-client';
+import { EmergenceStore } from '../../../../ui/src/emergence-store';
+import { get } from "svelte/store";
+
 export interface FileMetadata {
   name: string;
   last_modifed: number;
@@ -260,3 +264,27 @@ test('scale testing', async () => {
     await cleanAllConductors();
   });
 
+
+  test('scale test using scenario', async () => {
+    await runScenario(async scenario => {
+
+      const testAppPath = process.cwd() + '/../workdir/emergence.happ';
+
+      // Set up the app to be installed 
+      const appSource = { appBundleSource: { path: testAppPath } };
+  
+      // Add 2 players with the test app to the Scenario. The returned players
+      // can be destructured.
+      const [alice, bob] = await scenario.addPlayersWithApps([appSource, appSource]);
+      const aliceAppAgentWs = alice.conductor.appAgentWs();
+      const store = new EmergenceStore(new EmergenceClient(aliceAppAgentWs, "emergence"), undefined, aliceAppAgentWs.myPubKey)
+      
+      await store.createSession("dance", "slam for fun",[],1,100,60,1, undefined)
+
+      await store.fetchSessions()
+      const sessions = get(store.sessions)
+      assert.equal(sessions.length, 1);
+
+    });
+
+  });
