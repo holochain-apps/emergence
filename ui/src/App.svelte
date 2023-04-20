@@ -272,7 +272,4 @@
       max-width: 500px;
     }
   }
-  .fish {
-    
-  }
 </style>
