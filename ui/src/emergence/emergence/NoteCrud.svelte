@@ -26,7 +26,6 @@ export let sessionHash: ActionHash;
 
 let text: string = '';
 let pic: EntryHash | undefined = undefined;
-let selectedTags = []
 let tags = []
 
 let errorSnackbar: Snackbar;
@@ -34,18 +33,17 @@ let errorSnackbar: Snackbar;
 $: text, tags
 $: isNoteValid = text !== ""
 
-$: allTags = ["this", "that", "foo"]
+$: allTags = store.allTags
+// $: tagOpts = tagOptions()
 
-const tagOptions = () : ObjectOption[] => {
-  const options:ObjectOption[] = allTags.map(tag => 
-  {return {label: `${tag}`, value: tag}} )
-  return options
-}
-const setTags = () => {
-    tags = selectedTags.map(o => o.label)
-}
+// const tagOptions = () : ObjectOption[] => {
+//   const options:ObjectOption[] = $allTags.map(tag => 
+//   {return {label: `${tag}`, value: tag}} )
+//   return options
+// }
 
 onMount(() => {
+  store.fetchTags()
   if (note) {
     text = note.record.entry.text
     pic = note.record.entry.pic
@@ -55,7 +53,7 @@ onMount(() => {
 
 async function updateNote() {
   if (note) {
-    const updateRecord = await store.updateNote(note.original_hash, text, selectedTags, pic)
+    const updateRecord = await store.updateNote(note.original_hash, text, tags, pic)
     if (updateRecord) {
       dispatch('note-updated', { actionHash: updateRecord.actionHash });
     } else {
@@ -66,11 +64,12 @@ async function updateNote() {
 
 async function createNote() {  
   try {
-    console.log("FISH", tags)
     const record = await store.createNote(sessionHash, text, tags, pic)
 
     text = ""
     pic = undefined
+    tags = []
+
     dispatch('note-created', { note: record });
   } catch (e) {
     console.log("CREATE NOTE ERROR", e)
@@ -98,11 +97,9 @@ async function createNote() {
 
   <div style="margin-bottom: 16px">
     <span>Tags:</span >
-
     <MultiSelect 
-      bind:selected={selectedTags} 
-      options={tagOptions()} 
-      on:change={(_event)=>setTags()}
+      bind:selected={tags} 
+      options={$allTags} 
       allowUserOptions={true}
       />
   </div>

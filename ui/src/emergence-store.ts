@@ -78,6 +78,7 @@ export class EmergenceStore {
   notes: Writable<Array<Info<Note>>> = writable([])
   noteHashes: Writable<Array<ActionHash>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
+  allTags: Writable<Array<string>> = writable([])
   myNotes: Writable<Array<ActionHash>> = writable([])
   mySessions: Writable<HoloHashMap<ActionHash,SessionInterest>> = writable(new HoloHashMap())
   neededStuff: GetStuffInput = {}
@@ -583,8 +584,7 @@ export class EmergenceStore {
 
   async createNote(sessionHash: ActionHash, text: string, tags: Array<string>, pic: EntryHash | undefined): Promise<EntryRecord<Note>> {
     const record = await this.client.createNote(text, tags, pic)
-
-    await this.client.createRelations([
+    const relations = [
         {   src: sessionHash,
             dst: record.actionHash,
             content:  {
@@ -599,7 +599,17 @@ export class EmergenceStore {
                 data: JSON.stringify("")
             }
         },
-    ])
+    ]
+    tags.forEach(tag=>relations.push(
+        {   src: sessionHash,
+            dst: record.actionHash,
+            content:  {
+                path: "session.tag",
+                data: tag
+            }
+        },        
+    ))
+    await this.client.createRelations(relations)
     this.fetchSessions()
     return record
   }
@@ -731,8 +741,19 @@ export class EmergenceStore {
         } )
     }
     catch (e) {
-        console.log("Error fetching spaces", e)
+        console.log("Error fetching feed", e)
     }
   }
+
+  async fetchTags() {
+    try {
+        const tags = await this.client.getTags()
+        this.allTags.update((n) => {return tags} )
+    }
+    catch (e) {
+        console.log("Error fetching tags", e)
+    }
+  }
+
 
 }

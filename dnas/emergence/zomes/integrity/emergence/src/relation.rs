@@ -26,6 +26,7 @@ pub fn validate_create_link_relations(
     tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
     convert_relation_tag(tag)?;
+    // TODO: validate special relations: feed & tag
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_relations(

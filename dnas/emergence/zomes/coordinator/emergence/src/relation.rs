@@ -12,14 +12,27 @@ pub fn create_relations(input: Vec<Relation>) -> ExternResult<Vec<ActionHash>> {
         let base = if is_feed {
             AnyLinkableHash::from(agent_info()?.agent_latest_pubkey)
         } else {
-            AnyLinkableHash::from(relation.src)
+            AnyLinkableHash::from(relation.src.clone())
         };
         let action_hash = create_link_relaxed(base, relation.dst.clone(), LinkTypes::Relations, tag.clone())?;
         actions.push(action_hash.clone());
         if is_feed {
             let path = Path::from("feed");
-            create_link_relaxed(path.path_entry_hash()?, relation.dst, LinkTypes::Relations, tag)?;
+            create_link_relaxed(path.path_entry_hash()?, relation.dst, LinkTypes::Relations, tag.clone())?;
         };
+        if relation.content.path == "session.tag" {
+//            let tag_path = Path::from(format!("tags.{}",relation.content.data));
+            let tag_path = Path::from("tags");
+            // let typed_path = tag_path.clone().into_typed(ScopedLinkType::try_from(LinkTypes::Relations)?);
+            // typed_path.ensure()?;
+            create_link_relaxed(
+                tag_path.path_entry_hash()?,
+                relation.src,
+                LinkTypes::Relations,
+                tag,
+            )?;
+    
+        }
     }
     Ok(actions)
 }
@@ -49,7 +62,18 @@ pub fn get_feed(_input: GetFeedInput) -> ExternResult<Vec<Relation>> {
         relations.push(relation);
     }
     Ok(relations)
-   
+}
+
+#[hdk_extern]
+pub fn get_tags(_input: ()) -> ExternResult<Vec<String>> {
+    let path = Path::from("tags");
+    let links = get_links(path.path_entry_hash()?,  LinkTypes::Relations, None)?;
+    let mut tags = HashSet::new();
+    for link in links {
+        let content = convert_relation_tag(link.tag)?;
+        tags.insert(content.data);
+    }
+    Ok(tags.into_iter().map(|t| t).collect())
 }
 
 #[hdk_extern]

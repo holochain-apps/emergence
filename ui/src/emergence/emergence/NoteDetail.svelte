@@ -50,11 +50,11 @@
   .pic {
     max-width: 100px;
   }
-  .tags {
+  :global(.tags) {
     display: flex;
     margin-left: 5px;
   }
-  .tag {
+  :global(.tag) {
     color: white;
     background-color: gray;
     border-radius: 7px;

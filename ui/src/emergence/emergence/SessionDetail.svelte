@@ -37,6 +37,7 @@ $: session = store.sessionStore(sessionHash)
 $: entry = $session.record.entry
 $: slot = sessionSlot($session)
 $: notes = sessionNotes($session)
+$: tags = sessionTags($session)
 
 
 const sessionSlot = (session: Info<Session>): Slot | undefined => {
@@ -56,6 +57,9 @@ const sessionNotes = (session: Info<Session>):Array<ActionHash> => {
   return session.relations.filter(r=>r.content.path == "session.note").map(r=> r.dst)
 }
 
+const sessionTags = (session: Info<Session>):Array<string> => {
+  return session.relations.filter(r=>r.content.path == "session.tag").map(r=> r.content.data)
+}
 
 // $: sessions = store.sessions
 // $: session = derived(sessions, $sessions => $sessions.find(s=>encodeHashToBase64(sessionHash) == encodeHashToBase64(s.original_hash)))
@@ -202,7 +206,16 @@ async function deleteSession() {
           <Avatar agentPubKey={key}></Avatar>
         {/each}
       </div>
+      <div class="tags">
+        Tags: 
+        {#each tags as tag}
+          <div class="tag">
+            {tag}
+          </div>
+        {/each}
+      </div>
     </div>
+  
   </div>
   <div class="notes">
     {#each notes as note}

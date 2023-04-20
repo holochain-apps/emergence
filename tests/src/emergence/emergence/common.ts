@@ -55,6 +55,7 @@ export async function sampleNote(cell: CallableCell, partialNote = {}) {
   return {
       ...{
   text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  tags: [],
   pic: null,
       },
       ...partialNote
@@ -98,7 +99,7 @@ export async function sampleRelation(cell: CallableCell, partialRelation = {}) {
       src: record.signed_action.hashed.hash,
       dst: record.signed_action.hashed.hash,
       content: {
-        path: "entry/rating",
+        path: "entry.rating",
         data: JSON.stringify(5),
       }
         },
@@ -113,12 +114,29 @@ export async function sampleRelationAgent(cell: CallableCell, partialRelation = 
       src: cell.cell_id[1],
       dst: cell.cell_id[1],
       content: {
-        path: "agent/rating",
+        path: "agent.rating",
         data: JSON.stringify(5),
       }
         },
         ...partialRelation
     };
+}
+
+export async function sampleRelationTag(cell: CallableCell, partialRelation = {}) {
+  let sessionRecord = await createSession(cell)
+  let noteRecord = await createNote(cell)
+
+  return {
+      ...{
+      src: sessionRecord.signed_action.hashed.hash,
+      dst: noteRecord.signed_action.hashed.hash,
+    content: {
+      path: "session.tag",
+      data: "foo",
+    }
+      },
+      ...partialRelation
+  };
 }
 
 

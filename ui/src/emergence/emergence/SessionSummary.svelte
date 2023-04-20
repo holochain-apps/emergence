@@ -20,6 +20,11 @@ let loading = false;
 let slot:Slot|undefined = undefined
 
 $: loading, session, slot;
+$: tags = sessionTags(session)
+
+const sessionTags = (session: Info<Session>):Array<string> => {
+  return session.relations.filter(r=>r.content.path == "session.tag").map(r=> r.content.data)
+}
 
 onMount(async () => {
   loading = false
@@ -67,6 +72,13 @@ onMount(async () => {
         {#each session.record.entry.leaders as leader}
          <Avatar agentPubKey={leader}></Avatar>
         {/each}
+    </div>
+    <div class="tags">
+      {#each tags as tag}
+      <div class="tag">
+        {tag}
+      </div>
+    {/each}
     </div>
   </div>
 

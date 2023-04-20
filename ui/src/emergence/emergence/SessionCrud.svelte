@@ -40,7 +40,7 @@ let slot: Slot | undefined
 let slotValid: boolean = true
 
 $: title, description, leaders, smallest, largest, duration, amenities, slot, slotValid;
-$: isSessionValid = title !== '' && description !== '' && slotValid && smallest > 0 && largest < MAX_GROUP_SIZE && duration > 0;
+$: isSessionValid = leaders.length > 0 && title !== '' && description !== '' && slotValid && smallest > 0 && largest < MAX_GROUP_SIZE && duration > 0;
 
 onMount(() => {
   if (session) {
@@ -54,7 +54,7 @@ onMount(() => {
 
     slot = store.getSessionSlot(session)
   } else {
-    leaders = []
+    leaders = [store.myPubKey]
   }
 });
 

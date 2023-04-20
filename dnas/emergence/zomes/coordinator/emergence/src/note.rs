@@ -3,6 +3,7 @@ use emergence_integrity::*;
 #[hdk_extern]
 pub fn create_note(note: Note) -> ExternResult<Record> {
     let note_hash = create_entry(&EntryTypes::Note(note.clone()))?;
+
     let record = get(note_hash.clone(), GetOptions::default())?
         .ok_or(
             wasm_error!(

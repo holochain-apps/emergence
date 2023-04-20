@@ -57,7 +57,10 @@ export class EmergenceClient {
         type: parseInt(r.content.path.split(".")[1]),
         detail: JSON.parse(r.content.data)
     }});
+  }
 
+  async getTags() : Promise<Array<string>> {
+    return this.callZome('get_tags', undefined)
   }
 
   async createTimeWindow(timeWindow: TimeWindow) : Promise<ActionHash> {
