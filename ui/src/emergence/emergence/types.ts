@@ -211,6 +211,10 @@ export interface SessionRelationData {
   slot: undefined | Slot
 }
 
+export interface GetFeedInput {
+  agent_filter?: AgentPubKey
+}
+
 export enum FeedType {
    SessionNew = 1,
    SessionUpdate,

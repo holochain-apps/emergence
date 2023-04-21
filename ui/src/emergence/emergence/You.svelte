@@ -18,7 +18,7 @@
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
   
     onMount(async () => {
-        store.fetchFeed()
+        store.fetchMyStuff()
     });
     let tab = "notes"
     let editProfile = false
@@ -28,7 +28,7 @@
 
 </script>
 {#if $myProfile.status === "complete"  && $myProfile.value}
-    <div class="header"><h3><Avatar agentPubKey={store.myPubKey}></Avatar>{$myProfile.value.nickname}</h3>
+    <div class="header"><h3><Avatar agentPubKey={store.myPubKey}></Avatar></h3>
         <sl-button style="margin-left: 8px;" size=small on:click={() => editProfile=true} circle>
             <Fa icon={faEdit} />
         </sl-button>
@@ -38,7 +38,7 @@
         <update-profile on:cancel-edit-profile={()=>editProfile = false} on:profile-updated={()=>editProfile = false}></update-profile>
     {:else}
     <sl-tab-group>
-        <sl-tab slot="nav" panel="notes">SynapShots
+        <sl-tab slot="nav" panel="notes">Notes
         </sl-tab>
         <sl-tab slot="nav" panel="sessions">Sessions
         </sl-tab>

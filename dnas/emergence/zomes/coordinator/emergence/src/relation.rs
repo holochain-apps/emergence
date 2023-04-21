@@ -44,22 +44,27 @@ pub fn delete_relation(_input: Relation) -> ExternResult<()> {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetFeedInput {
-    filter: u32 // Placeholder
+    agent_filter: Option<AgentPubKey> // Placeholder
 }
 
 #[hdk_extern]
-pub fn get_feed(_input: GetFeedInput) -> ExternResult<Vec<Relation>> {
+pub fn get_feed(input: GetFeedInput) -> ExternResult<Vec<Relation>> {
     let path = Path::from("feed");
     let links = get_links(path.path_entry_hash()?,  LinkTypes::Relations, None)?;
     let mut relations: Vec<Relation> = Vec::new();
     for link in links {
         let relation = Relation 
         { 
-            src: AnyLinkableHash::from(link.author),
+            src: AnyLinkableHash::from(link.author.clone()),
             dst: link.target, 
             content: convert_relation_tag(link.tag)? 
         };
-        relations.push(relation);
+        match input.agent_filter {
+            Some(ref agent) => if *agent == link.author {
+                relations.push(relation)
+            }
+            None => relations.push(relation)
+        };
     }
     Ok(relations)
 }

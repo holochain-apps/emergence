@@ -725,24 +725,33 @@ export class EmergenceStore {
     }
   }
 
-  async fetchFeed() {
+  async fetchMyStuff() {
     try {
-        const feed = await this.client.getFeed()
-        this.feed.update((n) => {return feed} )
-
-        // these will move elsewhere when we load in the feed by scrolling...
+        const feed = await this.client.getFeed(this.myPubKey)
         this.myNotes.update((n) => {
-            return feed.filter(f=>f.type == FeedType.NoteNew && encodeHashToBase64(f.author) === this.myPubKeyBase64 ).map(f=>f.about)
+            return feed.filter(f=>f.type == FeedType.NoteNew ).map(f=>f.about)
         } )
         this.mySessions.update((n) => {
             feed.forEach(f=>{
-                if (f.type == FeedType.SessionSetInterest && encodeHashToBase64(f.author) === this.myPubKeyBase64) {
+                if (f.type == FeedType.SessionSetInterest) {
                     n.set(f.about,f.detail)
                 }
             }
             )
             return n
         } )
+    }
+    catch (e) {
+        console.log("Error fetching my stuff", e)
+    }
+  }
+
+
+  async fetchFeed() {
+    try {
+        const feed = await this.client.getFeed(undefined)
+        this.feed.update((n) => {return feed} )
+
     }
     catch (e) {
         console.log("Error fetching feed", e)
