@@ -76,19 +76,34 @@ pub fn get_tags(_input: ()) -> ExternResult<Vec<String>> {
     Ok(tags.into_iter().map(|t| t).collect())
 }
 
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct RelationInfo {
+    create_link_hash: ActionHash,
+    author: AgentPubKey,
+    timestamp: Timestamp,
+    relation: Relation,
+}
+
 #[hdk_extern]
-pub fn get_relations(input: AnyLinkableHash) -> ExternResult<Vec<Relation>> {
+pub fn get_relations(input: AnyLinkableHash) -> ExternResult<Vec<RelationInfo>> {
     let hash = AnyLinkableHash::from(input);
     let links = get_links(hash.clone(), LinkTypes::Relations, None)?;
 
-    let mut relations: Vec<Relation> = Vec::new();
+    let mut relations: Vec<RelationInfo> = Vec::new();
     for link in links {
         let relation = Relation 
         { 
             src: hash.clone(),
             dst: link.target, 
             content: convert_relation_tag(link.tag)? };
-        relations.push(relation);
+        let relation_info = RelationInfo {
+            create_link_hash: link.create_link_hash,
+            author: link.author,
+            timestamp: link.timestamp,
+            relation,
+        };
+        relations.push(relation_info);
     }
     Ok(relations)
 }

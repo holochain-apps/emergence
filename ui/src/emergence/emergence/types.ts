@@ -59,13 +59,13 @@ export interface Session {
 export interface Info<T> {
   original_hash: ActionHash,
   record: EntryRecord<T>,
-  relations: Array<Relation>,
+  relations: Array<RelationInfo>,
 }
 
 export interface RawInfo {
   original_hash: ActionHash,
   record: Record,
-  relations: Array<Relation>,
+  relations: Array<RelationInfo>,
 }
 
 
@@ -154,6 +154,14 @@ export interface Relation {
     dst: HoloHash,
     content: RelationContent,
 }
+
+export interface RelationInfo {
+  create_link_hash: ActionHash,
+  author: AgentPubKey,
+  timestamp: Timestamp,
+  relation: Relation,
+}
+
 
 export enum SessionInterest {
   NoOpinion = 0,

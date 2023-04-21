@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import { storeContext } from '../../contexts';
-import { amenitiesList, timeWindowDurationToStr, type Info, type Relation, type Space, timeWindowStartToStr } from './types';
+import { amenitiesList, timeWindowDurationToStr, type Info, type Relation, type Space, timeWindowStartToStr, type RelationInfo, type Session, type TimeWindow } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
@@ -12,10 +12,17 @@ import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import SpaceCrud from './SpaceCrud.svelte'; 
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
-  import Avatar from './Avatar.svelte';
-  import { encodeHashToBase64 } from '@holochain/client';
+import Avatar from './Avatar.svelte';
+import { encodeHashToBase64,  } from '@holochain/client';
+  import {ActionHashMap } from '@holochain-open-dev/utils';
 
 const dispatch = createEventDispatcher();
+
+
+interface SlottedSession {
+  session: Info<Session>,
+  window: TimeWindow,
+}
 
 export let space: Info<Space>;
 
@@ -49,19 +56,22 @@ async function deleteSpace() {
   }
 }
 
-const relationSummary = (relation: Relation) : string => {
-  switch (relation.content.path) {
-    case "space.sessions":
-      const session = store.getSession(relation.dst)
-      if (session) {
-        const slot = store.getSessionSlot(session)
-        return `${session.record.entry.title} ${timeWindowStartToStr(slot.window)} for ${timeWindowDurationToStr(slot.window)}`
+const slottedSessions = () :Array<SlottedSession>=> {
+
+  const sessions:  ActionHashMap<SlottedSession> = new ActionHashMap()
+  space.relations.forEach(ri => {
+    if (ri.relation.content.path == "space.sessions") {
+      const session = store.getSession(ri.relation.dst)
+      const slot = store.getSessionSlot(session)
+      if (encodeHashToBase64(slot.space) == encodeHashToBase64(space.original_hash)) {
+        const s = sessions.set(session.original_hash, {session,window:JSON.parse(ri.relation.content.data)})
       }
-      return "unknown session"
-    default: {
-      return JSON.stringify(relation.content)
     }
-  }
+  })
+  return Array.from(sessions.values())
+}
+const slottedSessionSummary = (ss: SlottedSession) : string => {
+  return `${ss.session.record.entry.title} ${timeWindowStartToStr(ss.window)} for ${timeWindowDurationToStr(ss.window)}`
 }
 </script>
 
@@ -144,11 +154,11 @@ const relationSummary = (relation: Relation) : string => {
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Secheduled Sessions:</strong></span>
+    <span style="margin-right: 4px"><strong>Scheduled Sessions:</strong></span>
 
     <ul>
-      {#each space.relations as relation}
-        <li>{relationSummary(relation)}</li>
+      {#each slottedSessions() as session}
+        <li>{slottedSessionSummary(session)}</li>
       {/each}
     </ul>
   </div>

@@ -4,14 +4,14 @@ use std::collections::HashMap;
 use hdk::prelude::*;
 use emergence_integrity::*;
 
-use crate::{relation::get_relations, session::get_session};
+use crate::{relation::{get_relations, RelationInfo}, session::get_session};
 
 
 #[derive(Serialize, Deserialize, Debug, SerializedBytes, Clone)]
 pub struct SessionInfo {
     pub original_hash: ActionHash,
     pub record: Record,
-    pub relations: Vec<Relation>,
+    pub relations: Vec<RelationInfo>,
 }
 
 #[hdk_extern]

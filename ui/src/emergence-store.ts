@@ -136,16 +136,15 @@ export class EmergenceStore {
   }
 
   getSessionSlot(session: Info<Session>) : Slot|undefined {
-    for (const r of session.relations) {
-        if (r.content.path == "session.space") {
-            const window = JSON.parse(r.content.data) as TimeWindow
-            return {
-                space: r.dst,
-                window
-            }
-        }
+    const rels = session.relations.filter(r=>r.relation.content.path == "session.space")
+    if (rels.length == 0) return undefined
+    rels.sort((a,b)=>b.timestamp - a.timestamp)
+    const rel = rels[0]
+    const window = JSON.parse(rel.relation.content.data) as TimeWindow
+    return {
+        space: rel.relation.dst,
+        window
     }
-    return undefined
   }
 
   sessionReleationDataStore(sessionStore: Readable<Info<Session>>) : Readable<SessionRelationData> {
@@ -155,9 +154,10 @@ export class EmergenceStore {
             interest: new HoloHashMap(),
             slot: undefined
         }
-        const spaces = $session.relations.filter(r=>r.content.path === "session.space")
+        const spaces = $session.relations.filter(r=>r.relation.content.path === "session.space")
         if (spaces.length > 0) {
-          let r = spaces[spaces.length-1]
+          let ri = spaces[spaces.length-1]
+          const r = ri.relation
           const window = JSON.parse(r.content.data) as TimeWindow
                   rel.slot = {
                       space: r.dst,
@@ -165,8 +165,9 @@ export class EmergenceStore {
                   }
         }
 
-        const interest = $session.relations.filter(r=>r.content.path === "session.interest")
-        interest.forEach(r=>{
+        const interest = $session.relations.filter(r=>r.relation.content.path === "session.interest")
+        interest.forEach(ri=>{
+            const r = ri.relation
             const who = r.dst
             who[1] = 32 //temporary workaround because of linkable hash problem
             const whoB64 = encodeHashToBase64(who)
@@ -183,9 +184,10 @@ export class EmergenceStore {
 
   sessionSlotStore(sessionStore: Readable<Info<Session>>) : Readable<Slot|undefined> {
     return derived(sessionStore, $session=> {
-        const spaces = $session.relations.filter(r=>r.content.path == "session.space")
+        const spaces = $session.relations.filter(r=>r.relation.content.path == "session.space")
         if (spaces.length > 0) {
-          let r = spaces[spaces.length-1]
+          let ri = spaces[spaces.length-1]
+          const r = ri.relation
           const window = JSON.parse(r.content.data) as TimeWindow
                   return {
                       space: r.dst,
@@ -198,8 +200,8 @@ export class EmergenceStore {
 
   sessionNoteStore(sessionStore: Readable<Info<Session>>) : Readable<Array<Info<Note>|undefined>> {
     return derived(sessionStore, $session=> {
-        return $session.relations.filter(r=>r.content.path == "session.note").map(r=> {
-            const note = this.getNote(r.dst)
+        return $session.relations.filter(r=>r.relation.content.path == "session.note").map(r=> {
+            const note = this.getNote(r.relation.dst)
             if (note) return note
             return undefined
       })})
@@ -207,7 +209,8 @@ export class EmergenceStore {
 
   getSessionNotes(session: Info<Session>) : Array<Info<Note>> {
     const notes: Array<Info<Note>> = []
-    for (const r of session.relations) {
+    for (const ri of session.relations) {
+        const r = ri.relation
         if (r.content.path == "session.note") {
             const note = this.getNote(r.dst)
             if (note) notes.push(note)
@@ -451,7 +454,7 @@ export class EmergenceStore {
         const sessions = await this.client.getSessions()
         this.sessions.update((n) => {return sessions} )
         const noteHashes = []
-        sessions.forEach(s=>s.relations.filter(r=>r.content.path === "session.space").forEach(r=>noteHashes.push(r.dst)))
+        sessions.forEach(s=>s.relations.filter(r=>r.relation.content.path === "session.space").forEach(r=>noteHashes.push(r.relation.dst)))
         this.noteHashes.update((n) => {return noteHashes} )
 
     }

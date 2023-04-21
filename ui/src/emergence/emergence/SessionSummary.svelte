@@ -31,7 +31,7 @@ $: loading, session, slot;
 $: tags = sessionTags(session)
 
 const sessionTags = (session: Info<Session>):Array<string> => {
-  return session.relations.filter(r=>r.content.path == "session.tag").map(r=> r.content.data)
+  return session.relations.filter(r=>r.relation.content.path == "session.tag").map(r=> r.relation.content.data)
 }
 
 onMount(async () => {

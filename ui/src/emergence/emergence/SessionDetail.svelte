@@ -41,9 +41,10 @@ $: tags = sessionTags($session)
 
 
 const sessionSlot = (session: Info<Session>): Slot | undefined => {
-  const spaces = session.relations.filter(r=>r.content.path == "session.space")
+  const spaces = session.relations.filter(r=>r.relation.content.path == "session.space")
         if (spaces.length > 0) {
-          let r = spaces[spaces.length-1]
+          const ri = spaces[spaces.length-1]
+          const r = ri.relation
           const window = JSON.parse(r.content.data) as TimeWindow
                   return {
                       space: r.dst,
@@ -54,11 +55,11 @@ const sessionSlot = (session: Info<Session>): Slot | undefined => {
 }
 
 const sessionNotes = (session: Info<Session>):Array<ActionHash> => {
-  return session.relations.filter(r=>r.content.path == "session.note").map(r=> r.dst)
+  return session.relations.filter(r=>r.relation.content.path == "session.note").map(r=> r.relation.dst)
 }
 
 const sessionTags = (session: Info<Session>):Array<string> => {
-  return session.relations.filter(r=>r.content.path == "session.tag").map(r=> r.content.data)
+  return session.relations.filter(r=>r.relation.content.path == "session.tag").map(r=> r.relation.content.data)
 }
 
 // $: sessions = store.sessions

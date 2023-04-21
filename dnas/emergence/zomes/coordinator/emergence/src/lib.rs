@@ -12,7 +12,7 @@ use all_spaces::SpaceInfo;
 use hdk::prelude::*;
 use emergence_integrity::*;
 use note::get_note;
-use relation::get_relations;
+use relation::{get_relations, RelationInfo};
 use session::get_session;
 use space::get_space;
 #[hdk_extern]
@@ -163,7 +163,7 @@ pub struct GetStuffInput {
 pub struct NoteInfo {
     pub original_hash: ActionHash,
     pub record: Record,
-    pub relations: Vec<Relation>,
+    pub relations: Vec<RelationInfo>,
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetStuffOutput {

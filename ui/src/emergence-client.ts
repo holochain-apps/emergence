@@ -9,7 +9,7 @@ import type {
     EntryHash,
     HoloHash,
 } from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
@@ -40,7 +40,7 @@ export class EmergenceClient {
     return this.callZome('create_relations', relations)
   }
 
-  getRelations(hash: HoloHash) : Promise<Array<Relation>> {
+  getRelations(hash: HoloHash) : Promise<Array<RelationInfo>> {
     return this.callZome('get_relations', hash)
   }
 

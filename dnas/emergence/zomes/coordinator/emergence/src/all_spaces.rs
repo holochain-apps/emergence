@@ -1,13 +1,13 @@
 use hdk::prelude::*;
 use emergence_integrity::*;
 use std::collections::HashMap;
-use crate::{relation::get_relations, space::get_space};
+use crate::{relation::{get_relations, RelationInfo}, space::get_space};
 
 #[derive(Serialize, Deserialize, Debug, SerializedBytes, Clone)]
 pub struct SpaceInfo{
     pub original_hash: ActionHash,
     pub record: Record,
-    pub relations: Vec<Relation>,
+    pub relations: Vec<RelationInfo>,
 }
 
 #[hdk_extern]
