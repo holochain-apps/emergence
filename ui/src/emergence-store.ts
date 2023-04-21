@@ -222,7 +222,7 @@ export class EmergenceStore {
   async slot(session: ActionHash, slot: Slot) {
     const space = this.getSpace(slot.space)
     if (space) {
-        this.client.createRelations([
+        await this.client.createRelations([
             {   src: session,
                 dst: slot.space,
                 content:  {
@@ -246,6 +246,7 @@ export class EmergenceStore {
             },
         ]
         )
+        await this.fetchSessions()
     } else {
         console.log("Couldn't find space", encodeHashToBase64(slot.space))
     }
@@ -449,8 +450,8 @@ export class EmergenceStore {
 
   async fetchSessions() {
     try {
-        this.fetchSpaces()
-        this.fetchTimeWindows()
+        await this.fetchSpaces()
+        await this.fetchTimeWindows()
         const sessions = await this.client.getSessions()
         this.sessions.update((n) => {return sessions} )
         const noteHashes = []

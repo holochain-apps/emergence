@@ -164,11 +164,8 @@
     const session = store.getSession(sessionHash)
     const sessionSlot = store.getSessionSlot(session)
     if (target.id && (!sessionSlot || JSON.stringify(sessionSlot.window) != windowJSON) || encodeHashToBase64(slot.space) != encodeHashToBase64(sessionSlot.space)) {
-      console.log("slotting?", srcId, target.id, space.record.entry.name)
       await store.slot(sessionHash, slot)
-      store.fetchSessions()
-    } else {
-      console.log("nope")
+      spaces = store.spaces
     }
     clearDrag()
   }
