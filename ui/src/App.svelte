@@ -216,7 +216,6 @@
 
 <style>
   main {
-    text-align: center;
     padding: 0em;
     max-width: 100%;
     margin: 0 auto;
@@ -263,13 +262,17 @@
   }
   .pane {
     width: 100%;
+    height: 80%;
     border: solid 1px;
     padding: 10px;
     margin: 10px;
   }
-  @media (min-width: 500px) {
+  #content {
+    height: 100vh;
+  }
+  /* @media (min-width: 500px) {
     main {
       max-width: 500px;
     }
-  }
+  } */
 </style>

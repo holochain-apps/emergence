@@ -17,8 +17,6 @@
     import { get } from 'svelte/store';
     import sanitize from "sanitize-filename";
     import type { Info, TimeWindow } from './types';
-    import { dirty_components } from 'svelte/internal';
-    import TimeWindows from './TimeWindows.svelte';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
   
@@ -138,7 +136,6 @@
         <p><b>Emergence</b> is a decentralized hApp for discovery, scheduling, connecting and remembering </p>
         <update-profile on:cancel-edit-profile={()=>editProfile = false} on:profile-updated={()=>editProfile = false}></update-profile>
     {:else}
-    {exportJSON}
     <sl-tab-group>
         <sl-tab slot="nav" panel="notes">Notes
         </sl-tab>

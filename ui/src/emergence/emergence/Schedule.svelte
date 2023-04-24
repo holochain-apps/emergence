@@ -7,11 +7,10 @@
   import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, type Slot, type RelationInfo, slotEqual } from './types';
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
-  import { faCalendarPlus } from '@fortawesome/free-solid-svg-icons';
+  import { faCalendarPlus, faArrowsUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
   import SessionSummary from './SessionSummary.svelte';
   import { HoloHashMap } from '@holochain-open-dev/utils';
-  import SpaceCrud from './SpaceCrud.svelte';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -176,6 +175,7 @@
   }
   let dragDuration = 300
 
+  let bySpace = false
 </script>
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -189,6 +189,9 @@
       <h3>Schedule</h3>
       <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
         <Fa icon={faCalendarPlus} />
+      </sl-button>
+      <sl-button on:click={() => {bySpace = !bySpace } } circle>
+        <Fa icon={faArrowsUpDownLeftRight} />
       </sl-button>
       </div>
 
@@ -221,6 +224,7 @@
       </div>
 
       <div class="schedule-grid">
+        {#if bySpace}
         <div style="display:grid; grid-template-columns:repeat({$spaces.length+1},1fr); ">
           <div class="empty"></div>
           {#each $spaces as space, idx}
@@ -233,7 +237,7 @@
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
                   </div>
                 {/if}
-                </div>
+            </div>
           {/each}
           {#each days as day}
             <div style="grid-column-start:0; grid-column-end: span {$spaces.length+1}">{day.toDateString()}</div>
@@ -278,6 +282,76 @@
             {/each}
           {/each}
         </div>
+        {:else}
+        <div style="display:grid;  grid-template-columns: 100px {Array(days.length+$windows.length).fill("1fr").flat().join(" ")};">
+          <div class="empty"></div>
+
+          {#each days as day}
+            <div style="">{day.getDate()}/{day.getMonth()+1}</div>
+            {#each $windows.filter(w=>{
+                // @ts-ignore
+                return new Date(w.start).toDateString()  == day.toDateString()
+              }).sort(sortWindows) as window}
+              <div class="time-title"
+                class:selected={JSON.stringify(selectedWindow) ==  JSON.stringify(window)}
+                title={timeWindowDurationToStr(window)}
+                on:click={(e)=>{selectWindow(window); e.stopPropagation()}}
+              >{new Date(window.start).toTimeString().slice(0,5)}
+               
+              </div>
+            
+            {/each}
+          {/each}
+
+          {#each $spaces as space, idx}
+            <div class="space-title"
+              class:selected={selectedSpaceIdx ==  idx}
+              on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
+                {space.record.entry.name}
+                {#if space.record.entry.pic}
+                  <div class="space-pic">
+                    <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
+                  </div>
+                {/if}
+            </div>
+
+            {#each days as day}
+              <div class="empty"></div>
+
+              {#each $windows.filter(w=>{
+                  // @ts-ignore
+                  return new Date(w.start).toDateString()  == day.toDateString()
+                }).sort(sortWindows) as window}
+                <div 
+                  id={`${JSON.stringify(window)}-${idx}}`}
+                  class="schedule-slot"
+                  class:glowing={dragTarget == `${JSON.stringify(window)}-${idx}}`}
+                  class:selected={selectedSpaceIdx ==  idx  || JSON.stringify(selectedWindow) ==  JSON.stringify(window) || sessionsInSpace(window, space).find(s=>selectedSessions.get(s.record.actionHash))}
+
+                  on:dragenter={handleDragEnter} 
+                  on:dragleave={handleDragLeave}  
+                  on:drop={handleDragDropSession}
+                  on:dragover={handleDragOver}          
+                  on:click={(e)=>{selectSlot(window, space); e.stopPropagation()}}
+                >
+                  {#each sessionsInSpace(window, space) as session}
+                    <div class="slotted-session"
+                    id={encodeHashToBase64(session.original_hash)}
+                    class:tilted={draggedItemId == encodeHashToBase64(session.original_hash)}
+                    draggable={dragOn}
+                    on:dragstart={handleDragStart}
+                    on:dragend={handleDragEnd}              
+                    >
+                      {session.record.entry.title}
+                    </div>
+                  {/each}
+                </div>
+              {/each}
+            {/each}
+
+          {/each}
+        </div>
+        {/if}
       </div>
 
       <div class="selected-sessions">
