@@ -225,10 +225,10 @@
 
       <div class="schedule-grid">
         {#if bySpace}
-        <div style="display:grid; grid-template-columns:repeat({$spaces.length+1},1fr); ">
-          <div class="empty"></div>
+        <table style="">
+          <th class="empty"></th>
           {#each $spaces as space, idx}
-            <div class="space-title"
+            <th class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
                 {space.record.entry.name}
@@ -237,24 +237,26 @@
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
                   </div>
                 {/if}
-            </div>
+            </th>
           {/each}
           {#each days as day}
-            <div style="grid-column-start:0; grid-column-end: span {$spaces.length+1}">{day.toDateString()}</div>
-
+            <tr>
+              <td colspan="{$spaces.length+1}" >{day.toDateString()}</td>
+            </tr>
             {#each $windows.filter(w=>{
                 // @ts-ignore
                 return new Date(w.start).toDateString()  == day.toDateString()
               }).sort(sortWindows) as window}
-              <div class="time-title"
+            <tr>
+              <td class="time-title"
                 class:selected={JSON.stringify(selectedWindow) ==  JSON.stringify(window)}
                 title={timeWindowDurationToStr(window)}
                 on:click={(e)=>{selectWindow(window); e.stopPropagation()}}
               >{new Date(window.start).toTimeString().slice(0,5)}
                
-              </div>
+              </td>
               {#each $spaces as space, idx}
-                <div 
+                <td 
                   id={`${JSON.stringify(window)}-${idx}}`}
                   class="schedule-slot"
                   class:glowing={dragTarget == `${JSON.stringify(window)}-${idx}}`}
@@ -277,34 +279,35 @@
                       {session.record.entry.title}
                     </div>
                   {/each}
-                </div>
+                </td>
               {/each}
+            </tr>
             {/each}
           {/each}
-        </div>
+        </table>
         {:else}
-        <div style="display:grid;  grid-template-columns: 100px {Array(days.length+$windows.length).fill("1fr").flat().join(" ")};">
-          <div class="empty"></div>
+        <table>
+          <th class="empty"></th>
 
           {#each days as day}
-            <div style="">{day.getDate()}/{day.getMonth()+1}</div>
+            <th style="">{day.getDate()}/{day.getMonth()+1}</th>
             {#each $windows.filter(w=>{
                 // @ts-ignore
                 return new Date(w.start).toDateString()  == day.toDateString()
               }).sort(sortWindows) as window}
-              <div class="time-title"
+              <th class="time-title"
                 class:selected={JSON.stringify(selectedWindow) ==  JSON.stringify(window)}
                 title={timeWindowDurationToStr(window)}
                 on:click={(e)=>{selectWindow(window); e.stopPropagation()}}
               >{new Date(window.start).toTimeString().slice(0,5)}
                
-              </div>
+              </th>
             
             {/each}
           {/each}
-
           {#each $spaces as space, idx}
-            <div class="space-title"
+          <tr>
+            <td class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
                 {space.record.entry.name}
@@ -313,16 +316,16 @@
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
                   </div>
                 {/if}
-            </div>
+            </td>
 
             {#each days as day}
-              <div class="empty"></div>
+              <td class="empty"></td>
 
               {#each $windows.filter(w=>{
                   // @ts-ignore
                   return new Date(w.start).toDateString()  == day.toDateString()
                 }).sort(sortWindows) as window}
-                <div 
+                <td 
                   id={`${JSON.stringify(window)}-${idx}}`}
                   class="schedule-slot"
                   class:glowing={dragTarget == `${JSON.stringify(window)}-${idx}}`}
@@ -345,12 +348,12 @@
                       {session.record.entry.title}
                     </div>
                   {/each}
-                </div>
+                </td>
               {/each}
             {/each}
-
+          </tr>
           {/each}
-        </div>
+        </table>
         {/if}
       </div>
 
@@ -395,7 +398,6 @@
  .space-title {
   outline: solid 1px;
   cursor: pointer;
-  width: 100%;
  }
  .time-title {
   outline: solid 1px;

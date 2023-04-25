@@ -29,6 +29,7 @@
   import SessionDetail from './emergence/emergence/SessionDetail.svelte';
   import type { Info, Session } from './emergence/emergence/types';
   import You from './emergence/emergence/You.svelte'
+  import Admin from './emergence/emergence/Admin.svelte';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -84,10 +85,12 @@
   {:else}
   <profiles-context store="{profilesStore}">
     {#if $prof && ($prof.status!=="complete" || $prof.value===undefined)}
-    <h1>Hello.</h1>
-    <p><b>Emergence</b> is a decentralized hApp for discovery, scheduling, connecting and remembering </p>
-    <p>Harness the power of the decentralized web technology for local, ofline collaboration.</p>
-    <p> Continue with a nickname and optional avatar, both of which can be changed later.</p>
+    <div style="text-align:center">
+      <h1>Hello.</h1>
+      <p><b>Emergence</b> is a decentralized hApp for discovery, scheduling, connecting and remembering </p>
+      <p>Harness the power of the decentralized web technology for local, ofline collaboration.</p>
+      <p> Continue with a nickname and optional avatar, both of which can be changed later.</p>
+    </div>
     {/if}
 
     <profile-prompt>
@@ -143,9 +146,7 @@
       {/if}
       {#if pane=="admin"}
       <div class="pane">
-        <h3>TimeWindows</h3>
-        <TimeWindows></TimeWindows>
-        <CreateTimeWindow></CreateTimeWindow>
+        <Admin></Admin>
       </div>
       {/if}
       {#if pane=="feed"}
@@ -199,13 +200,13 @@
         >
            <Fa icon={faUser} size="2x"/>
         </div>
-        <!-- <div class="nav-button {pane=="admin"?"selected":""}"
+        <div class="nav-button {pane=="admin"?"selected":""}"
           title="Admin"
           on:keypress={()=>{pane='admin'}}
           on:click={()=>{pane='admin'}}
         >
            <Fa icon={faGear} size="2x"/>
-        </div> -->
+        </div>
       </div>
     </div>
     </file-storage-context>
