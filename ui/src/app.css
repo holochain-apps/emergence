@@ -14,8 +14,15 @@ html, body {
   font-size: 16px;
   line-height: 1.5;
   color: #333;
-  padding-bottom: 60px; /* Adjust this value based on the height of your bottom navigation */
-}  
+  padding: 0px;
+  padding-bottom: 76px; /* Adjust this value based on the height of your bottom navigation */
+  height: 100%; overflow: hidden; /* In general, it's a good idea to have the body take up the full viewport height and have a fixed layout with no scrollbar. Then, you can have a scrollable inner container like .pane-content to handle the overflow of the content. This approach helps keep the page structure clean and allows you to control the scrolling behavior more effectively. */
+}
+
+#content {
+  height: 100%;
+  padding: 0px;
+}
 
 a {
   text-decoration: none;
@@ -82,9 +89,15 @@ input, button {
 }
 
 /*Here are some basic styles for the pane and modal:*/
+
 .pane {
-  padding: 1rem;
+  padding: 0px;
   background-color: var(--bg-color);
+  height: calc(100% - 76px); /* Subtract the height of the bottom navigation */
+}
+
+.pane-content {
+  height: 100%;
 }
 
 .modal {
@@ -104,3 +117,14 @@ input, button {
   font-weight: 500;
 }
 
+#content{
+  background-color: green;
+}
+
+/*debug*/
+body{
+  background-color: yellow;
+}
+.pane{
+  background-color: pink;
+}

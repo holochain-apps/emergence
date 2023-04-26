@@ -262,10 +262,8 @@
     background-color:gray;
   }
   .pane {
-    height: 80%;
     border: solid 1px;
     padding: 10px;
-    margin: 10px;
   }
   #content {
     height: 100vh;
