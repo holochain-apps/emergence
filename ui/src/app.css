@@ -2,3 +2,105 @@
   --mdc-theme-primary: #7B1FA2;
   --mdc-theme-secondary: #FF5722;
 }
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  padding-bottom: 60px; /* Adjust this value based on the height of your bottom navigation */
+}  
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+input, button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Color Variables */
+:root {
+  --primary-color: #536DFE;
+  --secondary-color: #FF9800;
+  --bg-color: #F5F5F5;
+  --light-text-color: #FFF;
+  --dark-text-color: #333;
+  --border-color: #DDD;
+}
+
+/* Layout and Spacing */
+.space {
+  margin-bottom: 1rem;
+}
+
+.space-lg {
+  margin-bottom: 2rem;
+}
+
+/*Now, let's style the bottom navigation.*/
+.nav {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--primary-color);
+  padding: 0.5rem 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.nav-button {
+  flex: 1;
+  text-align: center;
+  color: var(--light-text-color);
+  padding: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.nav-button.selected {
+  background-color: var(--secondary-color);
+}
+
+/*Here are some basic styles for the pane and modal:*/
+.pane {
+  padding: 1rem;
+  background-color: var(--bg-color);
+}
+
+.modal {
+  background-color: var(--light-text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Finally, let's style the header: */
+.header {
+  background-color: var(--primary-color);
+  color: var(--light-text-color);
+  padding: 1rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
