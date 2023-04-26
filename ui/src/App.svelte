@@ -262,7 +262,6 @@
     background-color:gray;
   }
   .pane {
-    width: 100%;
     height: 80%;
     border: solid 1px;
     padding: 10px;

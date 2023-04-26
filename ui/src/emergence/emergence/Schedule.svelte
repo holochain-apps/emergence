@@ -176,6 +176,14 @@
   let dragDuration = 300
 
   let bySpace = false
+
+  const windowsInDay = (day) : Array<TimeWindow> => {
+    return $windows.filter(w=>{
+                // @ts-ignore
+                return new Date(w.start).toDateString()  == day.toDateString()
+              })
+  }
+
 </script>
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -243,10 +251,7 @@
             <tr>
               <td colspan="{$spaces.length+1}" >{day.toDateString()}</td>
             </tr>
-            {#each $windows.filter(w=>{
-                // @ts-ignore
-                return new Date(w.start).toDateString()  == day.toDateString()
-              }).sort(sortWindows) as window}
+            {#each windowsInDay(day).sort(sortWindows) as window}
             <tr>
               <td class="time-title"
                 class:selected={JSON.stringify(selectedWindow) ==  JSON.stringify(window)}
@@ -287,14 +292,19 @@
         </table>
         {:else}
         <table>
+          <tr>
+            <th class="empty"></th>
+            {#each days as day}
+            <th style="text-align:left" colspan="{windowsInDay(day).length+1}">{day.getDate()}/{day.getMonth()+1}</th>
+
+            {/each}
+          </tr>
+          <tr>
           <th class="empty"></th>
 
           {#each days as day}
-            <th style="">{day.getDate()}/{day.getMonth()+1}</th>
-            {#each $windows.filter(w=>{
-                // @ts-ignore
-                return new Date(w.start).toDateString()  == day.toDateString()
-              }).sort(sortWindows) as window}
+            <th style=""></th>
+            {#each windowsInDay(day).sort(sortWindows) as window}
               <th class="time-title"
                 class:selected={JSON.stringify(selectedWindow) ==  JSON.stringify(window)}
                 title={timeWindowDurationToStr(window)}
@@ -305,6 +315,7 @@
             
             {/each}
           {/each}
+          </tr>
           {#each $spaces as space, idx}
           <tr>
             <td class="space-title"
