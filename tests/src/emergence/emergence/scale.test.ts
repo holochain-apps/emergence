@@ -328,6 +328,13 @@ test('scale testing', async () => {
 
       assert.equal(get(store.sessions).length, sessionsCount);
 
+      // run the test over time increasing the following parameters:
+      // 1. number of agent's per conductor
+      // 2. number of notes create per agent, per minute
+      // 3. number of requests per agent per minute to load all the data: store.fetchSessions()
+      // 2. Number of conductors
+
+
     });
 
   });
