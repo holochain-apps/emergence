@@ -263,7 +263,7 @@
   }
   .pane {
     border: solid 1px;
-    padding: 10px;
+    width: 100vw;
   }
   #content {
     height: 100vh;

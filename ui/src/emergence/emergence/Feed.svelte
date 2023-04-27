@@ -34,7 +34,7 @@
     <h3>Feed</h3>
   </div>
   {#each $feed as f}
-    <div style="margin-bottom: 8px; width:500px; background:lightgray">
+    <div style="margin-bottom: 8px; width:100%; background:lightgray">
       <FeedElemDetail feedElem={f}></FeedElemDetail>
     </div>
   {/each}

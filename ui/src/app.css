@@ -94,10 +94,15 @@ input, button {
   padding: 0px;
   background-color: var(--bg-color);
   height: calc(100% - 76px); /* Subtract the height of the bottom navigation */
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
 }
 
 .pane-content {
   height: 100%;
+  overflow-x: clip;
 }
 
 .modal {
@@ -112,9 +117,20 @@ input, button {
 .header {
   background-color: var(--primary-color);
   color: var(--light-text-color);
-  padding: 1rem;
+  padding: .5rem;
   font-size: 1.25rem;
   font-weight: 500;
+  width: 100vw;
+}
+
+.space-pic{
+  max-width: 5em;
+  max-height: 5em;
+}
+
+.session{
+  margin-bottom: 8px; 
+  width:100%;
 }
 
 #content{
@@ -122,9 +138,9 @@ input, button {
 }
 
 /*debug*/
-body{
-  background-color: yellow;
-}
 .pane{
   background-color: pink;
+}
+.pane-content{
+  background-color: yellow;
 }
