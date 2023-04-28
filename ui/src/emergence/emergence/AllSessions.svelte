@@ -39,7 +39,7 @@ onMount(async () => {
     <span>No sessions found.</span>
   {:else}
       {#each $sessions as session}
-        <div style="margin-bottom: 8px; width:500px">
+        <div class="session">
           <SessionSummary 
             showTags={true}
             showSlot={true}

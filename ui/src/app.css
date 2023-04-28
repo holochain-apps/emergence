@@ -2,3 +2,145 @@
   --mdc-theme-primary: #7B1FA2;
   --mdc-theme-secondary: #FF5722;
 }
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  font-family: "Roboto", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
+  padding: 0px;
+  padding-bottom: 76px; /* Adjust this value based on the height of your bottom navigation */
+  height: 100%; overflow: hidden; /* In general, it's a good idea to have the body take up the full viewport height and have a fixed layout with no scrollbar. Then, you can have a scrollable inner container like .pane-content to handle the overflow of the content. This approach helps keep the page structure clean and allows you to control the scrolling behavior more effectively. */
+}
+
+#content {
+  height: 100%;
+  padding: 0px;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+input, button {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Color Variables */
+:root {
+  --primary-color: #536DFE;
+  --secondary-color: #FF9800;
+  --bg-color: #F5F5F5;
+  --light-text-color: #FFF;
+  --dark-text-color: #333;
+  --border-color: #DDD;
+}
+
+/* Layout and Spacing */
+.space {
+  margin-bottom: 1rem;
+}
+
+.space-lg {
+  margin-bottom: 2rem;
+}
+
+/*Now, let's style the bottom navigation.*/
+.nav {
+  display: flex;
+  justify-content: space-between;
+  background-color: var(--primary-color);
+  padding: 0.5rem 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.nav-button {
+  flex: 1;
+  text-align: center;
+  color: var(--light-text-color);
+  padding: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.nav-button.selected {
+  background-color: var(--secondary-color);
+}
+
+/*Here are some basic styles for the pane and modal:*/
+
+.pane {
+  padding: 0px;
+  background-color: var(--bg-color);
+  height: calc(100% - 76px); /* Subtract the height of the bottom navigation */
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+}
+
+.pane-content {
+  height: 100%;
+  overflow-x: clip;
+}
+
+.modal {
+  background-color: var(--light-text-color);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Finally, let's style the header: */
+.header {
+  background-color: var(--primary-color);
+  color: var(--light-text-color);
+  padding: .5rem;
+  font-size: 1.25rem;
+  font-weight: 500;
+  width: 100vw;
+}
+
+.space-pic{
+  max-width: 5em;
+  max-height: 5em;
+}
+
+.session{
+  margin-bottom: 8px; 
+  width:100%;
+}
+
+#content{
+  background-color: green;
+}
+
+/*debug*/
+.pane{
+  background-color: pink;
+}
+.pane-content{
+  background-color: yellow;
+}

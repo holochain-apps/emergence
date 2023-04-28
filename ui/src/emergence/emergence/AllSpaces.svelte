@@ -45,7 +45,7 @@ onMount(async () => {
     <span>No spaces found.</span>
   {:else}
     {#each $spaces as space}
-      <div style="margin-bottom: 8px; width:500px; background:lightgray">
+      <div style="margin-bottom: 8px; width:100%; background:lightgray">
         <SpaceDetail space={space}  on:space-deleted={() => store.fetchSpaces()}></SpaceDetail>
       </div>
     {/each}
