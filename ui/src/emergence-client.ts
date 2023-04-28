@@ -1,13 +1,14 @@
 // import {  } from './types';
 
-import type {
-    Action,
-    ActionHash,
-    AgentPubKey,
-    AppAgentCallZomeRequest,
-    AppAgentClient,
-    EntryHash,
-    HoloHash,
+import {
+  encodeHashToBase64,
+    type Action,
+    type ActionHash,
+    type AgentPubKey,
+    type AppAgentCallZomeRequest,
+    type AppAgentClient,
+    type EntryHash,
+    type HoloHash,
 } from '@holochain/client';
 import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
@@ -37,7 +38,6 @@ export class EmergenceClient {
 
 
   async createRelations(relations: Array<Relation>) : Promise<ActionHash> {
-    console.log("CERATE RELATIONS", relations)
     return this.callZome('create_relations', relations)
   }
 
@@ -46,6 +46,7 @@ export class EmergenceClient {
   }
 
   async getFeed(agent: AgentPubKey | undefined) : Promise<Array<FeedElem>> {
+    console.log("AGEN", encodeHashToBase64(agent))
     const relations: Array<Relation> = await this.callZome('get_feed', {agent_filter: agent})
     return relations.map(r => {
       // console.log("feed item", r.content)

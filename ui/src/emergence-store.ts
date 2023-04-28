@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 
@@ -458,11 +458,9 @@ export class EmergenceStore {
         ])
     }
   }
-
   async setSessionInterest(sessionHash: ActionHash, interest: SessionInterest) {
 
-    const me = this.myPubKey
-    me[1] =33
+    const me = decodeHashFromBase64(setCharAt(this.myPubKeyBase64,3,'E'))
     await this.client.createRelations([
         {   src: sessionHash,
             dst: me,
@@ -489,6 +487,16 @@ export class EmergenceStore {
         const sessions = await this.client.getSessions()
         this.sessions.update((n) => {return sessions} )
         const noteHashes = []
+        sessions.forEach(s=> s.record.entry.leaders.forEach(l=> 
+            {
+                if (encodeHashToBase64(l) == this.myPubKeyBase64){
+                    this.mySessions.update((n) => {
+                        n.set(s.original_hash,SessionInterest.Interested)
+                        return n
+                    } )
+                }
+            }    
+        ))
         sessions.forEach(s=>s.relations.filter(r=>r.relation.content.path === "session.space").forEach(r=>noteHashes.push(r.relation.dst)))
         this.noteHashes.update((n) => {return noteHashes} )
 
