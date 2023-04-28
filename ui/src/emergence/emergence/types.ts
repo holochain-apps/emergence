@@ -113,6 +113,17 @@ export interface UpdateNoteInput {
 }
 
 
+export interface SiteMap {
+  text: string,
+  pic: EntryHash,
+}
+
+export interface UpdateSiteMapInput {
+  original_map_hash: ActionHash,
+  previous_map_hash: ActionHash,
+  updated_map: SiteMap,
+}
+
 export interface Slot {
   space: ActionHash
   window: TimeWindow
@@ -227,6 +238,9 @@ export enum FeedType {
    NoteNew,
    NoteUpdate,
    NoteDelete,
+   SiteMapNew,
+   SiteMapUpdate,
+   SiteMapDelete,
    TimeWindowNew,
 }
 
@@ -249,6 +263,9 @@ export const getTypeName = (type: FeedType) : string  => {
     case FeedType.NoteNew: return "New Note"
     case FeedType.NoteUpdate: return "Update Note"
     case FeedType.NoteDelete: return "Delete Note"
+    case FeedType.SiteMapNew: return "New SiteMap"
+    case FeedType.SiteMapUpdate: return "Update SiteMap"
+    case FeedType.SiteMapDelete: return "Delete SiteMap"
     case FeedType.SlotSession: return "Scheduled Session"
     case FeedType.TimeWindowNew: return "New Slot"
   }
@@ -265,4 +282,14 @@ export interface GetStuffOutput {
   sessions?: Array<Info<Session>|undefined>,
   spaces?: Array<Info<Space>|undefined>,
   notes?: Array<Info<Note>|undefined>,
+}
+
+export interface Coordinates {
+  x: number,
+  y: number,
+}
+
+export interface SiteLocation {
+  imageHash: EntryHash,
+  location: Coordinates
 }

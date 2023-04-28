@@ -15,8 +15,9 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
+import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 
 TimeAgo.addDefaultLocale(en)
 
@@ -76,6 +77,7 @@ export class EmergenceStore {
   sessions: Writable<Array<Info<Session>>> = writable([])
   spaces: Writable<Array<Info<Space>>> = writable([])
   notes: Writable<Array<Info<Note>>> = writable([])
+  maps: Writable<Array<Info<SiteMap>>> = writable([])
   noteHashes: Writable<Array<ActionHash>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
   allTags: Writable<Array<string>> = writable([])
@@ -89,7 +91,7 @@ export class EmergenceStore {
     return this.neededStuff.notes ? true : false
   }
   
-  constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public myPubKey: AgentPubKey) {
+  constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public fileStorageClient:FileStorageClient, public myPubKey: AgentPubKey) {
     this.loader = setInterval(()=>{if(this.stuffIsNeeded()) this.fetchStuff()}, 1000);
     this.neededStuffStore =  neededStuffStore(client)
     this.myPubKeyBase64 = encodeHashToBase64(myPubKey)
@@ -135,6 +137,26 @@ export class EmergenceStore {
     return get(this.notes)[noteIdx]
   }
 
+  getSiteMapIdx(mapHash: ActionHash) : number {
+    const b64 = encodeHashToBase64(mapHash)
+    const maps = get(this.maps)
+    return maps.findIndex((s)=> encodeHashToBase64(s.original_hash) === b64)
+  }
+
+  getSiteMap(mapHash: ActionHash) : Info<SiteMap> | undefined {
+    const mapIdx = this.getSiteMapIdx(mapHash)
+    if (mapIdx == -1) return undefined
+    return get(this.maps)[mapIdx]
+  }
+
+  getCurrentSiteMap() : Info<SiteMap> | undefined {
+    const maps = get(this.maps)
+    if (maps.length>0) {
+      return maps[0]
+    }
+    return undefined
+  }
+
   getSessionSlot(session: Info<Session>) : Slot|undefined {
     const rels = session.relations.filter(r=>r.relation.content.path == "session.space")
     if (rels.length == 0) return undefined
@@ -144,6 +166,18 @@ export class EmergenceStore {
     return {
         space: rel.relation.dst,
         window
+    }
+  }
+
+  getSpaceSiteLocation(space: Info<Space>) : SiteLocation|undefined {
+    const rels = space.relations.filter(r=>r.relation.content.path == "space.location")
+    if (rels.length == 0) return undefined
+    rels.sort((a,b)=>b.timestamp - a.timestamp)
+    const rel = rels[0]
+    const location = JSON.parse(rel.relation.content.data) as Coordinates
+    return {
+        imageHash: rel.relation.dst,
+        location
     }
   }
 
@@ -464,9 +498,9 @@ export class EmergenceStore {
     }
   }
 
-  async createSpace(name: string, description: string, stewards:Array<AgentPubKey>, capacity: number, amenities: number, pic: EntryHash | undefined): Promise<EntryRecord<Space>> {
+  async createSpace(name: string, description: string, stewards:Array<AgentPubKey>, capacity: number, amenities: number, pic: EntryHash | undefined, siteLocation: undefined | SiteLocation): Promise<EntryRecord<Space>> {
     const record = await this.client.createSpace(name, description, stewards, capacity, amenities, pic)
-    await this.client.createRelations([
+    const relations = [
         {   src: record.actionHash, // should be agent key
             dst: record.actionHash,
             content:  {
@@ -474,7 +508,18 @@ export class EmergenceStore {
                 data: JSON.stringify(name)
             }
         },
-    ])
+    ]
+    if (siteLocation) {
+        relations.push({   
+            src: record.actionHash, // should be agent key
+            dst: siteLocation.imageHash,
+            content:  {
+                path: `space.location`,
+                data: JSON.stringify(siteLocation.location)
+            }
+        })
+    }
+    await this.client.createRelations(relations)
     this.fetchSpaces()
     return record
   }
@@ -540,9 +585,18 @@ export class EmergenceStore {
                 changes.push(`pic`)
             }
         }
+        let location :SiteLocation | undefined;
+        if (props.hasOwnProperty("location")) {
+            const currentSiteLocation = this.getSpaceSiteLocation(space)
+
+            if (JSON.stringify(currentSiteLocation) !== JSON.stringify(props.location)) {
+                changes.push(`site`)
+                location = props.location
+            }
+        }
         if (changes.length > 0) {
             const record = await this.client.updateSpace(update)
-            this.client.createRelations([
+            const relations = [
                 {   src: record.actionHash, // should be agent key
                     dst: record.actionHash,
                     content:  {
@@ -550,11 +604,29 @@ export class EmergenceStore {
                         data: JSON.stringify({name: spaceEntry.name, changes})
                     }
                 },
-            ])
-            this.spaces.update((spaces) => {
-                spaces[idx].record = record
-                return spaces
-            })
+            ]
+            if (location) {
+                relations.push({   
+                    src: space.original_hash,
+                    dst: location.imageHash,
+                    content:  {
+                        path: `space.location`,
+                        data: JSON.stringify(location.location)
+                    }
+                })
+            }
+            this.client.createRelations(relations)
+            if (location) {
+                // FIXME we could get more sophisticated and fiture out out to update the state
+                // without calling fetch spaces.  i.e. at least only fetch one space!!
+                // but preferably be able to do so with what's returned by create relations.
+                this.fetchSpaces()
+            } else {
+                this.spaces.update((spaces) => {
+                    spaces[idx].record = record
+                    return spaces
+                })
+            }
             return record
         }
         else {
@@ -682,6 +754,99 @@ export class EmergenceStore {
                 }
             },
         ])
+    }
+  }
+
+  async createSiteMap(text: string, pic: EntryHash): Promise<EntryRecord<SiteMap>> {
+    const record = await this.client.createSiteMap(text, pic)
+    const relations = [
+        {   src: record.actionHash, // should be agent key
+            dst: record.actionHash,
+            content:  {
+                path: `feed.${FeedType.SiteMapNew}`,
+                data: JSON.stringify("")
+            }
+        },
+    ]
+    await this.client.createRelations(relations)
+    this.fetchSiteMaps()
+    return record
+  }
+
+  async updateSiteMap(mapHash: ActionHash, text: string, pic: EntryHash): Promise<EntryRecord<SiteMap>> {
+    const idx = this.getSiteMapIdx(mapHash)
+    if (idx >= 0) {
+        const map = get(this.maps)[idx]
+
+        const updatedSiteMap: UpdateSiteMapInput = {
+            original_map_hash: mapHash,
+            previous_map_hash: map.record.actionHash,
+            updated_map: {
+                text,
+                pic,
+            }
+        }
+        const mapEntry = map.record.entry
+        let changes = []
+        if (mapEntry.text != text) {
+            changes.push(`text`)
+        }
+        if (mapEntry.pic != pic) {
+            changes.push(`pic`)
+        }
+        if (changes.length > 0) {
+            const record = await this.client.updateSiteMap(updatedSiteMap)
+            this.client.createRelations([
+                {   src: record.actionHash, // should be agent key
+                    dst: record.actionHash,
+                    content:  {
+                        path: `feed.${FeedType.SiteMapUpdate}`,
+                        data: JSON.stringify({changes})
+                    }
+                },
+            ])
+            this.maps.update((maps) => {
+                maps[idx].record = record
+                return maps
+            })
+            return record
+        }
+        else {
+            console.log("No changes detected ignoring...")
+        }
+    } else {
+        throw new Error(`could not find map`)
+    }
+  }
+
+  async deleteSiteMap(mapHash: ActionHash) {
+    const idx = this.getSiteMapIdx(mapHash)
+    if (idx >= 0) {
+        const map = get(this.maps)[idx]
+        await this.client.deleteSiteMap(map.record.actionHash)
+        this.maps.update((maps) => {
+            maps.splice(idx, 1);
+            return maps
+        })
+        this.client.createRelations([
+            {   src: map.original_hash, // should be agent key
+                dst: map.original_hash,
+                content:  {
+                    path: `feed.${FeedType.SiteMapDelete}`,
+                    data: JSON.stringify("")
+                }
+            },
+        ])
+    }
+  }
+
+  async fetchSiteMaps() {
+    try {
+        const maps = await this.client.getSiteMaps()
+        this.maps.update((n) => {return maps} )
+    }
+    catch (e) {
+        console.log("Error fetching sitemaps", e)
     }
   }
 

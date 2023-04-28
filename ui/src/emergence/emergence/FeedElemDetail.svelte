@@ -61,4 +61,13 @@ const sessionTitle = (sessionHash: ActionHash) => {
   created slot:
     <TimeWindowSummary timeWindow={feedElem.detail}></TimeWindowSummary>
   {/if}
+  {#if feedElem.type === FeedType.SiteMapNew}
+    created sitemap: {feedElem.detail}
+  {/if}
+  {#if feedElem.type === FeedType.SiteMapUpdate}
+    updated sitemap changes: {feedElem.detail.changes.join("; ")}
+  {/if}
+  {#if feedElem.type === FeedType.SiteMapDelete}
+    deleted sitemap {feedElem.detail}
+  {/if}
 </div>

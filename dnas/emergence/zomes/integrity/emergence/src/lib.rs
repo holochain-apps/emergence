@@ -6,6 +6,8 @@ pub mod session;
 pub use session::*;
 pub mod time_window;
 pub use time_window::*;
+pub mod map;
+pub use map::*;
 use hdi::prelude::*;
 pub mod relation;
 pub use relation::*;
@@ -17,6 +19,7 @@ pub enum EntryTypes {
     Session(Session),
     Space(Space),
     Note(Note),
+    Map(Map),
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
@@ -27,7 +30,9 @@ pub enum LinkTypes {
     AllSessions,
     SpaceUpdates,
     NoteUpdates,
+    MapUpdates,
     AllSpaces,
+    AllMaps,
 }
 #[hdk_extern]
 pub fn genesis_self_check(
@@ -66,6 +71,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 note,
                             )
                         }
+                        EntryTypes::Map(map) => {
+                            validate_create_map(
+                                EntryCreationAction::Create(action),
+                                map,
+                            )
+                        }
                     }
                 }
                 OpEntry::UpdateEntry { app_entry, action, .. } => {
@@ -86,6 +97,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_note(
                                 EntryCreationAction::Update(action),
                                 note,
+                            )
+                        }
+                        EntryTypes::Map(map) => {
+                            validate_create_map(
+                                EntryCreationAction::Update(action),
+                                map,
                             )
                         }
                     }
@@ -132,6 +149,17 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 original_session,
                             )
                         }
+                        (
+                            EntryTypes::Map(session),
+                            EntryTypes::Map(original_session),
+                        ) => {
+                            validate_update_map(
+                                action,
+                                session,
+                                original_action,
+                                original_session,
+                            )
+                        }
                         _ => {
                             Ok(
                                 ValidateCallbackResult::Invalid(
@@ -157,6 +185,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         EntryTypes::Note(note) => {
                             validate_delete_note(action, original_action, note)
+                        }
+                        EntryTypes::Map(map) => {
+                            validate_delete_map(action, original_action, map)
                         }
                     }
                 }
@@ -195,6 +226,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::MapUpdates => {
+                    validate_create_link_map_updates(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
                 LinkTypes::SessionUpdates => {
                     validate_create_link_session_updates(
                         action,
@@ -221,6 +260,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::AllSpaces => {
                     validate_create_link_all_spaces(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::AllMaps => {
+                    validate_create_link_all_maps(
                         action,
                         base_address,
                         target_address,
@@ -265,6 +312,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::MapUpdates => {
+                    validate_delete_link_map_updates(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
                 LinkTypes::SessionUpdates => {
                     validate_delete_link_session_updates(
                         action,
@@ -301,6 +357,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::AllMaps => {
+                    validate_delete_link_all_maps(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         OpType::StoreRecord(store_record) => {
@@ -323,6 +388,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_note(
                                 EntryCreationAction::Create(action),
                                 note,
+                            )
+                        }
+                        EntryTypes::Map(map) => {
+                            validate_create_map(
+                                EntryCreationAction::Create(action),
+                                map,
                             )
                         }
                     }
@@ -441,6 +512,37 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 Ok(result)
                             }
                         }
+                        EntryTypes::Map(map) => {
+                            let result = validate_create_map(
+                                EntryCreationAction::Update(action.clone()),
+                                map.clone(),
+                            )?;
+                            if let ValidateCallbackResult::Valid = result {
+                                let original_map: Option<Map> = original_record
+                                    .entry()
+                                    .to_app_option()
+                                    .map_err(|e| wasm_error!(e))?;
+                                let original_map = match original_map {
+                                    Some(map) => map,
+                                    None => {
+                                        return Ok(
+                                            ValidateCallbackResult::Invalid(
+                                                "The updated entry type must be the same as the original entry type"
+                                                    .to_string(),
+                                            ),
+                                        );
+                                    }
+                                };
+                                validate_update_map(
+                                    action,
+                                    map,
+                                    original_action,
+                                    original_map,
+                                )
+                            } else {
+                                Ok(result)
+                            }
+                        }
                     }
                 }
                 OpRecord::DeleteEntry { original_action_hash, action, .. } => {
@@ -516,6 +618,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 original_note,
                             )
                         }
+                        EntryTypes::Map(original_map) => {
+                            validate_delete_map(
+                                action,
+                                original_action,
+                                original_map,
+                            )
+                        }
                     }
                 }
                 OpRecord::CreateLink {
@@ -550,6 +659,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 tag,
                             )
                         }
+                        LinkTypes::MapUpdates => {
+                            validate_create_link_map_updates(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
                         LinkTypes::SessionUpdates => {
                             validate_create_link_session_updates(
                                 action,
@@ -576,6 +693,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::AllSpaces => {
                             validate_create_link_all_spaces(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::AllMaps => {
+                            validate_create_link_all_maps(
                                 action,
                                 base_address,
                                 target_address,
@@ -634,6 +759,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 create_link.tag,
                             )
                         }
+                        LinkTypes::MapUpdates => {
+                            validate_delete_link_map_updates(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
                         LinkTypes::SessionUpdates => {
                             validate_delete_link_session_updates(
                                 action,
@@ -663,6 +797,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::AllSpaces => {
                             validate_delete_link_all_spaces(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::AllMaps => {
+                            validate_delete_link_all_maps(
                                 action,
                                 create_link.clone(),
                                 base_address,

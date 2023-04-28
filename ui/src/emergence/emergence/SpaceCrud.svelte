@@ -2,7 +2,7 @@
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import { type AppAgentClient, type Record, type EntryHash, type AgentPubKey, type ActionHash, type DnaHash, encodeHashToBase64 } from '@holochain/client';
 import { storeContext } from '../../contexts';
-import { Amenities, type Info, type Space, setAmenity } from './types';
+import { Amenities, type Info, type Space, setAmenity, type SiteMap, type SiteLocation} from './types';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
@@ -16,8 +16,9 @@ import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import Avatar from './Avatar.svelte';
-  import { faTrash } from '@fortawesome/free-solid-svg-icons';
-  import Fa from 'svelte-fa';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import Fa from 'svelte-fa';
+import SiteMapLocation from './SiteMapLocation.svelte';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -31,6 +32,8 @@ let stewards:Array<AgentPubKey> = []
 let amenities: number = 0;
 let capacity: number = 0;
 let pic: EntryHash | undefined = undefined;
+let location: SiteLocation | undefined;
+let sitemap: Info<SiteMap> | undefined;
 
 let errorSnackbar: Snackbar;
 
@@ -38,6 +41,7 @@ $: name, description, stewards, amenities;
 $: isSpaceValid = true && name !== '' && description !== '' && capacity > 0;
 
 onMount(() => {
+  sitemap = store.getCurrentSiteMap()
   if (space) {
     name = space.record.entry.name
     amenities = space.record.entry.amenities
@@ -45,12 +49,17 @@ onMount(() => {
     stewards = space.record.entry.stewards
     capacity = space.record.entry.capacity
     pic = space.record.entry.pic
+    console.log("sitemap", sitemap)
+
+    location = store.getSpaceSiteLocation(space)
+    console.log("location", location)
+
   }
 });
 
 async function updateSpace() {
   if (space) {
-    const updateRecord = await store.updateSpace(space.original_hash, {name, description, stewards, capacity, amenities, pic})
+    const updateRecord = await store.updateSpace(space.original_hash, {name, description, stewards, capacity, amenities, pic, location})
     if (updateRecord) {
       dispatch('space-updated', { actionHash: updateRecord.actionHash });
     } else {
@@ -61,13 +70,14 @@ async function updateSpace() {
 
 async function createSpace() {  
   try {
-    const record = await store.createSpace(name, description, stewards, capacity, amenities, pic)
+    const record = await store.createSpace(name, description, stewards, capacity, amenities, pic, location)
 
     name = ""
     description = ""
     amenities = 0
     capacity = 0
     pic = undefined
+    location = undefined
     dispatch('space-created', { space: record });
   } catch (e) {
     console.log("CREATE SPACE ERROR", e)
@@ -162,7 +172,16 @@ function deleteSteward(index: number) {
     }}
   ></upload-files>
   </div>
-
+  {#if sitemap}
+    <div style="margin-bottom: 16px">
+      Map Location: {location ? JSON.stringify(location.location) : "none"}
+      <SiteMapLocation
+        sitemap={sitemap}
+        location={location && encodeHashToBase64(location.imageHash) === encodeHashToBase64(sitemap.record.entryHash) ? location.location : undefined}
+        on:sitemap-locate={(e)=> location = {imageHash: sitemap.record.entryHash, location :e.detail}}
+        ></SiteMapLocation>
+    </div>
+  {/if}
   {#if space}
     <div style="display: flex; flex-direction: row">
       <sl-button

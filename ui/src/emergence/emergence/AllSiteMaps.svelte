@@ -1,13 +1,10 @@
 <script lang="ts">
-import { onMount, getContext, createEventDispatcher } from 'svelte';
+import { onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { storeContext } from '../../contexts';
-import SpaceDetail from './SpaceDetail.svelte';
+import SiteMapDetail from './SiteMapDetail.svelte';
 import type { EmergenceStore } from '../../emergence-store';
-import Fa from 'svelte-fa';
-import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
-const dispatch = createEventDispatcher();
 
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -15,11 +12,11 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let loading = true;
 let error: any = undefined;
 
-$: spaces = store.spaces
+$: sitemaps = store.maps
 $: loading, error;
 
 onMount(async () => {
-  await store.fetchSpaces();
+  await store.fetchSiteMaps();
   loading = false;
 });
 
@@ -27,11 +24,7 @@ onMount(async () => {
 
 <div class="pane-content">
   <div class="pane-header">
-      <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('all-spaces-close') } } circle>
-        <Fa icon={faCircleArrowLeft} />
-      </sl-button>
-
-    <h3>Spaces List</h3>
+    <h3>SiteMaps List</h3>
   </div>
 
   {#if loading}
@@ -40,13 +33,13 @@ onMount(async () => {
 
     </div>
   {:else if error}
-    <span>Error fetching the spaces: {error.data.data}.</span>
-  {:else if $spaces.length === 0}
-    <span>No spaces found.</span>
+    <span>Error fetching the sitemaps: {error.data.data}.</span>
+  {:else if $sitemaps.length === 0}
+    <span>No sitemaps found.</span>
   {:else}
-    {#each $spaces as space}
+    {#each $sitemaps as sitemap}
       <div style="margin-bottom: 8px; width:500px; background:lightgray">
-        <SpaceDetail space={space}  on:space-deleted={() => store.fetchSpaces()}></SpaceDetail>
+        <SiteMapDetail sitemap={sitemap}  on:sitemap-deleted={() => store.fetchSiteMaps()}></SiteMapDetail>
       </div>
     {/each}
   {/if}

@@ -3,15 +3,26 @@
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
-    import { getContext } from "svelte";
-  import type { Info } from "./types";
+    import { getContext, onMount } from "svelte";
+  import type { Info, SiteMap } from "./types";
   import { get } from "svelte/store";
-  import { faFileExport, faFileImport } from "@fortawesome/free-solid-svg-icons";
+  import { faFileExport, faFileImport, faPlus } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
   import sanitize from "sanitize-filename";
+  import NoteCrud from "./NoteCrud.svelte";
+  import SiteMapCrud from "./SiteMapCrud.svelte";
+  import AllSiteMaps from "./AllSiteMaps.svelte";
+  import SiteMapLocation from "./SiteMapLocation.svelte";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
+    let creatingMap = false;
+    let sitemap: Info<SiteMap>;
+    $: sitemap
+
+    onMount(() => {
+        sitemap = store.getCurrentSiteMap()
+    })
 
     const download = (filename: string, text: string) => {
         var element = document.createElement('a');
@@ -98,7 +109,15 @@
     }
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
-  
+{#if creatingMap}
+    <div class="modal">
+        <SiteMapCrud
+        on:sitemap-created={() => {creatingMap = false;} }
+        on:edit-canceled={() => { creatingMap = false; } }
+        ></SiteMapCrud></div>
+{/if}
+
+
     <div class="header">
         <div>
             <sl-button style="margin-left: 8px;" size=small on:click={doExport} circle>
@@ -109,9 +128,23 @@
             </sl-button>
         </div>
     </div>
+    <div>
+        Create Sitemap:
+        <sl-button on:click={() => {creatingMap = true; } } circle>
+          <Fa icon={faPlus} />
+        </sl-button>
 
+        <AllSiteMaps></AllSiteMaps>
+    </div>
 
-
+    {#if sitemap}
+    <div style="margin-bottom: 16px">
+      <SiteMapLocation
+        sitemap={sitemap}
+        on:sitemap-locate={(e)=> location = e.detail}
+        ></SiteMapLocation>
+    </div>
+    {/if}
   <style>
     .header{
         display: flex;

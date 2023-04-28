@@ -1,7 +1,7 @@
 <script lang="ts">
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import { storeContext } from '../../contexts';
-import type { Info, Note } from './types';
+import type { Info, SiteMap } from './types';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
@@ -14,65 +14,50 @@ import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import type { ActionHash, EntryHash } from '@holochain/client';
-import MultiSelect from 'svelte-multiselect'
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
-let amenityElems: Array<SlCheckbox> = []
 
 const dispatch = createEventDispatcher();
-export let note: Info<Note>|undefined = undefined;  // set this if update
-export let sessionHash: ActionHash;
+export let sitemap: Info<SiteMap>|undefined = undefined;  // set this if update
 
 let text: string = '';
 let pic: EntryHash | undefined = undefined;
-let tags = []
 
 let errorSnackbar: Snackbar;
 
-$: text, tags
-$: isNoteValid = text !== ""
-
-$: allTags = store.allTags
-// $: tagOpts = tagOptions()
-
-// const tagOptions = () : ObjectOption[] => {
-//   const options:ObjectOption[] = $allTags.map(tag => 
-//   {return {label: `${tag}`, value: tag}} )
-//   return options
-// }
+$: text
+$: isSiteMapValid = text !== ""
 
 onMount(() => {
   store.fetchTags()
-  if (note) {
-    text = note.record.entry.text
-    pic = note.record.entry.pic
-    tags = note.record.entry.tags
+  if (sitemap) {
+    text = sitemap.record.entry.text
+    pic = sitemap.record.entry.pic
   }
 });
 
-async function updateNote() {
-  if (note) {
-    const updateRecord = await store.updateNote(note.original_hash, text, tags, pic)
+async function updateSiteMap() {
+  if (sitemap) {
+    const updateRecord = await store.updateSiteMap(sitemap.original_hash, text, pic)
     if (updateRecord) {
-      dispatch('note-updated', { actionHash: updateRecord.actionHash });
+      dispatch('sitemap-updated', { actionHash: updateRecord.actionHash });
     } else {
       dispatch('edit-canceled')
     }
   }
 }
 
-async function createNote() {  
+async function createSiteMap() {  
   try {
-    const record = await store.createNote(sessionHash, text, tags, pic)
+    const record = await store.createSiteMap(text, pic)
 
     text = ""
     pic = undefined
-    tags = []
 
-    dispatch('note-created', { note: record });
+    dispatch('sitemap-created', { sitemap: record });
   } catch (e) {
-    console.log("CREATE NOTE ERROR", e)
-    errorSnackbar.labelText = `Error creating the note: ${e.data.data}`;
+    console.log("CREATE SITEMAP ERROR", e)
+    errorSnackbar.labelText = `Error creating the sitemap: ${e.data.data}`;
     errorSnackbar.show();
   }
 }
@@ -81,10 +66,10 @@ async function createNote() {
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 <div style="display: flex; flex-direction: column">
-  {#if note}
-    <span style="font-size: 18px">Edit Note</span>
+  {#if sitemap}
+    <span style="font-size: 18px">Edit SiteMap</span>
   {:else}
-    <span style="font-size: 18px">Create Note</span>
+    <span style="font-size: 18px">Create SiteMap</span>
   {/if}
               
   <div style="margin-bottom: 16px">
@@ -92,15 +77,6 @@ async function createNote() {
       label=Text 
       value={ text } on:input={e => { text = e.target.value;} }
     ></sl-textarea>
-  </div>
-
-  <div style="margin-bottom: 16px">
-    <span>Tags:</span >
-    <MultiSelect 
-      bind:selected={tags} 
-      options={$allTags} 
-      allowUserOptions={true}
-      />
   </div>
 
   <div style="margin-bottom: 16px">
@@ -114,7 +90,7 @@ async function createNote() {
   ></upload-files>
   </div>
 
-  {#if note}
+  {#if sitemap}
     <div style="display: flex; flex-direction: row">
       <sl-button
       label="Cancel"
@@ -123,8 +99,8 @@ async function createNote() {
       >Cancel</sl-button>
       <sl-button 
       style="flex: 1;"
-      on:click={() => updateNote()}
-      disabled={!isNoteValid}
+      on:click={() => updateSiteMap()}
+      disabled={!isSiteMapValid}
       variant=primary>Save</sl-button>
     </div>
   {:else}
@@ -135,9 +111,9 @@ async function createNote() {
     style="flex: 1; margin-right: 16px"
     >Cancel</sl-button>
     <sl-button 
-    on:click={() => createNote()}
-    disabled={!isNoteValid}
-    variant=primary>Create Note</sl-button>
+    on:click={() => createSiteMap()}
+    disabled={!isSiteMapValid}
+    variant=primary>Create SiteMap</sl-button>
     </div>
   {/if}
 

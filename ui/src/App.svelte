@@ -30,6 +30,8 @@
   import type { Info, Session } from './emergence/emergence/types';
   import You from './emergence/emergence/You.svelte'
   import Admin from './emergence/emergence/Admin.svelte';
+  import SiteMapDisplay from './emergence/emergence/SiteMapDisplay.svelte';
+  import { get } from 'svelte/store';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -63,7 +65,7 @@
 
     fileStorageClient = new FileStorageClient(client, 'emergence');
 
-    store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, client.myPubKey)
+    store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
     loading = false;
   });
 
@@ -124,7 +126,22 @@
 
       {#if pane=="spaces"}
       <div class="pane">
-        <AllSpaces></AllSpaces>
+        {#if store.getCurrentSiteMap()}
+          <SiteMapDisplay 
+            sitemap={store.getCurrentSiteMap()}
+            on:show-all-spaces={()=>pane= "spaces.list"}
+            ></SiteMapDisplay>
+        {:else}
+          <h5>No Sitemap configured yet</h5>
+        {/if}
+      </div>
+      {/if}
+
+      {#if pane=="spaces.list"}
+      <div class="pane">
+        <AllSpaces
+          on:all-spaces-close={()=>pane= "spaces"}
+        ></AllSpaces>
         Create Space:
         <sl-button on:click={() => {creatingSpace = true; } } circle>
           <Fa icon={faPlus} />
@@ -185,8 +202,7 @@
 
         </div>
 
-
-        <div class="nav-button {pane=="spaces"?"selected":""}"
+        <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
           title="Spaces"
           on:keypress={()=>{pane='spaces'}}
           on:click={()=>{pane='spaces'}}

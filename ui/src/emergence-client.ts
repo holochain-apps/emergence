@@ -9,7 +9,7 @@ import type {
     EntryHash,
     HoloHash,
 } from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
@@ -37,6 +37,7 @@ export class EmergenceClient {
 
 
   async createRelations(relations: Array<Relation>) : Promise<ActionHash> {
+    console.log("CERATE RELATIONS", relations)
     return this.callZome('create_relations', relations)
   }
 
@@ -153,11 +154,39 @@ export class EmergenceClient {
   }
 
   async updateNote(update: UpdateNoteInput) : Promise<EntryRecord<Note>> {
-    return new EntryRecord(await this.callZome('update_space', update))
+    return new EntryRecord(await this.callZome('update_note', update))
   }
 
   deleteNote(actionHash: ActionHash) {
-    return this.callZome('delete_space', actionHash)
+    return this.callZome('delete_note', actionHash)
+  }
+
+  async createSiteMap(text: string, pic: EntryHash | undefined) : Promise<EntryRecord<SiteMap>> {
+    const mapEntry: SiteMap = { 
+        text,
+        pic,
+      };
+    
+    return new EntryRecord(await this.callZome('create_map', mapEntry))
+  }
+
+  async updateSiteMap(update: UpdateSiteMapInput) : Promise<EntryRecord<SiteMap>> {
+    return new EntryRecord(await this.callZome('update_map', update))
+  }
+
+  deleteSiteMap(actionHash: ActionHash) {
+    return this.callZome('delete_map', actionHash)
+  }
+
+  async getSiteMaps() : Promise<Array<Info<SiteMap>>> {
+    const maps = await this.callZome('get_all_maps',null)
+    return maps.map(r => {
+        const info: Info<SiteMap> = {
+        original_hash: r.original_hash,
+        record: new EntryRecord(r.record), 
+        relations: r.relations}
+        return info
+    }).filter(r=>!r.record.entry.trashed);
   }
 
   async getStuff(input: GetStuffInput) : Promise<GetStuffOutput> {

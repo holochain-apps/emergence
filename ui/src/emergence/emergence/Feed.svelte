@@ -33,7 +33,7 @@
   <div class="pane-header">
     <h3>Feed</h3>
   </div>
-  {#each $feed as f}
+  {#each $feed.reverse() as f}
     <div style="margin-bottom: 8px; width:500px; background:lightgray">
       <FeedElemDetail feedElem={f}></FeedElemDetail>
     </div>

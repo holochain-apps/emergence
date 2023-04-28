@@ -6,6 +6,8 @@ pub mod session;
 pub mod time_window;
 pub mod relation;
 pub mod utils;
+pub mod map;
+pub mod all_maps;
 
 use all_sessions::SessionInfo;
 use all_spaces::SpaceInfo;
