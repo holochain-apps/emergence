@@ -20,7 +20,6 @@ $: session = store.sessionStore(sessionHash)
 $: relData = store.sessionReleationDataStore(session)
 
 async function setSessionInterest(interest: SessionInterest) {
-console.log("FISH", interest)
   try {
     if (interest !== $relData.myInterest)
       await store.setSessionInterest($session.original_hash, interest )

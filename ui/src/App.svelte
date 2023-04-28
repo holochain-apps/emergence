@@ -21,7 +21,6 @@
   import { FileStorageClient } from "@holochain-open-dev/file-storage";
 
   import { clientContext, storeContext } from './contexts';
-  import CreateTimeWindow from './emergence/emergence/CreateTimeWindow.svelte';
   import { EmergenceStore } from './emergence-store';
   import { EmergenceClient } from './emergence-client';
   import Feed from './emergence/emergence/Feed.svelte';
@@ -66,6 +65,7 @@
     fileStorageClient = new FileStorageClient(client, 'emergence');
 
     store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
+    store.fetchSiteMaps()
     loading = false;
   });
 

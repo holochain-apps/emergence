@@ -49,11 +49,7 @@ onMount(() => {
     stewards = space.record.entry.stewards
     capacity = space.record.entry.capacity
     pic = space.record.entry.pic
-    console.log("sitemap", sitemap)
-
     location = store.getSpaceSiteLocation(space)
-    console.log("location", location)
-
   }
 });
 

@@ -48,7 +48,7 @@ export class EmergenceClient {
   async getFeed(agent: AgentPubKey | undefined) : Promise<Array<FeedElem>> {
     const relations: Array<Relation> = await this.callZome('get_feed', {agent_filter: agent})
     return relations.map(r => {
-      console.log("feed item", r.content)
+      // console.log("feed item", r.content)
 
       const author = r.src
       author[1] =32

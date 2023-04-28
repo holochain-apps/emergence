@@ -12,9 +12,7 @@ import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import SiteMapCrud from './SiteMapCrud.svelte'; 
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
-import Avatar from './Avatar.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
-  import {ActionHashMap } from '@holochain-open-dev/utils';
 
 const dispatch = createEventDispatcher();
 
@@ -63,7 +61,7 @@ async function deleteSiteMap() {
 {:else if error}
 <span>Error fetching the sitemap: {error.data.data}</span>
 {:else if editing}
-<SiteMapCrud
+  <SiteMapCrud
   sitemap={ sitemap }
   on:sitemap-updated={async () => {
     editing = false;

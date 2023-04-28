@@ -6,6 +6,8 @@
     import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
     import type { Info, Coordinates, SiteMap } from './types';
     import { fromUint8Array } from "js-base64";
+    import { faStar } from '@fortawesome/free-solid-svg-icons';
+    import Fa from 'svelte-fa';
     const dispatch = createEventDispatcher();
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -17,6 +19,7 @@
     let file: File | undefined
     let picB64: string | undefined
     let img: HTMLImageElement | undefined
+    let markerSize = 30
 
     $: loading, sitemap, location, picB64, file;
 
@@ -45,21 +48,21 @@
 
     $: x = location && picB64 && img ? location.x / (img.naturalWidth/img.width) : 0
     $: y = location && picB64 && img ? location.y / (img.naturalHeight/img.height) : 0
-	$: cssVarStyles = `--top:${y+10}px;--left:${x-10}px`;
+	$: locStyle = `top:${y-markerSize/2}px;left:${x-markerSize/2}px;width:${markerSize}px;height:${markerSize}px`;
 
 </script>
-
+x{x} y{y}
 <div class="pic" >
+    <div class="img-container">
     {#if file}  
-    {#if location}
-    x:{x} y:{y}
-        <div style="{cssVarStyles}" class="location">&nbsp</div>
-    {/if} 
-    {#if picB64}
-    <img bind:this={img} on:click={handleClick} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit: cover; overflow: hidden">
-    {/if}       
-    
+        {#if location}
+            <div style="{locStyle}" class="location"><Fa  icon={faStar} size={"2x"} color={"red"}></Fa></div>
+        {/if} 
+        {#if picB64}
+        <img bind:this={img} on:click={handleClick} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit: cover; overflow: hidden">
+        {/if}       
     {/if}
+    </div>
 </div>
 
 <style>
@@ -69,12 +72,11 @@
 .pic {
     cursor: crosshair;
 }
+.img-container {
+    position: relative;
+    padding: 0px;
+}
 .location {
-    position:relative;
-    top: var(--top);
-    left: var(--left);
-    width: 20px;
-    height: 20px;
-    background-color: red;
+    position:absolute;
 }
 </style>

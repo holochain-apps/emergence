@@ -9,19 +9,14 @@
   import { faFileExport, faFileImport, faPlus } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
   import sanitize from "sanitize-filename";
-  import NoteCrud from "./NoteCrud.svelte";
   import SiteMapCrud from "./SiteMapCrud.svelte";
   import AllSiteMaps from "./AllSiteMaps.svelte";
-  import SiteMapLocation from "./SiteMapLocation.svelte";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
     let creatingMap = false;
-    let sitemap: Info<SiteMap>;
-    $: sitemap
 
     onMount(() => {
-        sitemap = store.getCurrentSiteMap()
     })
 
     const download = (filename: string, text: string) => {
@@ -94,7 +89,7 @@
     const doImport = async (data: any) => {
         for (const s of data.spaces) {
             const e = s.entry
-            await store.createSpace(e.name,e.description,[],e.capacity, e.amenities, undefined)
+            await store.createSpace(e.name,e.description,[],e.capacity, e.amenities, undefined, undefined)
         }
         for (const s of data.windows) {
             await store.createTimeWindow(new Date(s.start), s.duration)
@@ -137,14 +132,6 @@
         <AllSiteMaps></AllSiteMaps>
     </div>
 
-    {#if sitemap}
-    <div style="margin-bottom: 16px">
-      <SiteMapLocation
-        sitemap={sitemap}
-        on:sitemap-locate={(e)=> location = e.detail}
-        ></SiteMapLocation>
-    </div>
-    {/if}
   <style>
     .header{
         display: flex;

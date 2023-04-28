@@ -3,13 +3,15 @@
     import type { EmergenceStore  } from '../../emergence-store';
     import { onMount, getContext, createEventDispatcher } from 'svelte';
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
+    import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
     import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
-    import type { Info, SiteLocation, SiteMap, Space } from './types';
-    import { encodeHashToBase64 } from '@holochain/client';
-    import { faList } from '@fortawesome/free-solid-svg-icons';
+    import { slotEqual, type Info, type Session, type SiteLocation, type SiteMap, type Space, timeWindowStartToStr } from './types';
+    import { faList, faStar } from '@fortawesome/free-solid-svg-icons';
     import Fa from 'svelte-fa';
     import { fromUint8Array } from "js-base64";
     import { watchResize } from "svelte-watch-resize";
+  import  { HoloHashMap } from '@holochain-open-dev/utils';
+  import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 
     const dispatch = createEventDispatcher();
 
@@ -22,7 +24,10 @@
     let picB64: string | undefined
     let img: HTMLImageElement | undefined;
     let r = 0
-    $: picB64, img, r
+    let markerSize = 30
+    let spaceDetails
+
+    $: picB64, img, r, spaceDetails
     $: spaces = store.spaces
     $: locations = $spaces && picB64 && img && (r>-1)? $spaces.map(s=>{return {loc: store.getSpaceSiteLocation(s), space:s}}) : []
 
@@ -36,21 +41,35 @@
         }
     });
 
-    const handleClick = async (e:MouseEvent) => {
-        picB64 = picB64
+    const handleClick = async (loc) => {
+        spaceDetails = loc
     }
 
     const getSpaceStyle = (location: SiteLocation | undefined) => {
         if (!location) return "display:none"
         const x = location.location.x / (img.naturalWidth/img.width) 
         const y = location.location.y / (img.naturalHeight/img.height) 
-        return `top:${y-10}px;left:${x-10}px`
+        return `top:${y-markerSize/2}px;left:${x-markerSize/2}px;width:${markerSize}px;height:${markerSize}px`
     }
 
     const handleResize = async () => {
         r+=1
     }
 
+    const sessionsInSpace = (space: Info<Space>) : Array<any> | undefined => {
+        let rel = space.relations.filter(r=>r.relation.content.path == "space.sessions")
+        const sessions: HoloHashMap<ActionHash, any> = new HoloHashMap
+        const spaceB64 = encodeHashToBase64(space.original_hash)
+
+        rel.forEach(r=> {
+            const session = store.getSession(r.relation.dst)
+            const slot = store.getSessionSlot(session)
+            if (spaceB64 == encodeHashToBase64(slot.space)) {
+                sessions.set(session.original_hash, {title: session.record.entry.title, window: slot.window})
+            }
+         })
+        return Array.from(sessions.values())
+    }
 </script>
 
 {#if loading}
@@ -67,13 +86,32 @@
       
         </div>
         <div class="pic" use:watchResize={handleResize}>
-            <div class="container">
+            <div class="img-container">
+                {#if spaceDetails}
+                <div class="details">
+                    {spaceDetails.space.record.entry.name}
+                </div>
+            {/if}
             {#if file && picB64}
             
             {#each locations as loc}
-                <div title={loc.space.record.entry.name} style={getSpaceStyle(loc.loc)} class="location"></div>
+            <sl-tooltip  trigger="click">
+                <div slot="content">
+                    <div style="display:flex; flex-direction:column">
+                        <span>{loc.space.record.entry.name}</span>
+                        {loc.space.record.entry.description}
+                        {#each sessionsInSpace(loc.space) as ses}
+                            <span>{ses.title} -- {timeWindowStartToStr(ses.window)}</span>
+                        {/each}
+                    </div>
+                </div>
+                <div
+                    style={getSpaceStyle(loc.loc)} class="location">
+                    <Fa  icon={faStar} size={"2x"} color={"red"}></Fa>
+                </div>
+            </sl-tooltip>
             {/each}
-            <img  bind:this={img} on:click={handleClick} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit: cover; overflow: hidden">
+            <img  bind:this={img} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit: cover; overflow: hidden">
             {/if}
             </div>
         </div>
@@ -84,14 +122,23 @@
 img {
     width:100%;
 }
-.container {
+.img-container {
     position: relative;
+    padding: 0px;
 }
 .location {
     position:absolute;
-    width: 20px;
-    height: 20px;
-    background-color: red;
 }
 
+.details {
+    position: absolute;
+    height: 200px;
+    width: 500px;
+    top: 50%;
+    left: 20%;
+    background-color: white;
+    border: solid 1px;
+    border-radius: 10px;
+    padding: 10px;
+}
 </style>
