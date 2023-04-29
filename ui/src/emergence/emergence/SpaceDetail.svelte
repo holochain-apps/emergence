@@ -8,7 +8,7 @@ import { amenitiesList, timeWindowDurationToStr, type Info, type Relation, type 
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
-import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit, faClose } from '@fortawesome/free-solid-svg-icons';
 import SpaceCrud from './SpaceCrud.svelte'; 
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
@@ -106,6 +106,9 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 <div style="display: flex; flex-direction: column">
   <div style="display: flex; flex-direction: row">
     <span style="flex: 1"></span>
+    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-space-detail') } } circle>
+      <Fa icon={faClose} />
+    </sl-button>
     <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
       <Fa icon={faEdit} />
     </sl-button>

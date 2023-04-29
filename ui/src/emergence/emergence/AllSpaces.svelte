@@ -7,6 +7,9 @@ import SpaceDetail from './SpaceDetail.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import Fa from 'svelte-fa';
 import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
+  import SpaceSummary from './SpaceSummary.svelte';
+  import SpaceCrud from './SpaceCrud.svelte';
+  import type { Info, Space } from './types';
 const dispatch = createEventDispatcher();
 
 
@@ -14,9 +17,10 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 let loading = true;
 let error: any = undefined;
+let spaceDetail: Info<Space> | undefined
 
 $: spaces = store.spaces
-$: loading, error;
+$: loading, error, spaceDetail;
 
 onMount(async () => {
   await store.fetchSpaces();
@@ -33,7 +37,6 @@ onMount(async () => {
 
     <h3>Spaces List</h3>
   </div>
-
   {#if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
       <sl-spinner></sl-spinner>
@@ -44,9 +47,21 @@ onMount(async () => {
   {:else if $spaces.length === 0}
     <span>No spaces found.</span>
   {:else}
+    {#if spaceDetail}
+    <div class="modal">
+      <SpaceDetail
+        on:close-space-detail={()=>spaceDetail = undefined} 
+        space={spaceDetail}>
+      </SpaceDetail>
+    </div>
+    {/if}
+
+
     {#each $spaces as space}
-      <div style="margin-bottom: 8px; width:100%; background:lightgray">
-        <SpaceDetail space={space}  on:space-deleted={() => store.fetchSpaces()}></SpaceDetail>
+      <div style="margin-bottom: 8px; width:100%;">
+        <SpaceSummary
+          on:space-selected={()=>spaceDetail=space} 
+        space={space}></SpaceSummary>
       </div>
     {/each}
   {/if}

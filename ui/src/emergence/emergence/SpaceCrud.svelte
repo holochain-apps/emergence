@@ -16,7 +16,7 @@ import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import Avatar from './Avatar.svelte';
-import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faClose, faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import SiteMapLocation from './SiteMapLocation.svelte';
 
@@ -96,12 +96,41 @@ function deleteSteward(index: number) {
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 <div style="display: flex; flex-direction: column">
+  <div style="display: flex; flex-direction: row; justify-content:space-between">
+
   {#if space}
+
     <span style="font-size: 18px">Edit Space</span>
+
+    <div style="display: flex; flex-direction: row">
+      <sl-button circle size=small
+      label="Cancel"
+      on:click={() => dispatch('edit-canceled')}
+      style="flex: 1; margin-right: 16px"
+      ><Fa icon={faClose} /></sl-button>
+      <sl-button circle size=small
+      style="flex: 1;"
+      on:click={() => updateSpace()}
+      disabled={!isSpaceValid}
+      variant=primary><Fa icon={faSave} /></sl-button>
+    </div>
   {:else}
     <span style="font-size: 18px">Create Space</span>
+    <div style="display: flex; flex-direction: row">
+      <sl-button circle size=small
+      label="Cancel"
+      on:click={() => dispatch('edit-canceled')}
+      style="flex: 1; margin-right: 16px"
+      ><Fa icon={faClose} /></sl-button>
+      <sl-button circle size=small
+      on:click={() => createSpace()}
+      disabled={!isSpaceValid}
+      variant=primary><Fa icon={faSave} /></sl-button>
+    </div>
   {/if}
-  
+
+</div>
+
 
   <div style="margin-bottom: 16px">
     <sl-input
@@ -178,32 +207,7 @@ function deleteSteward(index: number) {
         ></SiteMapLocation>
     </div>
   {/if}
-  {#if space}
-    <div style="display: flex; flex-direction: row">
-      <sl-button
-      label="Cancel"
-      on:click={() => dispatch('edit-canceled')}
-      style="flex: 1; margin-right: 16px"
-      >Cancel</sl-button>
-      <sl-button 
-      style="flex: 1;"
-      on:click={() => updateSpace()}
-      disabled={!isSpaceValid}
-      variant=primary>Save</sl-button>
-    </div>
-  {:else}
-  <div style="display: flex; flex-direction: row">
-    <sl-button
-    label="Cancel"
-    on:click={() => dispatch('edit-canceled')}
-    style="flex: 1; margin-right: 16px"
-    >Cancel</sl-button>
-    <sl-button 
-    on:click={() => createSpace()}
-    disabled={!isSpaceValid}
-    variant=primary>Create Space</sl-button>
-    </div>
-  {/if}
+
 
 </div>
 <style>
