@@ -10,6 +10,7 @@ import type { EmergenceStore } from '../../emergence-store';
 import '@vaadin/date-time-picker'
   import { faClose, faSave } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
+  import MultiSelect from 'svelte-multiselect'
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -23,7 +24,7 @@ let errorSnackbar: Snackbar;
 
 let datePicker:any
 
-$: duration, start;
+$: duration, start, tags;
 $: isTimeWindowValid = duration > 0 && start;
 
 onMount(() => {
@@ -72,6 +73,14 @@ const setLen = (l:number) => {
     value={duration}
     on:input={e=>setLen(parseInt(e.target.value))}
   ></sl-input>
+  <div style="margin-bottom: 16px">
+    <span>Tags:</span >
+    <MultiSelect 
+      bind:selected={tags} 
+      options={[]} 
+      allowUserOptions={true}
+      />
+  </div>
 
   </div>
             

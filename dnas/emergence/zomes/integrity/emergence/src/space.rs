@@ -9,6 +9,7 @@ pub struct Space {
     pub amenities: u32,
     pub trashed: bool,
     pub pic: Option<EntryHash>,
+    pub tags: Vec<String>,
 }
 pub fn validate_create_space(
     _action: EntryCreationAction,

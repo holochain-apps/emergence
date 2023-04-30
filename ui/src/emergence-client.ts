@@ -1,14 +1,12 @@
 // import {  } from './types';
 
-import {
-  encodeHashToBase64,
-    type Action,
-    type ActionHash,
-    type AgentPubKey,
-    type AppAgentCallZomeRequest,
-    type AppAgentClient,
-    type EntryHash,
-    type HoloHash,
+import type {
+     ActionHash,
+     AgentPubKey,
+     AppAgentCallZomeRequest,
+     AppAgentClient,
+     EntryHash,
+     HoloHash,
 } from '@holochain/client';
 import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
@@ -46,7 +44,6 @@ export class EmergenceClient {
   }
 
   async getFeed(agent: AgentPubKey | undefined) : Promise<Array<FeedElem>> {
-    console.log("AGEN", encodeHashToBase64(agent))
     const relations: Array<Relation> = await this.callZome('get_feed', {agent_filter: agent})
     return relations.map(r => {
       // console.log("feed item", r.content)
@@ -117,9 +114,9 @@ export class EmergenceClient {
     }).filter(r=>!r.record.entry.trashed);
   }
 
-  async createSpace(name: string, description:string, stewards:Array<AgentPubKey>, capacity:number, amenities: number, pic: EntryHash | undefined) : Promise<EntryRecord<Space>> {
+  async createSpace(name: string, description:string, stewards:Array<AgentPubKey>, capacity:number, amenities: number, tags: Array<string>, pic: EntryHash | undefined) : Promise<EntryRecord<Space>> {
     const spaceEntry: Space = { 
-        name, description, stewards, capacity, amenities, trashed: false, pic
+        name, description, stewards, capacity, amenities, tags, trashed: false, pic
       };
     
     return new EntryRecord(await this.callZome('create_space', spaceEntry))

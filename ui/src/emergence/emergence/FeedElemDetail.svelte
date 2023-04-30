@@ -9,6 +9,7 @@ import Avatar from './Avatar.svelte';
 import type { ActionHash } from '@holochain/client';
 import NoteDetail from './NoteDetail.svelte';
 import TimeWindowSummary from './TimeWindowSummary.svelte';
+  import { detach } from 'svelte/internal';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -51,7 +52,7 @@ const sessionTitle = (sessionHash: ActionHash) => {
     deleted space {feedElem.detail}
   {/if}
   {#if feedElem.type === FeedType.SlotSession}
-    scheduled {sessionTitle(feedElem.about)} into {feedElem.detail.space} for <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary>
+    scheduled {sessionTitle(feedElem.about)} into {feedElem.detail.space} for <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary> 
   {/if}
   {#if feedElem.type === FeedType.NoteNew}
   created note:

@@ -129,7 +129,9 @@
 
   function handleDragEnter(e) {
     const elem = findDropSlotParentElement(e.target as HTMLElement)
-    dragTarget = elem ? elem.id : ""
+    if (!elem.classList.contains("excluded")) {
+      dragTarget = elem ? elem.id : ""
+    }
   }
 
   function handleDragLeave(e) {
@@ -153,6 +155,11 @@
   async function handleDragDropSession(e:DragEvent) {
     e.preventDefault();
     const target = findDropSlotParentElement(e.target as HTMLElement)
+    if (target.classList.contains("excluded")) {
+      clearDrag()
+      return
+    }
+
     var srcId = e.dataTransfer.getData("text");
 
     const [windowJSON,idx] = target.id.split("-")
@@ -183,7 +190,23 @@
                 return new Date(w.start).toDateString()  == day.toDateString()
               })
   }
-
+  const windowToolTip = (window) => {
+    return `${timeWindowDurationToStr(window)} ${window.tags.length > 0 ? `tags: ${window.tags.join(",")}`:""}`
+  }
+  const spaceToolTip = (space) => {
+    return `${space.record.entry.tags.length > 0 ? `tags: ${space.record.entry.tags.join(",")}`:""}`
+  }
+  const isExcluded = (window, space) : boolean => {
+    if (window.tags.length === 0 && space.record.entry.tags.length > 0) return true
+    if (window.tags.length > 0 && space.record.entry.tags.length === 0) return true
+    if (window.tags.length > 0) {
+      for (const wt of window.tags) {
+        if (space.record.entry.tags.findIndex(st => st==wt)>=0) return false
+      }
+      return true
+    }
+    return false
+  }
 </script>
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -243,6 +266,8 @@
           {#each $spaces as space, idx}
             <th class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
+              class:tagged={space.record.entry.tags.length > 0}
+              title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
                 {space.record.entry.name}
                 {#if space.record.entry.pic}
@@ -259,10 +284,13 @@
             {#each windowsInDay(day).sort(sortWindows) as window}
             <tr>
               <td class="time-title"
+                class:tagged={window.tags.length > 0}
                 class:selected={JSON.stringify(selectedWindow) ==  JSON.stringify(window)}
-                title={timeWindowDurationToStr(window)}
+                title={windowTooltip(window)}
                 on:click={(e)=>{selectWindow(window); e.stopPropagation()}}
-              >{new Date(window.start).toTimeString().slice(0,5)}
+              >
+                
+                  {new Date(window.start).toTimeString().slice(0,5)}
                
               </td>
               {#each $spaces as space, idx}
@@ -300,7 +328,7 @@
           <tr>
             <th class="empty"></th>
             {#each days as day}
-            <th style="text-align:left" colspan="{windowsInDay(day).length+1}">{day.getDate()}/{day.getMonth()+1}</th>
+            <th style="text-align:left" colspan="{windowsInDay(day).length+1}">{day.getMonth()+1}/{day.getDate()}</th>
 
             {/each}
           </tr>
@@ -312,10 +340,13 @@
             {#each windowsInDay(day).sort(sortWindows) as window}
               <th class="time-title"
                 class:selected={JSON.stringify(selectedWindow) ==  JSON.stringify(window)}
-                title={timeWindowDurationToStr(window)}
+                class:tagged={window.tags.length > 0}
+                title={windowToolTip(window)}
                 on:click={(e)=>{selectWindow(window); e.stopPropagation()}}
-              >{new Date(window.start).toTimeString().slice(0,5)}
-               
+              >
+    
+                {new Date(window.start).toTimeString().slice(0,5)}
+
               </th>
             
             {/each}
@@ -325,6 +356,8 @@
           <tr>
             <td class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
+              class:tagged={space.record.entry.tags.length > 0}
+              title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
                 {space.record.entry.name}
                 {#if space.record.entry.pic}
@@ -345,6 +378,7 @@
                   id={`${JSON.stringify(window)}-${idx}}`}
                   class="schedule-slot"
                   class:glowing={dragTarget == `${JSON.stringify(window)}-${idx}}`}
+                  class:excluded={isExcluded(window, space)}
                   class:selected={selectedSpaceIdx ==  idx  || JSON.stringify(selectedWindow) ==  JSON.stringify(window) || sessionsInSpace(window, space).find(s=>selectedSessions.get(s.record.actionHash))}
 
                   on:dragenter={handleDragEnter} 
@@ -434,6 +468,18 @@
  .selected {
   background-color: lightblue;
  }
+ .tagged {
+  background-color: white;
+ }
+ .excluded {
+  background: repeating-linear-gradient(
+    45deg,
+    #606dbc,
+    #606dbc 10px,
+    #465298 10px,
+    #465298 20px
+  );
+ }
  .tilted {
     transform: rotate(3deg);
     box-shadow: 6px 6px 10px rgba(0, 0, 0, 0.5) !important;
@@ -442,6 +488,7 @@
   outline: none;
   border-color: #9ecaed;
   box-shadow: 0 0 10px #9ecaed !important;
+  background-color: green;
 }
 
 </style>

@@ -7,6 +7,7 @@ import { timeWindowStartToStr, timeWindowDurationToStr, type TimeWindow } from '
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
+  import Slot from './Slot.svelte';
 
 export let timeWindow: TimeWindow;
 
@@ -16,7 +17,7 @@ let client: AppAgentClient = (getContext(clientContext) as any).getClient();
 
 
 <div class="slot">
-  { timeWindowStartToStr(timeWindow) } for { timeWindowDurationToStr(timeWindow) } 
+  { timeWindowStartToStr(timeWindow) } for { timeWindowDurationToStr(timeWindow) } {timeWindow.tags.length > 0 ? timeWindow.tags.join(", ") : "" }
 </div>
 
 <style>

@@ -147,6 +147,14 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Tags:</strong></span>
+    <span style="white-space: pre-line">
+      {space.record.entry.tags.join(", ")}
+    </span>
+  </div>
+
+
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Picture</strong></span>
 
     {#if space.record.entry.pic}

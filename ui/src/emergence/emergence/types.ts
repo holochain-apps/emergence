@@ -90,6 +90,7 @@ export interface Space {
   amenities: number;
   trashed: boolean;
   pic?: EntryHash;
+  tags: Array<string>;
 }
 
 

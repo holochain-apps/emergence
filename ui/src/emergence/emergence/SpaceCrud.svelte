@@ -19,6 +19,7 @@ import Avatar from './Avatar.svelte';
 import { faClose, faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import SiteMapLocation from './SiteMapLocation.svelte';
+import MultiSelect from 'svelte-multiselect'
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -32,8 +33,10 @@ let stewards:Array<AgentPubKey> = []
 let amenities: number = 0;
 let capacity: number = 0;
 let pic: EntryHash | undefined = undefined;
+let tags: Array<string> = []
 let location: SiteLocation | undefined;
 let sitemap: Info<SiteMap> | undefined;
+
 
 let errorSnackbar: Snackbar;
 
@@ -49,13 +52,14 @@ onMount(() => {
     stewards = space.record.entry.stewards
     capacity = space.record.entry.capacity
     pic = space.record.entry.pic
+    tags = space.record.entry.tags
     location = store.getSpaceSiteLocation(space)
   }
 });
 
 async function updateSpace() {
   if (space) {
-    const updateRecord = await store.updateSpace(space.original_hash, {name, description, stewards, capacity, amenities, pic, location})
+    const updateRecord = await store.updateSpace(space.original_hash, {name, description, stewards, capacity, amenities, tags, pic, location})
     if (updateRecord) {
       dispatch('space-updated', { actionHash: updateRecord.actionHash });
     } else {
@@ -66,13 +70,14 @@ async function updateSpace() {
 
 async function createSpace() {  
   try {
-    const record = await store.createSpace(name, description, stewards, capacity, amenities, pic, location)
+    const record = await store.createSpace(name, description, stewards, capacity, amenities, tags, pic, location)
 
     name = ""
     description = ""
     amenities = 0
     capacity = 0
     pic = undefined
+    tags = []
     location = undefined
     dispatch('space-created', { space: record });
   } catch (e) {
@@ -179,6 +184,15 @@ function deleteSteward(index: number) {
         on:sl-change={e => { amenities = setAmenity(amenities, i, e.target.checked)} }
       >{amenity}</sl-checkbox>
     {/each}
+  </div>
+
+  <div style="margin-bottom: 16px">
+    <span>Tags:</span >
+    <MultiSelect 
+      bind:selected={tags} 
+      options={[]} 
+      allowUserOptions={true}
+      />
   </div>
 
   <div style="margin-bottom: 16px">

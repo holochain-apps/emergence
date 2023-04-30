@@ -5,6 +5,7 @@ use std::fmt;
 pub struct TimeWindow {
     start: Timestamp,
     duration: u32,
+    tags: Vec<String>,
 }
 impl fmt::Display for TimeWindow {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

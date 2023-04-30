@@ -89,11 +89,16 @@
     const doImport = async (data: any) => {
         for (const s of data.spaces) {
             const e = s.entry
-            await store.createSpace(e.name,e.description,[],e.capacity, e.amenities, undefined, undefined)
+            if (! e.tags) {
+                e.tags = []
+            }
+            await store.createSpace(e.name,e.description,[],e.capacity, e.amenities, e.tags, undefined, undefined)
         }
         for (const s of data.windows) {
-            const tags = s.tags ? s.tags : []
-            await store.createTimeWindow(new Date(s.start), s.duration, tags)
+            if (! s.tags) {
+                s.tags = []
+            }
+            await store.createTimeWindow(new Date(s.start), s.duration, s.tags)
         }
         for (const s of data.sessions) {
             const leaders = [] // fixme
