@@ -195,17 +195,22 @@
   <div class="pane-content">
     <div class="pane-header">
       <h3>Schedule</h3>
-      <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
-        <Fa icon={faCalendarPlus} />
-      </sl-button>
-      <sl-button on:click={() => {bySpace = !bySpace } } circle>
-        <Fa icon={faArrowsUpDownLeftRight} />
-      </sl-button>
+      <div>
+        <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
+          <Fa icon={faCalendarPlus} />
+        </sl-button>
+        <sl-button on:click={() => {bySpace = !bySpace } } circle>
+          <Fa icon={faArrowsUpDownLeftRight} />
+        </sl-button>
+      </div>
       </div>
 
     {#if creatingTimeWindow}
     <div class="modal">
-      <CreateTimeWindow on:timeWindow-created={()=>creatingTimeWindow=false}></CreateTimeWindow>
+      <CreateTimeWindow 
+        on:timeWindow-created={()=>creatingTimeWindow=false}
+        on:close-create-timeWindow={()=>creatingTimeWindow=false}>
+      </CreateTimeWindow>
     </div>
     {/if}
 

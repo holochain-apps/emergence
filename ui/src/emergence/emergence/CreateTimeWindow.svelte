@@ -8,6 +8,8 @@ import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import '@vaadin/date-time-picker'
+  import { faClose, faSave } from '@fortawesome/free-solid-svg-icons';
+  import Fa from 'svelte-fa';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -15,20 +17,21 @@ const dispatch = createEventDispatcher();
 
 let duration: number = 60;
 let start: Date|undefined;
+let tags: Array<string> = []
 
 let errorSnackbar: Snackbar;
 
 let datePicker:any
 
 $: duration, start;
-$: isTimeWindowValid = duration > 0;
+$: isTimeWindowValid = duration > 0 && start;
 
 onMount(() => {
 });
 
 async function createTimeWindow() { 
   try {
-    const actionHash = store.createTimeWindow(new Date(datePicker.value), duration!)
+    const actionHash = store.createTimeWindow(new Date(datePicker.value), duration!, tags)
     start = undefined
     duration = 60
     dispatch('timeWindow-created', { timeWindowHash: actionHash });
@@ -48,9 +51,21 @@ const setLen = (l:number) => {
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 <div style="display: flex; flex-direction: column">
-  <span style="font-size: 18px">Slot Add</span>
   
-  <vaadin-date-time-picker bind:this={datePicker}></vaadin-date-time-picker>
+  <div style="display: flex; flex-direction: row; justify-content: space-between; margin-bottom: 10px;">
+    <span style="font-size: 18px">Slot Add</span>
+    <div>
+      <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-create-timeWindow') } } circle>
+        <Fa icon={faClose} />
+      </sl-button>
+      <sl-button circle size=small
+        on:click={() => createTimeWindow()}
+        disabled={!isTimeWindowValid}
+        variant=primary><Fa icon={faSave} />
+      </sl-button>
+    </div>
+  </div>
+  <vaadin-date-time-picker bind:this={datePicker} on:change={() => {start = new Date(datePicker.value)}}></vaadin-date-time-picker>
   <div style="margin-bottom: 16px">
     <sl-input
     label=Duration
@@ -60,9 +75,6 @@ const setLen = (l:number) => {
 
   </div>
             
-  <sl-button 
-  on:click={() => createTimeWindow()}
-  disabled={!isTimeWindowValid}
-  variant=primary>Add Slot</sl-button>
+
 
 </div>

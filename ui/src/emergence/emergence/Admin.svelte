@@ -92,7 +92,8 @@
             await store.createSpace(e.name,e.description,[],e.capacity, e.amenities, undefined, undefined)
         }
         for (const s of data.windows) {
-            await store.createTimeWindow(new Date(s.start), s.duration)
+            const tags = s.tags ? s.tags : []
+            await store.createTimeWindow(new Date(s.start), s.duration, tags)
         }
         for (const s of data.sessions) {
             const leaders = [] // fixme

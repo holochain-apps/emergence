@@ -257,7 +257,7 @@
     display: flex; flex-direction: column;
   }
   :global(.pane-header){
-    display: flex; flex-direction: row; justify-content:space-around; align-items: center;
+    display: flex; flex-direction: row; justify-content:space-between; align-items: center;
   }
 
 
