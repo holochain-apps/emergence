@@ -11,17 +11,25 @@
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
   import SessionSummary from './SessionSummary.svelte';
   import { HoloHashMap } from '@holochain-open-dev/utils';
+  import '@shoelace-style/shoelace/dist/components/select/select.js';
+  import '@shoelace-style/shoelace/dist/components/option/option.js';
+  import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
+  import { decodeArrayStream } from '@msgpack/msgpack';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
   let loading = true;
   let error: any = undefined;
   let creatingTimeWindow = false
+  let slotType: string 
+  $: slotType  
+  let filteredDay: number | undefined
+  $: filteredDay
 
   $: loading, error, creatingTimeWindow;
   $: spaces = store.spaces
   $: windows = store.timeWindows
-  $: days = calcDays($windows) 
+  $: days = calcDays($windows, slotType, filteredDay) 
   $: sessions = store.sessions
 
   let selectedSessions:HoloHashMap<ActionHash,boolean> = new HoloHashMap()
@@ -32,11 +40,19 @@
   $: sessionsInSpace
   $: amSteward = store.amSteward
 
-  const calcDays = (windows): Array<Date> => {
+
+  const calcDays = (windows, slotTypeFilter, dayFilter): Array<Date> => {
     const days = []
     const dayStrings = {}
     
-    windows.forEach(w=>dayStrings[new Date(w.start).toDateString()] = new Date(w.start))
+    windows.forEach(w=> {
+      console.log(w.start, dayFilter)
+      if ((!slotTypeFilter || w.tags.includes(slotTypeFilter)) &&
+          (!dayFilter || w.start == dayFilter))
+       {
+        dayStrings[new Date(w.start).toDateString()] = new Date(w.start)
+      }
+    })
     Object.values(dayStrings).forEach((d:Date)=>days.push(d))
     days.sort((a,b)=> a-b)
     return days
@@ -185,11 +201,11 @@
 
   let bySpace = false
 
-  const windowsInDay = (day) : Array<TimeWindow> => {
+  const windowsInDay = (day, type) : Array<TimeWindow> => {
     return $windows.filter(w=>{
                 // @ts-ignore
                 return new Date(w.start).toDateString()  == day.toDateString()
-              })
+              }).filter(w => w.tags.includes(type) || !type )
   }
   const windowToolTip = (window) => {
     return `${timeWindowDurationToStr(window)} ${window.tags.length > 0 ? `slot types: ${window.tags.join(",")}`:""}`
@@ -208,16 +224,21 @@
     }
     return false
   }
+
   const deleteWindow = async (window: TimeWindow) => {
 
     for (const s of $sessions) {
       if (store.getSessionSlot(s)) {
         alert("slot has scheduled sessions, can't delete!")
+
         return
       }
     }
     await store.deleteTimeWindow(window)
     store.fetchTimeWindows()
+  }
+  const dayToStr = (day) => {
+    return `${day.getMonth()+1}/${day.getDate()}`
   }
 </script>
 {#if loading}
@@ -231,14 +252,34 @@
     <div class="pane-header">
       <h3>Schedule</h3>
       <div>
+        <sl-select 
+        placeholder="Filter by Day"
+        on:sl-change={(e) => filteredDay = parseInt(e.target.value) }
+        pill
+        clearable
+        >
+          {#each days as day}
+            <sl-option value={day.getTime()}> {dayToStr(day)}</sl-option>
+          {/each}
+        </sl-select>
+        <sl-select
+        placeholder="Filter by Slot Type"
+        on:sl-change={(e) => slotType = e.target.value }
+        pill
+        clearable
+        >
+          {#each store.getSlotTypeTags() as type}
+            <sl-option value={type}> {type}</sl-option>
+          {/each}
+        </sl-select>
         {#if $amSteward}
           <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
             <Fa icon={faCalendarPlus} />
           </sl-button>
         {/if}
-        <sl-button on:click={() => {bySpace = !bySpace } } circle>
+        <!-- <sl-button on:click={() => {bySpace = !bySpace } } circle>
           <Fa icon={faArrowsUpDownLeftRight} />
-        </sl-button>
+        </sl-button> -->
       </div>
       </div>
 
@@ -295,7 +336,7 @@
             <tr>
               <td colspan="{$spaces.length+1}" >{day.toDateString()}</td>
             </tr>
-            {#each windowsInDay(day).sort(sortWindows) as window}
+            {#each windowsInDay(day, slotType).sort(sortWindows) as window}
             <tr>
               <td class="time-title"
                 class:tagged={window.tags.length > 0}
@@ -306,7 +347,7 @@
                 
                   {new Date(window.start).toTimeString().slice(0,5)}
                   {#if $amSteward}
-                    <sl-button style="margin-left: 4px;" size=small on:click={()=>deleteWindow(window)} circle>
+                    <sl-button style="margin-left: 4px;" size=small on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                       <Fa icon={faTrash} />
                     </sl-button>
                   {/if}
@@ -342,11 +383,12 @@
           {/each}
         </table>
         {:else}
+        {slotType}
         <table>
           <tr>
             <th class="empty"></th>
             {#each days as day}
-            <th style="text-align:left" colspan="{windowsInDay(day).length+1}">{day.getMonth()+1}/{day.getDate()}</th>
+            <th style="text-align:left" colspan="{windowsInDay(day, slotType).length+1}">{dayToStr(day)}</th>
 
             {/each}
           </tr>
@@ -355,7 +397,7 @@
 
           {#each days as day}
             <th style=""></th>
-            {#each windowsInDay(day).sort(sortWindows) as window}
+            {#each windowsInDay(day, slotType).sort(sortWindows) as window}
               <th class="time-title"
                 class:selected={JSON.stringify(selectedWindow) ==  JSON.stringify(window)}
                 class:tagged={window.tags.length > 0}
@@ -365,7 +407,7 @@
     
                 {new Date(window.start).toTimeString().slice(0,5)}
                 {#if $amSteward}
-                  <sl-button style="margin-left: 4px;" size=small on:click={()=>deleteWindow(window)} circle>
+                  <sl-button style="margin-left: 4px;" size=small on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                     <Fa icon={faTrash} />
                   </sl-button>
                 {/if}

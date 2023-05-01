@@ -80,13 +80,7 @@ async function createSiteMap() {
 
   <div style="margin-bottom: 16px">
     <span>Add a pic (optional):</span >
-      {#if pic}
-      <div class="pic">
-        <show-image image-hash={encodeHashToBase64(pic)}></show-image>
-      </div>
-      {/if}
   
-      {pic ? encodeHashToBase64(pic) : "none"}
       <upload-files
         one-file
         accepted-files="image/jpeg,image/png,image/gif"

@@ -7,9 +7,8 @@ import SpaceDetail from './SpaceDetail.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import Fa from 'svelte-fa';
 import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
-  import SpaceSummary from './SpaceSummary.svelte';
-  import SpaceCrud from './SpaceCrud.svelte';
-  import type { Info, Space } from './types';
+import SpaceSummary from './SpaceSummary.svelte';
+import type { Info, Space } from './types';
 const dispatch = createEventDispatcher();
 
 
