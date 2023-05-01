@@ -87,6 +87,13 @@ export class EmergenceStore {
   myPubKeyBase64: string
   loader = undefined
   neededStuffStore =undefined
+  amSteward: Writable<boolean> = writable(false)
+
+
+  setSelfSteward(value) {
+    this.amSteward.update((n) => {return value} )
+  }
+
   stuffIsNeeded() {
     return this.neededStuff.notes ? true : false
   }

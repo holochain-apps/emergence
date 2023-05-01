@@ -30,6 +30,7 @@
 
   $: selectedSessions, selectedSpaceIdx, selectedSessions, selectedWindow
   $: sessionsInSpace
+  $: amSteward = store.amSteward
 
   const calcDays = (windows): Array<Date> => {
     const days = []
@@ -219,9 +220,11 @@
     <div class="pane-header">
       <h3>Schedule</h3>
       <div>
-        <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
-          <Fa icon={faCalendarPlus} />
-        </sl-button>
+        {#if $amSteward}
+          <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
+            <Fa icon={faCalendarPlus} />
+          </sl-button>
+        {/if}
         <sl-button on:click={() => {bySpace = !bySpace } } circle>
           <Fa icon={faArrowsUpDownLeftRight} />
         </sl-button>
@@ -474,11 +477,11 @@
  .excluded {
   background: repeating-linear-gradient(
     45deg,
-    #606dbc,
-    #606dbc 10px,
-    #465298 10px,
-    #465298 20px
-  );
+  rgba(0, 0, 0, 0.2),
+  rgba(0, 0, 0, 0.2) 10px,
+  rgba(0, 0, 0, 0.3) 10px,
+  rgba(0, 0, 0, 0.3) 20px
+    );
  }
  .tilted {
     transform: rotate(3deg);

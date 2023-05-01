@@ -56,13 +56,13 @@ const setLen = (l:number) => {
   <div style="display: flex; flex-direction: row; justify-content: space-between; margin-bottom: 10px;">
     <span style="font-size: 18px">Slot Add</span>
     <div>
-      <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-create-timeWindow') } } circle>
-        <Fa icon={faClose} />
-      </sl-button>
       <sl-button circle size=small
         on:click={() => createTimeWindow()}
         disabled={!isTimeWindowValid}
         variant=primary><Fa icon={faSave} />
+      </sl-button>
+      <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-create-timeWindow') } } circle>
+        <Fa icon={faClose} />
       </sl-button>
     </div>
   </div>

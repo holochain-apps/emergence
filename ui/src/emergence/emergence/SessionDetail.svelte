@@ -119,14 +119,16 @@ async function deleteSession() {
 {:else if error}
 <span>Error fetching the session: {error.data.data}</span>
 {:else if editing}
-<SessionCrud
-  session={ $session}
-  on:session-updated={async () => {
-    editing = false;
-  //  await fetchSession()
-  } }
-  on:edit-canceled={() => { editing = false; } }
-></SessionCrud>
+  <div class="modal">
+    <SessionCrud
+      session={ $session}
+      on:session-updated={async () => {
+        editing = false;
+      //  await fetchSession()
+      } }
+      on:edit-canceled={() => { editing = false; } }
+    ></SessionCrud>
+  </div>
 {:else}
 
 <div class="pane-content">

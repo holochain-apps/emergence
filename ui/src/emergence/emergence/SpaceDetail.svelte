@@ -37,6 +37,7 @@ let showConfirm = false
 let errorSnackbar: Snackbar;
   
 $: editing,  error, loading, space, showConfirm;
+$: amSteward = store.amSteward
 
 onMount(async () => {
   if (space === undefined) {
@@ -106,14 +107,16 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 <div style="display: flex; flex-direction: column">
   <div style="display: flex; flex-direction: row">
     <span style="flex: 1"></span>
+    {#if $amSteward}
+      <sl-button style="margin-left: 8px;" size=small on:click={() => showConfirm=true} circle>
+        <Fa icon={faTrash} />
+      </sl-button>
+      <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
+        <Fa icon={faEdit} />
+      </sl-button>
+    {/if}
     <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-space-detail') } } circle>
       <Fa icon={faClose} />
-    </sl-button>
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
-      <Fa icon={faEdit} />
-    </sl-button>
-    <sl-button style="margin-left: 8px;" size=small on:click={() => showConfirm=true} circle>
-      <Fa icon={faTrash} />
     </sl-button>
   </div>
 

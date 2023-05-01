@@ -109,28 +109,28 @@ function deleteSteward(index: number) {
 
     <div style="display: flex; flex-direction: row">
       <sl-button circle size=small
-      label="Cancel"
-      on:click={() => dispatch('edit-canceled')}
-      style="flex: 1; margin-right: 16px"
-      ><Fa icon={faClose} /></sl-button>
-      <sl-button circle size=small
       style="flex: 1;"
       on:click={() => updateSpace()}
       disabled={!isSpaceValid}
       variant=primary><Fa icon={faSave} /></sl-button>
+      <sl-button circle size=small
+      label="Cancel"
+      on:click={() => dispatch('edit-canceled')}
+      style="flex: 1; margin-right: 16px"
+      ><Fa icon={faClose} /></sl-button>
     </div>
   {:else}
     <span style="font-size: 18px">Create Space</span>
     <div style="display: flex; flex-direction: row">
       <sl-button circle size=small
+      on:click={() => createSpace()}
+      disabled={!isSpaceValid}
+      variant=primary><Fa icon={faSave} /></sl-button>
+      <sl-button circle size=small
       label="Cancel"
       on:click={() => dispatch('edit-canceled')}
       style="flex: 1; margin-right: 16px"
       ><Fa icon={faClose} /></sl-button>
-      <sl-button circle size=small
-      on:click={() => createSpace()}
-      disabled={!isSpaceValid}
-      variant=primary><Fa icon={faSave} /></sl-button>
     </div>
   {/if}
 

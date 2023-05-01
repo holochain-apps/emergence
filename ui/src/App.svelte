@@ -30,7 +30,6 @@
   import You from './emergence/emergence/You.svelte'
   import Admin from './emergence/emergence/Admin.svelte';
   import SiteMapDisplay from './emergence/emergence/SiteMapDisplay.svelte';
-  import { get } from 'svelte/store';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -44,6 +43,7 @@
 
   $: client, fileStorageClient, store, loading, creatingSession, creatingSpace;
   $: prof = profilesStore ? profilesStore.myProfile : undefined
+  $: amSteward = store ? store.amSteward : undefined
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
@@ -216,13 +216,15 @@
         >
            <Fa icon={faUser} size="2x"/>
         </div>
-        <div class="nav-button {pane=="admin"?"selected":""}"
-          title="Admin"
-          on:keypress={()=>{pane='admin'}}
-          on:click={()=>{pane='admin'}}
-        >
-           <Fa icon={faGear} size="2x"/>
-        </div>
+        {#if store && $amSteward}
+          <div class="nav-button {pane=="admin"?"selected":""}"
+            title="Admin"
+            on:keypress={()=>{pane='admin'}}
+            on:click={()=>{pane='admin'}}
+          >
+            <Fa icon={faGear} size="2x"/>
+          </div>
+        {/if}
       </div>
     </div>
     </file-storage-context>

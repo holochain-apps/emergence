@@ -5,6 +5,7 @@
     import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
     import '@shoelace-style/shoelace/dist/components/tab/tab.js';
     import '@shoelace-style/shoelace/dist/components/button/button.js';
+    import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
     import Fa from 'svelte-fa'
     import { faEdit, faExchange, faFileExport, faFileImport } from '@fortawesome/free-solid-svg-icons';
 
@@ -18,7 +19,8 @@
     import type { Info, TimeWindow } from './types';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
-  
+    let steward: SlCheckbox
+
     onMount(async () => {
         store.fetchMyStuff()
     });
@@ -28,19 +30,26 @@
     $: myProfile = store.profilesStore.myProfile
     $: myNotes = store.myNotes
     $: mySessions = store.mySessions
-
+    $: amSteward = store.amSteward
  
 </script>
 
 {#if $myProfile.status === "complete"  && $myProfile.value}
     <div class="header"><h3><Avatar agentPubKey={store.myPubKey}></Avatar></h3>
+        <sl-checkbox
+        bind:this={steward}
+        checked={$amSteward}
+        on:sl-change={e => { store.setSelfSteward(steward.checked)} }
+      >Steward</sl-checkbox>
         <sl-button style="margin-left: 8px;" size=small on:click={() => editProfile=true} circle>
             <Fa icon={faEdit} />
         </sl-button>
     </div>
     {#if editProfile}
-        <p><b>Emergence</b> is a decentralized hApp for discovery, scheduling, connecting and remembering </p>
-        <update-profile on:cancel-edit-profile={()=>editProfile = false} on:profile-updated={()=>editProfile = false}></update-profile>
+        <div class="modal">
+            <div style="width:300px;text-align: center; border-bottom: 1px solid"><b>Emergence</b> is a decentralized hApp for discovery, scheduling, connecting and remembering </div>
+            <update-profile on:cancel-edit-profile={()=>editProfile = false} on:profile-updated={()=>editProfile = false}></update-profile>
+        </div>
     {:else}
     <sl-tab-group>
         <sl-tab slot="nav" panel="notes">Notes
