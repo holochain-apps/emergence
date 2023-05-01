@@ -1,8 +1,6 @@
 use emergence_integrity::*;
 use hdk::prelude::*;
 
-
-
 #[hdk_extern]
 pub fn create_time_window(input: TimeWindow) -> ExternResult<ActionHash> {
     let path = Path::from("all_time_windows");
@@ -19,9 +17,16 @@ pub fn create_time_window(input: TimeWindow) -> ExternResult<ActionHash> {
     Ok(action_hash)
 }
 #[hdk_extern]
-pub fn delete_time_window(_input: TimeWindow) -> ExternResult<()> {
-    Err(wasm_error!(WasmErrorInner::Guest(String::from("delete time_windows not implmented"))))
-   // Ok(())
+pub fn delete_time_window(input: TimeWindow) -> ExternResult<()> {
+    let path = Path::from("all_time_windows");
+    let links = get_links(path.path_entry_hash()?, LinkTypes::TimeWindows, None)?;
+    for link in links {
+        let w = convert_time_window_tag(link.tag)?;
+        if w == input {
+            delete_link(link.create_link_hash)?;
+        }
+    }
+    Ok(())
 }
 
 #[hdk_extern]

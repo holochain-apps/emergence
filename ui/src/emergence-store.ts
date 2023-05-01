@@ -313,6 +313,11 @@ export class EmergenceStore {
     return actionHash
   }
 
+  async deleteTimeWindow(window: TimeWindow) : Promise<undefined> {
+    await this.client.deleteTimeWindow(window)
+    return undefined
+  }
+
   async fetchTimeWindows() {
     const timeWindows = await this.client.getTimeWindows()
     this.timeWindows.update((n) => {return timeWindows} )

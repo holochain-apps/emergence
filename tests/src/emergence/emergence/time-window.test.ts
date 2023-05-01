@@ -44,7 +44,24 @@ test('create a timeWindow and get all timeWindows', async () => {
       payload: null
     });
     assert.equal(collectionOutput.length, 1);
-    assert.deepEqual(createdTimeWindow, collectionOutput[0]);    
+    assert.deepEqual(createdTimeWindow, collectionOutput[0]);
+
+    await alice.cells[0].callZome({
+      zome_name: "emergence",
+      fn_name: "delete_time_window",
+      payload: createdTimeWindow,
+    });
+
+    // alice gets all timeWindows again
+    collectionOutput = await alice.cells[0].callZome({
+      zome_name: "emergence",
+      fn_name: "get_time_windows",
+      payload: null
+    });
+    assert.equal(collectionOutput.length, 0);
+
+
+
   });
 });
 

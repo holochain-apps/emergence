@@ -7,7 +7,7 @@
   import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, type Slot, type RelationInfo, slotEqual } from './types';
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
-  import { faCalendarPlus, faArrowsUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
+  import { faCalendarPlus, faArrowsUpDownLeftRight, faTrash } from '@fortawesome/free-solid-svg-icons';
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
   import SessionSummary from './SessionSummary.svelte';
   import { HoloHashMap } from '@holochain-open-dev/utils';
@@ -208,6 +208,17 @@
     }
     return false
   }
+  const deleteWindow = async (window: TimeWindow) => {
+
+    for (const s of $sessions) {
+      if (store.getSessionSlot(s)) {
+        alert("slot has scheduled sessions, can't delete!")
+        return
+      }
+    }
+    await store.deleteTimeWindow(window)
+    store.fetchTimeWindows()
+  }
 </script>
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -294,7 +305,11 @@
               >
                 
                   {new Date(window.start).toTimeString().slice(0,5)}
-               
+                  {#if $amSteward}
+                    <sl-button style="margin-left: 4px;" size=small on:click={()=>deleteWindow(window)} circle>
+                      <Fa icon={faTrash} />
+                    </sl-button>
+                  {/if}
               </td>
               {#each $spaces as space, idx}
                 <td 
@@ -349,6 +364,11 @@
               >
     
                 {new Date(window.start).toTimeString().slice(0,5)}
+                {#if $amSteward}
+                  <sl-button style="margin-left: 4px;" size=small on:click={()=>deleteWindow(window)} circle>
+                    <Fa icon={faTrash} />
+                  </sl-button>
+                {/if}
 
               </th>
             

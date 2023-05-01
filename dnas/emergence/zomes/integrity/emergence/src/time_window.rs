@@ -1,7 +1,7 @@
 use hdi::prelude::*;
 use std::fmt;
 
-#[derive(Serialize, Deserialize, Debug, SerializedBytes, Clone)]
+#[derive(Serialize, Deserialize, Debug, SerializedBytes, Clone, PartialEq)]
 pub struct TimeWindow {
     start: Timestamp,
     duration: u32,
@@ -30,9 +30,7 @@ pub fn validate_delete_link_time_windows(
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(
-        ValidateCallbackResult::Invalid(
-            String::from("TimeWindows links cannot be deleted"),
-        ),
+        ValidateCallbackResult::Valid,
     )
 }
 

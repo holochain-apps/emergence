@@ -163,7 +163,7 @@ function deleteLeader(index: number) {
   <div style="margin-bottom: 16px">
     <div style="font-size: 16px" on:click={()=>amenities = 0}>Required Amenities </div>
     {#each Amenities as amenity, i}
-      <sl-checkbox 
+      <sl-checkbox
         bind:this={amenityElems[i]}
         checked={(amenities >> i)&1}
         on:sl-change={e => { amenities = setAmenity(amenities, i, e.target.checked)} }

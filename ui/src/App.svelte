@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faTicket, faUser, faGear, faRss, faCalendar, faPlus } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faTicket, faUser, faGear, faRss, faCalendar, faPlus, faAmericanSignLanguageInterpreting } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -142,10 +142,12 @@
         <AllSpaces
           on:all-spaces-close={()=>pane= "spaces"}
         ></AllSpaces>
-        Create Space:
-        <sl-button on:click={() => {creatingSpace = true; } } circle>
-          <Fa icon={faPlus} />
-        </sl-button>
+        {#if $amSteward}
+          Create Space:
+          <sl-button on:click={() => {creatingSpace = true; } } circle>
+            <Fa icon={faPlus} />
+          </sl-button>
+        {/if}
     
         {#if creatingSpace}
           <div class="modal"><SpaceCrud

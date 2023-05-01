@@ -70,6 +70,10 @@ export class EmergenceClient {
     return this.callZome('get_time_windows',null)
   }
 
+  async deleteTimeWindow(timeWindow: TimeWindow) : Promise<undefined> {
+    return this.callZome('delete_time_window', timeWindow)
+  }
+
   genKey = () => {
     const keyChars = 'ABCDEFGHJKLMNPQRSTVXYZ23456789';
     let key = '';
