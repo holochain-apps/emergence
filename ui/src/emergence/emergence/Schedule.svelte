@@ -46,7 +46,6 @@
     const dayStrings = {}
     
     windows.forEach(w=> {
-      console.log(w.start, dayFilter)
       if ((!slotTypeFilter || w.tags.includes(slotTypeFilter)) &&
           (!dayFilter || w.start == dayFilter))
        {
@@ -383,7 +382,6 @@
           {/each}
         </table>
         {:else}
-        {slotType}
         <table>
           <tr>
             <th class="empty"></th>
