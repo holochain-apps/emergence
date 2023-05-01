@@ -323,9 +323,10 @@ export class EmergenceStore {
     this.timeWindows.update((n) => {return timeWindows} )
   }
 
-  getAllTimeWindowTags(): Array<string> {
+  getSlotTypeTags(): Array<string> {
     const tags = new Set()
     get(this.timeWindows).forEach(w=> w.tags.forEach(t=>tags.add(t)))
+    get(this.spaces).forEach(s=> s.record.entry.tags.forEach(t=>tags.add(t)))
     return Array.from(tags) as Array<string>
   }
 

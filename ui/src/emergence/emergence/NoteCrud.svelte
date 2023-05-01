@@ -13,7 +13,7 @@ import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
-import type { ActionHash, EntryHash } from '@holochain/client';
+import { encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client';
 import MultiSelect from 'svelte-multiselect'
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -102,12 +102,13 @@ async function createNote() {
       allowUserOptions={true}
       />
   </div>
-
+  
   <div style="margin-bottom: 16px">
     <span>Add a pic (optional):</span >
     <upload-files
     one-file
     accepted-files="image/jpeg,image/png,image/gif"
+    defaultValue={pic ? encodeHashToBase64(pic) : undefined}
     on:file-uploaded={(e) => {
       pic = e.detail.file.hash;
     }}

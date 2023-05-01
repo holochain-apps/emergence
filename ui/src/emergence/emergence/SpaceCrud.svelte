@@ -187,28 +187,26 @@ function deleteSteward(index: number) {
   </div>
 
   <div style="margin-bottom: 16px">
-    <span>Time-window Restrictions:</span >
+    <span>Slot type:</span >
     <MultiSelect 
       bind:selected={tags} 
-      options={store.getAllTimeWindowTags()} 
+      options={store.getSlotTypeTags()}
+      allowUserOptions={true}
       />
   </div>
 
   <div style="margin-bottom: 16px">
-    {#if pic}
-    <div class="pic">
-    <show-image image-hash={encodeHashToBase64(pic)}></show-image>
-    </div>
-    {/if}
-
     <span>Add a pic (optional):</span >
-    <upload-files
-    one-file
-    accepted-files="image/jpeg,image/png,image/gif"
-    on:file-uploaded={(e) => {
-      pic = e.detail.file.hash;
-    }}
-  ></upload-files>
+      <div class="pic-upload">
+          <upload-files
+          one-file
+          accepted-files="image/jpeg,image/png,image/gif"
+          defaultValue={pic ? encodeHashToBase64(pic) : undefined}
+          on:file-uploaded={(e) => {
+            pic = e.detail.file.hash;
+          }}
+        ></upload-files>
+      </div>
   </div>
   {#if sitemap}
     <div style="margin-bottom: 16px">
@@ -224,7 +222,7 @@ function deleteSteward(index: number) {
 
 </div>
 <style>
-  .pic {
-   width: 50px;
+  :global(.pic-upload) {
+    width: 200px;
   }
 </style> 

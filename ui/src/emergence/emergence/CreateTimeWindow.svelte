@@ -74,10 +74,10 @@ const setLen = (l:number) => {
     on:input={e=>setLen(parseInt(e.target.value))}
   ></sl-input>
   <div style="margin-bottom: 16px">
-    <span>Tags:</span >
+    <span>Slot type:</span >
     <MultiSelect 
       bind:selected={tags} 
-      options={[]} 
+      options={store.getSlotTypeTags()} 
       allowUserOptions={true}
       />
   </div>

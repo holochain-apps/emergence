@@ -12,8 +12,7 @@ import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
-import type { ActionHash, EntryHash } from '@holochain/client';
+import { encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -81,27 +80,35 @@ async function createSiteMap() {
 
   <div style="margin-bottom: 16px">
     <span>Add a pic (optional):</span >
-    <upload-files
-    one-file
-    accepted-files="image/jpeg,image/png,image/gif"
-    on:file-uploaded={(e) => {
-      pic = e.detail.file.hash;
-    }}
-  ></upload-files>
+      {#if pic}
+      <div class="pic">
+        <show-image image-hash={encodeHashToBase64(pic)}></show-image>
+      </div>
+      {/if}
+  
+      {pic ? encodeHashToBase64(pic) : "none"}
+      <upload-files
+        one-file
+        accepted-files="image/jpeg,image/png,image/gif"
+        defaultValue={pic ? encodeHashToBase64(pic) : undefined}
+        on:file-uploaded={(e) => {
+          pic = e.detail.file.hash;
+        }}
+      ></upload-files>
   </div>
 
   {#if sitemap}
     <div style="display: flex; flex-direction: row">
       <sl-button
-      label="Cancel"
-      on:click={() => dispatch('edit-canceled')}
-      style="flex: 1; margin-right: 16px"
+        label="Cancel"
+        on:click={() => dispatch('edit-canceled')}
+        style="flex: 1; margin-right: 16px"
       >Cancel</sl-button>
       <sl-button 
-      style="flex: 1;"
-      on:click={() => updateSiteMap()}
-      disabled={!isSiteMapValid}
-      variant=primary>Save</sl-button>
+        style="flex: 1;"
+        on:click={() => updateSiteMap()}
+        disabled={!isSiteMapValid}
+        variant=primary>Save</sl-button>
     </div>
   {:else}
   <div style="display: flex; flex-direction: row">

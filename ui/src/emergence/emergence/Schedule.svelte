@@ -192,10 +192,10 @@
               })
   }
   const windowToolTip = (window) => {
-    return `${timeWindowDurationToStr(window)} ${window.tags.length > 0 ? `tagged: ${window.tags.join(",")}`:""}`
+    return `${timeWindowDurationToStr(window)} ${window.tags.length > 0 ? `slot types: ${window.tags.join(",")}`:""}`
   }
   const spaceToolTip = (space) => {
-    return `${space.record.entry.tags.length > 0 ? `restricted to: ${space.record.entry.tags.join(",")}`:""}`
+    return `${space.record.entry.tags.length > 0 ? `slot types: ${space.record.entry.tags.join(",")}`:""}`
   }
   const isExcluded = (window, space) : boolean => {
     if (window.tags.length === 0 && space.record.entry.tags.length > 0) return true
