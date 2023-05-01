@@ -311,6 +311,12 @@ export class EmergenceStore {
     this.timeWindows.update((n) => {return timeWindows} )
   }
 
+  getAllTimeWindowTags(): Array<string> {
+    const tags = new Set()
+    get(this.timeWindows).forEach(w=> w.tags.forEach(t=>tags.add(t)))
+    return Array.from(tags) as Array<string>
+  }
+
   async createSession(title: string, description: string, leaders:Array<AgentPubKey>,  smallest: number, largest: number, duration: number, amenities: number, slot: Slot|undefined): Promise<EntryRecord<Session>> {
     const record = await this.client.createSession(title, amenities, description, leaders, smallest, largest, duration)
     if (slot) {
@@ -484,7 +490,6 @@ export class EmergenceStore {
   async fetchSessions() {
     try {
         await this.fetchSpaces()
-        await this.fetchTimeWindows()
         const sessions = await this.client.getSessions()
         this.sessions.update((n) => {return sessions} )
         const noteHashes = []
@@ -900,6 +905,7 @@ export class EmergenceStore {
     try {
         const spaces = await this.client.getSpaces()
         this.spaces.update((n) => {return spaces} )
+        await this.fetchTimeWindows()
     }
     catch (e) {
         console.log("Error fetching spaces", e)

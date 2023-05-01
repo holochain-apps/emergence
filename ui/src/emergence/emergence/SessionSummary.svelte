@@ -120,10 +120,12 @@ onMount(async () => {
 
 <style>
   .time {
-    font-size: 1.6em;
+    font-size: 1.7em;
+    margin-top: -6px;
+    margin-bottom: -11px;
   }
   .date, .space {
-    font-size: .9em;
+    font-size: .7em;
   }
   .summary {
     display: flex; flex-direction: row;

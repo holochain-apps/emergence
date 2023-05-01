@@ -187,11 +187,10 @@ function deleteSteward(index: number) {
   </div>
 
   <div style="margin-bottom: 16px">
-    <span>Tags:</span >
+    <span>Time-window Restrictions:</span >
     <MultiSelect 
       bind:selected={tags} 
-      options={[]} 
-      allowUserOptions={true}
+      options={store.getAllTimeWindowTags()} 
       />
   </div>
 
