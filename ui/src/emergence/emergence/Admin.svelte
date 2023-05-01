@@ -1,16 +1,17 @@
 <script lang="ts">
-    import { encodeHashToBase64, type AgentPubKey } from "@holochain/client";
+    import { encodeHashToBase64, type AgentPubKey, type EntryHash } from "@holochain/client";
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import { getContext, onMount } from "svelte";
-  import type { Info, SiteMap } from "./types";
-  import { get } from "svelte/store";
-  import { faFileExport, faFileImport, faPlus } from "@fortawesome/free-solid-svg-icons";
-  import Fa from "svelte-fa";
-  import sanitize from "sanitize-filename";
-  import SiteMapCrud from "./SiteMapCrud.svelte";
-  import AllSiteMaps from "./AllSiteMaps.svelte";
+    import type { Info, SiteMap } from "./types";
+    import { get } from "svelte/store";
+    import { faFileExport, faFileImport, faPlus } from "@fortawesome/free-solid-svg-icons";
+    import Fa from "svelte-fa";
+    import sanitize from "sanitize-filename";
+    import SiteMapCrud from "./SiteMapCrud.svelte";
+    import AllSiteMaps from "./AllSiteMaps.svelte";
+    import { fromUint8Array, toUint8Array } from "js-base64";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -32,10 +33,26 @@
         document.body.removeChild(element);
     }
 
-    const serializeInfo = (info:Info<any>) : any => {
+    const serializeInfo = async (info:Info<any>, hasPic: boolean) : Promise<any> => {
+        let entry = info.record.entry
+        if (hasPic) {
+            if (entry.pic) {
+                const file = await store.fileStorageClient.downloadFile(entry.pic);
+                const data = await file.arrayBuffer();
+                delete entry.pic
+                entry.pic_data = fromUint8Array(new Uint8Array(data))
+                entry.pic_file = {
+                    name: file.name,
+                    size: file.size,
+                    file_type: file.type,
+                    last_modified: file.lastModified,
+                }
+            }
+            console.log(entry.pic_file)
+        }
         const obj = {
             original_hash: encodeHashToBase64(info.original_hash),
-            entry: info.record.entry,
+            entry,
             relations: info.relations.map(ri => {
                 const rel = {
                     src: encodeHashToBase64(ri.relation.src),
@@ -48,27 +65,34 @@
         return obj
     }
 
-    const doExport = ()=> {
+    const doExport = async ()=> {
+        const spaces = []
+        for (const s of get(store.spaces)) { 
+            spaces.push(await serializeInfo(s, true))
+        }
+        const sessions = []
+        for (const s of get(store.sessions)) {
+            const info = await serializeInfo(s, false)
+            info.entry['leaders'] = info.entry['leaders'].map(l => encodeHashToBase64(l))
+            sessions.push(info)
+        }
+        const notes = []
+        for (const s of get(store.notes)) { 
+            notes.push(await serializeInfo(s, true))
+        }
+        
+        const maps = []
+        for (const s of get(store.maps)) { 
+            maps.push(await serializeInfo(s, true))
+        }
+
         exportJSON= JSON.stringify(
             {
-                spaces:get(store.spaces).map(s=>{ 
-                    const info = serializeInfo(s)
-
-                    info.entry['picture'] = info.entry['picture'] ? encodeHashToBase64(info['picture']) : undefined
-                    return info
-                }),
-                sessions:get(store.sessions).map(s=>{ 
-                    const info = serializeInfo(s)
-                    info.entry['leaders'] = info.entry['leaders'].map(l => encodeHashToBase64(l))
-
-                    return info
-                }),
-                notes: get(store.notes).map(s=>{ 
-                    const info = serializeInfo(s)
-
-                    return info
-                }),
-                windows: get(store.timeWindows)
+                spaces,
+                sessions,
+                notes,
+                windows: get(store.timeWindows),
+                maps,
             }
         )
         const fileName = sanitize(`emergence.json`)
@@ -86,19 +110,40 @@
         }, false);
         reader.readAsText(file);
     };
+
+    const uploadImportedFile = async (e) : Promise<EntryHash> => {
+        let pic = undefined
+        if (e.pic_data) {
+            const file = new File([toUint8Array(e.pic_data)], e.pic_file.name, {
+                    lastModified: e.pic_data.last_modifed,
+                    type: e.pic_data.file_type,
+                     });
+        pic = await store.fileStorageClient.uploadFile(file);
+        }
+        return pic
+    }
+
     const doImport = async (data: any) => {
-        for (const s of data.spaces) {
+        for (const s of data.maps) {
             const e = s.entry
-            if (! e.tags) {
-                e.tags = []
-            }
-            await store.createSpace(e.name,e.description,[],e.capacity, e.amenities, e.tags, undefined, undefined)
+            let pic = await uploadImportedFile(e)
+
+
+            await store.createSiteMap(e.text, pic)
         }
         for (const s of data.windows) {
             if (! s.tags) {
                 s.tags = []
             }
             await store.createTimeWindow(new Date(s.start), s.duration, s.tags)
+        }
+        for (const s of data.spaces) {
+            const e = s.entry
+            if (! e.tags) {
+                e.tags = []
+            }
+            let pic = await uploadImportedFile(e)
+            await store.createSpace(e.name,e.description,[],e.capacity, e.amenities, e.tags, pic, undefined)
         }
         for (const s of data.sessions) {
             const leaders = [] // fixme
@@ -121,7 +166,7 @@
 
     <div class="header">
         <div>
-            <sl-button style="margin-left: 8px;" size=small on:click={doExport} circle>
+            <sl-button style="margin-left: 8px;" size=small on:click={async () => await doExport()} circle>
                 <Fa icon={faFileExport} />
             </sl-button>
             <sl-button style="margin-left: 8px;" size=small on:click={()=>fileinput.click()} circle>
