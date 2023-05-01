@@ -36,6 +36,8 @@ export async function sampleSpace(cell: CallableCell, partialSpace = {}) {
     amenities: 1,
     stewards: [cell.cell_id[1]],
     capacity: 10,
+    tags: [],
+    pic: null,
     trashed: false
 
         },
@@ -77,6 +79,7 @@ export async function sampleTimeWindow(cell: CallableCell, partialTimeWindow = {
         ...{
 	  start,
 	  duration: 30,
+    tags: [],
         },
         ...partialTimeWindow
     };

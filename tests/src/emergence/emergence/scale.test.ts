@@ -306,12 +306,12 @@ test('scale testing', async () => {
       await scenario.shareAllAgents();
 
       const aliceAppAgentWs = players[0].conductor.appAgentWs();
-      const store = new EmergenceStore(new EmergenceClient(aliceAppAgentWs, "emergence"), undefined, aliceAppAgentWs.myPubKey)
+      const store = new EmergenceStore(new EmergenceClient(aliceAppAgentWs, "emergence"), undefined, undefined, aliceAppAgentWs.myPubKey)
 
       const spaces = []
       // agent 1 creates a bunch of spaces
       for (let x=0; x< spacesCount; x=x+1) {
-        const space = await store.createSpace(`space ${x}`,"description",[], 10,1, undefined);
+        const space = await store.createSpace(`space ${x}`,"description",[], 10,1,[], undefined,undefined);
         assert.ok(space);
         spaces.push(space)
       }
@@ -328,12 +328,21 @@ test('scale testing', async () => {
 
       assert.equal(get(store.sessions).length, sessionsCount);
 
-      // run the test over time increasing the following parameters:
-      // 1. number of agent's per conductor
-      // 2. number of notes create per agent, per minute
-      // 3. number of requests per agent per minute to load all the data: store.fetchSessions()
-      // 2. Number of conductors
-
+      // Test involves creating the expected number of spaces and sessions and then simulating 
+      // user behavior.  Then the test is run multiple times while recording performance metrics 
+      // where each run the intensity of user behavior increased by upping the following parameters:
+      // 1. number of agents per conductor
+      // 1. number of notes created per agent, per minute
+      // 1. percentage of notes that include images
+      // 1. number of requests per agent per minute to load all the data: store.fetchSessions()
+      // 1. number of conductors
+      
+      // The metrics measured should be:
+      
+      // 1. conductor load avarege
+      // 2. zome-call time delays (if any)
+      // 3. time-taken for a random agent on a different conductor to "see" changes (i.e. gossip delays)
+      // 4. ?
 
     });
 

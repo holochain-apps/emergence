@@ -2,7 +2,7 @@
   "name": "tests",
   "private": true,
   "scripts": {
-    "test": "vitest run scale.test.ts"
+    "test": "vitest run"
   },
   "dependencies": {
     "@holochain-open-dev/file-storage": "0.3.0",
