@@ -38,7 +38,7 @@ async function setSessionInterest(interest: SessionInterest) {
 value={`${$relData.myInterest}`}
 on:sl-change={(e) => setSessionInterest(parseInt(e.target.value)) }
 >
-  <sl-option value={SessionInterest.NoOpinion}><Fa slot="prefix" icon={faBookmark} /> No Opinion</sl-option>
+  <sl-option value={SessionInterest.NoOpinion}><Fa slot="prefix" icon={faBookmark} /> Attending?</sl-option>
   <sl-option value={SessionInterest.Going}><Fa slot="prefix" icon={faStar} />Going</sl-option>
   <sl-option value={SessionInterest.Interested}><Fa slot="prefix" icon={faBookmark} /> Interested</sl-option>
 </sl-select>

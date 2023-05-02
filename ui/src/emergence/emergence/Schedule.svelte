@@ -281,7 +281,7 @@
     </sl-button> -->
   </div>
 </div>
-  <div class="pane-content">
+  <div class="pane-content pane-desktop">
 
 
     {#if creatingTimeWindow}

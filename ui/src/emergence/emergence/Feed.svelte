@@ -45,7 +45,6 @@
   .feed-item{
     margin-bottom: 8px; 
     width:100%; 
-    background:lightgray;
     display: flex;
     justify-content: center;
   }

@@ -1,22 +1,22 @@
 <script lang="ts">
-import { createEventDispatcher, onMount, getContext } from 'svelte';
-import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import '@shoelace-style/shoelace/dist/components/button/button.js';
-import { storeContext } from '../../contexts';
-import type { EmergenceStore  } from '../../emergence-store';
-import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, Amenities, amenitiesList, type Session, type Info, durationToStr, type Note, type TimeWindow, SessionInterest } from './types';
-import type { Snackbar } from '@material/mwc-snackbar';
+import { faCircleArrowLeft, faEdit, faPlus, faTrash, faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import '@material/mwc-snackbar';
-import Fa from 'svelte-fa'
-import { faTrash, faEdit, faPlus, faCircleArrowLeft,faUserGroup } from '@fortawesome/free-solid-svg-icons';
+import type { Snackbar } from '@material/mwc-snackbar';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
+import { createEventDispatcher, getContext, onMount } from 'svelte';
+import Fa from 'svelte-fa';
+import { storeContext } from '../../contexts';
+import type { EmergenceStore } from '../../emergence-store';
+import { SessionInterest, amenitiesList, durationToStr, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow } from './types';
 
-import SessionCrud from './SessionCrud.svelte';
-import NoteCrud from './NoteCrud.svelte';
-import type { ActionHash, AgentPubKey } from '@holochain/client';
-import NoteDetail from './NoteDetail.svelte';
+import type { ActionHash } from '@holochain/client';
 import Avatar from './Avatar.svelte';
-import InterestSelect from './InterestSelect.svelte';
 import Confirm from './Confirm.svelte';
+import InterestSelect from './InterestSelect.svelte';
+import NoteCrud from './NoteCrud.svelte';
+import NoteDetail from './NoteDetail.svelte';
+import SessionCrud from './SessionCrud.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -222,9 +222,7 @@ async function deleteSession() {
   </div>
   <div class="notes">
     {#each notes as note}
-      <div class="note">
         <NoteDetail noteHash={note}></NoteDetail>
-      </div>
     {/each}
   </div>
     Create Note:  <sl-button on:click={() => {creatingNote = true; } } circle>
@@ -270,5 +268,6 @@ async function deleteSession() {
     display: flex;
     align-items: center;
     margin: 10px;
+    background-color: aqua;
   }
 </style>

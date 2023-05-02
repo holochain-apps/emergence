@@ -144,6 +144,9 @@ html{
   background-color: #233a3e;
   color: #f8fcda;
 }
+.pane-desktop{
+  width: 100vw;
+}
 
 /*debug*/
 #content{
@@ -157,4 +160,7 @@ html{
 }
 html{
   background-color: #cadddf;
+}
+.note{
+  background-color: #ff00ff;
 }

@@ -37,10 +37,9 @@
     .avatar-row {
         display:flex;
         flex-direction: row;
+        justify-content:center;
     }
     .avatar-row agent-avatar{
-        margin-right: 0.5em;
-    }
-    .nickname {
+        margin-right: 0.5em;       
     }
 </style>
