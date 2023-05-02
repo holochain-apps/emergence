@@ -30,6 +30,7 @@
   import You from './emergence/emergence/You.svelte'
   import Admin from './emergence/emergence/Admin.svelte';
   import SiteMapDisplay from './emergence/emergence/SiteMapDisplay.svelte';
+  import AllSiteMaps from './emergence/emergence/AllSiteMaps.svelte';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -39,6 +40,7 @@
   let profilesStore: ProfilesStore | undefined
   let creatingSpace = false
   let creatingSession = false
+  let creatingMap = false
   let selectedSession: Info<Session>|undefined = undefined
 
   $: client, fileStorageClient, store, loading, creatingSession, creatingSpace;
@@ -166,6 +168,15 @@
       {#if pane=="admin"}
       <div class="pane">
         <Admin></Admin>
+      </div>
+      {/if}
+      {#if pane=="admin.sitemaps"}
+      <div class="pane">
+        <AllSiteMaps></AllSiteMaps>
+        Create Sitemap:
+        <sl-button on:click={() => {creatingMap = true; } } circle>
+          <Fa icon={faPlus} />
+        </sl-button>
       </div>
       {/if}
       {#if pane=="feed"}

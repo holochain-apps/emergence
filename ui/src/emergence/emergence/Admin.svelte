@@ -3,7 +3,7 @@
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
-    import { getContext, onMount } from "svelte";
+    import { createEventDispatcher, getContext, onMount } from "svelte";
     import type { Info, SiteMap } from "./types";
     import { get } from "svelte/store";
     import { faFileExport, faFileImport, faPlus } from "@fortawesome/free-solid-svg-icons";
@@ -16,6 +16,7 @@
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
     let creatingMap = false;
+    const dispatch = createEventDispatcher();
 
     onMount(() => {
     })
@@ -163,17 +164,24 @@
         ></SiteMapCrud></div>
 {/if}
 
-
-    <div class="header">
-        <div>
-            <sl-button style="margin-left: 8px;" size=small on:click={async () => await doExport()} circle>
-                <Fa icon={faFileExport} />
-            </sl-button>
-            <sl-button style="margin-left: 8px;" size=small on:click={()=>fileinput.click()} circle>
-                <Fa icon={faFileImport} />
-            </sl-button>
-        </div>
+<div class="pane-content">
+    <div class="pane-header">
+      <h3>Admin</h3>
+      <div style="display:flex">
+        <sl-button style="margin-left: 8px;" size=small on:click={async () => await doExport()} circle>
+            <Fa icon={faFileExport} />
+        </sl-button>
+        <sl-button style="margin-left: 8px;" size=small on:click={()=>fileinput.click()} circle>
+            <Fa icon={faFileImport} />
+        </sl-button>
+      </div>
     </div>
+  
+    <!-- <sl-button on:click={() => {  dispatch('open-sitemaps')} }>
+        Site Maps
+    </sl-button> -->
+
+
     <div>
         Create Sitemap:
         <sl-button on:click={() => {creatingMap = true; } } circle>
@@ -182,13 +190,7 @@
 
         <AllSiteMaps></AllSiteMaps>
     </div>
-
+</div>
   <style>
-    .header{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: solid 1px;
-    }
 
   </style>
