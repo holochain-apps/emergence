@@ -1,11 +1,14 @@
 <script lang="ts">
-import { onMount, getContext } from 'svelte';
+import { onMount, getContext, createEventDispatcher } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SiteMapDetail from './SiteMapDetail.svelte';
 import type { EmergenceStore } from '../../emergence-store';
+  import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
+  import Fa from 'svelte-fa';
 
+const dispatch = createEventDispatcher();
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -24,7 +27,10 @@ onMount(async () => {
 
 <div class="pane-content">
   <div class="pane-header">
-    <h3>SiteMaps List</h3>
+    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('sitemaps-close') } } circle>
+      <Fa icon={faCircleArrowLeft} />
+    </sl-button>
+  <h3>SiteMaps List</h3>
   </div>
 
   {#if loading}

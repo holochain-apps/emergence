@@ -156,40 +156,30 @@
     }
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
-{#if creatingMap}
-    <div class="modal">
-        <SiteMapCrud
-        on:sitemap-created={() => {creatingMap = false;} }
-        on:edit-canceled={() => { creatingMap = false; } }
-        ></SiteMapCrud></div>
-{/if}
+
 
 <div class="pane-content">
     <div class="pane-header">
       <h3>Admin</h3>
       <div style="display:flex">
-        <sl-button style="margin-left: 8px;" size=small on:click={async () => await doExport()} circle>
-            <Fa icon={faFileExport} />
-        </sl-button>
-        <sl-button style="margin-left: 8px;" size=small on:click={()=>fileinput.click()} circle>
-            <Fa icon={faFileImport} />
-        </sl-button>
+        &nbsp;
       </div>
     </div>
   
-    <!-- <sl-button on:click={() => {  dispatch('open-sitemaps')} }>
+    <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
         Site Maps
-    </sl-button> -->
+    </sl-button>
+
+    <sl-button style="margin: 8px;"  on:click={async () => await doExport()}>
+        Export
+    </sl-button>
+
+    <sl-button style="margin: 8px;" on:click={()=>fileinput.click()}>
+        Import
+    </sl-button>
 
 
-    <div>
-        Create Sitemap:
-        <sl-button on:click={() => {creatingMap = true; } } circle>
-          <Fa icon={faPlus} />
-        </sl-button>
-
-        <AllSiteMaps></AllSiteMaps>
-    </div>
+   
 </div>
   <style>
 

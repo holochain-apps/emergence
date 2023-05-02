@@ -7,6 +7,7 @@
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
   import SessionCrud from './emergence/emergence/SessionCrud.svelte';
+  import SiteMapCrud from './emergence/emergence/SiteMapCrud.svelte';
   import SpaceCrud from './emergence/emergence/SpaceCrud.svelte';
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
@@ -167,12 +168,24 @@
       {/if}
       {#if pane=="admin"}
       <div class="pane">
-        <Admin></Admin>
+        <Admin
+          on:open-sitemaps={()=>pane = 'admin.sitemaps'}
+        ></Admin>
       </div>
       {/if}
       {#if pane=="admin.sitemaps"}
       <div class="pane">
-        <AllSiteMaps></AllSiteMaps>
+        {#if creatingMap}
+          <div class="modal">
+              <SiteMapCrud
+              on:sitemap-created={() => {creatingMap = false;} }
+              on:edit-canceled={() => { creatingMap = false; } }
+              ></SiteMapCrud>
+          </div>
+        {/if}
+        <AllSiteMaps
+        on:sitemaps-close={()=>pane = 'admin'}
+        ></AllSiteMaps>
         Create Sitemap:
         <sl-button on:click={() => {creatingMap = true; } } circle>
           <Fa icon={faPlus} />
@@ -230,7 +243,7 @@
            <Fa icon={faUser} size="2x"/>
         </div>
         {#if store && $amSteward}
-          <div class="nav-button {pane=="admin"?"selected":""}"
+          <div class="nav-button {pane.startsWith("admin")?"selected":""}"
             title="Admin"
             on:keypress={()=>{pane='admin'}}
             on:click={()=>{pane='admin'}}

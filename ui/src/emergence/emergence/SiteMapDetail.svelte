@@ -61,14 +61,16 @@ async function deleteSiteMap() {
 {:else if error}
 <span>Error fetching the sitemap: {error.data.data}</span>
 {:else if editing}
-  <SiteMapCrud
-  sitemap={ sitemap }
-  on:sitemap-updated={async () => {
-    editing = false;
-//    await fetchSiteMap()
-  } }
-  on:edit-canceled={() => { editing = false; } }
-></SiteMapCrud>
+  <div class="modal">
+    <SiteMapCrud
+    sitemap={ sitemap }
+    on:sitemap-updated={async () => {
+      editing = false;
+  //    await fetchSiteMap()
+    } }
+    on:edit-canceled={() => { editing = false; } }
+  ></SiteMapCrud>
+  </div>
 {:else}
 {#if showConfirm}
 <div class="modal">
