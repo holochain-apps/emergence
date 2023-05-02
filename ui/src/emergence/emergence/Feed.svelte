@@ -29,10 +29,10 @@
 {:else if $feed.length === 0}
 <span>No Activity</span>
 {:else}
+<div class="pane-header">
+  <h3>Feed</h3>
+</div>
 <div class="pane-content">
-  <div class="pane-header">
-    <h3>Feed</h3>
-  </div>
   {#each $feed.reverse() as f}
     <div style="margin-bottom: 8px; width:100%; background:lightgray">
       <FeedElemDetail feedElem={f}></FeedElemDetail>

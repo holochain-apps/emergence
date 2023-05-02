@@ -260,16 +260,22 @@
   :global(.pane-contents) {
     display: flex; flex-direction: column;
   }
-  :global(.pane-header){
-    display: flex; flex-direction: row; justify-content:space-between; align-items: center;
+  :global(.pane){
+    width: 100%;
   }
-
+  :global(.pane-header){
+    display: flex; 
+    flex-direction: row; 
+    justify-content:space-between; 
+    align-items: center;
+    padding: .5em;
+  }
 
   .nav {
     display: flex; flex-direction: row; flex: 1;
     padding-left: 10px;
     padding-right: 10px;
-    max-width: 400px;
+    width: 400px;
     margin: auto;
   }
   .nav-button {

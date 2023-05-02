@@ -35,16 +35,21 @@
 </script>
 
 {#if $myProfile.status === "complete"  && $myProfile.value}
-    <div class="header"><h3><Avatar agentPubKey={store.myPubKey}></Avatar></h3>
+    <div class="pane-header"><h3><Avatar agentPubKey={store.myPubKey}></Avatar></h3>
         <sl-checkbox
         bind:this={steward}
         checked={$amSteward}
         on:sl-change={e => { store.setSelfSteward(steward.checked)} }
-      >Steward</sl-checkbox>
+    >Steward</sl-checkbox>
         <sl-button style="margin-left: 8px;" size=small on:click={() => editProfile=true} circle>
             <Fa icon={faEdit} />
         </sl-button>
     </div>
+{/if}
+
+<div class="pane-content">
+{#if $myProfile.status === "complete"  && $myProfile.value}
+
     {#if editProfile}
         <div class="modal">
             <div style="width:300px;text-align: center; border-bottom: 1px solid"><b>Emergence</b> is a decentralized hApp for discovery, scheduling, connecting and remembering </div>
@@ -87,11 +92,7 @@
 {:else}
     <sl-spinner></sl-spinner>
 {/if}
+</div>
+
 <style>
-    .header{
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        border-bottom: solid 1px;
-    }
 </style>

@@ -114,12 +114,12 @@ input, button {
 }
 
 /* Finally, let's style the header: */
-.header {
+.pane-header{
   background-color: var(--primary-color);
   color: var(--light-text-color);
   padding: .5rem;
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: 400;
   width: 100vw;
 }
 
@@ -140,8 +140,9 @@ input, button {
 html{
   background-color: #e6f2f5;
 }
-.header{
+.header, .pane-header{
   background-color: #233a3e;
+  color: #f8fcda;
 }
 
 /*debug*/

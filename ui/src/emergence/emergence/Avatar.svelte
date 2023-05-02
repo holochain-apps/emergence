@@ -11,7 +11,7 @@
 
   export let agentPubKey: AgentPubKey
   export let size = 32
-  export let namePosition = "column"
+  export let namePosition = "row"
   export let showAvatar = true
   export let showNickname = true
 
@@ -25,7 +25,7 @@
         <agent-avatar size={size} agent-pub-key="{encodeHashToBase64(agentPubKey)}"></agent-avatar>
     {/if}
     {#if showNickname}
-        {nickname}
+        <div class="nickname">{nickname}</div>
     {/if}
 </div>
 
@@ -33,11 +33,14 @@
     .avatar-column {
         display:flex;
         flex-direction: column;
-        align-items: center;
     }
     .avatar-row {
         display:flex;
         flex-direction: row;
-        align-items: center;
+    }
+    .avatar-row agent-avatar{
+        margin-right: 0.5em;
+    }
+    .nickname {
     }
 </style>

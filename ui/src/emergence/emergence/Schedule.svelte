@@ -247,40 +247,42 @@
 {:else if error}
 <span>Error fetching the wall: {error.data.data}.</span>
 {:else}
+
+<div class="pane-header">
+  <h3>Schedule</h3>
+  <div>
+    <sl-select 
+    placeholder="Filter by Day"
+    on:sl-change={(e) => filteredDay = parseInt(e.target.value) }
+    pill
+    clearable
+    >
+      {#each days as day}
+        <sl-option value={day.getTime()}> {dayToStr(day)}</sl-option>
+      {/each}
+    </sl-select>
+    <sl-select
+    placeholder="Filter by Slot Type"
+    on:sl-change={(e) => slotType = e.target.value }
+    pill
+    clearable
+    >
+      {#each store.getSlotTypeTags() as type}
+        <sl-option value={type}> {type}</sl-option>
+      {/each}
+    </sl-select>
+    {#if $amSteward}
+      <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
+        <Fa icon={faCalendarPlus} />
+      </sl-button>
+    {/if}
+    <!-- <sl-button on:click={() => {bySpace = !bySpace } } circle>
+      <Fa icon={faArrowsUpDownLeftRight} />
+    </sl-button> -->
+  </div>
+</div>
   <div class="pane-content">
-    <div class="pane-header">
-      <h3>Schedule</h3>
-      <div>
-        <sl-select 
-        placeholder="Filter by Day"
-        on:sl-change={(e) => filteredDay = parseInt(e.target.value) }
-        pill
-        clearable
-        >
-          {#each days as day}
-            <sl-option value={day.getTime()}> {dayToStr(day)}</sl-option>
-          {/each}
-        </sl-select>
-        <sl-select
-        placeholder="Filter by Slot Type"
-        on:sl-change={(e) => slotType = e.target.value }
-        pill
-        clearable
-        >
-          {#each store.getSlotTypeTags() as type}
-            <sl-option value={type}> {type}</sl-option>
-          {/each}
-        </sl-select>
-        {#if $amSteward}
-          <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
-            <Fa icon={faCalendarPlus} />
-          </sl-button>
-        {/if}
-        <!-- <sl-button on:click={() => {bySpace = !bySpace } } circle>
-          <Fa icon={faArrowsUpDownLeftRight} />
-        </sl-button> -->
-      </div>
-      </div>
+
 
     {#if creatingTimeWindow}
     <div class="modal">

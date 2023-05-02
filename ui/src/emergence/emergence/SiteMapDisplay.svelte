@@ -77,14 +77,16 @@
         <sl-spinner></sl-spinner>
     </div>
 {:else}
-    <div class="pane-content">
-        <div class="pane-header">
-        <h3>SiteMap</h3>
-        <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('show-all-spaces') } } circle>
-            <Fa icon={faList} />
-          </sl-button>
-      
-        </div>
+
+<div class="pane-header">
+    <h3>SiteMap</h3>
+    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('show-all-spaces') } } circle>
+        <Fa icon={faList} />
+      </sl-button>
+</div>
+
+<div class="pane-content">
+
         <div class="pic" use:watchResize={handleResize}>
             <div class="img-container">
                 {#if spaceDetails}

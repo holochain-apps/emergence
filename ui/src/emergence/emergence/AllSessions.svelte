@@ -24,10 +24,10 @@ onMount(async () => {
 
 </script>
 
+<div class="pane-header">
+  <h3>Sessions List</h3>
+</div>
 <div class="pane-content">
-  <div class="pane-header">
-    <h3>Sessions List</h3>
-  </div>
   {#if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
       <sl-spinner></sl-spinner>
