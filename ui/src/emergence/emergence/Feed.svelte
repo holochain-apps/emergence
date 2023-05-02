@@ -34,10 +34,19 @@
 </div>
 <div class="pane-content">
   {#each $feed.reverse() as f}
-    <div style="margin-bottom: 8px; width:100%; background:lightgray">
+    <div class="feed-item">
       <FeedElemDetail feedElem={f}></FeedElemDetail>
     </div>
   {/each}
 </div>
 {/if}
 
+<style>
+  .feed-item{
+    margin-bottom: 8px; 
+    width:100%; 
+    background:lightgray;
+    display: flex;
+    justify-content: center;
+  }
+</style>
