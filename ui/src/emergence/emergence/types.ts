@@ -82,7 +82,8 @@ export interface UpdateSessionInput {
   updated_trashed: boolean,
 }
 
-export interface Space { 
+export interface Space {
+  key: string,
   name: string;
   description: string;
   stewards: Array<AgentPubKey>;

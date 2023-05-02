@@ -90,7 +90,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
     <div class="name-row">
       <div class="name">
         <sl-tooltip placement="top-start" content={space.record.entry.description}>
-          <span>{ space.record.entry.name }</span>
+          <span>{ space.record.entry.name }{#if space.record.entry.key} ({space.record.entry.key}){/if}</span>
         </sl-tooltip>
       </div>
       <div class="sessions">

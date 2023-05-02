@@ -109,7 +109,7 @@
                 </div>
                 <div
                     style={getSpaceStyle(loc.loc)} class="location">
-                    <Fa  icon={faStar} size={"2x"} color={"red"}></Fa>
+                    {loc.space.record.entry.key}
                 </div>
             </sl-tooltip>
             {/each}
@@ -130,6 +130,13 @@ img {
 }
 .location {
     position:absolute;
+    background-color: red;
+    border-radius: 50%;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    padding-top: 3px;
+    cursor: pointer;
 }
 
 .details {

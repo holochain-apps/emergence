@@ -144,7 +144,7 @@
                 e.tags = []
             }
             let pic = await uploadImportedFile(e)
-            await store.createSpace(e.name,e.description,[],e.capacity, e.amenities, e.tags, pic, undefined)
+            await store.createSpace(e.key ? e.key : "", e.name,e.description,[],e.capacity, e.amenities, e.tags, pic, undefined)
         }
         for (const s of data.sessions) {
             const leaders = [] // fixme

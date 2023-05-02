@@ -424,7 +424,7 @@
               class:tagged={space.record.entry.tags.length > 0}
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
-                {space.record.entry.name}
+                {space.record.entry.name}{#if space.record.entry.key} ({space.record.entry.key}){/if}
                 {#if space.record.entry.pic}
                   <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>

@@ -27,6 +27,7 @@ let amenityElems: Array<SlCheckbox> = []
 const dispatch = createEventDispatcher();
 export let space: Info<Space>|undefined = undefined;  // set this if update
 
+let key: string = '';
 let name: string = '';
 let description: string = '';
 let stewards:Array<AgentPubKey> = []
@@ -40,12 +41,13 @@ let sitemap: Info<SiteMap> | undefined;
 
 let errorSnackbar: Snackbar;
 
-$: name, description, stewards, amenities;
+$: key, name, description, stewards, amenities;
 $: isSpaceValid = true && name !== '' && description !== '' && capacity > 0;
 
 onMount(() => {
   sitemap = store.getCurrentSiteMap()
   if (space) {
+    key = space.record.entry.key
     name = space.record.entry.name
     amenities = space.record.entry.amenities
     description = space.record.entry.description
@@ -59,7 +61,7 @@ onMount(() => {
 
 async function updateSpace() {
   if (space) {
-    const updateRecord = await store.updateSpace(space.original_hash, {name, description, stewards, capacity, amenities, tags, pic, location})
+    const updateRecord = await store.updateSpace(space.original_hash, {key, name, description, stewards, capacity, amenities, tags, pic, location})
     if (updateRecord) {
       dispatch('space-updated', { actionHash: updateRecord.actionHash });
     } else {
@@ -70,8 +72,9 @@ async function updateSpace() {
 
 async function createSpace() {  
   try {
-    const record = await store.createSpace(name, description, stewards, capacity, amenities, tags, pic, location)
+    const record = await store.createSpace(key, name, description, stewards, capacity, amenities, tags, pic, location)
 
+    key = ""
     name = ""
     description = ""
     amenities = 0
@@ -136,6 +139,13 @@ function deleteSteward(index: number) {
 
 </div>
 
+  <div style="margin-bottom: 16px; width: 50px">
+    <sl-input
+    label=Key
+    value={key}
+    on:input={e => { key = e.target.value; } }
+  ></sl-input>
+  </div>
 
   <div style="margin-bottom: 16px">
     <sl-input
@@ -144,7 +154,7 @@ function deleteSteward(index: number) {
     on:input={e => { name = e.target.value; } }
   ></sl-input>
   </div>
-            
+
   <div style="margin-bottom: 16px">
     <sl-textarea 
       label=Description 

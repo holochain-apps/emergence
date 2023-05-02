@@ -31,6 +31,7 @@ export async function createSession(cell: CallableCell, session = undefined): Pr
 export async function sampleSpace(cell: CallableCell, partialSpace = {}) {
     return {
         ...{
+    key: "A",
 	  name: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
 	  description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     amenities: 1,
