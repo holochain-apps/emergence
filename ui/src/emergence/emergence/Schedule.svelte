@@ -250,8 +250,8 @@
 
 <div class="pane-header">
   <h3>Schedule</h3>
-  <div>
-    <sl-select 
+  <div style="display:flex">
+    <sl-select style="margin-right: 5px;width: 150px;"
     placeholder="Filter by Day"
     on:sl-change={(e) => filteredDay = parseInt(e.target.value) }
     pill
@@ -261,7 +261,7 @@
         <sl-option value={day.getTime()}> {dayToStr(day)}</sl-option>
       {/each}
     </sl-select>
-    <sl-select
+    <sl-select style="margin-right: 5px;width: 200px;"
     placeholder="Filter by Slot Type"
     on:sl-change={(e) => slotType = e.target.value }
     pill
