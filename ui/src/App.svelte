@@ -267,21 +267,37 @@
 
   .nav {
     display: flex; flex-direction: row; flex: 1;
+    padding-left: 10px;
+    padding-right: 10px;
+    max-width: 400px;
+    margin: auto;
   }
   .nav-button {
     display: flex;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    width: 100px;
     height: 50px;
+    max-width: 50px;
+    border-radius: 50%;
     padding: 5px;
     margin: 5px;
-    background-color: lightgray;
-    color:white
+    background-color: #d3d3d3;
+    color:#ffffff;
+  }
+  .nav-button svg{
+    background-color: black;
   }
   .selected {
-    background-color:gray;
+    background-color:#808080;
+  }
+  .nav-button:hover {
+    background-color: #a3a3a3;
+    cursor: pointer;
+  }
+  .nav-button:active {
+    background-color: #707070;
+    cursor: pointer;
   }
   .pane {
     border: solid 1px;
