@@ -282,21 +282,20 @@
     border-radius: 50%;
     padding: 5px;
     margin: 5px;
-    background-color: #d3d3d3;
-    color:#ffffff;
-  }
-  .nav-button svg{
-    background-color: black;
+    background-color: #90686f;
+    color:#fff6e0;
   }
   .selected {
-    background-color:#808080;
+    background-color:#3e232c;
+    color: #fff;
   }
   .nav-button:hover {
-    background-color: #a3a3a3;
+    background-color: #5f3b43;
     cursor: pointer;
   }
   .nav-button:active {
-    background-color: #707070;
+    background-color: #4f2f39;
+    color: #fceed7;
     cursor: pointer;
   }
   .pane {

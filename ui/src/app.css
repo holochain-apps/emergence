@@ -133,18 +133,27 @@ input, button {
   width:100%;
 }
 
-#content{
-  background-color: green;
+/*color theme*/
+.nav{
+  background-color: #e6f2f5;
+}
+html{
+  background-color: #e6f2f5;
+}
+.header{
+  background-color: #233a3e;
 }
 
 /*debug*/
+#content{
+  background-color: green;
+}
 .pane{
-  background-color: pink;
+  background-color: #f4e9e9;
 }
 .pane-content{
-  background-color: yellow;
+  background-color: #fff6e0;
 }
-
-.nav-button:hover{
-
+html{
+  background-color: #cadddf;
 }
