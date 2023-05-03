@@ -29,7 +29,6 @@
       let sortedSpaces = slottedSessionSpaces.sort((a,b)=>a.ss.window.start-b.ss.window.start).map(sss => sss.space)
       // remove dups
       for (let i = sortedSpaces.length-1; i >=0; i-=1) {
-        console.log(i,sortedSpaces[i])
         const j = sortedSpaces.findIndex(s=>encodeHashToBase64(s.original_hash) == encodeHashToBase64(sortedSpaces[i].original_hash))
         if (j >= 0 && j != i) {
           sortedSpaces.splice(i,1)

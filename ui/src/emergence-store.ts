@@ -87,7 +87,7 @@ export class EmergenceStore {
   myPubKeyBase64: string
   loader = undefined
   neededStuffStore =undefined
-  amSteward: Writable<boolean> = writable(false)
+  amSteward: Writable<boolean> = writable(true)
 
 
   setSelfSteward(value) {
@@ -553,7 +553,7 @@ export class EmergenceStore {
     ]
     if (siteLocation) {
         relations.push({   
-            src: record.actionHash, // should be agent key
+            src: record.actionHash,
             dst: siteLocation.imageHash,
             content:  {
                 path: `space.location`,

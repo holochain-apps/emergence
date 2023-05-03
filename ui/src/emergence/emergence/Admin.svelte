@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { encodeHashToBase64, type AgentPubKey, type EntryHash } from "@holochain/client";
+    import { encodeHashToBase64, type EntryHash } from "@holochain/client";
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
@@ -35,6 +35,7 @@
             if (entry.pic) {
                 const file = await store.fileStorageClient.downloadFile(entry.pic);
                 const data = await file.arrayBuffer();
+                entry.pic_hash = encodeHashToBase64(entry.pic)
                 delete entry.pic
                 entry.pic_data = fromUint8Array(new Uint8Array(data))
                 entry.pic_file = {
@@ -44,13 +45,13 @@
                     last_modified: file.lastModified,
                 }
             }
-            console.log(entry.pic_file)
         }
         const obj = {
             original_hash: encodeHashToBase64(info.original_hash),
             entry,
             relations: info.relations.map(ri => {
                 const rel = {
+                    timestamp: ri.timestamp,
                     src: encodeHashToBase64(ri.relation.src),
                     dst: encodeHashToBase64(ri.relation.dst),
                     content: ri.relation.content
@@ -79,7 +80,9 @@
         
         const maps = []
         for (const s of get(store.maps)) { 
-            maps.push(await serializeInfo(s, true))
+            const mapEntry = await serializeInfo(s, true)
+            mapEntry.entryHash = encodeHashToBase64(s.record.entryHash)
+            maps.push(mapEntry)
         }
 
         exportJSON= JSON.stringify(
@@ -120,12 +123,13 @@
     }
 
     const doImport = async (data: any) => {
+        const maps = {}
         for (const s of data.maps) {
             const e = s.entry
             let pic = await uploadImportedFile(e)
+            const record = await store.createSiteMap(e.text, pic)
+            maps[s.entryHash] = record.entryHash
 
-
-            await store.createSiteMap(e.text, pic)
         }
         for (const s of data.windows) {
             if (! s.tags) {
@@ -133,20 +137,43 @@
             }
             await store.createTimeWindow(new Date(s.start), s.duration, s.tags)
         }
+        const spaces = {}
         for (const s of data.spaces) {
             const e = s.entry
             if (! e.tags) {
                 e.tags = []
             }
             let pic = await uploadImportedFile(e)
-            await store.createSpace(e.key ? e.key : "", e.name,e.description,[],e.capacity, e.amenities, e.tags, pic, undefined)
+            const record = await store.createSpace(e.key ? e.key : "", e.name,e.description,[],e.capacity, e.amenities, e.tags, pic, undefined)
+            spaces[s.original_hash] = record.actionHash
+            const relation = s.relations.filter(r=>r.content.path === "space.location").sort((a,b) => b.timestamp - a.timestamp)[0]
+            if (relation) {
+                console.log("LOCREL", relation)
+                console.log("maps", maps)
+                console.log(" maps[relation.dst]",  maps[relation.dst])
+                await store.client.createRelations([
+                    {   
+                        src: record.actionHash,
+                        dst: maps[relation.dst],
+                        content:  {
+                            path: `space.location`,
+                            data: relation.content.data
+                        }
+                    }                    
+                ])
+            }
+
         }
         for (const s of data.sessions) {
             const leaders = [] // fixme
-            const slot = undefined
             const e = s.entry
-
-            await store.createSession(e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, slot)
+            const record = await store.createSession(e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined)
+            const relation = s.relations.filter(r=>r.content.path === "session.space").sort((a,b) => b.timestamp - a.timestamp)[0]
+            if (relation) {
+                const window = JSON.parse(relation.content.data)
+                store.slot(record.actionHash, {window, space: spaces[relation.dst]})
+            }
+ 
         }
     }
 </script>
