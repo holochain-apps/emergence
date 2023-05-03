@@ -7,7 +7,7 @@
     import '@shoelace-style/shoelace/dist/components/button/button.js';
     import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
     import Fa from 'svelte-fa'
-    import { faEdit, faExchange, faFileExport, faFileImport } from '@fortawesome/free-solid-svg-icons';
+    import { faEdit } from '@fortawesome/free-solid-svg-icons';
 
     import type {  Record } from '@holochain/client';
     import { storeContext } from '../../contexts';

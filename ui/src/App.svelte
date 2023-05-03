@@ -12,7 +12,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faTicket, faUser, faGear, faRss, faCalendar, faPlus, faAmericanSignLanguageInterpreting } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faTicket, faUser, faGear, faRss, faCalendar, faPlus, faAmericanSignLanguageInterpreting, faHome } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -33,6 +33,7 @@
   import Admin from './emergence/emergence/Admin.svelte';
   import SiteMapDisplay from './emergence/emergence/SiteMapDisplay.svelte';
   import AllSiteMaps from './emergence/emergence/AllSiteMaps.svelte';
+  import Discover from './emergence/emergence/Discover.svelte';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -210,19 +211,19 @@
         </sl-button>
       </div>
       {/if}
-      {#if pane=="feed"}
+      {#if pane=="discover"}
       <div class="pane">
-        <Feed></Feed>
+        <Discover></Discover>
       </div>
       {/if}
 
       <div class="nav">
-        <div class="nav-button {pane === "feed" ? "selected":""}"
-          title="Activity"
-          on:keypress={()=>{pane='feed'}}
-          on:click={()=>{pane='feed'}}
+        <div class="nav-button {pane === "discover" ? "selected":""}"
+          title="Discover"
+          on:keypress={()=>{pane='discover'}}
+          on:click={()=>{pane='discover'}}
         >
-           <Fa icon={faRss} size="2x"/>
+           <Fa icon={faHome} size="2x"/>
         </div>
         <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
           title="Sessions"

@@ -1,4 +1,4 @@
-import type { EntryRecord, HoloHashMap } from '@holochain-open-dev/utils';
+import type { ActionHashMap, EntryRecord, HoloHashMap } from '@holochain-open-dev/utils';
 import { 
   type Record, 
   type ActionHash,
@@ -248,6 +248,7 @@ export enum FeedType {
 }
 
 export interface FeedElem {
+  timestamp: Timestamp,
   author: AgentPubKey,
   about: ActionHash,
   type: FeedType,

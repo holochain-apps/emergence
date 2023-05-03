@@ -48,10 +48,10 @@ pub struct GetFeedInput {
 }
 
 #[hdk_extern]
-pub fn get_feed(input: GetFeedInput) -> ExternResult<Vec<Relation>> {
+pub fn get_feed(input: GetFeedInput) -> ExternResult<Vec<RelationInfo>> {
     let path = Path::from("feed");
     let links = get_links(path.path_entry_hash()?,  LinkTypes::Relations, None)?;
-    let mut relations: Vec<Relation> = Vec::new();
+    let mut relations: Vec<RelationInfo> = Vec::new();
     for link in links {
         let relation = Relation 
         { 
@@ -59,11 +59,17 @@ pub fn get_feed(input: GetFeedInput) -> ExternResult<Vec<Relation>> {
             dst: link.target, 
             content: convert_relation_tag(link.tag)? 
         };
+        let relation_info = RelationInfo {
+            create_link_hash: link.create_link_hash,
+            author: link.author.clone(),
+            timestamp: link.timestamp,
+            relation,
+        };
         match input.agent_filter {
             Some(ref agent) => if *agent == link.author {
-                relations.push(relation)
+                relations.push(relation_info)
             }
-            None => relations.push(relation)
+            None => relations.push(relation_info)
         };
     }
     Ok(relations)

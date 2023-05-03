@@ -44,17 +44,17 @@ export class EmergenceClient {
   }
 
   async getFeed(agent: AgentPubKey | undefined) : Promise<Array<FeedElem>> {
-    const relations: Array<Relation> = await this.callZome('get_feed', {agent_filter: agent})
-    return relations.map(r => {
-      // console.log("feed item", r.content)
-
+    const relations: Array<RelationInfo> = await this.callZome('get_feed', {agent_filter: agent})
+    return relations.map(ri => {
+      const r = ri.relation
       const author = r.src
       author[1] =32
         return {
-        author,
-        about: r.dst,
-        type: parseInt(r.content.path.split(".")[1]),
-        detail: JSON.parse(r.content.data)
+          timestamp: ri.timestamp,
+          author,
+          about: r.dst,
+          type: parseInt(r.content.path.split(".")[1]),
+          detail: JSON.parse(r.content.data)
     }});
   }
 
