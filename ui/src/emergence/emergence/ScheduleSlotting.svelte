@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount, getContext } from 'svelte';
+  import { onMount, getContext, createEventDispatcher } from 'svelte';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import { type EntryHash, type Record, type AgentPubKey, type ActionHash, type AppAgentClient, type NewEntryAction, encodeHashToBase64, type ActionHashB64, decodeHashFromBase64, type Timestamp } from '@holochain/client';
   import { storeContext } from '../../contexts';
@@ -7,14 +7,14 @@
   import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, type Slot, type RelationInfo, slotEqual } from './types';
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
-  import { faCalendarPlus, faArrowsUpDownLeftRight, faTrash } from '@fortawesome/free-solid-svg-icons';
+  import { faCalendarPlus, faArrowsUpDownLeftRight, faTrash, faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
   import SessionSummary from './SessionSummary.svelte';
   import { HoloHashMap } from '@holochain-open-dev/utils';
   import '@shoelace-style/shoelace/dist/components/select/select.js';
   import '@shoelace-style/shoelace/dist/components/option/option.js';
-  import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
-  import { decodeArrayStream } from '@msgpack/msgpack';
+
+  const dispatch = createEventDispatcher();
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -229,8 +229,7 @@
     for (const s of $sessions) {
       const slot = store.getSessionSlot(s)
       if ( JSON.stringify(slot.window) == JSON.stringify(window)) {
-        alert("slot has scheduled sessions, can't delete!")
-
+        alert("Time window has scheduled sessions, can't delete! Please move the sessions first.")
         return
       }
     }
@@ -250,7 +249,12 @@
 {:else}
 
 <div class="pane-header">
-  <h3>Schedule</h3>
+  <div >
+    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('slotting-close') } } circle>
+      <Fa icon={faCircleArrowLeft} />
+    </sl-button>
+    <h3>Schedule</h3>
+  </div>
   <div style="display:flex">
     <sl-select style="margin-right: 5px;width: 150px;"
     placeholder="Filter by Day"

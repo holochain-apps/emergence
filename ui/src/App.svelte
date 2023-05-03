@@ -25,7 +25,8 @@
   import { EmergenceStore } from './emergence-store';
   import { EmergenceClient } from './emergence-client';
   import Feed from './emergence/emergence/Feed.svelte';
-  import Schedule from './emergence/emergence/Schedule.svelte';
+  import ScheduleSlotting from './emergence/emergence/ScheduleSlotting.svelte';
+  import ScheduleUpcoming from './emergence/emergence/ScheduleUpcoming.svelte';
   import SessionDetail from './emergence/emergence/SessionDetail.svelte';
   import type { Info, Session } from './emergence/emergence/types';
   import You from './emergence/emergence/You.svelte'
@@ -127,6 +128,23 @@
         </div>
       {/if}
 
+      {#if pane=="schedule"}
+        <div class="pane">
+          <ScheduleUpcoming
+            on:open-slotting={()=>pane="schedule.slotting"}
+          ></ScheduleUpcoming>
+        </div>
+      {/if}
+
+      {#if pane=="schedule.slotting"}
+        <div class="pane">
+          <ScheduleSlotting
+            on:slotting-close={()=>pane="schedule"}
+
+          ></ScheduleSlotting>
+        </div>
+      {/if}
+
       {#if pane=="spaces"}
       <div class="pane">
         {#if store.getCurrentSiteMap()}
@@ -198,12 +216,6 @@
       </div>
       {/if}
 
-      {#if pane=="schedule"}
-      <div class="pane">
-        <Schedule></Schedule>
-      </div>
-      {/if}
-
       <div class="nav">
         <div class="nav-button {pane === "feed" ? "selected":""}"
           title="Activity"
@@ -219,13 +231,12 @@
         >
           <Fa icon={faTicket} size="2x"/>
         </div>
-        <div class="nav-button {pane=="schedule"?"selected":""}"
+        <div class="nav-button {pane.startsWith("schedule")?"selected":""}"
           title="Schedule"
           on:keypress={()=>{pane='schedule'}}
           on:click={()=>{pane='schedule'}}
         >
           <Fa icon={faCalendar} size="2x"/>
-
         </div>
 
         <div class="nav-button {pane.startsWith("spaces")?"selected":""}"

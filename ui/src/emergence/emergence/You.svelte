@@ -9,14 +9,12 @@
     import Fa from 'svelte-fa'
     import { faEdit, faExchange, faFileExport, faFileImport } from '@fortawesome/free-solid-svg-icons';
 
-      import type {  Record } from '@holochain/client';
+    import type {  Record } from '@holochain/client';
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import NoteDetail from './NoteDetail.svelte';
     import SessionSummary from './SessionSummary.svelte';
     import Avatar from './Avatar.svelte';
-    import { get } from 'svelte/store';
-    import type { Info, TimeWindow } from './types';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let steward: SlCheckbox

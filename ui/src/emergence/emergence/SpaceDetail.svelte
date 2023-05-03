@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import { storeContext } from '../../contexts';
-import { amenitiesList, timeWindowDurationToStr, type Info, type Relation, type Space, timeWindowStartToStr, type RelationInfo, type Session, type TimeWindow } from './types';
+import { amenitiesList, timeWindowDurationToStr, type Info, type Space, timeWindowStartToStr, type RelationInfo, type Session, type TimeWindow, type SlottedSession } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
@@ -14,15 +14,8 @@ import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
 import Avatar from './Avatar.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
-  import {ActionHashMap } from '@holochain-open-dev/utils';
 
 const dispatch = createEventDispatcher();
-
-
-interface SlottedSession {
-  session: Info<Session>,
-  window: TimeWindow,
-}
 
 export let space: Info<Space>;
 
@@ -57,20 +50,6 @@ async function deleteSpace() {
   }
 }
 
-const slottedSessions = () :Array<SlottedSession>=> {
-
-  const sessions:  ActionHashMap<SlottedSession> = new ActionHashMap()
-  space.relations.forEach(ri => {
-    if (ri.relation.content.path == "space.sessions") {
-      const session = store.getSession(ri.relation.dst)
-      const slot = store.getSessionSlot(session)
-      if (encodeHashToBase64(slot.space) == encodeHashToBase64(space.original_hash)) {
-        const s = sessions.set(session.original_hash, {session,window:JSON.parse(ri.relation.content.data)})
-      }
-    }
-  })
-  return Array.from(sessions.values())
-}
 const slottedSessionSummary = (ss: SlottedSession) : string => {
   return `${ss.session.record.entry.title} ${timeWindowStartToStr(ss.window)} for ${timeWindowDurationToStr(ss.window)}`
 }
@@ -171,7 +150,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
     <span style="margin-right: 4px"><strong>Scheduled Sessions:</strong></span>
 
     <ul>
-      {#each slottedSessions() as session}
+      {#each store.getSlottedSessions(space) as session}
         <li>{slottedSessionSummary(session)}</li>
       {/each}
     </ul>

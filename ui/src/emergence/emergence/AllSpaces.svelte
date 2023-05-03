@@ -60,7 +60,8 @@ onMount(async () => {
       <div style="margin-bottom: 8px; width:100%;">
         <SpaceSummary
           on:space-selected={()=>spaceDetail=space} 
-        space={space}></SpaceSummary>
+          space={space}>
+        </SpaceSummary>
       </div>
     {/each}
   {/if}

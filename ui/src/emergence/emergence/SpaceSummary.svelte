@@ -5,7 +5,7 @@ import '@shoelace-style/shoelace/dist/components/button/button.js';
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import { storeContext } from '../../contexts';
-import { amenitiesList, timeWindowDurationToStr, type Info, type Relation, type Space, timeWindowStartToStr, type RelationInfo, type Session, type TimeWindow } from './types';
+import { amenitiesList, timeWindowDurationToStr, type Info, type Relation, type Space, timeWindowStartToStr, type RelationInfo, type Session, type TimeWindow, type SlottedSession } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
@@ -16,12 +16,6 @@ import { encodeHashToBase64,  } from '@holochain/client';
 import {ActionHashMap } from '@holochain-open-dev/utils';
 
 const dispatch = createEventDispatcher();
-
-
-interface SlottedSession {
-  session: Info<Session>,
-  window: TimeWindow,
-}
 
 export let space: Info<Space>;
 
@@ -41,7 +35,7 @@ onMount(async () => {
   loading=false
 });
 
-$: slottedSessions = getSlottedSessions()
+$: slottedSessions = store.getSlottedSessions(space)
 
 const getSlottedSessions = () :Array<SlottedSession>=> {
 

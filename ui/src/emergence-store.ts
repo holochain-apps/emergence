@@ -14,8 +14,8 @@ import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
-import { HoloHashMap, type EntryRecord } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt } from './emergence/emergence/types';
+import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 
@@ -525,6 +525,21 @@ export class EmergenceStore {
     }
   }
 
+  getSlottedSessions(space: Info<Space>) :Array<SlottedSession> {
+
+    const sessions:  ActionHashMap<SlottedSession> = new ActionHashMap()
+    space.relations.forEach(ri => {
+      if (ri.relation.content.path == "space.sessions") {
+        const session = this.getSession(ri.relation.dst)
+        const slot = this.getSessionSlot(session)
+        if (encodeHashToBase64(slot.space) == encodeHashToBase64(space.original_hash)) {
+          const s = sessions.set(session.original_hash, {session,window:JSON.parse(ri.relation.content.data)})
+        }
+      }
+    })
+    return Array.from(sessions.values()).sort((a,b)=>a.window.start - b.window.start).slice(0, 2);
+  }
+  
   async createSpace(key:string, name: string, description: string, stewards:Array<AgentPubKey>, capacity: number, amenities: number, tags: Array<string>, pic: EntryHash | undefined, siteLocation: undefined | SiteLocation): Promise<EntryRecord<Space>> {
     const record = await this.client.createSpace(key, name, description, stewards, capacity, amenities, tags, pic)
     const relations = [

@@ -6,11 +6,7 @@
     import { createEventDispatcher, getContext, onMount } from "svelte";
     import type { Info, SiteMap } from "./types";
     import { get } from "svelte/store";
-    import { faFileExport, faFileImport, faPlus } from "@fortawesome/free-solid-svg-icons";
-    import Fa from "svelte-fa";
     import sanitize from "sanitize-filename";
-    import SiteMapCrud from "./SiteMapCrud.svelte";
-    import AllSiteMaps from "./AllSiteMaps.svelte";
     import { fromUint8Array, toUint8Array } from "js-base64";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
