@@ -100,6 +100,11 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Map Symbol:</strong></span>
+    <span style="white-space: pre-line">{ space.record.entry.key }</span>
+  </div>
+
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Name:</strong></span>
     <span style="white-space: pre-line">{ space.record.entry.name }</span>
   </div>

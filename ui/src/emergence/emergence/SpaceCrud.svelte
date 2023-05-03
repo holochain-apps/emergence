@@ -139,9 +139,9 @@ function deleteSteward(index: number) {
 
 </div>
 
-  <div style="margin-bottom: 16px; width: 50px">
+  <div style="margin-bottom: 16px; width: 100px">
     <sl-input
-    label=Key
+    label="Map Symbol"
     value={key}
     on:input={e => { key = e.target.value; } }
   ></sl-input>
