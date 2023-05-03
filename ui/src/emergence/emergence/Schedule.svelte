@@ -227,7 +227,8 @@
   const deleteWindow = async (window: TimeWindow) => {
 
     for (const s of $sessions) {
-      if (store.getSessionSlot(s)) {
+      const slot = store.getSessionSlot(s)
+      if ( JSON.stringify(slot.window) == JSON.stringify(window)) {
         alert("slot has scheduled sessions, can't delete!")
 
         return
