@@ -23,7 +23,7 @@
     const sortSpaces = (spaces) => {
       let slottedSessionSpaces:Array<SlottedSessionSpace> = []
       for (const space of spaces) {
-        const sss = store.getSlottedSessions(space).slice(0, 2).map(ss=> {return {ss,space}})
+        const sss = store.getSlottedSessions(space).map(ss=> {return {ss,space}})
         slottedSessionSpaces = slottedSessionSpaces.concat(sss)
       }
       let sortedSpaces = slottedSessionSpaces.sort((a,b)=>a.ss.window.start-b.ss.window.start).map(sss => sss.space)

@@ -39,7 +39,7 @@ onMount(async () => {
   loading=false
 });
 
-$: slottedSessions = store.getSlottedSessions(space)
+$: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
 
 </script>
 
