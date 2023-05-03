@@ -148,9 +148,6 @@
             spaces[s.original_hash] = record.actionHash
             const relation = s.relations.filter(r=>r.content.path === "space.location").sort((a,b) => b.timestamp - a.timestamp)[0]
             if (relation) {
-                console.log("LOCREL", relation)
-                console.log("maps", maps)
-                console.log(" maps[relation.dst]",  maps[relation.dst])
                 await store.client.createRelations([
                     {   
                         src: record.actionHash,
