@@ -2,7 +2,7 @@
     import { encodeHashToBase64, type ActionHash } from '@holochain/client';
     import { storeContext } from '../../contexts';
     import type { EmergenceStore  } from '../../emergence-store';
-    import { createEventDispatcher, onMount, getContext } from 'svelte';
+    import { getContext } from 'svelte';
     import Avatar from './Avatar.svelte';
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import { onDestroy } from 'svelte';

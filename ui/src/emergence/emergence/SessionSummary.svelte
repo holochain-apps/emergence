@@ -9,8 +9,8 @@ import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import Avatar from './Avatar.svelte';
 import InterestSelect from './InterestSelect.svelte';
-  import { faUserGroup } from '@fortawesome/free-solid-svg-icons';
-  import Fa from 'svelte-fa';
+import { faUserGroup } from '@fortawesome/free-solid-svg-icons';
+import Fa from 'svelte-fa';
 
 const dispatch = createEventDispatcher();
 

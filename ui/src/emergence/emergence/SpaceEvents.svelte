@@ -8,13 +8,10 @@ import { storeContext } from '../../contexts';
 import type {  Info, Space,  Session,  TimeWindow } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
-import Fa from 'svelte-fa'
-import { faFlag } from '@fortawesome/free-solid-svg-icons';
 import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
-import {ActionHashMap } from '@holochain-open-dev/utils';
-  import SessionSummary from './SessionSummary.svelte';
+import SessionSummary from './SessionSummary.svelte';
 
 const dispatch = createEventDispatcher();
 

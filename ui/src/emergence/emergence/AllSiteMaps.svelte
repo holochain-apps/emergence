@@ -1,12 +1,12 @@
 <script lang="ts">
 import { onMount, getContext, createEventDispatcher } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import type { EntryHash, Record, AgentPubKey, ActionHash, AppAgentClient, NewEntryAction } from '@holochain/client';
+import type { Record  } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SiteMapDetail from './SiteMapDetail.svelte';
 import type { EmergenceStore } from '../../emergence-store';
-  import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
-  import Fa from 'svelte-fa';
+import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import Fa from 'svelte-fa';
 
 const dispatch = createEventDispatcher();
 

@@ -12,7 +12,7 @@ import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import { encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client';
+import { encodeHashToBase64, type EntryHash } from '@holochain/client';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 

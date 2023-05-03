@@ -7,7 +7,6 @@
   import type { ProfilesStore } from "@holochain-open-dev/profiles";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
-  let profilesStore: ProfilesStore = store.profilesStore
 
   export let agentPubKey: AgentPubKey
   export let size = 32

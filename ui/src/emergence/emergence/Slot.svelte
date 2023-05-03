@@ -66,7 +66,7 @@
   >
   <sl-option value="">No Space Selected</sl-option>
   {#each $spaces as space}
-  <sl-option value={encodeHashToBase64(space.record.actionHash)}>{space.record.entry.name}</sl-option>
+  <sl-option value={encodeHashToBase64(space.record.actionHash)}>{space.record.entry.name}{#if space.record.entry.key} ({space.record.entry.key}){/if}</sl-option>
   {/each}
   </sl-select>
 </div>

@@ -1,9 +1,9 @@
 <script lang="ts">
-import { createEventDispatcher, onMount, getContext } from 'svelte';
+import { getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
-import { getTypeName, type FeedElem, FeedType, timeWindowStartToStr, timeWindowDurationToStr, sessionInterestToString, SessionInterest } from './types';
+import { SessionInterest } from './types';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
 import {  faBookmark, faStar } from '@fortawesome/free-solid-svg-icons';

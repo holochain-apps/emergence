@@ -1,5 +1,5 @@
 <script lang="ts">
-import { createEventDispatcher, getContext, onMount } from 'svelte';
+import { createEventDispatcher, onMount } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 
 const dispatch = createEventDispatcher();

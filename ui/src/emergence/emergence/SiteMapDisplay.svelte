@@ -5,13 +5,13 @@
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
     import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
-    import { slotEqual, type Info, type Session, type SiteLocation, type SiteMap, type Space, timeWindowStartToStr } from './types';
-    import { faList, faStar } from '@fortawesome/free-solid-svg-icons';
+    import { type Info, type SiteLocation, type SiteMap, type Space, timeWindowStartToStr } from './types';
+    import { faList } from '@fortawesome/free-solid-svg-icons';
     import Fa from 'svelte-fa';
     import { fromUint8Array } from "js-base64";
     import { watchResize } from "svelte-watch-resize";
-  import  { HoloHashMap } from '@holochain-open-dev/utils';
-  import { encodeHashToBase64, type ActionHash } from '@holochain/client';
+    import  { HoloHashMap } from '@holochain-open-dev/utils';
+    import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 
     const dispatch = createEventDispatcher();
 

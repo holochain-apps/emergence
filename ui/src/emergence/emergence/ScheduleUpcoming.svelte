@@ -7,7 +7,7 @@
     import { faCalendarTimes } from "@fortawesome/free-solid-svg-icons";
     import SpaceEvents from "./SpaceEvents.svelte";
     import type { Info, SlottedSession, Space } from "./types";
-  import { encodeHashToBase64, setSigningCredentials } from "@holochain/client";
+    import { encodeHashToBase64 } from "@holochain/client";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     const dispatch = createEventDispatcher();
@@ -15,7 +15,6 @@
     onMount(() => {
     })
     $: spaces = store.spaces
-    $: sessions = store.sessions
     $: sortedSpaces = sortSpaces($spaces)
     interface SlottedSessionSpace {
       ss: SlottedSession,

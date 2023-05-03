@@ -5,14 +5,14 @@ import '@shoelace-style/shoelace/dist/components/button/button.js';
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import { storeContext } from '../../contexts';
-import { amenitiesList, timeWindowDurationToStr, type Info, type Relation, type Space, timeWindowStartToStr, type RelationInfo, type Session, type TimeWindow, type SlottedSession } from './types';
+import { amenitiesList, timeWindowDurationToStr, type Info, type Space, timeWindowStartToStr, type SlottedSession } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
 import { faFlag } from '@fortawesome/free-solid-svg-icons';
 import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
-import { encodeHashToBase64,  } from '@holochain/client';
+import { encodeHashToBase64 } from '@holochain/client';
 import {ActionHashMap } from '@holochain-open-dev/utils';
 
 const dispatch = createEventDispatcher();

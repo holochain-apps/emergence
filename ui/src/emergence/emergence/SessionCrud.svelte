@@ -14,8 +14,8 @@ import {  Amenities, setAmenity, type Info, type Session, type Slot } from './ty
 import SlotSelect from './Slot.svelte';
 import { encodeHashToBase64, type AgentPubKey } from '@holochain/client';
 import Avatar from './Avatar.svelte';
-  import { faTrash } from '@fortawesome/free-solid-svg-icons';
-  import Fa from 'svelte-fa';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import Fa from 'svelte-fa';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
