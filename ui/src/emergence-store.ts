@@ -537,7 +537,7 @@ export class EmergenceStore {
         }
       }
     })
-    return Array.from(sessions.values()).sort((a,b)=>a.window.start - b.window.start).slice(0, 2);
+    return Array.from(sessions.values()).sort((a,b)=>a.window.start - b.window.start);
   }
   
   async createSpace(key:string, name: string, description: string, stewards:Array<AgentPubKey>, capacity: number, amenities: number, tags: Array<string>, pic: EntryHash | undefined, siteLocation: undefined | SiteLocation): Promise<EntryRecord<Space>> {
