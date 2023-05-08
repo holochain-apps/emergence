@@ -6,16 +6,12 @@
     import '@shoelace-style/shoelace/dist/components/tab/tab.js';
     import '@shoelace-style/shoelace/dist/components/button/button.js';
     import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
-    import Fa from 'svelte-fa'
-    import { faEdit } from '@fortawesome/free-solid-svg-icons';
 
     import type {  Record } from '@holochain/client';
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
-    import NoteDetail from './NoteDetail.svelte';
-    import SessionSummary from './SessionSummary.svelte';
-    import Avatar from './Avatar.svelte';
-  import Feed from './Feed.svelte';
+    import Feed from './Feed.svelte';
+    import TagCloud from './TagCloud.svelte'
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let steward: SlCheckbox
@@ -45,7 +41,7 @@
             <Feed></Feed>            
         </sl-tab-panel>
         <sl-tab-panel name="cloud">
-            TBD
+            <TagCloud></TagCloud>
 
         </sl-tab-panel>
     </sl-tab-group>

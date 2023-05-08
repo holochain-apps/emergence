@@ -32,7 +32,10 @@ let errorSnackbar: Snackbar;
 $: text, tags
 $: isNoteValid = text !== ""
 
-$: allTags = store.allTags
+$: tagUses = store.allTags
+$: allTags = $tagUses.map(t=>t.tag)
+
+
 // $: tagOpts = tagOptions()
 
 // const tagOptions = () : ObjectOption[] => {
@@ -98,7 +101,7 @@ async function createNote() {
     <span>Tags:</span >
     <MultiSelect 
       bind:selected={tags} 
-      options={$allTags} 
+      options={allTags} 
       allowUserOptions={true}
       />
   </div>

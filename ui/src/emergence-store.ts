@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 
@@ -80,7 +80,7 @@ export class EmergenceStore {
   maps: Writable<Array<Info<SiteMap>>> = writable([])
   noteHashes: Writable<Array<ActionHash>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
-  allTags: Writable<Array<string>> = writable([])
+  allTags: Writable<Array<TagUse>> = writable([])
   myNotes: Writable<Array<ActionHash>> = writable([])
   mySessions: Writable<HoloHashMap<ActionHash,SessionInterest>> = writable(new HoloHashMap())
   neededStuff: GetStuffInput = {}

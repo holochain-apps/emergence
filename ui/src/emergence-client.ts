@@ -8,7 +8,7 @@ import type {
      EntryHash,
      HoloHash,
 } from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
@@ -58,7 +58,7 @@ export class EmergenceClient {
     }});
   }
 
-  async getTags() : Promise<Array<string>> {
+  async getTags() : Promise<Array<TagUse>> {
     return this.callZome('get_tags', undefined)
   }
 

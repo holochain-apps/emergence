@@ -1,6 +1,7 @@
 use emergence_integrity::*;
 use hdk::prelude::*;
 use crate::utils::*;
+use std::collections::HashMap;
 
 #[hdk_extern]
 pub fn create_relations(input: Vec<Relation>) -> ExternResult<Vec<ActionHash>> {
@@ -75,16 +76,38 @@ pub fn get_feed(input: GetFeedInput) -> ExternResult<Vec<RelationInfo>> {
     Ok(relations)
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SessionAgent {
+    session: ActionHash,
+    agent: AgentPubKey,
+}
+
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct TagUse {
+    tag: String,
+    session_agents: Vec<SessionAgent>,
+}
+
 #[hdk_extern]
-pub fn get_tags(_input: ()) -> ExternResult<Vec<String>> {
+pub fn get_tags(_input: ()) -> ExternResult<Vec<TagUse>> {
     let path = Path::from("tags");
     let links = get_links(path.path_entry_hash()?,  LinkTypes::Relations, None)?;
-    let mut tags = HashSet::new();
+    let mut tags: HashMap<String,Vec<SessionAgent>> = HashMap::new();
     for link in links {
         let content = convert_relation_tag(link.tag)?;
-        tags.insert(content.data);
+        let tag = content.data;
+        let sa = SessionAgent{
+            session: link.target.try_into()?,
+            agent: link.author
+        };
+        if let Some(session_agent) = tags.get_mut(&tag) {
+            session_agent.push(sa)
+        } else {
+            tags.insert(tag, vec![sa]);
+        };
     }
-    Ok(tags.into_iter().map(|t| t).collect())
+    Ok(tags.into_iter().map(|(tag,session_agents)| TagUse{tag,session_agents}).collect())
 }
 
 
