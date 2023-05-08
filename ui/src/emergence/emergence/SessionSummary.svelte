@@ -129,7 +129,7 @@ onMount(async () => {
   }
   .summary {
     display: flex; flex-direction: row;
-    border: solid 1px;
+    border: solid 1px #EFF0F3;
   }
   .slot {
     border-right: solid 1px;

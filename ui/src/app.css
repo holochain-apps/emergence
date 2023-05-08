@@ -65,9 +65,11 @@ input, button {
 
 /*Now, let's style the bottom navigation.*/
 .nav {
+  border; 1px solid red;
   display: flex;
   justify-content: space-between;
   background-color: var(--primary-color);
+  background-color: #fff;
   padding: 0.5rem 0;
   position: fixed;
   bottom: 0;
@@ -93,6 +95,7 @@ input, button {
 .pane {
   padding: 0px;
   background-color: var(--bg-color);
+  background-color: #fff;
   height: calc(100% - 76px); /* Subtract the height of the bottom navigation */
   display: flex;
   justify-content: flex-start;
@@ -117,8 +120,10 @@ input, button {
 .pane-header{
   background-color: var(--primary-color);
   color: var(--light-text-color);
+  background-color: #F8F9FA;
+  color: rgba(22, 26, 30, 1.0);
   padding: .5rem;
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: 400;
   width: 100vw;
 }
@@ -140,10 +145,7 @@ input, button {
 html{
   background-color: #e6f2f5;
 }
-.header, .pane-header{
-  background-color: #233a3e;
-  color: #f8fcda;
-}
+
 .pane-desktop{
   width: 100vw;
 }
@@ -152,11 +154,9 @@ html{
 #content{
   background-color: green;
 }
-.pane{
-  background-color: #f4e9e9;
-}
+
 .pane-content{
-  background-color: #fff6e0;
+  background-color: #fff;
 }
 html{
   background-color: #cadddf;

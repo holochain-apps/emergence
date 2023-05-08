@@ -224,6 +224,7 @@
           on:click={()=>{pane='discover'}}
         >
            <Fa icon={faHome} size="2x"/>
+           <span class="button-title">Discover</span>
         </div>
         <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
           title="Sessions"
@@ -231,6 +232,7 @@
           on:click={()=>{pane='sessions'}}
         >
           <Fa icon={faTicket} size="2x"/>
+           <span class="button-title">Sessions</span>
         </div>
         <div class="nav-button {pane.startsWith("schedule")?"selected":""}"
           title="Schedule"
@@ -238,6 +240,7 @@
           on:click={()=>{pane='schedule'}}
         >
           <Fa icon={faCalendar} size="2x"/>
+          <span class="button-title">Schedule</span>
         </div>
 
         <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
@@ -246,6 +249,7 @@
           on:click={()=>{pane='spaces'}}
         >
           <Fa icon={faMap} size="2x"/>
+         <span class="button-title">Spaces</span>
         </div>
         <div class="nav-button {pane=="you"?"selected":""}"
           title="You"
@@ -253,6 +257,7 @@
           on:click={()=>{pane='you'}}
         >
            <Fa icon={faUser} size="2x"/>
+           <span class="button-title">You</span>
         </div>
         {#if store && $amSteward}
           <div class="nav-button {pane.startsWith("admin")?"selected":""}"
@@ -261,6 +266,7 @@
             on:click={()=>{pane='admin'}}
           >
             <Fa icon={faGear} size="2x"/>
+           <span class="button-title">Settings</span>
           </div>
         {/if}
       </div>
@@ -278,6 +284,7 @@
     margin: 0 auto;
   }
   body {
+    background-color: #fff;
   }
   .pane {
     position: relative;
@@ -311,12 +318,14 @@
     display: flex; flex-direction: row; flex: 1;
     padding-left: 10px;
     padding-right: 10px;
-    width: 400px;
+    width: 100%;
     margin: auto;
+    justify-content: center;
   }
+
   .nav-button {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 50px;
@@ -324,29 +333,44 @@
     border-radius: 50%;
     padding: 5px;
     margin: 5px;
-    background-color: #90686f;
-    color:#fff6e0;
+    background-color: transparent;
+    color: rgba(86, 94, 109, 1);
+    transition: color .25s ease;
   }
+
+  .nav-button .button-title {
+    font-size: 9px;
+    padding-top: 5px;
+  }
+
   .selected {
-    background-color:#3e232c;
-    color: #fff;
+    color: rgba(22, 26, 30, 1);
+    background-color: transparent;
   }
+
+  .nav-button.selected .button-title {
+    font-weight: bold;
+  }
+
   .nav-button:hover {
-    background-color: #5f3b43;
+    color: rgba(22, 26, 30, 1);
     cursor: pointer;
   }
+
   .nav-button:active {
     background-color: #4f2f39;
     color: #fceed7;
     cursor: pointer;
   }
+
   .pane {
-    border: solid 1px;
     width: 100vw;
   }
+
   #content {
     height: 100vh;
   }
+
   /* @media (min-width: 500px) {
     main {
       max-width: 500px;
