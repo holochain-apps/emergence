@@ -22,5 +22,9 @@
 </script>
 
 <div>
+  {#if $tags.length > 0}
   <WordCloud words={words}/>
+  {:else}
+  No tags yet!
+  {/if}
 </div>

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import { type FeedElem, FeedType, sessionInterestToString } from './types';
+import { type FeedElem, FeedType, sessionInterestToString, timestampToStr } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
@@ -21,16 +21,12 @@ const sessionTitle = (sessionHash: ActionHash) => {
   return "<deleted session>"
 }
 
-const dateStr = (elem: FeedElem) => {
-  const d = new Date(elem.timestamp/1000)
-  return `${d.toDateString()} @ ${d.toTimeString().slice(0,5)}`
-}
 </script>
 
 <div class="feed-elem">
   <div class="elem-head">
     <Avatar agentPubKey={feedElem.author} size={30}></Avatar>
-    <span style="margin-left:5px">{dateStr(feedElem)}</span>
+    <span style="margin-left:5px">{timestampToStr(feedElem.timestamp)}</span>
   </div>
   <div class="elem-body">
     {#if feedElem.type === FeedType.SessionNew}
@@ -59,7 +55,7 @@ const dateStr = (elem: FeedElem) => {
     {/if}
     {#if feedElem.type === FeedType.NoteNew}
     created note:
-      <NoteDetail noteHash={feedElem.about} showAvatar={false}></NoteDetail>
+      <NoteDetail noteHash={feedElem.about} showAvatar={false} showTimestamp={false}></NoteDetail>
     {/if}
     {#if feedElem.type === FeedType.TimeWindowNew}
     created slot:

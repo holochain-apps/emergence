@@ -222,7 +222,7 @@ async function deleteSession() {
   </div>
   <div class="notes">
     {#each notes as note}
-        <NoteDetail noteHash={note}></NoteDetail>
+        <NoteDetail showSession={false} noteHash={note}></NoteDetail>
     {/each}
   </div>
     Create Note:  <sl-button on:click={() => {creatingNote = true; } } circle>

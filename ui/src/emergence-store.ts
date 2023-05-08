@@ -259,6 +259,7 @@ export class EmergenceStore {
     }
     return notes
   }
+  
 
   async slot(session: ActionHash, slot: Slot) {
     const space = this.getSpace(slot.space)
@@ -715,7 +716,7 @@ export class EmergenceStore {
   }
 
   async createNote(sessionHash: ActionHash, text: string, tags: Array<string>, pic: EntryHash | undefined): Promise<EntryRecord<Note>> {
-    const record = await this.client.createNote(text, tags, pic)
+    const record = await this.client.createNote(text, sessionHash, tags, pic)
     const relations = [
         {   src: sessionHash,
             dst: record.actionHash,
@@ -756,6 +757,7 @@ export class EmergenceStore {
             previous_note_hash: note.record.actionHash,
             updated_note: {
                 text,
+                session: note.record.entry.session,
                 tags,
             }
         }

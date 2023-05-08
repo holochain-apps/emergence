@@ -7,11 +7,14 @@
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import { onDestroy } from 'svelte';
     import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
+    import { timestampToStr } from './types';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
     export let noteHash: ActionHash
     export let showAvatar = true
+    export let showSession = true
+    export let showTimestamp = true
 
     $: note = store.neededStuffStore.notes.get(noteHash)
     onDestroy(() => {
@@ -33,12 +36,16 @@
             <div class="author-name">
               <!-- TODO: SEPERATE AUTHOR NAME AND AVATAR -->
             </div>
-            <div class="post-date"> 
-              <!-- TODO: DATE -->
-            </div>
+            {#if showTimestamp}
+              <div class="post-date"> 
+                {timestampToStr($note.value.record.action.timestamp)}
+              </div>
+            {/if}
+            {#if showSession}
             <div class="post-session"> 
-              <!-- TODO: SESSION -->
+              Session: {store.getSession($note.value.record.entry.session).record.entry.title}
             </div>         
+            {/if}
           </div>
         </div>
 

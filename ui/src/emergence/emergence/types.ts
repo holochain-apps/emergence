@@ -103,6 +103,7 @@ export interface UpdateSpaceInput {
 
 export interface Note {
   text: string,
+  session: ActionHash,
   pic?: EntryHash,
   tags: Array<string>;
 }
@@ -156,6 +157,11 @@ export const timeWindowDurationToStr = (window: TimeWindow) : string => {
 
 export const durationToStr = (duration: number) : string => {
   return duration >=60 ? `${duration/60} hour${duration>60?'s':''}` : `${duration} minutes`
+}
+
+export const timestampToStr = (timestamp: Timestamp) : string => {
+    const d = new Date(timestamp)
+    return `${d.toDateString()} @ ${d.toTimeString().slice(0,5)}`
 }
 
 export interface RelationContent {

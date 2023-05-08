@@ -50,7 +50,7 @@ export class EmergenceClient {
       const author = r.src
       author[1] =32
         return {
-          timestamp: ri.timestamp,
+          timestamp: ri.timestamp/1000,
           author,
           about: r.dst,
           type: parseInt(r.content.path.split(".")[1]),
@@ -145,9 +145,10 @@ export class EmergenceClient {
     }).filter(r=>!r.record.entry.trashed);
   }
 
-  async createNote(text: string, tags: Array<string>, pic: EntryHash | undefined) : Promise<EntryRecord<Note>> {
+  async createNote(text: string, session: ActionHash, tags: Array<string>, pic: EntryHash | undefined) : Promise<EntryRecord<Note>> {
     const noteEntry: Note = { 
         text,
+        session,
         pic,
         tags,
       };
