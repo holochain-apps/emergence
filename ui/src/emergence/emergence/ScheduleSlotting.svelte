@@ -479,7 +479,8 @@
 
       <div class="selected-sessions">
         <div><strong>Selected</strong></div>
-        {#each $sessions.filter((s)=>selectedSessions.get(s.record.actionHash)) as session}
+        {#each $sessions.filter((s)=>selectedSessions.get(s.record.actionHash))
+          .sort((a,b)=>store.getSessionSlot(a).window.start - store.getSessionSlot(b).window.start) as session}
           <div style="margin-bottom: 8px;">
             <SessionSummary 
               showAmenities={true}
