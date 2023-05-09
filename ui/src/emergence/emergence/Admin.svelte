@@ -4,7 +4,7 @@
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
-    import type { Info } from "./types";
+    import { sessionSelfTags, type Info } from "./types";
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
@@ -71,6 +71,7 @@
         for (const s of get(store.sessions)) {
             const info = await serializeInfo(s, false)
             info.entry['leaders'] = info.entry['leaders'].map(l => encodeHashToBase64(l))
+            info.entry['tags'] = sessionSelfTags(s)
             sessions.push(info)
         }
         const notes = []
@@ -164,7 +165,7 @@
         for (const s of data.sessions) {
             const leaders = [] // fixme
             const e = s.entry
-            const record = await store.createSession(e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined)
+            const record = await store.createSession(e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, e.tags)
             const relation = s.relations.filter(r=>r.content.path === "session.space").sort((a,b) => b.timestamp - a.timestamp)[0]
             if (relation) {
                 const window = JSON.parse(relation.content.data)
