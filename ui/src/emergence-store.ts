@@ -28,11 +28,13 @@ export const neededStuffStore = (client: EmergenceClient) => {
     setInterval(async ()=>{
         if(neededStuff.notes ? true : false) {
         const stuff = await client.getStuff(neededStuff)
+        console.log("STUFF",stuff)
         if (stuff.notes) {
             notes.update(oldNotes=>{
                 stuff.notes.forEach(n=>{
-                    
-                   oldNotes.set(n.original_hash,n)
+                   if (n) {
+                       oldNotes.set(n.original_hash,n)
+                   }
                 })
                 return oldNotes
             })
@@ -748,10 +750,11 @@ export class EmergenceStore {
   }
 
   async updateNote(noteHash: ActionHash, text: string, tags: Array<string>, pic: EntryHash | undefined): Promise<EntryRecord<Note>> {
-    const idx = this.getNoteIdx(noteHash)
-    if (idx >= 0) {
-        const note = get(this.notes)[idx]
-
+    const anote = get(this.neededStuffStore.notes.get(noteHash))
+    // @ts-ignore
+    if (anote.status == "complete") {
+        // @ts-ignore
+        const note = anote.value
         const updatedNote: UpdateNoteInput = {
             original_note_hash: noteHash,
             previous_note_hash: note.record.actionHash,
@@ -780,10 +783,6 @@ export class EmergenceStore {
                     }
                 },
             ])
-            this.notes.update((notes) => {
-                notes[idx].record = record
-                return notes
-            })
             return record
         }
         else {
@@ -795,17 +794,13 @@ export class EmergenceStore {
   }
 
   async deleteNote(noteHash: ActionHash) {
-    const idx = this.getNoteIdx(noteHash)
-    if (idx >= 0) {
-        const note = get(this.notes)[idx]
-        await this.client.deleteNote(note.record.actionHash)
-        this.notes.update((notes) => {
-            notes.splice(idx, 1);
-            return notes
-        })
+    const anote = this.neededStuffStore.notes.get(noteHash)
+    if (anote) {
+        await this.client.deleteNote(noteHash)
+        this.neededStuffStore.notes.clear([noteHash])
         this.client.createRelations([
-            {   src: note.original_hash, // should be agent key
-                dst: note.original_hash,
+            {   src: noteHash, // should be agent key
+                dst: noteHash,
                 content:  {
                     path: `feed.${FeedType.NoteDelete}`,
                     data: JSON.stringify("")

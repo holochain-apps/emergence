@@ -6,7 +6,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
-import type { ActionHash } from '@holochain/client';
+import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 import NoteDetail from './NoteDetail.svelte';
 import TimeWindowSummary from './TimeWindowSummary.svelte';
 
@@ -56,6 +56,13 @@ const sessionTitle = (sessionHash: ActionHash) => {
     {#if feedElem.type === FeedType.NoteNew}
     created note:
       <NoteDetail noteHash={feedElem.about} showAvatar={false} showTimestamp={false}></NoteDetail>
+    {/if}
+    {#if feedElem.type === FeedType.NoteUpdate}
+    updated note:
+      <NoteDetail noteHash={feedElem.about} showAvatar={false} showTimestamp={false}></NoteDetail>
+    {/if}
+    {#if feedElem.type === FeedType.NoteDelete}
+    deleted note: {encodeHashToBase64(feedElem.about)}
     {/if}
     {#if feedElem.type === FeedType.TimeWindowNew}
     created slot:

@@ -2,12 +2,17 @@
     import { encodeHashToBase64, type ActionHash } from '@holochain/client';
     import { storeContext } from '../../contexts';
     import type { EmergenceStore  } from '../../emergence-store';
-    import { getContext } from 'svelte';
+    import { createEventDispatcher, getContext } from 'svelte';
     import Avatar from './Avatar.svelte';
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import { onDestroy } from 'svelte';
     import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
     import { timestampToStr } from './types';
+    import Fa from 'svelte-fa';
+    import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+    import NoteCrud from './NoteCrud.svelte';
+
+    const dispatch = createEventDispatcher();
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -21,6 +26,10 @@
         store.neededStuffStore.notes.clear(noteHash)
     }); 
 
+    let editing = false
+    const deleteNote = ()=> {
+      store.deleteNote($note.value.record.actionHash)
+    }
 </script>
 
 {#if $note.status=== "pending"}
@@ -28,7 +37,26 @@
 {:else}
   <div class="note">
       {#if $note.value}
+       {#if editing}
+        <div>
+          <NoteCrud note={$note.value}
+            sessionHash={undefined}
+            on:note-updated={() => {editing = false;} }
+            on:edit-canceled={() => { editing = false; } }
+          ></NoteCrud>
+          </div>
+        {:else} 
         <div class="post-header">
+          {#if encodeHashToBase64($note.value.record.action.author) === store.myPubKeyBase64}
+            <div class="crud">
+              <sl-button style="margin-left: 8px;" size=small on:click={deleteNote} circle>
+                <Fa icon={faTrash} />
+              </sl-button>
+              <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
+                <Fa icon={faEdit} />
+              </sl-button>        
+            </div>
+          {/if}
           {#if showAvatar}
             <div class="avatar"><Avatar agentPubKey={$note.value.record.action.author}></Avatar></div>
           {/if}
@@ -62,6 +90,7 @@
           <show-image image-hash={encodeHashToBase64($note.value.record.entry.pic)}></show-image>
           </div>
         {/if}
+       {/if}
       {:else}
         Not found on DHT
       {/if}

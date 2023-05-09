@@ -15,6 +15,7 @@ import type { EmergenceStore } from '../../emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import { encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client';
 import MultiSelect from 'svelte-multiselect'
+    import { get } from 'svelte/store';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -50,6 +51,7 @@ onMount(() => {
     text = note.record.entry.text
     pic = note.record.entry.pic
     tags = note.record.entry.tags
+    sessionHash = note.record.entry.session
   }
 });
 
