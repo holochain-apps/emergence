@@ -312,6 +312,7 @@
     justify-content:space-between; 
     align-items: center;
     padding: .5em;
+    margin-bottom: 1em;
   }
 
   .nav {
