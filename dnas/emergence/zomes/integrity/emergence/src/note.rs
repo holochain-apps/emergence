@@ -6,6 +6,7 @@ pub struct Note {
     pub session: ActionHash,
     pub tags: Vec<String>,
     pub pic: Option<EntryHash>,
+    pub trashed: bool,
 }
 pub fn validate_create_note(
     _action: EntryCreationAction,

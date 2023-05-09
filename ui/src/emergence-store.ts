@@ -762,6 +762,7 @@ export class EmergenceStore {
                 text,
                 session: note.record.entry.session,
                 tags,
+                trashed: false,
             }
         }
         const noteEntry = note.record.entry
@@ -794,10 +795,29 @@ export class EmergenceStore {
   }
 
   async deleteNote(noteHash: ActionHash) {
-    const anote = this.neededStuffStore.notes.get(noteHash)
-    if (anote) {
-        await this.client.deleteNote(noteHash)
+    const anote = get(this.neededStuffStore.notes.get(noteHash))
+    // @ts-ignore
+    if (anote.status == "complete") {
+        // @ts-ignore
+        const note = anote.value
+        const updatedNote: UpdateNoteInput = {
+            original_note_hash: noteHash,
+            previous_note_hash: note.record.actionHash,
+            updated_note: {
+                text: note.record.entry.text,
+                session: note.record.entry.session,
+                tags: note.record.entry.tags,
+                trashed: true,
+            }
+        }
+        await this.client.updateNote(updatedNote)
         this.neededStuffStore.notes.clear([noteHash])
+        const session = this.getSession(note.record.entry.session)
+        if (session) {
+            const relations = session.relations.filter(ri=>ri.relation.content.path === "session.note").map(ri=>ri.create_link_hash)
+            await this.client.deleteRelations(relations)
+            this.fetchSessions()
+        }
         this.client.createRelations([
             {   src: noteHash, // should be agent key
                 dst: noteHash,

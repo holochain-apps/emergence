@@ -37,9 +37,7 @@ pub fn validate_delete_link_relations(
     _tag: LinkTag,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(
-        ValidateCallbackResult::Invalid(
-            String::from("Relations links cannot be deleted"),
-        ),
+        ValidateCallbackResult::Valid,
     )
 }
 

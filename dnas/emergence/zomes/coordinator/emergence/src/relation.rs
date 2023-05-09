@@ -37,10 +37,13 @@ pub fn create_relations(input: Vec<Relation>) -> ExternResult<Vec<ActionHash>> {
     }
     Ok(actions)
 }
+
 #[hdk_extern]
-pub fn delete_relation(_input: Relation) -> ExternResult<()> {
-    Err(wasm_error!(WasmErrorInner::Guest(String::from("delete relations not implmented"))))
-   // Ok(())
+pub fn delete_relations(input: Vec<ActionHash>) -> ExternResult<()> {
+    for relation_hash in input {
+        delete_link(relation_hash)?;
+    }
+    Ok(())
 }
 
 #[derive(Serialize, Deserialize, Debug)]

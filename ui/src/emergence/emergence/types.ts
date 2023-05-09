@@ -105,7 +105,8 @@ export interface Note {
   text: string,
   session: ActionHash,
   pic?: EntryHash,
-  tags: Array<string>;
+  tags: Array<string>,
+  trashed: boolean,
 }
 
 

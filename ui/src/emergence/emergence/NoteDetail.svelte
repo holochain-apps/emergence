@@ -11,6 +11,7 @@
     import Fa from 'svelte-fa';
     import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
     import NoteCrud from './NoteCrud.svelte';
+    import Confirm from './Confirm.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -30,7 +31,16 @@
     const deleteNote = ()=> {
       store.deleteNote($note.value.record.actionHash)
     }
+
+    let showConfirm = false
 </script>
+{#if showConfirm}
+<div class="modal">
+  <Confirm message="Please confirm delete." 
+    on:confirm-canceled={()=>showConfirm=false} 
+    on:confirm-confirmed={deleteNote}></Confirm>
+</div>
+{/if}
 
 {#if $note.status=== "pending"}
   <sl-spinner></sl-spinner>
@@ -47,9 +57,11 @@
           </div>
         {:else} 
         <div class="post-header">
-          {#if encodeHashToBase64($note.value.record.action.author) === store.myPubKeyBase64}
+          {#if encodeHashToBase64($note.value.record.action.author) === store.myPubKeyBase64 &&
+               !$note.value.record.entry.trashed
+            }
             <div class="crud">
-              <sl-button style="margin-left: 8px;" size=small on:click={deleteNote} circle>
+              <sl-button style="margin-left: 8px;" size=small on:click={()=>showConfirm=true} circle>
                 <Fa icon={faTrash} />
               </sl-button>
               <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>

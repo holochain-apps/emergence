@@ -43,6 +43,10 @@ export class EmergenceClient {
     return this.callZome('get_relations', hash)
   }
 
+  async deleteRelations(relations: Array<ActionHash>) {
+    return this.callZome('delete_relations', relations)
+  }
+
   async getFeed(agent: AgentPubKey | undefined) : Promise<Array<FeedElem>> {
     const relations: Array<RelationInfo> = await this.callZome('get_feed', {agent_filter: agent})
     return relations.map(ri => {
@@ -151,6 +155,7 @@ export class EmergenceClient {
         session,
         pic,
         tags,
+        trashed: false,
       };
     
     return new EntryRecord(await this.callZome('create_note', noteEntry))
