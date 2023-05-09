@@ -8,6 +8,7 @@
     import { storeContext } from '../../contexts';
     import type { TagUse } from './types';
 	import WordCloud from "svelte-d3-cloud";
+    import TagCloudPeople from './TagCloudPeople.svelte';
   
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     $: tags = store.allTags
@@ -18,13 +19,24 @@
     onMount(async () => {
         store.fetchTags()
     });
-
+    let selectedTag = ""
 </script>
 
 <div>
   {#if $tags.length > 0}
-  <WordCloud words={words}/>
-  {:else}
+    <div class="cloud">
+        <WordCloud words={words} on:click={(e)=> selectedTag = e.detail.target.innerHTML}/>
+    {#if selectedTag}
+        <TagCloudPeople tag={selectedTag}></TagCloudPeople>
+    {/if}
+    </div>
+{:else}
   No tags yet!
   {/if}
 </div>
+
+<style>
+    .cloud {
+        display: flex;
+    }
+</style>
