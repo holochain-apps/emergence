@@ -19,7 +19,7 @@
     onMount(async () => {
         store.fetchMyStuff()
     });
-    let tab = "feed"
+    let tab = "cloud"
 
     $: amSteward = store.amSteward
  
@@ -32,9 +32,9 @@
 <div class="pane-content">
 
     <sl-tab-group>
-        <sl-tab slot="nav" panel="feed">Feed
-        </sl-tab>
         <sl-tab slot="nav" panel="cloud">Tag Cloud
+        </sl-tab>
+        <sl-tab slot="nav" panel="feed">Feed
         </sl-tab>
     
         <sl-tab-panel name="feed">

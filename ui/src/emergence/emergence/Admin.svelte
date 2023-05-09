@@ -165,11 +165,17 @@
         for (const s of data.sessions) {
             const leaders = [] // fixme
             const e = s.entry
-            const record = await store.createSession(e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, e.tags)
+            const tags = e.tags  ? e.tags : []
+            let record
+            try {
+             record = await store.createSession(e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, tags)
+            } catch(e) {
+                console.log("Import Error",e)
+            }
             const relation = s.relations.filter(r=>r.content.path === "session.space").sort((a,b) => b.timestamp - a.timestamp)[0]
             if (relation) {
                 const window = JSON.parse(relation.content.data)
-                store.slot(record.actionHash, {window, space: spaces[relation.dst]})
+                await store.slot(record.actionHash, {window, space: spaces[relation.dst]})
             }
  
         }
