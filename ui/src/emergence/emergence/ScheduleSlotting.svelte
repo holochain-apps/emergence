@@ -36,7 +36,7 @@
   let selectedSpaceIdx: number|undefined = undefined
   let selectedWindow: TimeWindow|undefined = undefined
 
-  $: selectedSessions, selectedSpaceIdx, selectedSessions, selectedWindow
+  $: selectedSessions, selectedSpaceIdx, selectedWindow
   $: sessionsInSpace
   $: amSteward = store.amSteward
 
@@ -188,6 +188,11 @@
     if (target.id && (!sessionSlot || JSON.stringify(sessionSlot.window) != windowJSON) || encodeHashToBase64(slot.space) != encodeHashToBase64(sessionSlot.space)) {
       await store.slot(sessionHash, slot)
       spaces = store.spaces
+    }
+    if (selectedSpaceIdx) {
+      const idx = selectedSpaceIdx
+      selectedSpaceIdx = undefined
+      selectSpace(idx, $spaces[idx])
     }
     clearDrag()
   }
