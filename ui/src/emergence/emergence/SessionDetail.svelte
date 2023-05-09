@@ -8,7 +8,7 @@ import { createEventDispatcher, getContext, onMount } from 'svelte';
 import Fa from 'svelte-fa';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
-import { SessionInterest, amenitiesList, durationToStr, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow } from './types';
+import { SessionInterest, amenitiesList, durationToStr, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags } from './types';
 
 import type { ActionHash } from '@holochain/client';
 import Avatar from './Avatar.svelte';
@@ -52,14 +52,6 @@ const sessionSlot = (session: Info<Session>): Slot | undefined => {
                   }
         }
         return undefined
-}
-
-const sessionNotes = (session: Info<Session>):Array<ActionHash> => {
-  return session.relations.filter(r=>r.relation.content.path == "session.note").map(r=> r.relation.dst)
-}
-
-const sessionTags = (session: Info<Session>):Array<string> => {
-  return session.relations.filter(r=>r.relation.content.path == "session.tag").map(r=> r.relation.content.data)
 }
 
 // $: sessions = store.sessions

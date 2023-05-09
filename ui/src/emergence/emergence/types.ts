@@ -13,7 +13,8 @@ import {
   type DeleteLink,
   type Timestamp,
   type HoloHash,
-  encodeHashToBase64
+  encodeHashToBase64,
+  decodeHashFromBase64
 } from '@holochain/client';
 
 export type EmergenceSignal = {
@@ -360,4 +361,24 @@ export class WRectangle {
       `Rect: ${this.x} x ${ this.y}:  ${this.width} x ${this.height}`
     );
   }
+}
+
+export const sessionNotes = (session: Info<Session>):Array<ActionHash> => {
+  return session.relations.filter(r=>r.relation.content.path == "session.note").map(r=> r.relation.dst)
+}
+
+export const sessionTags = (session: Info<Session>):Array<string> => {
+  return session.relations.filter(r=>r.relation.content.path == "session.tag").map(r=> r.relation.content.data)
+}
+
+export const sessionSelfTags = (session: Info<Session>):Array<string> => {
+  const hashB64 = encodeHashToBase64(session.original_hash)
+  return session.relations.filter(r=>r.relation.content.path == "session.tag"  && 
+    encodeHashToBase64(r.relation.dst) === hashB64
+  )
+  .map(r=> r.relation.content.data)
+}
+
+export const dedupHashes = (hashes: Array<HoloHash>) : Array<HoloHash> => {
+  return [ ... new Set(hashes.map(s=>encodeHashToBase64(s)))].map(s=>decodeHashFromBase64(s))
 }

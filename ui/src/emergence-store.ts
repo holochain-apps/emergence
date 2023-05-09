@@ -15,9 +15,10 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
+import { UpdateProfile } from '@holochain-open-dev/profiles/dist/elements/update-profile';
 
 TimeAgo.addDefaultLocale(en)
 
@@ -333,21 +334,33 @@ export class EmergenceStore {
     return Array.from(tags) as Array<string>
   }
 
-  async createSession(title: string, description: string, leaders:Array<AgentPubKey>,  smallest: number, largest: number, duration: number, amenities: number, slot: Slot|undefined): Promise<EntryRecord<Session>> {
+  async createSession(title: string, description: string, leaders:Array<AgentPubKey>,  smallest: number, largest: number, duration: number, amenities: number, slot: Slot|undefined, tags: Array<string>): Promise<EntryRecord<Session>> {
     const record = await this.client.createSession(title, amenities, description, leaders, smallest, largest, duration)
+    const sessionHash = record.actionHash
     if (slot) {
-        await this.slot(record.actionHash, slot)
+        await this.slot(sessionHash, slot)
     }
   
-    await this.client.createRelations([
-        {   src: record.actionHash, // should be agent key
-            dst: record.actionHash,
+    const relations = [
+        {   src: sessionHash, // should be agent key
+            dst: sessionHash,
             content:  {
                 path: `feed.${FeedType.SessionNew}`,
                 data: JSON.stringify(title)
             }
         },
-    ])
+    ]
+    tags.forEach(tag=>relations.push(
+        {   src: sessionHash,
+            dst: sessionHash,
+            content:  {
+                path: "session.tag",
+                data: tag
+            }
+        },        
+    ))
+
+    await this.client.createRelations(relations)
 
     this.fetchSessions()
     return record
@@ -431,9 +444,45 @@ export class EmergenceStore {
                 doSlot = true
             }
         }
+        const relations = []
+        const relationsToDelete = []
+        if (props.hasOwnProperty("tags")) {
+            const tags = sessionSelfTags(session).sort()
+            const updatedTags = props.tags.sort()
+            const updatedTagsJSON = JSON.stringify(updatedTags)
+            if (JSON.stringify(tags)!=updatedTagsJSON) {
+                changes.push(`tags -> ${updatedTagsJSON}`)
+                for (const tag of updatedTags) {
+                    if (!tags.includes(tag)) { 
+                        relations.push({   
+                            src: sessionHash,
+                            dst: sessionHash,
+                            content:  {
+                                path: "session.tag",
+                                data: tag
+                            }
+                        })
+                    }
+                }
+                const hashB64 = encodeHashToBase64(session.original_hash)
+                for (const tag of tags) {
+                    if (!updatedTags.includes(tag)) { 
+                        const ri = session.relations.find(ri=>
+                            ri.relation.content.path == "session.tag" &&
+                            ri.relation.content.data == tag &&
+                            encodeHashToBase64(ri.relation.dst) === hashB64
+                            )
+                        if (ri) {
+                            relationsToDelete.push(ri.create_link_hash)
+                        }
+                    }
+                }
+            }
+        }
+
         if (changes.length > 0) {
             const record = await this.client.updateSession(update)
-            this.client.createRelations([
+            relations.push(
                 {   src: record.actionHash, // should be agent key
                     dst: record.actionHash,
                     content:  {
@@ -441,7 +490,11 @@ export class EmergenceStore {
                         data: JSON.stringify({title: sessionEntry.title, changes})
                     }
                 },
-            ])
+            )
+            await this.client.createRelations(relations)
+            if (relationsToDelete.length>0) {
+                await this.client.deleteRelations(relationsToDelete)
+            }
             if (doSlot) {
                 if (props.slot !== undefined) {
                     await this.slot(session.original_hash, props.slot)

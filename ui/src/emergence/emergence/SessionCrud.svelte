@@ -10,12 +10,13 @@ import "@holochain-open-dev/profiles/dist/elements/search-agent.js";
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import {  Amenities, setAmenity, type Info, type Session, type Slot } from './types';
+import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionTags, sessionSelfTags } from './types';
 import SlotSelect from './Slot.svelte';
 import { encodeHashToBase64, type AgentPubKey } from '@holochain/client';
 import Avatar from './Avatar.svelte';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
+import MultiSelect from 'svelte-multiselect'
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -33,14 +34,17 @@ let largest: number = 100;
 let duration: number = 30
 let amenities: number = 0;
 let leaders:Array<AgentPubKey> = []
+let tags:Array<string> = []
 
 let errorSnackbar: Snackbar;
 
 let slot: Slot | undefined
 let slotValid: boolean = true
 
-$: title, description, leaders, smallest, largest, duration, amenities, slot, slotValid;
+$: title, description, leaders, smallest, largest, duration, amenities, slot, slotValid, tags;
 $: isSessionValid = leaders.length > 0 && title !== '' && description !== '' && slotValid && smallest > 0 && largest < MAX_GROUP_SIZE && duration > 0;
+$: tagUses = store.allTags
+$: allTags = $tagUses.map(t=>t.tag)
 
 onMount(() => {
   if (session) {
@@ -51,16 +55,17 @@ onMount(() => {
     smallest = session.record.entry.smallest
     largest = session.record.entry.largest
     duration = session.record.entry.duration
-
+    tags = sessionSelfTags(session)
     slot = store.getSessionSlot(session)
   } else {
     leaders = [store.myPubKey]
   }
 });
 
+
 async function updateSession() {
   if (session) {
-    const updateRecord = await store.updateSession(session.original_hash, {title, amenities, slot, description, leaders, smallest, largest, duration})
+    const updateRecord = await store.updateSession(session.original_hash, {title, amenities, slot, description, leaders, smallest, largest, duration, tags})
     if (updateRecord) {
       dispatch('session-updated', { actionHash: updateRecord.actionHash });
     } else {
@@ -71,7 +76,7 @@ async function updateSession() {
 
 async function createSession() {    
   try {
-    const record = await store.createSession(title!, description, leaders, smallest, largest, duration, amenities, slot)
+    const record = await store.createSession(title!, description, leaders, smallest, largest, duration, amenities, slot, tags)
 
     title = ""
     description = ""
@@ -137,6 +142,14 @@ function deleteLeader(index: number) {
     {/each}
 
     <search-agent field-label="Add Leader" include-myself={true} clear-on-select={true} on:agent-selected={(e)=>addleader(e.detail.agentPubKey)}></search-agent>
+  </div>
+  <div style="margin-bottom: 16px">
+    <span>Tags:</span >
+    <MultiSelect 
+      bind:selected={tags} 
+      options={allTags} 
+      allowUserOptions={true}
+      />
   </div>
   <div style="margin-bottom: 16px">
     <sl-input

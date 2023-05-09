@@ -3,7 +3,7 @@ import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { type Slot, type Session, type Info, amenitiesList } from './types';
+import { type Slot, type Session, type Info, amenitiesList, sessionTags } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -29,10 +29,6 @@ let slot:Slot|undefined = undefined
 $: relData = store.sessionReleationDataStore(store.sessionStore(session.original_hash))
 $: loading, session, slot;
 $: tags = sessionTags(session)
-
-const sessionTags = (session: Info<Session>):Array<string> => {
-  return session.relations.filter(r=>r.relation.content.path == "session.tag").map(r=> r.relation.content.data)
-}
 
 onMount(async () => {
   loading = false
