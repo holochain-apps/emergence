@@ -194,6 +194,11 @@
       selectedSpaceIdx = undefined
       selectSpace(idx, $spaces[idx])
     }
+    if (selectedWindow) {
+      const window = selectedWindow
+      selectedWindow = undefined
+      selectWindow(window)
+    }
     clearDrag()
   }
   const clearDrag = () => {
