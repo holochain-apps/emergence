@@ -17,7 +17,7 @@ import InterestSelect from './InterestSelect.svelte';
 import NoteCrud from './NoteCrud.svelte';
 import NoteDetail from './NoteDetail.svelte';
 import SessionCrud from './SessionCrud.svelte';
-
+//
 const dispatch = createEventDispatcher();
 
 export let sessionHash: ActionHash;
@@ -125,22 +125,29 @@ async function deleteSession() {
 
 <div class="pane-content">
   <div class="pane-header">
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('session-close') } } circle>
-      <Fa icon={faCircleArrowLeft} />
-    </sl-button>
+
+    <div class="controls">
+      <sl-button size=small on:click={() => { dispatch('session-close') } } circle>
+        <Fa icon={faCircleArrowLeft} />
+      </sl-button>
+      <div>
+        <sl-button size=small on:click={() => { editing = true; } } circle>
+          <Fa icon={faEdit} />
+        </sl-button>
+        <sl-button size=small on:click={()=>showConfirm=true} circle>
+          <Fa icon={faTrash} />
+        </sl-button>
+      </div>
+    </div>
+
     <h2 style="margin-left: 10px">{ entry.title }</h2>
 
     <span style="flex: 1"></span>
-    <InterestSelect sessionHash={sessionHash}></InterestSelect>
-  
 
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
-      <Fa icon={faEdit} />
-    </sl-button>
+    <div class="action">
+      <InterestSelect sessionHash={sessionHash}></InterestSelect>
+    </div>
 
-    <sl-button style="margin-left: 8px;" size=small on:click={()=>showConfirm=true} circle>
-      <Fa icon={faTrash} />
-    </sl-button>
   </div>
   {#if showConfirm}
     <div class="modal">
@@ -244,6 +251,30 @@ async function deleteSession() {
     margin-bottom: 16px;
     justify-content: space-between;
   }
+
+  .controls {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  .controls div sl-button {
+    margin-left: 5px;
+  }
+
+  .action {
+    padding-bottom: 15px;
+    position: sticky;
+    top: 0;
+  }
+
+  .pane-header h2 {
+    font-size: 24px;
+    line-height: 30px;
+    margin: 40px 0 20px 0;
+    letter-spacing: -0.01rem;
+  }
+
   .properties {
     display: flex;
     flex-direction: column; 

@@ -105,7 +105,6 @@ input, button {
 
 .pane-content {
   height: 100%;
-  overflow-x: clip;
 }
 
 .modal {

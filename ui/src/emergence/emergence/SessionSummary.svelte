@@ -52,24 +52,26 @@ onMount(async () => {
       dispatch('session-selected', session); 
   }}>
   {#if showSlot}
-    <div class="slot" >
-      {#if slot}
-      <div class="date">
-        {new Date(slot.window.start).toDateString().slice(0,10)}
+    <div class="slot">
+      <div class="slot-wrapper">
+        {#if slot}
+        <div class="date">
+          {new Date(slot.window.start).toDateString().slice(0,10)}
+        </div>
+        <div class="time">
+          {new Date(slot.window.start).toTimeString().slice(0,5)}
+        </div>
+        <div class="space">
+          {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"}
+        </div>
+        {:else}
+        <div class="date">
+          Slot TBA
+        </div>
+        <div class="time">--:--</div>
+        <div class="space">Space TBA</div>
+        {/if}
       </div>
-      <div class="time">
-        {new Date(slot.window.start).toTimeString().slice(0,5)}
-      </div>
-      <div class="space">
-        {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"} 
-      </div>
-      {:else}
-      <div class="date">
-        Slot TBA
-      </div>
-      <div class="time">--:--</div>
-      <div class="space">Space TBA</div>
-      {/if}
     </div>
   {/if}
   <div class="info">
@@ -118,25 +120,36 @@ onMount(async () => {
   .time {
     font-size: 1.7em;
     margin-top: -6px;
-    margin-bottom: -11px;
+    margin-bottom: -2px;
   }
   .date, .space {
     font-size: .7em;
   }
   .summary {
-    display: flex; flex-direction: row;
+    display: flex;
+    flex-direction: row;
     border: solid 1px #EFF0F3;
+    align-items: stretch;
+
   }
   .slot {
-    border-right: solid 1px;
-    height: 75px;
+    display: flex;
+    align-items: center;
     width: 90px;
+    background-color: rgba(243, 243, 245, 1.0);
+    text-align: center;
+  }
+  .slot-wrapper {
     padding: 5px;
+    width: 100%;
+    height: 75px;
   }
   .info {
+    border-left: solid 1px rgba(239, 240, 243, 1.0);
     display: flex;
     flex-direction: column;
     padding: 5px;
+    background-color: #fff;
     width: 100%;
   }
   .top-area, .bottom-area {

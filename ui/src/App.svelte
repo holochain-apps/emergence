@@ -308,9 +308,9 @@
   }
   :global(.pane-header){
     display: flex; 
-    flex-direction: row; 
+    flex-direction: column;
     justify-content:space-between; 
-    align-items: center;
+    align-items: left;
     padding: .5em;
     margin-bottom: 1em;
   }
