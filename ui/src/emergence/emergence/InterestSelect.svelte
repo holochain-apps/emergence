@@ -3,10 +3,12 @@ import { getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
+import '@shoelace-style/shoelace/dist/components/menu/menu.js';
+import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 import { SessionInterest } from './types';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
-import {  faBookmark, faStar } from '@fortawesome/free-solid-svg-icons';
+import {  faBookmark, faChevronDown, faStar } from '@fortawesome/free-solid-svg-icons';
 import type{  ActionHash } from '@holochain/client';
 import type { Snackbar } from '@material/mwc-snackbar';
 import Fa from 'svelte-fa';
@@ -20,6 +22,7 @@ $: session = store.sessionStore(sessionHash)
 $: relData = store.sessionReleationDataStore(session)
 
 async function setSessionInterest(interest: SessionInterest) {
+  open=false
   try {
     if (interest !== $relData.myInterest)
       await store.setSessionInterest($session.original_hash, interest )
@@ -30,15 +33,33 @@ async function setSessionInterest(interest: SessionInterest) {
     errorSnackbar.show();
   }
 }
+let open = false
 
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<sl-select 
-value={`${$relData.myInterest}`}
-on:sl-change={(e) => setSessionInterest(parseInt(e.target.value)) }
->
-  <sl-option value={SessionInterest.NoOpinion}><Fa slot="prefix" icon={faBookmark} /> Attending?</sl-option>
-  <sl-option value={SessionInterest.Going}><Fa slot="prefix" icon={faStar} />Going</sl-option>
-  <sl-option value={SessionInterest.Interested}><Fa slot="prefix" icon={faBookmark} /> Interested</sl-option>
-</sl-select>
+{#if !open}
+  <div class="select" on:mousedown={(e)=>{open = true;e.stopPropagation()}}
+    on:mouseup={(e)=>{open = false;e.stopPropagation()}}
+    >
+  {#if $relData.myInterest === SessionInterest.NoOpinion}<Fa icon={faBookmark} />{/if}
+  {#if $relData.myInterest === SessionInterest.Going}<Fa icon={faStar} />{/if}
+  {#if $relData.myInterest === SessionInterest.Interested}<Fa icon={faBookmark} />{/if}
+  <Fa icon={faChevronDown} />
+  </div>
+{:else}
+  <sl-menu 
+  value={`${$relData.myInterest}`}
+  on:sl-select={(e) =>   {e.stopPropagation(); setSessionInterest(parseInt(e.detail.item.value)) }}
+  >
+    <sl-menu-item value={SessionInterest.NoOpinion}><Fa slot="prefix" icon={faBookmark} /> Attending?</sl-menu-item>
+    <sl-menu-item value={SessionInterest.Going}><Fa slot="prefix" icon={faStar} />Going</sl-menu-item>
+    <sl-menu-item value={SessionInterest.Interested}><Fa slot="prefix" icon={faBookmark} /> Interested</sl-menu-item>
+  </sl-menu>
+{/if}
+
+<style>
+  .select {
+    display:flex;
+  }
+</style>

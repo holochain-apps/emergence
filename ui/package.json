@@ -26,7 +26,6 @@
     "javascript-time-ago": "2.3.7",
     "sanitize-filename": "1.6.3",
     "svelte-d3-cloud": "^0.0.2"
-
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",

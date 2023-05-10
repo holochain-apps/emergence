@@ -57,18 +57,6 @@
           </div>
         {:else} 
         <div class="post-header">
-          {#if encodeHashToBase64($note.value.record.action.author) === store.myPubKeyBase64 &&
-               !$note.value.record.entry.trashed
-            }
-            <div class="crud">
-              <sl-button style="margin-left: 8px;" size=small on:click={()=>showConfirm=true} circle>
-                <Fa icon={faTrash} />
-              </sl-button>
-              <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
-                <Fa icon={faEdit} />
-              </sl-button>        
-            </div>
-          {/if}
           {#if showAvatar}
             <div class="avatar"><Avatar agentPubKey={$note.value.record.action.author}></Avatar></div>
           {/if}
@@ -87,7 +75,19 @@
             </div>         
             {/if}
           </div>
-        </div>
+          {#if encodeHashToBase64($note.value.record.action.author) === store.myPubKeyBase64 &&
+            !$note.value.record.entry.trashed
+         }
+            <div class="crud">
+              <sl-button style="margin-left: 8px;" size=small on:click={()=>showConfirm=true} circle>
+                <Fa icon={faTrash} />
+              </sl-button>
+              <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
+                <Fa icon={faEdit} />
+              </sl-button>        
+            </div>
+          {/if}
+     </div>
 
         <div class="post-content">
           {$note.value.record.entry.text}

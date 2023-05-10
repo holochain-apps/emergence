@@ -86,7 +86,7 @@ onMount(async () => {
             {/each}
         </div>
       </div>
-      <div class="right-side">
+      <div class="right-side" on:click={(e)=>{e.stopPropagation()}}>
         {#if allowSetIntention}
           <InterestSelect sessionHash={session.original_hash}></InterestSelect>
         {/if}
