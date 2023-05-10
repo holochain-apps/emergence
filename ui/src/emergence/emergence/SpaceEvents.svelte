@@ -12,6 +12,8 @@ import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
 import SessionSummary from './SessionSummary.svelte';
+    import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
+    import Fa from 'svelte-fa';
 
 const dispatch = createEventDispatcher();
 
@@ -29,7 +31,8 @@ let loading = true;
 let error: any = undefined;
 
 let errorSnackbar: Snackbar;
-  
+let showImage = ""
+
 $: error, loading, space;
 
 onMount(async () => {
@@ -45,7 +48,6 @@ $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
   <sl-spinner></sl-spinner>
@@ -56,10 +58,19 @@ $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
 {:else}
 
 <div class="events">
+  {#if showImage}
+  <div class="modal">
+    <sl-button style="margin-left: 8px; " size=small on:click={() => showImage ="" } circle>
+      <Fa icon={faCircleArrowLeft} />
+    </sl-button>
+  
+    <show-image image-hash={showImage}></show-image>
+  </div>
+  {/if}
   <div class="summary"
     on:click={() => dispatch('space-selected', space)}
   >
-    <div class="pic">
+    <div class="pic" on:click={()=>showImage=encodeHashToBase64(space.record.entry.pic)}>
       {#if space.record.entry.pic}
       <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
       {:else}
@@ -109,12 +120,13 @@ $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    width: 150px;
   }
   .name {
     flex: 1;
   }
   .info {
-    width: 100%;
+    width: 250px;
     display: flex;
     flex-direction: column;
     padding: 5px;
@@ -128,13 +140,15 @@ $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
     display: flex;
     flex-direction: row;
     border: solid 1px gray;
+    width: 300px;
+    height: 100%;
   }
   .stewards {
     display: flex;
     flex-direction: row;
   }
   .pic {
-     width: 100px;
+     width: 150px;
      border-right: solid 1px gray;
   }
 </style> 
