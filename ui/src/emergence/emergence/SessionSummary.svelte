@@ -29,13 +29,12 @@ let slot:Slot|undefined = undefined
 $: relData = store.sessionReleationDataStore(store.sessionStore(session.original_hash))
 $: loading, session, slot;
 $: tags = sessionTags(session)
-
+$: slot = store.getSessionSlot(session)
 onMount(async () => {
   loading = false
   if (session === undefined) {
     throw new Error(`The session input is required for the SessionSummary element`);
   }
-  slot = store.getSessionSlot(session)
 });
 
 </script>
