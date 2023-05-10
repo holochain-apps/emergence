@@ -39,6 +39,7 @@ $: slot = sessionSlot($session)
 $: notes = sessionNotes($session)
 $: tags = sessionTags($session)
 
+let updateSessionDialog
 
 const sessionSlot = (session: Info<Session>): Slot | undefined => {
   const spaces = session.relations.filter(r=>r.relation.content.path == "session.space")
@@ -110,18 +111,15 @@ async function deleteSession() {
 </div>
 {:else if error}
 <span>Error fetching the session: {error.data.data}</span>
-{:else if editing}
-  <div class="modal">
-    <SessionCrud
-      session={ $session}
-      on:session-updated={async () => {
-        editing = false;
-      //  await fetchSession()
-      } }
-      on:edit-canceled={() => { editing = false; } }
-    ></SessionCrud>
-  </div>
 {:else}
+
+<SessionCrud
+bind:this={updateSessionDialog}
+  session={ $session}
+  on:session-updated={async () => {
+    await store.fetchSessions()
+  } }
+></SessionCrud>
 
 <div class="pane-content">
   <div class="pane-header">
@@ -131,7 +129,7 @@ async function deleteSession() {
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
       <div>
-        <sl-button size=small on:click={() => { editing = true; } } circle>
+        <sl-button size=small on:click={() => { updateSessionDialog.open($session) } } circle>
           <Fa icon={faEdit} />
         </sl-button>
         <sl-button size=small on:click={()=>showConfirm=true} circle>

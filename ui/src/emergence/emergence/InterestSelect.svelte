@@ -8,7 +8,7 @@ import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 import { SessionInterest } from './types';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
-import {  faBookmark, faChevronDown, faStar } from '@fortawesome/free-solid-svg-icons';
+import {  faBookmark, faChevronDown, faEnvelope, faStar } from '@fortawesome/free-solid-svg-icons';
 import type{  ActionHash } from '@holochain/client';
 import type { Snackbar } from '@material/mwc-snackbar';
 import Fa from 'svelte-fa';
@@ -42,7 +42,8 @@ let open = false
   <div class="select" on:mousedown={(e)=>{open = true;e.stopPropagation()}}
     on:mouseup={(e)=>{open = false;e.stopPropagation()}}
     >
-  {#if $relData.myInterest === SessionInterest.NoOpinion}<Fa icon={faBookmark} />{/if}
+    
+  {#if $relData.myInterest === SessionInterest.NoOpinion}RSVP{/if}
   {#if $relData.myInterest === SessionInterest.Going}<Fa icon={faStar} />{/if}
   {#if $relData.myInterest === SessionInterest.Interested}<Fa icon={faBookmark} />{/if}
   <Fa icon={faChevronDown} />
@@ -52,7 +53,7 @@ let open = false
   value={`${$relData.myInterest}`}
   on:sl-select={(e) =>   {e.stopPropagation(); setSessionInterest(parseInt(e.detail.item.value)) }}
   >
-    <sl-menu-item value={SessionInterest.NoOpinion}><Fa slot="prefix" icon={faBookmark} /> Attending?</sl-menu-item>
+    <sl-menu-item value={SessionInterest.NoOpinion}>RSVP</sl-menu-item>
     <sl-menu-item value={SessionInterest.Going}><Fa slot="prefix" icon={faStar} />Going</sl-menu-item>
     <sl-menu-item value={SessionInterest.Interested}><Fa slot="prefix" icon={faBookmark} /> Interested</sl-menu-item>
   </sl-menu>

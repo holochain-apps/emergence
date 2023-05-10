@@ -3,7 +3,6 @@
   import { AdminWebsocket, type ActionHash, type AppAgentClient } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import TimeWindows from './emergence/emergence/TimeWindows.svelte';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
   import SessionCrud from './emergence/emergence/SessionCrud.svelte';
@@ -24,7 +23,6 @@
   import { clientContext, storeContext } from './contexts';
   import { EmergenceStore } from './emergence-store';
   import { EmergenceClient } from './emergence-client';
-  import Feed from './emergence/emergence/Feed.svelte';
   import ScheduleSlotting from './emergence/emergence/ScheduleSlotting.svelte';
   import ScheduleUpcoming from './emergence/emergence/ScheduleUpcoming.svelte';
   import SessionDetail from './emergence/emergence/SessionDetail.svelte';
@@ -81,6 +79,7 @@
   setContext(clientContext, {
     getClient: () => client,
   });
+  let createSessionDialog
 </script>
 
 <main>
@@ -107,16 +106,14 @@
       <div class="pane">
         <AllSessions on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}></AllSessions>
         Create Session:
-        <sl-button on:click={() => {creatingSession = true; } } circle>
+        <sl-button on:click={() => {creatingSession = true; createSessionDialog.open()} } circle>
           <Fa icon={faPlus} />
         </sl-button>
 
-        {#if creatingSession}
-          <div class="modal"><SessionCrud
+          <SessionCrud
+            bind:this={createSessionDialog}
             on:session-created={() => {creatingSession = false;} }
-            on:edit-canceled={() => { creatingSession = false; } }
-            ></SessionCrud></div>
-        #{/if}
+            ></SessionCrud>
       </div>
       {/if}
 

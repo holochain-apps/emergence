@@ -6,6 +6,7 @@ import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import "@holochain-open-dev/profiles/dist/elements/search-agent.js";
+import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
@@ -24,7 +25,31 @@ let amenityElems: Array<SlCheckbox> = []
 const dispatch = createEventDispatcher();
 
 export let session: Info<Session>|undefined = undefined;  // set this if update
-
+export const open = (session) => {
+  if (session) {
+    title = session.record.entry.title
+    amenities = session.record.entry.amenities
+    description = session.record.entry.description
+    leaders = session.record.entry.leaders
+    smallest = session.record.entry.smallest
+    largest = session.record.entry.largest
+    duration = session.record.entry.duration
+    tags = sessionSelfTags(session)
+    slot = store.getSessionSlot(session)
+  } else {
+    title = ""
+    amenities = 0
+    description = ""
+    smallest = 2;
+    largest = 100;
+    duration = 30
+    amenities = 0;
+    leaders = [store.myPubKey]
+    tags = []
+    slot = undefined
+  }
+  dialog.show()
+}
 const MAX_GROUP_SIZE = 600
 
 let title: string = '';
@@ -47,19 +72,6 @@ $: tagUses = store.allTags
 $: allTags = $tagUses.map(t=>t.tag)
 
 onMount(() => {
-  if (session) {
-    title = session.record.entry.title
-    amenities = session.record.entry.amenities
-    description = session.record.entry.description
-    leaders = session.record.entry.leaders
-    smallest = session.record.entry.smallest
-    largest = session.record.entry.largest
-    duration = session.record.entry.duration
-    tags = sessionSelfTags(session)
-    slot = store.getSessionSlot(session)
-  } else {
-    leaders = [store.myPubKey]
-  }
 });
 
 
@@ -71,6 +83,7 @@ async function updateSession() {
     } else {
       dispatch('edit-canceled')
     }
+    dialog.hide()
   }
 }
 
@@ -91,6 +104,7 @@ async function createSession() {
     errorSnackbar.labelText = `Error creating the session: ${e.data.data}`;
     errorSnackbar.show();
   }
+  dialog.hide()
 }
 
 function addleader(agent: AgentPubKey) {
@@ -104,16 +118,14 @@ function deleteLeader(index: number) {
   leaders.splice(index, 1)
   leaders = leaders
 }
+let dialog
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-
+<sl-dialog label={session ? "Edit Session" : "Create Session"} bind:this={dialog}>
 <div style="display: flex; flex-direction: column">
   {#if session}
-    <span style="font-size: 18px">Edit Session</span>
     Key: {session.record.entry.key}
-  {:else}
-    <span style="font-size: 18px">Create Session</span>
   {/if}
   <div style="margin-bottom: 16px">
     <sl-input
@@ -189,7 +201,7 @@ function deleteLeader(index: number) {
     <div style="display: flex; flex-direction: row">
       <sl-button
       label="Cancel"
-      on:click={() => dispatch('edit-canceled')}
+      on:click={() => dialog.hide()}
       style="flex: 1; margin-right: 16px"
       >Cancel</sl-button>
       <sl-button 
@@ -202,7 +214,7 @@ function deleteLeader(index: number) {
   <div style="display: flex; flex-direction: row">
     <sl-button
     label="Cancel"
-    on:click={() => dispatch('edit-canceled')}
+    on:click={() => {dialog.hide()}}
     style="flex: 1; margin-right: 16px"
     >Cancel</sl-button>
 
@@ -214,3 +226,4 @@ function deleteLeader(index: number) {
   {/if}
 
 </div>
+</sl-dialog>
