@@ -27,7 +27,7 @@
         store.neededStuffStore.notes.clear(noteHash)
     }); 
 
-    let editing = false
+    let updateNoteDialog
     const deleteNote = ()=> {
       store.deleteNote($note.value.record.actionHash)
     }
@@ -47,15 +47,11 @@
 {:else}
   <div class="note">
       {#if $note.value}
-       {#if editing}
-        <div>
-          <NoteCrud note={$note.value}
-            sessionHash={undefined}
-            on:note-updated={() => {editing = false;} }
-            on:edit-canceled={() => { editing = false; } }
-          ></NoteCrud>
-          </div>
-        {:else} 
+        <NoteCrud 
+        bind:this={updateNoteDialog}
+        sessionHash={undefined}
+        on:note-updated={() => {} }
+        ></NoteCrud>
         <div class="post-header">
           {#if showAvatar}
             <div class="avatar"><Avatar agentPubKey={$note.value.record.action.author}></Avatar></div>
@@ -82,7 +78,7 @@
               <sl-button style="margin-left: 8px;" size=small on:click={()=>showConfirm=true} circle>
                 <Fa icon={faTrash} />
               </sl-button>
-              <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
+              <sl-button style="margin-left: 8px; " size=small on:click={() => { updateNoteDialog.open($note.value) } } circle>
                 <Fa icon={faEdit} />
               </sl-button>        
             </div>
@@ -102,7 +98,6 @@
           <show-image image-hash={encodeHashToBase64($note.value.record.entry.pic)}></show-image>
           </div>
         {/if}
-       {/if}
       {:else}
         Not found on DHT
       {/if}

@@ -8,6 +8,7 @@ import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
+import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
@@ -45,51 +46,53 @@ $: allTags = $tagUses.map(t=>t.tag)
 // }
 
 onMount(() => {
+});
+export const open = (n) => {
   store.fetchTags()
-  if (note) {
+  if (n) {
+    note = n
     text = note.record.entry.text
     pic = note.record.entry.pic
     tags = note.record.entry.tags
     sessionHash = note.record.entry.session
+  } else {
+    text = ""
+    pic = undefined
+    tags = []
   }
-});
+  dialog.show()
+}
 
 async function updateNote() {
   if (note) {
     const updateRecord = await store.updateNote(note.original_hash, text, tags, pic)
     if (updateRecord) {
       dispatch('note-updated', { actionHash: updateRecord.actionHash });
-    } else {
-      dispatch('edit-canceled')
-    }
+    } 
+    dialog.hide()
   }
 }
 
 async function createNote() {  
   try {
     const record = await store.createNote(sessionHash, text, tags, pic)
-
-    text = ""
-    pic = undefined
-    tags = []
-
     dispatch('note-created', { note: record });
   } catch (e) {
     console.log("CREATE NOTE ERROR", e)
     errorSnackbar.labelText = `Error creating the note: ${e.data.data}`;
     errorSnackbar.show();
   }
+  dialog.hide()
 }
+
+let dialog
 
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
+<sl-dialog label={note ? "Edit Note" : "Create Note"} bind:this={dialog}>
+
 <div style="display: flex; flex-direction: column">
-  {#if note}
-    <span style="font-size: 18px">Edit Note</span>
-  {:else}
-    <span style="font-size: 18px">Create Note</span>
-  {/if}
               
   <div style="margin-bottom: 16px">
     <sl-textarea 
@@ -123,7 +126,7 @@ async function createNote() {
     <div style="display: flex; flex-direction: row">
       <sl-button
       label="Cancel"
-      on:click={() => dispatch('edit-canceled')}
+      on:click={() =>  dialog.hide()}
       style="flex: 1; margin-right: 16px"
       >Cancel</sl-button>
       <sl-button 
@@ -136,7 +139,7 @@ async function createNote() {
   <div style="display: flex; flex-direction: row">
     <sl-button
     label="Cancel"
-    on:click={() => dispatch('edit-canceled')}
+    on:click={() => dialog.hide()}
     style="flex: 1; margin-right: 16px"
     >Cancel</sl-button>
     <sl-button 
@@ -147,3 +150,4 @@ async function createNote() {
   {/if}
 
 </div>
+</sl-dialog>

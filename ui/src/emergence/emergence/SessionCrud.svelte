@@ -25,8 +25,9 @@ let amenityElems: Array<SlCheckbox> = []
 const dispatch = createEventDispatcher();
 
 export let session: Info<Session>|undefined = undefined;  // set this if update
-export const open = (session) => {
-  if (session) {
+export const open = (ses) => {
+  if (ses) {
+    session = ses
     title = session.record.entry.title
     amenities = session.record.entry.amenities
     description = session.record.entry.description
@@ -80,8 +81,6 @@ async function updateSession() {
     const updateRecord = await store.updateSession(session.original_hash, {title, amenities, slot, description, leaders, smallest, largest, duration, tags})
     if (updateRecord) {
       dispatch('session-updated', { actionHash: updateRecord.actionHash });
-    } else {
-      dispatch('edit-canceled')
     }
     dialog.hide()
   }

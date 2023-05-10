@@ -97,8 +97,7 @@ async function deleteSession() {
     errorSnackbar.show();
   }
 }
-
-
+let createNoteDialog
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -222,18 +221,16 @@ bind:this={updateSessionDialog}
         <NoteDetail showSession={false} noteHash={note}></NoteDetail>
     {/each}
   </div>
-    Create Note:  <sl-button on:click={() => {creatingNote = true; } } circle>
+    Create Note:  <sl-button on:click={() => {createNoteDialog.open() } } circle>
     <Fa icon={faPlus} />
   </sl-button>
 
-  {#if creatingNote}
-  <div class="modal">
-    <NoteCrud sessionHash={$session.original_hash}
+    <NoteCrud
+      bind:this={createNoteDialog}
+      sessionHash={$session.original_hash}
       on:note-created={() => {creatingNote = false;} }
       on:edit-canceled={() => { creatingNote = false; } }
     ></NoteCrud>
-    </div>
-  {/if}
 
 </div>
 {/if}
