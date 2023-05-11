@@ -39,12 +39,10 @@
   let loading = true;
   let pane = "sessions"
   let profilesStore: ProfilesStore | undefined
-  let creatingSpace = false
-  let creatingSession = false
   let creatingMap = false
   let selectedSession: Info<Session>|undefined = undefined
 
-  $: client, fileStorageClient, store, loading, creatingSession, creatingSpace;
+  $: client, fileStorageClient, store, loading;
   $: prof = profilesStore ? profilesStore.myProfile : undefined
   $: amSteward = store ? store.amSteward : undefined
 
@@ -80,6 +78,7 @@
     getClient: () => client,
   });
   let createSessionDialog
+  let createSpaceDialog
 </script>
 
 <main>
@@ -106,13 +105,13 @@
       <div class="pane">
         <AllSessions on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}></AllSessions>
         Create Session:
-        <sl-button on:click={() => {creatingSession = true; createSessionDialog.open()} } circle>
+        <sl-button on:click={() => {createSessionDialog.open()} } circle>
           <Fa icon={faPlus} />
         </sl-button>
 
           <SessionCrud
             bind:this={createSessionDialog}
-            on:session-created={() => {creatingSession = false;} }
+            on:session-created={() => {} }
             ></SessionCrud>
       </div>
       {/if}
@@ -163,17 +162,15 @@
         ></AllSpaces>
         {#if $amSteward}
           Create Space:
-          <sl-button on:click={() => {creatingSpace = true; } } circle>
+          <sl-button on:click={() => {createSpaceDialog.open() } } circle>
             <Fa icon={faPlus} />
           </sl-button>
         {/if}
     
-        {#if creatingSpace}
-          <div class="modal"><SpaceCrud
-            on:space-created={() => {creatingSpace = false;} }
-            on:edit-canceled={() => { creatingSpace = false; } }
-            ></SpaceCrud></div>
-        {/if}
+          <SpaceCrud
+            bind:this={createSpaceDialog}
+            on:space-created={() => {} }
+            ></SpaceCrud>
       </div>
       {/if}
 

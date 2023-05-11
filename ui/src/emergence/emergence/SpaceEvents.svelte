@@ -37,7 +37,7 @@ $: error, loading, space;
 
 onMount(async () => {
   if (space === undefined) {
-    throw new Error(`The space input is required for the SpaceDetail element`);
+    throw new Error(`The space input is required for the SpaceEvents element`);
   }
   loading=false
 });

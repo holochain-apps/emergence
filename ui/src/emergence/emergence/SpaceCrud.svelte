@@ -10,6 +10,7 @@ import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
+import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
@@ -45,6 +46,10 @@ $: key, name, description, stewards, amenities;
 $: isSpaceValid = true && name !== '' && description !== '' && capacity > 0;
 
 onMount(() => {
+});
+
+export const open = (spc) => {
+  space = spc
   sitemap = store.getCurrentSiteMap()
   if (space) {
     key = space.record.entry.key
@@ -56,24 +61,7 @@ onMount(() => {
     pic = space.record.entry.pic
     tags = space.record.entry.tags
     location = store.getSpaceSiteLocation(space)
-  }
-});
-
-async function updateSpace() {
-  if (space) {
-    const updateRecord = await store.updateSpace(space.original_hash, {key, name, description, stewards, capacity, amenities, tags, pic, location})
-    if (updateRecord) {
-      dispatch('space-updated', { actionHash: updateRecord.actionHash });
-    } else {
-      dispatch('edit-canceled')
-    }
-  }
-}
-
-async function createSpace() {  
-  try {
-    const record = await store.createSpace(key, name, description, stewards, capacity, amenities, tags, pic, location)
-
+  } else {
     key = ""
     name = ""
     description = ""
@@ -82,12 +70,31 @@ async function createSpace() {
     pic = undefined
     tags = []
     location = undefined
+  }
+  dialog.show()
+}
+
+async function updateSpace() {
+  if (space) {
+    const updateRecord = await store.updateSpace(space.original_hash, {key, name, description, stewards, capacity, amenities, tags, pic, location})
+    if (updateRecord) {
+      dispatch('space-updated', { actionHash: updateRecord.actionHash });
+    }
+    dialog.hide()
+  }
+}
+
+async function createSpace() {  
+  try {
+    const record = await store.createSpace(key, name, description, stewards, capacity, amenities, tags, pic, location)
+
     dispatch('space-created', { space: record });
   } catch (e) {
     console.log("CREATE SPACE ERROR", e)
     errorSnackbar.labelText = `Error creating the space: ${e.data.data}`;
     errorSnackbar.show();
   }
+  dialog.hide()
 }
 function addSteward(agent: AgentPubKey) {
   const agentB64 = encodeHashToBase64(agent)
@@ -100,42 +107,35 @@ function deleteSteward(index: number) {
   stewards.splice(index, 1)
   stewards = stewards
 }
+let dialog
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<div style="display: flex; flex-direction: column">
-  <div style="display: flex; flex-direction: row; justify-content:space-between">
-
+<sl-dialog label={space?"Edit Space":"Create Space"}
+  bind:this={dialog}
+  >
   {#if space}
-
-    <span style="font-size: 18px">Edit Space</span>
-
-    <div style="display: flex; flex-direction: row">
-      <sl-button circle size=small
-      style="flex: 1;"
+      <sl-button circle 
+      style="margin-top:12px" 
+      slot="header-actions" 
       on:click={() => updateSpace()}
       disabled={!isSpaceValid}
       variant=primary><Fa icon={faSave} /></sl-button>
-      <sl-button circle size=small
-      label="Cancel"
-      on:click={() => dispatch('edit-canceled')}
-      style="flex: 1; margin-right: 16px"
-      ><Fa icon={faClose} /></sl-button>
-    </div>
+      
   {:else}
-    <span style="font-size: 18px">Create Space</span>
-    <div style="display: flex; flex-direction: row">
-      <sl-button circle size=small
+      <sl-button circle 
+      style="margin-top:12px" 
+      slot="header-actions" 
       on:click={() => createSpace()}
       disabled={!isSpaceValid}
       variant=primary><Fa icon={faSave} /></sl-button>
-      <sl-button circle size=small
-      label="Cancel"
-      on:click={() => dispatch('edit-canceled')}
-      style="flex: 1; margin-right: 16px"
-      ><Fa icon={faClose} /></sl-button>
-    </div>
+      
   {/if}
+
+
+  <div style="display: flex; flex-direction: column">
+  <div style="display: flex; flex-direction: row; justify-content:space-between">
+
 
 </div>
 
@@ -231,6 +231,7 @@ function deleteSteward(index: number) {
 
 
 </div>
+</sl-dialog>
 <style>
   :global(.pic-upload) {
     width: 200px;

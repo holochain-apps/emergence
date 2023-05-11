@@ -25,6 +25,7 @@ onMount(async () => {
   await store.fetchSpaces();
   loading = false;
 });
+let spaceDetailDialog
 
 </script>
 
@@ -46,20 +47,16 @@ onMount(async () => {
   {:else if $spaces.length === 0}
     <span>No spaces found.</span>
   {:else}
-    {#if spaceDetail}
-    <div class="modal">
+    
       <SpaceDetail
-        on:close-space-detail={()=>spaceDetail = undefined} 
+        bind:this={spaceDetailDialog}
         space={spaceDetail}>
       </SpaceDetail>
-    </div>
-    {/if}
-
 
     {#each $spaces as space}
       <div style="margin-bottom: 8px; width:100%;">
         <SpaceSummary
-          on:space-selected={()=>spaceDetail=space} 
+          on:space-selected={()=>{spaceDetail=space;spaceDetailDialog.open(space)}} 
           space={space}>
         </SpaceSummary>
       </div>

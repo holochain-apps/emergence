@@ -2,7 +2,10 @@
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js';
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
+import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+
 import { storeContext } from '../../contexts';
 import { amenitiesList, timeWindowDurationToStr, type Info, type Space, timeWindowStartToStr, type SlottedSession } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
@@ -33,11 +36,13 @@ $: editing,  error, loading, space, showConfirm;
 $: amSteward = store.amSteward
 
 onMount(async () => {
-  if (space === undefined) {
-    throw new Error(`The space input is required for the SpaceDetail element`);
-  }
-  loading=false
 });
+
+export const open = (spc) => {
+  space = spc
+  loading = false
+  dialog.show()
+}
 
 async function deleteSpace() {
   try {
@@ -48,16 +53,33 @@ async function deleteSpace() {
     errorSnackbar.labelText = `Error deleting the space: ${e.data.data}`;
     errorSnackbar.show();
   }
+  dialog.hide()
+  store.fetchSpaces()
+  showConfirm = false
 }
 
 const slottedSessionSummary = (ss: SlottedSession) : string => {
   return `${ss.session.record.entry.title} ${timeWindowStartToStr(ss.window)} for ${timeWindowDurationToStr(ss.window)}`
 }
+let dialog
+let editDialog
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
+<SpaceCrud
+  bind:this={editDialog}
+  space={ space }
+  on:space-updated={async () => {
+  } }
+></SpaceCrud>
 
+<sl-dialog label={space? space.record.entry.name : ""} bind:this={dialog} class="dialog-header-actions">
+  {#if $amSteward}
+  <sl-button style="margin-top:12px" slot="header-actions" on:click={() => showConfirm=true} circle ><Fa icon={faTrash} ></Fa></sl-button>
+  <sl-button style="margin-top:12px" slot="header-actions" on:click={() => {dialog.hide();editDialog.open(space)}} circle ><Fa icon={faEdit} ></Fa></sl-button>
+  {/if}
+  
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
   <sl-spinner></sl-spinner>
@@ -65,15 +87,6 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 </div>
 {:else if error}
 <span>Error fetching the space: {error.data.data}</span>
-{:else if editing}
-<SpaceCrud
-  space={ space }
-  on:space-updated={async () => {
-    editing = false;
-//    await fetchSpace()
-  } }
-  on:edit-canceled={() => { editing = false; } }
-></SpaceCrud>
 {:else}
 {#if showConfirm}
 <div class="modal">
@@ -82,22 +95,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
     on:confirm-confirmed={deleteSpace}></Confirm>
 </div>
 {/if}
-
 <div style="display: flex; flex-direction: column">
-  <div style="display: flex; flex-direction: row">
-    <span style="flex: 1"></span>
-    {#if $amSteward}
-      <sl-button style="margin-left: 8px;" size=small on:click={() => showConfirm=true} circle>
-        <Fa icon={faTrash} />
-      </sl-button>
-      <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
-        <Fa icon={faEdit} />
-      </sl-button>
-    {/if}
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-space-detail') } } circle>
-      <Fa icon={faClose} />
-    </sl-button>
-  </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Map Symbol:</strong></span>
@@ -163,6 +161,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 
 </div>
 {/if}
+</sl-dialog>
 
 <style>
   .pic {
