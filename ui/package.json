@@ -3,9 +3,10 @@
   "version": "0.1.0",
   "scripts": {
     "start": "vite --clearScreen false --port $UI_PORT",
-    "build": "npm run check && vite build",
+    "build": "vite build",
+    "build-check": "npm run check && vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "package": "npm run build && cd public && bestzip ../dist.zip *"
+    "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "^0.12.2",

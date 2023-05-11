@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, type ActionHash, type AppAgentClient } from '@holochain/client';
+  import { AdminWebsocket, type AppAgentClient } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faTicket, faUser, faGear, faRss, faCalendar, faPlus, faAmericanSignLanguageInterpreting, faHome } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faTicket, faUser, faGear, faCalendar, faPlus, faHome } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -54,7 +54,7 @@
     client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, 'emergence');
     if (adminPort) {
       const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
-      const x = await adminWebsocket.listApps({})
+      //const x = await adminWebsocket.listApps({})
       const cellIds = await adminWebsocket.listCellIds()
       await adminWebsocket.authorizeSigningCredentials(cellIds[0])
     }
@@ -77,8 +77,8 @@
   setContext(clientContext, {
     getClient: () => client,
   });
-  let createSessionDialog
-  let createSpaceDialog
+  let createSessionDialog: SessionCrud
+  let createSpaceDialog: SpaceCrud
 </script>
 
 <main>
@@ -104,7 +104,7 @@
       {#if pane=="sessions"}
       <div class="pane">
         <AllSessions on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}></AllSessions>
-        <div class="create-session" on:click={() => {createSessionDialog.open()} } >
+        <div class="create-session" on:click={() => {createSessionDialog.open(undefined)} } >
           <div class="summary">
             <div class="slot">
               <div class="slot-wrapper">
@@ -176,7 +176,7 @@
         ></AllSpaces>
         {#if $amSteward}
           Create Space:
-          <sl-button on:click={() => {createSpaceDialog.open() } } circle>
+          <sl-button on:click={() => {createSpaceDialog.open(undefined) } } circle>
             <Fa icon={faPlus} />
           </sl-button>
         {/if}

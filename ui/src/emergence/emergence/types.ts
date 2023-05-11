@@ -1,8 +1,7 @@
-import type { ActionHashMap, EntryRecord, HoloHashMap } from '@holochain-open-dev/utils';
+import type { EntryRecord, HoloHashMap } from '@holochain-open-dev/utils';
 import { 
   type Record, 
   type ActionHash,
-  type DnaHash,
   type SignedActionHashed,
   type EntryHash, 
   type AgentPubKey,
