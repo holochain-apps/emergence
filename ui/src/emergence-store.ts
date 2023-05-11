@@ -1023,8 +1023,11 @@ export class EmergenceStore {
         } )
         this.mySessions.update((n) => {
             feed.forEach(f=>{
-                if (f.type == FeedType.SessionSetInterest) {
+                if (f.type == FeedType.SessionSetInterest  && f.detail != SessionInterest.NoOpinion) {
                     n.set(f.about,f.detail)
+                }
+                if (f.type == FeedType.SessionSetInterest  && f.detail == SessionInterest.NoOpinion) {
+                    n.delete(f.about)
                 }
             }
             )

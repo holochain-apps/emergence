@@ -55,12 +55,23 @@
         </div>
     {:else}
     <sl-tab-group>
-        <sl-tab slot="nav" panel="notes">Notes
-        </sl-tab>
         <sl-tab slot="nav" panel="sessions">Sessions
+        </sl-tab>
+        <sl-tab slot="nav" panel="notes">Notes
         </sl-tab>
         <sl-tab slot="nav" panel="updates">Updates</sl-tab>
     
+        <sl-tab-panel name="sessions">
+            {#if $mySessions.size == 0}
+                You haven't created or marked interest in any sessions yet.. 
+            {/if}
+
+            {#each Array.from($mySessions.keys()) as session}
+            <SessionSummary showTags={true} showSlot={true} allowSetIntention={true} session={store.getSession(session)}></SessionSummary>
+            {/each}
+
+
+        </sl-tab-panel>
         <sl-tab-panel name="notes">
             {#if $myNotes.length == 0}
                 You haven't created any notes yet.. 
@@ -69,17 +80,6 @@
                 <NoteDetail noteHash={note}></NoteDetail>
             {/each}
             
-        </sl-tab-panel>
-        <sl-tab-panel name="sessions">
-            {#if $mySessions.size == 0}
-                You haven't created or marked interest in any sessions yet.. 
-            {/if}
-
-            {#each Array.from($mySessions.keys()) as session}
-            <SessionSummary session={store.getSession(session)}></SessionSummary>
-            {/each}
-
-
         </sl-tab-panel>
         <sl-tab-panel name="updates">
             TBD

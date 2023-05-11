@@ -1,12 +1,12 @@
 <script lang="ts">
 import { createEventDispatcher, onMount, getContext } from 'svelte';
-import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { type Slot, type Session, type Info, amenitiesList, sessionTags } from './types';
+import { type Slot, type Session, type Info, amenitiesList, sessionTags, SessionInterest, sessionInterestToString } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import Avatar from './Avatar.svelte';
 import InterestSelect from './InterestSelect.svelte';
 import { faUserGroup } from '@fortawesome/free-solid-svg-icons';
@@ -30,6 +30,8 @@ $: relData = store.sessionReleationDataStore(store.sessionStore(session.original
 $: loading, session, slot;
 $: tags = sessionTags(session)
 $: slot = store.getSessionSlot(session)
+$: going = Array.from($relData.interest).filter(([_,i])=> i!=SessionInterest.NoOpinion)
+
 onMount(async () => {
   loading = false
   if (session === undefined) {
@@ -89,7 +91,24 @@ onMount(async () => {
         {#if allowSetIntention}
           <InterestSelect sessionHash={session.original_hash}></InterestSelect>
         {/if}
-        <Fa icon={faUserGroup} /> {$relData.interest.size} 
+        {#if going.length > 0}
+        <sl-tooltip >
+          <div slot="content">
+            <div style="display:flex">
+              {#each going as [agent,interest]}
+              <Avatar agentPubKey={agent}></Avatar>:{sessionInterestToString(interest)}
+              {/each}
+              </div>
+          </div>
+          <div style="display:flex">
+            <Fa icon={faUserGroup} /> 
+            {going.length}
+          </div>  
+        </sl-tooltip>
+        {:else}
+         <Fa icon={faUserGroup} /> 0
+        {/if}
+
       </div>
     </div>
     <div class="bottom-area">
