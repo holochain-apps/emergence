@@ -110,13 +110,11 @@ export interface Note {
   trashed: boolean,
 }
 
-
 export interface UpdateNoteInput {
   original_note_hash: ActionHash,
   previous_note_hash: ActionHash,
   updated_note: Note,
 }
-
 
 export interface SiteMap {
   text: string,

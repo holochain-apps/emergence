@@ -18,7 +18,6 @@ import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-de
 import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
-import { UpdateProfile } from '@holochain-open-dev/profiles/dist/elements/update-profile';
 
 TimeAgo.addDefaultLocale(en)
 
