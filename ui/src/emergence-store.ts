@@ -366,6 +366,18 @@ export class EmergenceStore {
     return record
   }
 
+  async recordSense(sessionHash: ActionHash, type: SessionInterest) {
+    const relations = [
+        {   src: sessionHash, // should be agent key
+            dst: sessionHash,
+            content:  {
+                path: `feed.${FeedType.Sense}`,
+                data: JSON.stringify(type)
+            }
+        },
+    ]
+    await this.client.createRelations(relations)
+  }
 
   async updateSession(sessionHash: ActionHash, props:any): Promise<EntryRecord<Session>> {
     const sessionIdx = this.getSessionIdx(sessionHash)

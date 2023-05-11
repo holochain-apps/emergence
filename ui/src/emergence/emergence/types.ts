@@ -253,6 +253,7 @@ export enum FeedType {
    SiteMapUpdate,
    SiteMapDelete,
    TimeWindowNew,
+   Sense,
 }
 
 export interface FeedElem {
@@ -280,6 +281,7 @@ export const getTypeName = (type: FeedType) : string  => {
     case FeedType.SiteMapDelete: return "Delete SiteMap"
     case FeedType.SlotSession: return "Scheduled Session"
     case FeedType.TimeWindowNew: return "New Slot"
+    case FeedType.Sense: return "Sense Added"
   }
   return "Unknown feed type"
 }
@@ -368,7 +370,11 @@ export const sessionNotes = (session: Info<Session>):Array<ActionHash> => {
 }
 
 export const sessionTags = (session: Info<Session>):Array<string> => {
-  return session.relations.filter(r=>r.relation.content.path == "session.tag").map(r=> r.relation.content.data)
+  const tagsMap = {}
+  session.relations.filter(r=>r.relation.content.path == "session.tag").forEach(r=> tagsMap[r.relation.content.data] = tagsMap[r.relation.content.data] ? tagsMap[r.relation.content.data] += 1 : 1)
+  const tags = Object.keys(tagsMap)
+  console.log("TAGS",tagsMap)
+  return tags.sort((a,b)=>tagsMap[a]-tagsMap[b])
 }
 
 export const sessionSelfTags = (session: Info<Session>):Array<string> => {

@@ -12,6 +12,7 @@
     import type { EmergenceStore } from '../../emergence-store';
     import Feed from './Feed.svelte';
     import TagCloud from './TagCloud.svelte'
+  import Sense from './Sense.svelte';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let steward: SlCheckbox
@@ -36,6 +37,8 @@
         </sl-tab>
         <sl-tab slot="nav" panel="feed">Feed
         </sl-tab>
+        <sl-tab slot="nav" panel="sense">Swipe Game
+        </sl-tab>
     
         <sl-tab-panel name="feed">
             <Feed></Feed>            
@@ -43,6 +46,9 @@
         <sl-tab-panel name="cloud">
             <TagCloud></TagCloud>
 
+        </sl-tab-panel>
+        <sl-tab-panel name="sense">
+            <Sense></Sense>
         </sl-tab-panel>
     </sl-tab-group>
 </div>

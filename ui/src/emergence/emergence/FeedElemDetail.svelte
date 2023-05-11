@@ -78,6 +78,9 @@ const sessionTitle = (sessionHash: ActionHash) => {
     {#if feedElem.type === FeedType.SiteMapDelete}
       deleted sitemap {feedElem.detail}
     {/if}
+    {#if feedElem.type === FeedType.Sense}
+      sense added: {sessionInterestToString(JSON.parse(feedElem.detail))} for {store.getSession(feedElem.about).record.entry.title}
+    {/if}
   </div>
 </div>
 <style>
