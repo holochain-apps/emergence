@@ -104,10 +104,24 @@
       {#if pane=="sessions"}
       <div class="pane">
         <AllSessions on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}></AllSessions>
-        Create Session:
-        <sl-button on:click={() => {createSessionDialog.open()} } circle>
-          <Fa icon={faPlus} />
-        </sl-button>
+        <div class="create-session" on:click={() => {createSessionDialog.open()} } >
+          <div class="summary">
+            <div class="slot">
+              <div class="slot-wrapper">
+                +
+              </div>
+            </div>
+            <div class="info">
+              <div class="top-area">
+                <div class="left-side">
+                  <span><strong>Create a session</strong></span>
+                  <p>What are you excited to share with this community? What special insights and wisdom are you ready to share?</p>
+                </div>
+                <div class="right-side"></div>
+              </div>
+            </div>
+          </div>
+        </div>
 
           <SessionCrud
             bind:this={createSessionDialog}
@@ -336,6 +350,64 @@
   .nav-button .button-title {
     font-size: 9px;
     padding-top: 5px;
+  }
+
+  .create-session {
+   max-width: 720px;
+   border: 1px solid rgba(239, 240, 243, 1.0);
+   display: flex;
+   background-color: rgba(243, 243, 245, 1.0);
+   width: 100%;
+   opacity: .6;
+    transition: all .25s ease;
+
+  }
+
+  .create-session:hover {
+    opacity: 1;
+    cursor: pointer;
+  }
+
+  .summary {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+  }
+
+   .slot {
+     width: 95px;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+   }
+
+   .slot-wrapper {
+    height: 50px;
+    width: 50px;
+    font-size: 24px;
+    font-weight: bold;
+    border: 3px solid rgba(116, 116, 122, 1.0);
+    color: rgba(116, 116, 122, 1.0);
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: .5;
+   }
+
+  .info {
+    width: 100%;
+    flex-stretch: 1;
+    background-color: #fff;
+  }
+
+  .left-side {
+    padding: 10px;
+  }
+
+  .left-side p {
+    opacity: .5;
+    font-size: 12px;
   }
 
   .selected {
