@@ -27,19 +27,18 @@ export const neededStuffStore = (client: EmergenceClient) => {
 
     setInterval(async ()=>{
         if(neededStuff.notes ? true : false) {
-        const stuff = await client.getStuff(neededStuff)
-        console.log("STUFF",stuff)
-        if (stuff.notes) {
-            notes.update(oldNotes=>{
-                stuff.notes.forEach(n=>{
-                   if (n) {
-                       oldNotes.set(n.original_hash,n)
-                   }
+            const stuff = await client.getStuff(neededStuff)
+            if (stuff.notes) {
+                notes.update(oldNotes=>{
+                    stuff.notes.forEach(n=>{
+                    if (n) {
+                        oldNotes.set(n.original_hash,n)
+                    }
+                    })
+                    return oldNotes
                 })
-                return oldNotes
-            })
-            neededStuff.notes = undefined
-        }
+                neededStuff.notes = undefined
+            }
         }}
     , 1000);
     return {
@@ -363,19 +362,6 @@ export class EmergenceStore {
 
     this.fetchSessions()
     return record
-  }
-
-  async recordSense(sessionHash: ActionHash, type: SessionInterest) {
-    const relations = [
-        {   src: sessionHash, // should be agent key
-            dst: sessionHash,
-            content:  {
-                path: `feed.${FeedType.Sense}`,
-                data: JSON.stringify(type)
-            }
-        },
-    ]
-    await this.client.createRelations(relations)
   }
 
   async updateSession(sessionHash: ActionHash, props:any): Promise<EntryRecord<Session>> {
@@ -809,6 +795,7 @@ export class EmergenceStore {
         },        
     ))
     await this.client.createRelations(relations)
+    this.needNote(record.actionHash)
     this.fetchSessions()
     return record
   }

@@ -371,7 +371,6 @@ export const sessionTags = (session: Info<Session>):Array<string> => {
   const tagsMap = {}
   session.relations.filter(r=>r.relation.content.path == "session.tag").forEach(r=> tagsMap[r.relation.content.data] = tagsMap[r.relation.content.data] ? tagsMap[r.relation.content.data] += 1 : 1)
   const tags = Object.keys(tagsMap)
-  console.log("TAGS",tagsMap)
   return tags.sort((a,b)=>tagsMap[a]-tagsMap[b])
 }
 

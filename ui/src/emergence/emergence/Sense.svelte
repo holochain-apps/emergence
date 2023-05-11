@@ -15,27 +15,30 @@
   let loading = true;
   let error: any = undefined;
   let senseIdx = 0
-  $: original = store.sessions
-  $: sessions =  shuffle($original)
-  $: loading, error, senseIdx;
-  $: session = sessions[senseIdx]
-  $: slot = store.getSessionSlot(session)
+  let sessions
 
+  $: original = store.sessions
+  $: count = $original.length < 10 ? sessions.length : 10
+  $: sessions 
+  $: loading, error, senseIdx;
+  $: session = sessions ? sessions[senseIdx] : undefined
+  $: slot = session ? store.getSessionSlot(session) : undefined
 
   onMount(async () => {
-    await store.fetchFeed();
+    sessions = shuffle($original)
     loading = false
   });
 
-  const swipe = (type: SessionInterest) => {
-    store.recordSense(session.record.actionHash, type)
+  const swipe = (interest: SessionInterest) => {
+    store.setSessionInterest(session.record.actionHash, interest)
     senseIdx += 1
   }
 
   const shuffle = (sessions: Array<Info<Session>>) => {
-    return sessions.map(value => ({ value, sort: Math.random() }))
+    const shuffled = sessions.map(value => ({ value, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value)
+    return shuffled.splice(0,count)
   }
 
 </script>
@@ -49,6 +52,7 @@
 <span>All Done, thanks!</span>
 {:else}
 <div >
+    Remaining: {count - senseIdx}
     <div class="sense-item">
       <h1>{session.record.entry.title}</h1>
       <div class="leaders">
