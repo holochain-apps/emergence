@@ -156,6 +156,8 @@ html{
 
 .pane-content{
   background-color: #fff;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 html{
   background-color: #cadddf;

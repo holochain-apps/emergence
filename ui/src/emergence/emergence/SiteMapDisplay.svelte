@@ -97,7 +97,7 @@
             {#if file && picB64}
             
             {#each locations as loc}
-            <sl-tooltip  trigger="click">
+            <sl-tooltip >
                 <div slot="content">
                     <div style="display:flex; flex-direction:column">
                         <span>{loc.space.record.entry.name}</span>
