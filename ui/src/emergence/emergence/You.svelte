@@ -15,6 +15,7 @@
     import NoteDetail from './NoteDetail.svelte';
     import SessionSummary from './SessionSummary.svelte';
     import Avatar from './Avatar.svelte';
+    import Feed from './Feed.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -86,8 +87,7 @@
             
         </sl-tab-panel>
         <sl-tab-panel name="updates">
-            TBD
-
+            <Feed forMe={true}></Feed>
         </sl-tab-panel>
     </sl-tab-group>
     {/if}
