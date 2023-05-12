@@ -876,7 +876,11 @@ export class EmergenceStore {
         this.neededStuffStore.notes.clear([noteHash])
         const session = this.getSession(note.record.entry.session)
         if (session) {
-            const relations = session.relations.filter(ri=>ri.relation.content.path === "session.note").map(ri=>ri.create_link_hash)
+            const hashB64 = encodeHashToBase64(noteHash)
+            const relations = session.relations.filter(ri=>
+                ri.relation.content.path === "session.note" &&
+                encodeHashToBase64(ri.relation.dst) == hashB64
+                ).map(ri=>ri.create_link_hash)
             await this.client.deleteRelations(relations)
             this.fetchSessions()
         }

@@ -19,13 +19,12 @@
 
   $: original = store.sessions
   $: count = $original.length < 10 ? sessions.length : 10
-  $: sessions 
+  $: sessions = shuffle($original)
   $: loading, error, senseIdx;
   $: session = sessions ? sessions[senseIdx] : undefined
   $: slot = session ? store.getSessionSlot(session) : undefined
 
   onMount(async () => {
-    sessions = shuffle($original)
     loading = false
   });
 
