@@ -32,15 +32,12 @@
       store.deleteNote($note.value.record.actionHash)
     }
 
-    let showConfirm = false
+    let confirmDialog
 </script>
-{#if showConfirm}
-<div class="modal">
-  <Confirm message="Please confirm delete." 
-    on:confirm-canceled={()=>showConfirm=false} 
+  <Confirm 
+    bind:this={confirmDialog}
+    message="Please confirm delete." 
     on:confirm-confirmed={deleteNote}></Confirm>
-</div>
-{/if}
 
 {#if $note.status=== "pending"}
   <sl-spinner></sl-spinner>
@@ -75,7 +72,7 @@
             !$note.value.record.entry.trashed
          }
             <div class="crud">
-              <sl-button style="margin-left: 8px;" size=small on:click={()=>showConfirm=true} circle>
+              <sl-button style="margin-left: 8px;" size=small on:click={()=>confirmDialog.open()} circle>
                 <Fa icon={faTrash} />
               </sl-button>
               <sl-button style="margin-left: 8px; " size=small on:click={() => { updateNoteDialog.open($note.value) } } circle>

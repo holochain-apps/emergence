@@ -65,9 +65,11 @@
     const sessions: HoloHashMap<ActionHash, Info<Session>> = new HoloHashMap
     rel.forEach(r=> {
       const session = store.getSession(r.relation.dst)
-      const slot = store.getSessionSlot(session)
-      if (slotEqual({window,space:space.original_hash}, slot)) {
-        sessions.set(session.original_hash, session)
+      if (session) {
+        const slot = store.getSessionSlot(session)
+        if (slotEqual({window,space:space.original_hash}, slot)) {
+          sessions.set(session.original_hash, session)
+        }
       }
     })
     return Array.from(sessions.values())

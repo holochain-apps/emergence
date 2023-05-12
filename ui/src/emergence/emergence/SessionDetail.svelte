@@ -30,7 +30,6 @@ let error: any = undefined;
 
 let editing = false;
 let creatingNote = false;
-let showConfirm = false
 
 let errorSnackbar: Snackbar;
 
@@ -99,6 +98,8 @@ async function deleteSession() {
   }
 }
 let createNoteDialog
+let confirmDialog
+
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -132,7 +133,7 @@ bind:this={updateSessionDialog}
         <sl-button size=small on:click={() => { updateSessionDialog.open($session) } } circle>
           <Fa icon={faEdit} />
         </sl-button>
-        <sl-button size=small on:click={()=>showConfirm=true} circle>
+        <sl-button size=small on:click={()=>confirmDialog.open()} circle>
           <Fa icon={faTrash} />
         </sl-button>
       </div>
@@ -147,11 +148,10 @@ bind:this={updateSessionDialog}
     </div>
 
   </div>
-  {#if showConfirm}
-    <div class="modal">
-      <Confirm message="This will remove this session for everyone!" on:confirm-canceled={()=>showConfirm=false} on:confirm-confirmed={deleteSession}></Confirm>
-    </div>
-  {/if}
+  
+  <Confirm bind:this={confirmDialog}
+    message="This will remove this session for everyone!" on:confirm-confirmed={deleteSession}></Confirm>
+ 
   <div class="details">
     <div class="properties">
       <div style="display: flex; flex-direction: row; margin-bottom: 16px">

@@ -11,7 +11,7 @@ import { amenitiesList, timeWindowDurationToStr, type Info, type Space, timeWind
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
-import { faTrash, faEdit, faClose } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import SpaceCrud from './SpaceCrud.svelte'; 
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
@@ -28,11 +28,10 @@ let loading = true;
 let error: any = undefined;
 
 let editing = false;
-let showConfirm = false
 
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, space, showConfirm;
+$: editing,  error, loading, space;
 $: amSteward = store.amSteward
 
 onMount(async () => {
@@ -55,7 +54,6 @@ async function deleteSpace() {
   }
   dialog.hide()
   store.fetchSpaces()
-  showConfirm = false
 }
 
 const slottedSessionSummary = (ss: SlottedSession) : string => {
@@ -63,6 +61,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 }
 let dialog
 let editDialog
+let confirmDialog
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -76,7 +75,7 @@ let editDialog
 
 <sl-dialog label={space? space.record.entry.name : ""} bind:this={dialog} class="dialog-header-actions">
   {#if $amSteward}
-  <sl-button style="margin-top:12px" slot="header-actions" on:click={() => showConfirm=true} circle ><Fa icon={faTrash} ></Fa></sl-button>
+  <sl-button style="margin-top:12px" slot="header-actions" on:click={() => confirmDialog.open()} circle ><Fa icon={faTrash} ></Fa></sl-button>
   <sl-button style="margin-top:12px" slot="header-actions" on:click={() => {dialog.hide();editDialog.open(space)}} circle ><Fa icon={faEdit} ></Fa></sl-button>
   {/if}
   
@@ -88,13 +87,11 @@ let editDialog
 {:else if error}
 <span>Error fetching the space: {error.data.data}</span>
 {:else}
-{#if showConfirm}
-<div class="modal">
-  <Confirm message="This will remove this space for everyone!" 
-    on:confirm-canceled={()=>showConfirm=false} 
-    on:confirm-confirmed={deleteSpace}></Confirm>
-</div>
-{/if}
+  <Confirm 
+    bind:this={confirmDialog}
+    message="This will remove this space for everyone!" 
+    on:confirm-confirmed={deleteSpace}>
+  </Confirm>
 <div style="display: flex; flex-direction: column">
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">

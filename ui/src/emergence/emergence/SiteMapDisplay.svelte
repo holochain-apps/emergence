@@ -63,9 +63,11 @@
 
         rel.forEach(r=> {
             const session = store.getSession(r.relation.dst)
-            const slot = store.getSessionSlot(session)
-            if (spaceB64 == encodeHashToBase64(slot.space)) {
-                sessions.set(session.original_hash, {title: session.record.entry.title, window: slot.window})
+            if (session) {
+                const slot = store.getSessionSlot(session)
+                if (spaceB64 == encodeHashToBase64(slot.space)) {
+                    sessions.set(session.original_hash, {title: session.record.entry.title, window: slot.window})
+                }
             }
          })
         return Array.from(sessions.values())

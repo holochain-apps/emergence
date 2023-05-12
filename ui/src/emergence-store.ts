@@ -584,9 +584,11 @@ export class EmergenceStore {
     space.relations.forEach(ri => {
       if (ri.relation.content.path == "space.sessions") {
         const session = this.getSession(ri.relation.dst)
-        const slot = this.getSessionSlot(session)
-        if (encodeHashToBase64(slot.space) == encodeHashToBase64(space.original_hash)) {
-          const s = sessions.set(session.original_hash, {session,window:JSON.parse(ri.relation.content.data)})
+        if (session) {
+            const slot = this.getSessionSlot(session)
+            if (encodeHashToBase64(slot.space) == encodeHashToBase64(space.original_hash)) {
+            const s = sessions.set(session.original_hash, {session,window:JSON.parse(ri.relation.content.data)})
+            }
         }
       }
     })
