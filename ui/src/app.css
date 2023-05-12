@@ -65,7 +65,6 @@ input, button {
 
 /*Now, let's style the bottom navigation.*/
 .nav {
-  border: 1px solid red;
   display: flex;
   justify-content: space-between;
   background-color: var(--primary-color);
@@ -125,6 +124,7 @@ input, button {
   font-size: 1rem;
   font-weight: 400;
   width: 100vw;
+  text-align: center;
 }
 
 .space-pic{

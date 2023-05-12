@@ -297,6 +297,13 @@
   .pane {
     position: relative;
   }
+
+  :global(sl-dialog) {
+    z-index: 10000000;
+    position: relative;
+    display: block;
+  }
+
   :global(.modal) {
     background-color: white;
     padding: 10px;
@@ -429,6 +436,10 @@
     color: #fceed7;
     cursor: pointer;
   }
+
+.dialog {
+  z-index: 10000;
+}
 
   .pane {
     width: 100vw;

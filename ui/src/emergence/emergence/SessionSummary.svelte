@@ -78,41 +78,37 @@ onMount(async () => {
   <div class="info">
     <div class="top-area">
       <div class="left-side">
-        <div>
-            <span style="white-space: pre-line"><strong>{ session.record.entry.title }</strong></span>
+        <div class="title">
+            <span style="white-space: pre-line"><strong>{ session.record.entry.title }</strong> </span>
+            <span class="attendees">
+              {#if going.length > 0}
+              <sl-tooltip >
+                <div slot="content">
+                  <div style="display:flex">
+                    {#each going as [agent,interest]}
+                    <Avatar agentPubKey={agent}></Avatar>:{sessionInterestToString(interest)}
+                    {/each}
+                    </div>
+                </div>
+                <div style="display: inline-flex">
+                  <Fa icon={faUserGroup} />
+                  {going.length}
+                </div>
+              </sl-tooltip>
+              {:else}
+               <Fa icon={faUserGroup} /> 0
+              {/if}
+            </span>
         </div>
-        <div>
+        <div class="leaders">
+            <span>Hosted by</span>
             {#each session.record.entry.leaders as leader}
-            <Avatar showAvatar={false} agentPubKey={leader}></Avatar>
+              <Avatar showAvatar={false} agentPubKey={leader}></Avatar>
             {/each}
         </div>
       </div>
-      <div class="right-side" on:click={(e)=>{e.stopPropagation()}}>
-        {#if allowSetIntention}
-          <InterestSelect sessionHash={session.original_hash}></InterestSelect>
-        {/if}
-        {#if going.length > 0}
-        <sl-tooltip >
-          <div slot="content">
-            <div style="display:flex">
-              {#each going as [agent,interest]}
-              <Avatar agentPubKey={agent}></Avatar>:{sessionInterestToString(interest)}
-              {/each}
-              </div>
-          </div>
-          <div style="display:flex">
-            <Fa icon={faUserGroup} /> 
-            {going.length}
-          </div>  
-        </sl-tooltip>
-        {:else}
-         <Fa icon={faUserGroup} /> 0
-        {/if}
-
-      </div>
     </div>
     <div class="bottom-area">
-
       {#if showTags}
         <div class="tags">
           {#each tags as tag}
@@ -130,7 +126,11 @@ onMount(async () => {
       {/if}
     </div>
   </div>
-
+  <div class="right-side" on:click={(e)=>{e.stopPropagation()}}>
+    {#if allowSetIntention}
+      <InterestSelect sessionHash={session.original_hash}></InterestSelect>
+    {/if}
+  </div>
 </div>
 {/if}
 
@@ -148,6 +148,8 @@ onMount(async () => {
     flex-direction: row;
     border: solid 1px #EFF0F3;
     align-items: stretch;
+    max-width: 720px;
+    margin: 0 auto 10px auto;
 
   }
   .slot {
@@ -182,5 +184,23 @@ onMount(async () => {
   .right-side {
     display: flex;
     flex: 0;
+    padding: 10px;
+  }
+
+  .leaders {
+    font-size: 12px;
+    display: inline-flex;
+    margin-bottom: 5px;
+  }
+
+  .leaders span {
+    display: inline-block;
+    opacity: .5;
+    padding-right: 4px;
+  }
+
+  .attendees {
+    opacity: .6;
+    font-size: 12px;
   }
 </style>

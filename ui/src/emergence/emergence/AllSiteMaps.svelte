@@ -55,7 +55,6 @@ onMount(async () => {
   :global(.pane-content) {
     overflow-y: auto;
     height: auto;
-    max-width: 720px;
     width: 100%;
   }
 </style>

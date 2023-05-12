@@ -161,7 +161,11 @@
     margin-right: 5px;
     padding-top: 0px;
     padding-bottom: 0px;
+    font-size: 12px;
     margin-bottom: .25em;
+    border: 1px solid rgba(243, 243, 245, 1.0);
+    background-color: rgba(243, 243, 245, 1.0);
+    color: rgba(0, 0, 0, .5);
   }
 
 

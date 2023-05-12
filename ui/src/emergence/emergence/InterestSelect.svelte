@@ -62,5 +62,10 @@ let open = false
 <style>
   .select {
     display:flex;
+    border: 1px solid rgba(212, 212, 214, 1.0);
+    padding: 0 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    align-items: center;
   }
 </style>
