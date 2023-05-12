@@ -189,7 +189,7 @@ let dialog
   <div style="margin-bottom: 16px">
     <sl-input
     label="Capacity"
-    value={`${capacity}`}
+    value={isNaN(capacity)? '' : `${capacity}`}
     on:input={e => { capacity = parseInt(e.target.value); } }
     ></sl-input>
   </div>

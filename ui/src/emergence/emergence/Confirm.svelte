@@ -29,7 +29,7 @@ export const open = ()=>{
       <sl-button 
       style="flex: 1;"
       on:click={() => {dialog.hide(); dispatch('confirm-confirmed')}}
-      variant=primary>Confrim</sl-button>
+      variant=primary>Confirm</sl-button>
     </div>
 </div>
 </sl-dialog>

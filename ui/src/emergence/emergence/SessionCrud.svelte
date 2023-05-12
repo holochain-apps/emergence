@@ -165,21 +165,21 @@ let dialog
   <div style="margin-bottom: 16px">
     <sl-input
     label="Smallest Group-Size"
-    value={`${smallest}`}
+    value={isNaN(smallest)? '' : `${smallest}`}
     on:input={e => { smallest = parseInt(e.target.value); } }
   ></sl-input>
   </div>
   <div style="margin-bottom: 16px">
     <sl-input
     label="Largest Group-Size"
-    value={`${largest}`}
+    value={isNaN(largest)? '' : `${largest}`}
     on:input={e => { largest = parseInt(e.target.value); } }
   ></sl-input>
   </div>
   <div style="margin-bottom: 16px">
     <sl-input
     label="Duration (min)"
-    value={`${duration}`}
+    value={isNaN(duration)? '' : `${duration}`}
     on:input={e => { duration = parseInt(e.target.value); } }
   ></sl-input>
   </div>
