@@ -190,7 +190,9 @@
 
       {#if pane=="you"}
       <div class="pane">
-        <You></You>
+        <You
+        on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}
+        ></You>
       </div>
       {/if}
       {#if pane=="admin"}

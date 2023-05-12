@@ -11,6 +11,7 @@ import Avatar from './Avatar.svelte';
 import InterestSelect from './InterestSelect.svelte';
 import { faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
+import SpaceDetail from './SpaceDetail.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -38,7 +39,8 @@ onMount(async () => {
     throw new Error(`The session input is required for the SessionSummary element`);
   }
 });
-
+let spaceDetailDialog
+$:space = slot? store.getSpace(slot.space) : undefined
 </script>
 
 {#if loading}
@@ -47,6 +49,10 @@ onMount(async () => {
 
 </div>
 {:else}
+<SpaceDetail
+bind:this={spaceDetailDialog}
+space={undefined}>
+</SpaceDetail>
 <div class="summary" on:click={(e)=>{
   // @ts-ignore
     if (e.target.tagName != "SL-SELECT")
@@ -62,8 +68,8 @@ onMount(async () => {
         <div class="time">
           {new Date(slot.window.start).toTimeString().slice(0,5)}
         </div>
-        <div class="space">
-          {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"}
+        <div class="space clickable" on:click={(e)=>{e.stopPropagation();spaceDetailDialog.open(space)}}>
+          {space ? space.record.entry.name : "Unknown"}
         </div>
         {:else}
         <div class="date">
@@ -155,7 +161,7 @@ onMount(async () => {
   .slot {
     display: flex;
     align-items: center;
-    width: 90px;
+    width: 105px;
     background-color: rgba(243, 243, 245, 1.0);
     text-align: center;
   }
@@ -202,5 +208,8 @@ onMount(async () => {
   .attendees {
     opacity: .6;
     font-size: 12px;
+  }
+  :global(.clickable) {
+    cursor: pointer;
   }
 </style>

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount, getContext } from 'svelte';
+    import { onMount, getContext, createEventDispatcher } from 'svelte';
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
     import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
@@ -15,6 +15,8 @@
     import NoteDetail from './NoteDetail.svelte';
     import SessionSummary from './SessionSummary.svelte';
     import Avatar from './Avatar.svelte';
+
+    const dispatch = createEventDispatcher();
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let steward: SlCheckbox
@@ -67,7 +69,9 @@
             {/if}
 
             {#each Array.from($mySessions.keys()) as session}
-            <SessionSummary showTags={true} showSlot={true} allowSetIntention={true} session={store.getSession(session)}></SessionSummary>
+            <SessionSummary 
+                on:session-selected={(event)=>{dispatch('session-selected', event.detail)}} 
+            showTags={true} showSlot={true} allowSetIntention={true} session={store.getSession(session)}></SessionSummary>
             {/each}
 
 
