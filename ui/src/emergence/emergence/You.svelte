@@ -67,12 +67,13 @@
         </sl-dialog>
     
     <sl-tab-group>
-        <sl-tab slot="nav" panel="sessions">Sessions
-        </sl-tab>
-        <sl-tab slot="nav" panel="notes">Notes
-        </sl-tab>
-        <sl-tab slot="nav" panel="updates">Updates</sl-tab>
-    
+        <div class="navigation">
+            <sl-tab slot="nav" panel="sessions">Sessions
+            </sl-tab>
+            <sl-tab slot="nav" panel="notes">Notes
+            </sl-tab>
+            <sl-tab slot="nav" panel="updates">Updates</sl-tab>
+        </div>
         <sl-tab-panel name="sessions">
             {#if $mySessions.size == 0}
                 You haven't created or marked interest in any sessions yet.. 
@@ -106,4 +107,9 @@
 </div>
 
 <style>
+
+    .navigation {
+        display: flex;
+        justify-content: center;
+    }
 </style>

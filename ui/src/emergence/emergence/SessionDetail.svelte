@@ -154,10 +154,10 @@ bind:this={updateSessionDialog}
     </div>
 
   </div>
-  
+
   <Confirm bind:this={confirmDialog}
     message="This will remove this session for everyone!" on:confirm-confirmed={deleteSession}></Confirm>
- 
+
   <div class="details">
 
     <div class="properties">
@@ -259,6 +259,8 @@ bind:this={updateSessionDialog}
 <style>
   .notes{
     border-top: solid 1px;
+    max-width: 720px;
+    margin: 0 auto;
   }
   .details {
     display: flex;
@@ -266,6 +268,8 @@ bind:this={updateSessionDialog}
     align-items: flex-start;
     margin-bottom: 16px;
     justify-content: space-between;
+    max-width: 720px;
+    margin: 0 auto;
   }
 
   .controls {
