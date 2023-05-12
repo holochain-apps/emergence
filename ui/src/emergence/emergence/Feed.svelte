@@ -15,10 +15,10 @@
   $: mySessions = store.mySessions
   $: mySessionsb64 = Array.from($mySessions).map(([s,_])=> encodeHashToBase64(s))
   $: fullFeed = store.feed
-  $: feed = !forMe ? $fullFeed : $fullFeed.filter(f=>
+  $: feed = !forMe ? $fullFeed.reverse() : $fullFeed.filter(f=>
     encodeHashToBase64(f.author) == store.myPubKeyBase64 ||
     mySessionsb64.includes(encodeHashToBase64(f.about))
-    )
+    ).reverse()
   $: loading, error;
 
   onMount(async () => {
@@ -39,7 +39,7 @@
 <span>No Activity</span>
 {:else}
 <div >
-  {#each feed.reverse() as f}
+  {#each feed as f}
     <div class="feed-item">
       <FeedElemDetail feedElem={f}></FeedElemDetail>
     </div>

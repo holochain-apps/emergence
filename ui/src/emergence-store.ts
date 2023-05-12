@@ -814,6 +814,7 @@ export class EmergenceStore {
                 session: note.record.entry.session,
                 tags,
                 trashed: false,
+                pic,
             }
         }
         const noteEntry = note.record.entry
@@ -823,6 +824,9 @@ export class EmergenceStore {
         }
         if (noteEntry.pic != pic) {
             changes.push(`pic`)
+        }
+        if (JSON.stringify(noteEntry.tags.sort()) != JSON.stringify(tags.sort())) {
+            changes.push(`tags`)
         }
         if (changes.length > 0) {
             const record = await this.client.updateNote(updatedNote)
