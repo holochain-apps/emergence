@@ -4,7 +4,6 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
-import '@shoelace-style/shoelace/dist/components/dialog/dialog';
 
 import { storeContext } from '../../contexts';
 import type {  Info, Space,  Session,  TimeWindow } from './types';
@@ -14,7 +13,7 @@ import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
 import SessionSummary from './SessionSummary.svelte';
-  import SpaceDetail from './SpaceDetail.svelte';
+import SpaceDetail from './SpaceDetail.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -43,8 +42,8 @@ onMount(async () => {
 });
 
 $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
-let showImageDialog
 let spaceDetailDialog
+
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -62,14 +61,10 @@ bind:this={spaceDetailDialog}
 space={space}>
 </SpaceDetail>
 <div class="events">
-  <sl-dialog label={space.record.entry.name} style="--width=100vw"
-    bind:this={showImageDialog}>
-    <show-image image-hash={space && space.record.entry.pic ? encodeHashToBase64(space.record.entry.pic) : ""}></show-image>
-  </sl-dialog>
-  <div class="summary"
-    on:click={() => dispatch('space-selected', space)}
+  <div class="summary clickable"
+    on:click={() => spaceDetailDialog.open(space)}
   >
-    <div class="pic" on:click={()=>{ if (space.record.entry.pic) showImageDialog.show()}}>
+    <div class="pic">
       {#if space.record.entry.pic}
       <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
       {:else}
@@ -77,7 +72,7 @@ space={space}>
       {/if}
       
     </div>
-    <div class="info" on:click={()=>{ spaceDetailDialog.open(space)}}>
+    <div class="info">
       <div class="name-row">
         <div class="name">
           <sl-tooltip placement="top-start" content={space.record.entry.description}>
@@ -92,13 +87,15 @@ space={space}>
       </div>
     </div>
   </div>
-  <div class="sessions">
+  <div class="sessions clickable">
         {#if slottedSessions.length == 0}
           No Sessions Scheduled
         {:else}
           {#each slottedSessions as session}
             <div class="session">
-              <SessionSummary showSlot={true} session={session.session}></SessionSummary>
+              <SessionSummary 
+                on:session-selected={()=>{dispatch('session-selected', session.session)}}
+                showSlot={true} session={session.session}></SessionSummary>
             </div>
           {/each}
         {/if}

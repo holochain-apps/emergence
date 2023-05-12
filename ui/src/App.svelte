@@ -142,6 +142,7 @@
       {#if pane=="schedule"}
         <div class="pane">
           <ScheduleUpcoming
+            on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}
             on:open-slotting={()=>pane="schedule.slotting"}
           ></ScheduleUpcoming>
         </div>

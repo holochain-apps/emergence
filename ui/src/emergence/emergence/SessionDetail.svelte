@@ -22,6 +22,7 @@ import SessionCrud from './SessionCrud.svelte';
 const dispatch = createEventDispatcher();
 
 export let sessionHash: ActionHash;
+export let opened = false
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -83,6 +84,9 @@ $: relData = store.sessionReleationDataStore(session)
 onMount(async () => {
   if (session === undefined) {
     throw new Error(`The session input is required for the SessionDetail element`);
+  }
+  if (opened) {
+    open()
   }
 });
 
