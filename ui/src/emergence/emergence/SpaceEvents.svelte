@@ -106,6 +106,7 @@ space={space}>
 <style>
   .events {
     display: flex;
+    justify-content: center;
   }
   .summary {
     display: flex;
