@@ -5,6 +5,7 @@
     import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
     import '@shoelace-style/shoelace/dist/components/tab/tab.js';
     import '@shoelace-style/shoelace/dist/components/button/button.js';
+    import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
     import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
     import Fa from 'svelte-fa'
     import { faEdit } from '@fortawesome/free-solid-svg-icons';
@@ -26,13 +27,12 @@
         store.fetchMyStuff()
     });
     let tab = "notes"
-    let editProfile = false
 
     $: myProfile = store.profilesStore.myProfile
     $: myNotes = store.myNotes
     $: mySessions = store.mySessions
     $: amSteward = store.amSteward
- 
+    let dialog
 </script>
 
 {#if $myProfile.status === "complete"  && $myProfile.value}
@@ -42,7 +42,7 @@
         checked={$amSteward}
         on:sl-change={e => { store.setSelfSteward(steward.checked)} }
     >Steward</sl-checkbox>
-        <sl-button style="margin-left: 8px;" size=small on:click={() => editProfile=true} circle>
+        <sl-button style="margin-left: 8px;" size=small on:click={() => dialog.show()} circle>
             <Fa icon={faEdit} />
         </sl-button>
     </div>
@@ -51,12 +51,11 @@
 <div class="pane-content">
 {#if $myProfile.status === "complete"  && $myProfile.value}
 
-    {#if editProfile}
-        <div class="modal">
-            <div style="width:300px;text-align: center; border-bottom: 1px solid"><b>Emergence</b> is a decentralized hApp for discovery, scheduling, connecting and remembering </div>
-            <update-profile on:cancel-edit-profile={()=>editProfile = false} on:profile-updated={()=>editProfile = false}></update-profile>
-        </div>
-    {:else}
+    
+        <sl-dialog style="--width: 375px;" bind:this={dialog} label="Edit Profile">
+            <update-profile on:cancel-edit-profile={()=>dialog.hide()} on:profile-updated={()=>dialog.hide()}></update-profile>
+        </sl-dialog>
+    
     <sl-tab-group>
         <sl-tab slot="nav" panel="sessions">Sessions
         </sl-tab>
@@ -90,7 +89,7 @@
             <Feed forMe={true}></Feed>
         </sl-tab-panel>
     </sl-tab-group>
-    {/if}
+   
 {:else}
     <sl-spinner></sl-spinner>
 {/if}
