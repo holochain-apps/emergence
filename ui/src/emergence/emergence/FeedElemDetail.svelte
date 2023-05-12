@@ -8,7 +8,9 @@ import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
 import type { ActionHash } from '@holochain/client';
 import NoteDetail from './NoteDetail.svelte';
+import NoteSummary from './NoteSummary.svelte';
 import TimeWindowSummary from './TimeWindowSummary.svelte';
+  import { set_dynamic_element_data } from 'svelte/internal';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -24,10 +26,12 @@ const sessionTitle = (sessionHash: ActionHash) => {
 </script>
 
 <div class="feed-elem">
+  {#if feedElem.type !== FeedType.NoteNew}
   <div class="elem-head">
     <Avatar agentPubKey={feedElem.author} size={30}></Avatar>
     <span style="margin-left:5px">{timestampToStr(feedElem.timestamp)}</span>
   </div>
+  {/if}
   <div class="elem-body">
     {#if feedElem.type === FeedType.SessionNew}
       created session: {feedElem.detail}
@@ -54,16 +58,13 @@ const sessionTitle = (sessionHash: ActionHash) => {
     scheduled {sessionTitle(feedElem.about)} into {feedElem.detail.space} for <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary> 
     {/if}
     {#if feedElem.type === FeedType.NoteNew}
-    created note:
-      <NoteDetail noteHash={feedElem.about} showAvatar={false} showTimestamp={false}></NoteDetail>
+      <NoteDetail noteHash={feedElem.about}></NoteDetail>
     {/if}
     {#if feedElem.type === FeedType.NoteUpdate}
-    updated note:
-      <NoteDetail noteHash={feedElem.about} showAvatar={false} showTimestamp={false}></NoteDetail>
+      updated note: <NoteSummary showAvatar={false} showTimestamp={false} noteHash={feedElem.about}></NoteSummary>
     {/if}
     {#if feedElem.type === FeedType.NoteDelete}
-    trashed note: 
-    <NoteDetail noteHash={feedElem.about} showAvatar={false} showTimestamp={false}></NoteDetail>
+    deleted note: <NoteSummary noteHash={feedElem.about} showAvatar={false} showTimestamp={false}></NoteSummary>
     {/if}
     {#if feedElem.type === FeedType.TimeWindowNew}
     created slot:

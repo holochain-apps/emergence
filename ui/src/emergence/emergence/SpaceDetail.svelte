@@ -33,6 +33,7 @@ let errorSnackbar: Snackbar;
   
 $: editing,  error, loading, space;
 $: amSteward = store.amSteward
+$: debuggingEnabled = store.debuggingEnabled
 
 onMount(async () => {
 });
@@ -93,7 +94,12 @@ let confirmDialog
     on:confirm-confirmed={deleteSpace}>
   </Confirm>
 <div style="display: flex; flex-direction: column">
-
+  {#if $debuggingEnabled}
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
+    <span style="white-space: pre-line">{ encodeHashToBase64(space.record.actionHash) }</span>
+  </div>
+{/if}
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Map Symbol:</strong></span>
     <span style="white-space: pre-line">{ space.record.entry.key }</span>

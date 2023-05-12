@@ -22,6 +22,7 @@
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let steward: SlCheckbox
+    let debuging: SlCheckbox
 
     onMount(async () => {
         store.fetchMyStuff()
@@ -32,16 +33,25 @@
     $: myNotes = store.myNotes
     $: mySessions = store.mySessions
     $: amSteward = store.amSteward
+    $: debuggingEnabled = store.debuggingEnabled
     let dialog
 </script>
 
 {#if $myProfile.status === "complete"  && $myProfile.value}
-    <div class="pane-header"><h3><Avatar agentPubKey={store.myPubKey}></Avatar></h3>
+    <div class="pane-header">
+        <h3><Avatar agentPubKey={store.myPubKey}></Avatar></h3>
         <sl-checkbox
-        bind:this={steward}
-        checked={$amSteward}
-        on:sl-change={e => { store.setSelfSteward(steward.checked)} }
-    >Steward</sl-checkbox>
+            bind:this={steward}
+            checked={$amSteward}
+            on:sl-change={e => { store.setSelfSteward(steward.checked)} }
+            >Steward
+        </sl-checkbox>
+        <sl-checkbox
+            bind:this={debuging}
+            checked={$debuggingEnabled}
+            on:sl-change={e => { store.setDebugging(debuging.checked)} }
+            >Enable Debugging
+        </sl-checkbox>
         <sl-button style="margin-left: 8px;" size=small on:click={() => dialog.show()} circle>
             <Fa icon={faEdit} />
         </sl-button>
@@ -81,7 +91,7 @@
                 You haven't created any notes yet.. 
             {/if}
             {#each $myNotes as note}
-                <NoteDetail noteHash={note}></NoteDetail>
+                <NoteDetail showDeleted={false} showFrame={true} noteHash={note}></NoteDetail>
             {/each}
             
         </sl-tab-panel>

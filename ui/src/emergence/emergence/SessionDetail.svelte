@@ -11,7 +11,7 @@ import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
 import { SessionInterest, amenitiesList, durationToStr, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags } from './types';
 
-import type { ActionHash } from '@holochain/client';
+import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 import Avatar from './Avatar.svelte';
 import Confirm from './Confirm.svelte';
 import InterestSelect from './InterestSelect.svelte';
@@ -39,6 +39,8 @@ $: entry = $session.record.entry
 $: slot = sessionSlot($session)
 $: notes = sessionNotes($session)
 $: tags = sessionTags($session)
+
+$: debuggingEnabled = store.debuggingEnabled
 
 let updateSessionDialog
 
@@ -157,7 +159,21 @@ bind:this={updateSessionDialog}
     message="This will remove this session for everyone!" on:confirm-confirmed={deleteSession}></Confirm>
  
   <div class="details">
+
     <div class="properties">
+
+      {#if $debuggingEnabled}
+        <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+          <span style="margin-right: 4px"><strong>Original Hash:</strong></span>
+          <span style="white-space: pre-line">{ encodeHashToBase64($session.original_hash) }</span>
+        </div>
+        <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+            <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
+          <span style="white-space: pre-line">{ encodeHashToBase64($session.record.actionHash) }</span>
+        </div>
+      {/if}
+
+
       <div style="display: flex; flex-direction: row; margin-bottom: 16px">
         <span style="margin-right: 4px"><strong>Key:</strong></span>
         <span style="white-space: pre-line">{ entry.key }</span>
@@ -223,7 +239,7 @@ bind:this={updateSessionDialog}
   </div>
   <div class="notes">
     {#each notes as note}
-        <NoteDetail showSession={false} noteHash={note}></NoteDetail>
+        <NoteDetail showFrame={true} showSession={false} noteHash={note}></NoteDetail>
     {/each}
   </div>
     Create Note:  <sl-button on:click={() => {createNoteDialog.open() } } circle>

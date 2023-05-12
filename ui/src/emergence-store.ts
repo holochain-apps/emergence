@@ -89,11 +89,15 @@ export class EmergenceStore {
   loader = undefined
   neededStuffStore =undefined
   amSteward: Writable<boolean> = writable(true)
-
+  debuggingEnabled: Writable<boolean> = writable(false)
 
   setSelfSteward(value) {
     this.amSteward.update((n) => {return value} )
   }
+  setDebugging(value) {
+    this.debuggingEnabled.update((n) => {return value} )
+  }
+
 
   stuffIsNeeded() {
     return this.neededStuff.notes ? true : false
@@ -857,6 +861,7 @@ export class EmergenceStore {
     if (anote.status == "complete") {
         // @ts-ignore
         const note = anote.value
+
         const updatedNote: UpdateNoteInput = {
             original_note_hash: noteHash,
             previous_note_hash: note.record.actionHash,
@@ -864,10 +869,10 @@ export class EmergenceStore {
                 text: note.record.entry.text,
                 session: note.record.entry.session,
                 tags: note.record.entry.tags,
-                trashed: true,
+                trashed: !note.record.entry.trashed,
             }
         }
-        await this.client.updateNote(updatedNote)
+        const record = await this.client.updateNote(updatedNote)
         this.neededStuffStore.notes.clear([noteHash])
         const session = this.getSession(note.record.entry.session)
         if (session) {
@@ -876,8 +881,8 @@ export class EmergenceStore {
             this.fetchSessions()
         }
         this.client.createRelations([
-            {   src: noteHash, // should be agent key
-                dst: noteHash,
+            {   src: record.actionHash, // should be agent key
+                dst: record.actionHash,
                 content:  {
                     path: `feed.${FeedType.NoteDelete}`,
                     data: JSON.stringify("")
