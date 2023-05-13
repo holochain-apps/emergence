@@ -162,7 +162,7 @@ bind:this={updateSessionDialog}
 
     <div class="properties">
 
-      {#if $debuggingEnabled}
+      {#if $uiProps.debuggingEnabled}
         <div style="display: flex; flex-direction: row; margin-bottom: 16px">
           <span style="margin-right: 4px"><strong>Original Hash:</strong></span>
           <span style="white-space: pre-line">{ encodeHashToBase64($session.original_hash) }</span>
@@ -238,20 +238,19 @@ bind:this={updateSessionDialog}
   
   </div>
   <div class="notes">
-    {#each notes as note}
+    <div style="width: 600px;border: 1px solid grey; border-radius: 10px;padding: 20px;">
+      <NoteCrud
+        modal={false}
+        bind:this={createNoteDialog}
+        sessionHash={$session.original_hash}
+        on:note-created={() => {creatingNote = false;} }
+        on:edit-canceled={() => { creatingNote = false; } }
+      ></NoteCrud>
+    </div>
+      {#each notes.reverse() as note}
         <NoteDetail showFrame={true} showSession={false} noteHash={note}></NoteDetail>
     {/each}
   </div>
-    Create Note:  <sl-button on:click={() => {createNoteDialog.open() } } circle>
-    <Fa icon={faPlus} />
-  </sl-button>
-
-    <NoteCrud
-      bind:this={createNoteDialog}
-      sessionHash={$session.original_hash}
-      on:note-created={() => {creatingNote = false;} }
-      on:edit-canceled={() => { creatingNote = false; } }
-    ></NoteCrud>
 
 </div>
 {/if}
