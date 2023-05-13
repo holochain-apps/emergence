@@ -44,7 +44,7 @@
 
   $: client, fileStorageClient, store, loading;
   $: prof = profilesStore ? profilesStore.myProfile : undefined
-  $: amSteward = store ? store.amSteward : undefined
+  $: uiProps = store ? store.uiProps : undefined
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
@@ -175,7 +175,7 @@
         <AllSpaces
           on:all-spaces-close={()=>pane= "spaces"}
         ></AllSpaces>
-        {#if $amSteward}
+        {#if $uiProps.amSteward}
           Create Space:
           <sl-button on:click={() => {createSpaceDialog.open(undefined) } } circle>
             <Fa icon={faPlus} />
@@ -270,7 +270,7 @@
            <Fa icon={faUser} size="2x"/>
            <span class="button-title">You</span>
         </div>
-        {#if store && $amSteward}
+        {#if store && $uiProps.amSteward}
           <div class="nav-button {pane.startsWith("admin")?"selected":""}"
             title="Admin"
             on:keypress={()=>{pane='admin'}}
@@ -332,7 +332,10 @@
     padding: .5em;
     margin-bottom: 1em;
   }
-
+  :global(.flex-center) {
+        display: flex;
+        justify-content: center;
+    }
   .nav {
     display: flex; flex-direction: row; flex: 1;
     padding-left: 10px;

@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 
@@ -87,17 +87,31 @@ export class EmergenceStore {
   neededStuff: GetStuffInput = {}
   myPubKeyBase64: string
   loader = undefined
-  neededStuffStore =undefined
-  amSteward: Writable<boolean> = writable(true)
-  debuggingEnabled: Writable<boolean> = writable(false)
+  neededStuffStore = undefined
+  uiProps: Writable<UIProps> = writable({
+    amSteward: true,
+    debuggingEnabled: false,
+    youPanel: "sessions",
+    discoverPanel: "cloud",
+  })
 
-  setSelfSteward(value) {
-    this.amSteward.update((n) => {return value} )
+  setUIprops(props:{}) {
+    this.uiProps.update((n) => {
+        if (props.hasOwnProperty("amSteward")) {
+            n.amSteward = props["amSteward"]
+        }
+        if (props.hasOwnProperty("debuggingEnabled")) {
+            n.debuggingEnabled = props["debuggingEnabled"]
+        }
+        if (props.hasOwnProperty("youPanel")) {
+            n.youPanel = props["youPanel"]
+        }
+        if (props.hasOwnProperty("discoverPanel")) {
+            n.discoverPanel = props["discoverPanel"]
+        }
+        return n
+    })
   }
-  setDebugging(value) {
-    this.debuggingEnabled.update((n) => {return value} )
-  }
-
 
   stuffIsNeeded() {
     return this.neededStuff.notes ? true : false

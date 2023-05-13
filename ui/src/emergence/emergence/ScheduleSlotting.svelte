@@ -38,7 +38,7 @@
 
   $: selectedSessions, selectedSpaceIdx, selectedWindow
   $: sessionsInSpace
-  $: amSteward = store.amSteward
+  $: uiProps = store.uiProps
 
 
   const calcDays = (windows, slotTypeFilter, dayFilter): Array<Date> => {
@@ -288,7 +288,7 @@
         <sl-option value={type}> {type}</sl-option>
       {/each}
     </sl-select>
-    {#if $amSteward}
+    {#if $uiProps.amSteward}
       <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
         <Fa icon={faCalendarPlus} />
       </sl-button>
@@ -364,7 +364,7 @@
               >
                 
                   {new Date(window.start).toTimeString().slice(0,5)}
-                  {#if $amSteward}
+                  {#if $uiProps.amSteward}
                     <sl-button style="margin-left: 4px;" size=small on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                       <Fa icon={faTrash} />
                     </sl-button>
@@ -423,7 +423,7 @@
               >
     
                 {new Date(window.start).toTimeString().slice(0,5)}
-                {#if $amSteward}
+                {#if $uiProps.amSteward}
                   <sl-button style="margin-left: 4px;" size=small on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                     <Fa icon={faTrash} />
                   </sl-button>

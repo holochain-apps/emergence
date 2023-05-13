@@ -2,6 +2,7 @@
     import { onMount, getContext } from 'svelte';
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
+    import type SlTabGroup from  '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
     import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
     import '@shoelace-style/shoelace/dist/components/tab/tab.js';
     import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -12,17 +13,16 @@
     import type { EmergenceStore } from '../../emergence-store';
     import Feed from './Feed.svelte';
     import TagCloud from './TagCloud.svelte'
-  import Sense from './Sense.svelte';
+    import Sense from './Sense.svelte';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
-    let steward: SlCheckbox
+    let tabs : SlTabGroup
+    $: uiProps = store.uiProps
 
     onMount(async () => {
-        store.fetchMyStuff()
+        await store.fetchMyStuff()
+        tabs.show($uiProps.discoverPanel)
     });
-    let tab = "cloud"
-
-    $: amSteward = store.amSteward
  
 </script>
 
@@ -30,9 +30,11 @@
     <h3>Discover</h3>
 </div>
   
-<div class="pane-content">
-
-    <sl-tab-group>
+<div class="pane-content flex-center">
+    <sl-tab-group
+        bind:this={tabs}
+        on:sl-tab-show={(e)=>store.setUIprops({discoverPanel:e.detail.name})}
+        >
         <sl-tab slot="nav" panel="cloud">Tag Cloud
         </sl-tab>
         <sl-tab slot="nav" panel="feed">Feed
@@ -54,4 +56,5 @@
 </div>
 
 <style>
+
 </style>

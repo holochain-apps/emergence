@@ -40,7 +40,7 @@ $: slot = sessionSlot($session)
 $: notes = sessionNotes($session)
 $: tags = sessionTags($session)
 
-$: debuggingEnabled = store.debuggingEnabled
+$: uiProps = store.uiProps
 
 let updateSessionDialog
 

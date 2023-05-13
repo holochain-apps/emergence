@@ -33,7 +33,7 @@
     }
 
     let confirmDialog
-    $: debuggingEnabled = store.debuggingEnabled
+    $: uiProps = store.uiProps
 
 </script>
   <Confirm 
@@ -70,7 +70,7 @@
             {#if showSession}
               in session {store.getSession($note.value.record.entry.session).record.entry.title}
             {/if}
-            {#if $debuggingEnabled}
+            {#if $uiProps.debuggingEnabled}
             <div style="display: flex; flex-direction: row; margin-bottom: 16px">
                <span style="margin-right: 4px"><strong>Deleted:</strong></span>
                <span style="white-space: pre-line">{$note.value.record.entry.trashed}</span>

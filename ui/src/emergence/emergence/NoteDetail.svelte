@@ -25,7 +25,7 @@
     export let showDeleted = true
 
     $: note = store.neededStuffStore.notes.get(noteHash)
-    $: debuggingEnabled = store.debuggingEnabled
+    $: uiProps = store.uiProps
     onDestroy(() => {
         store.neededStuffStore.notes.clear(noteHash)
     }); 
@@ -79,7 +79,7 @@
             </div>
           {/if}
      </div>
-     {#if $debuggingEnabled}
+     {#if $uiProps.debuggingEnabled}
        <div style="display: flex; flex-direction: row; margin-bottom: 16px">
           <span style="margin-right: 4px"><strong>Deleted:</strong></span>
           <span style="white-space: pre-line">{$note.value.record.entry.trashed}</span>

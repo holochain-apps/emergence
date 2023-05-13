@@ -32,8 +32,7 @@ let editing = false;
 let errorSnackbar: Snackbar;
   
 $: editing,  error, loading, space;
-$: amSteward = store.amSteward
-$: debuggingEnabled = store.debuggingEnabled
+$: uiProps = store.uiProps
 
 onMount(async () => {
 });
@@ -75,7 +74,7 @@ let confirmDialog
 ></SpaceCrud>
 
 <sl-dialog label={space? space.record.entry.name : ""} bind:this={dialog} class="dialog-header-actions">
-  {#if $amSteward}
+  {#if $uiProps.amSteward}
   <sl-button style="margin-top:12px" slot="header-actions" on:click={() => confirmDialog.open()} circle ><Fa icon={faTrash} ></Fa></sl-button>
   <sl-button style="margin-top:12px" slot="header-actions" on:click={() => {dialog.hide();editDialog.open(space)}} circle ><Fa icon={faEdit} ></Fa></sl-button>
   {/if}
@@ -94,7 +93,7 @@ let confirmDialog
     on:confirm-confirmed={deleteSpace}>
   </Confirm>
 <div style="display: flex; flex-direction: column">
-  {#if $debuggingEnabled}
+  {#if $uiProps.debuggingEnabled}
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
     <span style="white-space: pre-line">{ encodeHashToBase64(space.record.actionHash) }</span>
