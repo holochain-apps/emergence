@@ -65,7 +65,7 @@
     const sessions: HoloHashMap<ActionHash, Info<Session>> = new HoloHashMap
     rel.forEach(r=> {
       const session = store.getSession(r.relation.dst)
-      if (session) {
+      if (session && !session.record.entry.trashed) {
         const slot = store.getSessionSlot(session)
         if (slotEqual({window,space:space.original_hash}, slot)) {
           sessions.set(session.original_hash, session)
@@ -238,7 +238,7 @@
 
   const deleteWindow = async (window: TimeWindow) => {
 
-    for (const s of $sessions) {
+    for (const s of $sessions.filter(s=>!s.record.entry.trashed)) {
       const slot = store.getSessionSlot(s)
       if ( JSON.stringify(slot.window) == JSON.stringify(window)) {
         alert("Time window has scheduled sessions, can't delete! Please move the sessions first.")
@@ -314,7 +314,7 @@
 
       <div class="orphans">
         <div><strong>Orphan Sessions</strong></div>
-        {#each $sessions.filter((s)=>!store.getSessionSlot(s)) as session}
+        {#each $sessions.filter((s)=>!s.record.entry.trashed && !store.getSessionSlot(s)) as session}
           <div
             id={encodeHashToBase64(session.original_hash)}
             class="orphaned-session"
@@ -491,7 +491,7 @@
 
       <div class="selected-sessions">
         <div><strong>Selected</strong></div>
-        {#each $sessions.filter((s)=>selectedSessions.get(s.record.actionHash))
+        {#each $sessions.filter((s)=>!s.record.entry.trashed && selectedSessions.get(s.record.actionHash))
           .sort((a,b)=>store.getSessionSlot(a).window.start - store.getSessionSlot(b).window.start) as session}
           <div style="margin-bottom: 8px;">
             <SessionSummary 

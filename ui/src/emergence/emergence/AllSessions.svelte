@@ -1,6 +1,5 @@
 <script lang="ts">
 import { onMount, getContext, createEventDispatcher } from 'svelte';
-import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SessionSummary from './SessionSummary.svelte';
@@ -10,16 +9,14 @@ const dispatch = createEventDispatcher();
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
-let loading = true;
 let error: any = undefined;
+let showDeletedSessions = false
 
 $: sessions = store.sessions
-$: loading, error;
+$: error;
 
 onMount(async () => {
-  await store.fetchSessions();
-  loading = false;
-
+   store.fetchSessions();
 });
 
 </script>
@@ -28,17 +25,12 @@ onMount(async () => {
   <h3>Sessions List</h3>
 </div>
 <div class="pane-content">
-  {#if loading}
-    <div style="display: flex; flex: 1; align-items: center; justify-content: center">
-      <sl-spinner></sl-spinner>
-
-    </div>
-  {:else if error}
+  {#if error}
     <span>Error fetching the sessions: {error.data.data}.</span>
   {:else if $sessions.length === 0}
     <span>No sessions found.</span>
   {:else}
-      {#each $sessions as session}
+      {#each $sessions.filter(s=>!s.record.entry.trashed || showDeletedSessions) as session}
         <div class="session">
           <SessionSummary 
             showTags={true}

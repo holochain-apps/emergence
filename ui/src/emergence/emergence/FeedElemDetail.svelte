@@ -10,7 +10,6 @@ import type { ActionHash } from '@holochain/client';
 import NoteDetail from './NoteDetail.svelte';
 import NoteSummary from './NoteSummary.svelte';
 import TimeWindowSummary from './TimeWindowSummary.svelte';
-  import { set_dynamic_element_data } from 'svelte/internal';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();

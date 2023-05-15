@@ -25,11 +25,11 @@
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let steward: SlCheckbox
     let debuging: SlCheckbox
-
+    let showDeletedSession = false
+    
     onMount(async () => {
         await store.fetchMyStuff()
         tabs.show($uiProps.youPanel)
-
     });
 
     $: myProfile = store.profilesStore.myProfile
@@ -83,10 +83,12 @@
                 You haven't created or marked interest in any sessions yet.. 
             {/if}
 
-            {#each Array.from($mySessions.keys()) as session}
-            <SessionSummary 
-                on:session-selected={(event)=>{dispatch('session-selected', event.detail)}} 
-            showTags={true} showSlot={true} allowSetIntention={true} session={store.getSession(session)}></SessionSummary>
+            {#each Array.from($mySessions.keys()).map(s =>store.getSession(s)) as session}
+                {#if !session.record.entry.trashed || showDeletedSession}
+                <SessionSummary 
+                    on:session-selected={(event)=>{dispatch('session-selected', event.detail)}} 
+                showTags={true} showSlot={true} allowSetIntention={true} session={session}></SessionSummary>
+                {/if}
             {/each}
 
 

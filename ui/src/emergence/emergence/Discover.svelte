@@ -19,9 +19,10 @@
     let tabs : SlTabGroup
     $: uiProps = store.uiProps
 
-    onMount(async () => {
-        await store.fetchMyStuff()
+    onMount(async () => {        
+        //await store.fetchMyStuff()
         tabs.show($uiProps.discoverPanel)
+
     });
  
 </script>

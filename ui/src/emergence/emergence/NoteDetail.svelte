@@ -26,7 +26,10 @@
 
     $: note = store.neededStuffStore.notes.get(noteHash)
     $: uiProps = store.uiProps
-    onDestroy(() => {
+
+    $: session = $note.value?  store.getSession($note.value.record.entry.session) : undefined
+
+      onDestroy(() => {
         store.neededStuffStore.notes.clear(noteHash)
     }); 
 
@@ -95,7 +98,7 @@
       {/if}     
         {#if showSession}
         <div class="post-session"> 
-          <strong>Session:</strong> {store.getSession($note.value.record.entry.session).record.entry.title}
+          <strong>{ session && session.record.entry.trashed ? "Deleted ":""}Session:</strong> { session ? session.record.entry.title : "unknown"}
         </div>         
         {/if}
 

@@ -42,7 +42,6 @@ onMount(async () => {
 let spaceDetailDialog
 $:space = slot? store.getSpace(slot.space) : undefined
 </script>
-
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
   <sl-spinner></sl-spinner>

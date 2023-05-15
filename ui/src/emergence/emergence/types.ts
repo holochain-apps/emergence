@@ -384,3 +384,9 @@ export const sessionSelfTags = (session: Info<Session>):Array<string> => {
 export const dedupHashes = (hashes: Array<HoloHash>) : Array<HoloHash> => {
   return [ ... new Set(hashes.map(s=>encodeHashToBase64(s)))].map(s=>decodeHashFromBase64(s))
 }
+export interface UIProps {
+  amSteward: boolean
+  debuggingEnabled: boolean
+  youPanel: string
+  discoverPanel: string
+}

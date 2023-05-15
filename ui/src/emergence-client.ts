@@ -119,7 +119,7 @@ export class EmergenceClient {
         record: new EntryRecord(r.record), 
         relations: r.relations}
         return info
-    }).filter(r=>!r.record.entry.trashed);
+    });
   }
 
   async createSpace(key: string, name: string, description:string, stewards:Array<AgentPubKey>, capacity:number, amenities: number, tags: Array<string>, pic: EntryHash | undefined) : Promise<EntryRecord<Space>> {

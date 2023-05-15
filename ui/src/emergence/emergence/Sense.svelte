@@ -19,7 +19,7 @@
 
   $: original = store.sessions
   $: count = $original.length < 10 ? sessions.length : 10
-  $: sessions = shuffle($original)
+  $: sessions = shuffle($original.filter(s=>!s.record.entry.trashed))
   $: loading, error, senseIdx;
   $: session = sessions ? sessions[senseIdx] : undefined
   $: slot = session ? store.getSessionSlot(session) : undefined

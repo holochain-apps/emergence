@@ -8,7 +8,6 @@
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
-  let loading = true;
   let error: any = undefined;
   export let forMe = false
 
@@ -19,21 +18,16 @@
     encodeHashToBase64(f.author) == store.myPubKeyBase64 ||
     mySessionsb64.includes(encodeHashToBase64(f.about))
     )
-  $: loading, error;
+  $: error;
 
   onMount(async () => {
     await store.fetchFeed();
     if (forMe)
       await store.fetchMyStuff();
-    loading = false
   });
 
 </script>
-{#if loading}
-<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-  <sl-spinner></sl-spinner>
-</div>
-{:else if error}
+{#if error}
 <span>Error fetching the feed: {error.data.data}.</span>
 {:else if feed.length === 0}
 <span>No Activity</span>

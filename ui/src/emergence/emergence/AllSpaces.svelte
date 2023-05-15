@@ -1,6 +1,5 @@
 <script lang="ts">
 import { onMount, getContext, createEventDispatcher } from 'svelte';
-import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SpaceDetail from './SpaceDetail.svelte';
@@ -14,16 +13,14 @@ const dispatch = createEventDispatcher();
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
-let loading = true;
 let error: any = undefined;
 let spaceDetail: Info<Space> | undefined
 
 $: spaces = store.spaces
-$: loading, error, spaceDetail;
+$: error, spaceDetail;
 
 onMount(async () => {
-  await store.fetchSpaces();
-  loading = false;
+  store.fetchSpaces();
 });
 let spaceDetailDialog
 
@@ -37,12 +34,7 @@ let spaceDetailDialog
 
     <h3>Spaces List</h3>
   </div>
-  {#if loading}
-    <div style="display: flex; flex: 1; align-items: center; justify-content: center">
-      <sl-spinner></sl-spinner>
-
-    </div>
-  {:else if error}
+  {#if error}
     <span>Error fetching the spaces: {error.data.data}.</span>
   {:else if $spaces.length === 0}
     <span>No spaces found.</span>
