@@ -152,7 +152,7 @@ let dialog
 </div>
 </sl-dialog>
 {:else}
-<div style="display: flex; flex-direction: column; ">
+<div style="display: flex; flex-direction: column; width: 100%; max-width: 720px; ">
   <div style="display:flex;flex-direction: row">
     <div style="display: flex; flex-direction: column; width: 80%; margin-right: 10px;">
 

@@ -35,9 +35,9 @@ let spaceDetailDialog
     <h3>Spaces List</h3>
   </div>
   {#if error}
-    <span>Error fetching the spaces: {error.data.data}.</span>
+    <span class="notice">Error fetching the spaces: {error.data.data}.</span>
   {:else if $spaces.length === 0}
-    <span>No spaces found.</span>
+    <span class="notice">No spaces found.</span>
   {:else}
     
       <SpaceDetail
@@ -46,7 +46,7 @@ let spaceDetailDialog
       </SpaceDetail>
 
     {#each $spaces as space}
-      <div style="margin-bottom: 8px; width:100%;">
+      <div class="space">
         <SpaceSummary
           on:space-selected={()=>{spaceDetail=space;spaceDetailDialog.open(space)}} 
           space={space}>
@@ -60,5 +60,16 @@ let spaceDetailDialog
   :global(.pane-content) {
     overflow-y: auto;
     height: 95%;
+  }
+  .notice {
+    display: block;
+    text-align: center;
+    padding: 25px;
+  }
+
+  .space {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto 10px auto;
   }
 </style>

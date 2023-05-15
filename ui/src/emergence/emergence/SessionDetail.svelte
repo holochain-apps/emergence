@@ -238,7 +238,7 @@ bind:this={updateSessionDialog}
   
   </div>
   <div class="notes">
-    <div style="width: 600px;border: 1px solid grey; border-radius: 10px;padding: 20px;">
+    <div>
       <NoteCrud
         modal={false}
         bind:this={createNoteDialog}
@@ -260,6 +260,7 @@ bind:this={updateSessionDialog}
     border-top: solid 1px;
     max-width: 720px;
     margin: 0 auto;
+    width: 100%;
   }
   .details {
     display: flex;

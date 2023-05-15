@@ -446,7 +446,6 @@
 .dialog {
   z-index: 10000;
 }
-
   .pane {
     width: 100vw;
   }

@@ -26,9 +26,9 @@ onMount(async () => {
 </div>
 <div class="pane-content">
   {#if error}
-    <span>Error fetching the sessions: {error.data.data}.</span>
+    <span class="notice">Error fetching the sessions: {error.data.data}.</span>
   {:else if $sessions.length === 0}
-    <span>No sessions found.</span>
+    <span class="notice">No sessions found.</span>
   {:else}
       {#each $sessions.filter(s=>!s.record.entry.trashed || showDeletedSessions) as session}
         <div class="session">
@@ -44,3 +44,12 @@ onMount(async () => {
   {/if}
 </div>
 
+<style>
+
+.notice {
+  display: block;
+  text-align: center;
+  padding: 25px;
+}
+
+</style>
