@@ -4,6 +4,11 @@ import type { Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SessionSummary from './SessionSummary.svelte';
 import type { EmergenceStore } from '../../emergence-store';
+import SessionFilter from './SessionFilter.svelte';
+import { defaultSessionsFilter, type SessionsFilter } from './types';
+  import { faFilter } from '@fortawesome/free-solid-svg-icons';
+  import Fa from 'svelte-fa';
+  import { StoreSubscriber } from '@holochain-open-dev/stores';
 
 const dispatch = createEventDispatcher();
 
@@ -11,9 +16,13 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 let error: any = undefined;
 let showDeletedSessions = false
+let filter: SessionsFilter = defaultSessionsFilter()
 
 $: sessions = store.sessions
-$: error;
+$: error, filter;
+$: uiProps = store.uiProps
+
+let showFilter = false
 
 onMount(async () => {
    store.fetchSessions();
@@ -30,7 +39,16 @@ onMount(async () => {
   {:else if $sessions.length === 0}
     <span class="notice">No sessions found.</span>
   {:else}
-      {#each $sessions.filter(s=>!s.record.entry.trashed || showDeletedSessions) as session}
+    <sl-button style="margin-left: 8px; " size=small on:click={() => { showFilter = !showFilter } } circle>
+      <Fa icon={faFilter} />
+    </sl-button>
+    {#if showFilter}
+      <SessionFilter
+      on:close-filter={()=>showFilter = false}
+      on:update-filter={(e)=>{store.setUIprops({filter: e.detail})}}
+      filter={filter}></SessionFilter>
+    {/if}
+    {#each $sessions.filter(s=> (!s.record.entry.trashed || showDeletedSessions) && store.filterSession(s, $uiProps.filter)) as session}
         <div class="session">
           <SessionSummary 
             showTags={true}

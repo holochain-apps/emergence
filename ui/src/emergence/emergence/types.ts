@@ -384,9 +384,42 @@ export const sessionSelfTags = (session: Info<Session>):Array<string> => {
 export const dedupHashes = (hashes: Array<HoloHash>) : Array<HoloHash> => {
   return [ ... new Set(hashes.map(s=>encodeHashToBase64(s)))].map(s=>decodeHashFromBase64(s))
 }
+
 export interface UIProps {
   amSteward: boolean
   debuggingEnabled: boolean
   youPanel: string
   discoverPanel: string
+}
+
+export interface SessionsFilter {
+  timeNow: boolean,
+  timeNext: boolean,
+  timePast: boolean,
+  timeFuture: boolean,
+  timeUnscheduled: boolean,
+  involvementLeading: boolean,
+  involvementGoing: boolean,
+  involvementInterested: boolean,
+  involvementNoOpinion: boolean,
+  tags: Array<string>,
+  space: Array<ActionHash>,
+  keyword: string,
+}
+
+export const defaultSessionsFilter = () : SessionsFilter => {
+  return {
+    timeNow: false,
+    timeNext: false,
+    timePast: false,
+    timeFuture: false,
+    timeUnscheduled: false,
+    involvementLeading: false,
+    involvementGoing: false,
+    involvementInterested: false,
+    involvementNoOpinion: false,
+    tags: [],
+    space: [],
+    keyword: "",
+  }
 }
