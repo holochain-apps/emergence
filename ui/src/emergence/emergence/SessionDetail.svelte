@@ -150,10 +150,7 @@ bind:this={updateSessionDialog}
 
     <span style="flex: 1"></span>
 
-    <div class="action">
-      <InterestSelect sessionHash={sessionHash}></InterestSelect>
-    </div>
-
+ 
   </div>
 
   <Confirm bind:this={confirmDialog}
@@ -219,6 +216,10 @@ bind:this={updateSessionDialog}
     </div>
 
     <div class="stats">
+      <div class="action">
+        <InterestSelect sessionHash={sessionHash}></InterestSelect>
+      </div>
+  
       <div>
         Total Interested: <Fa icon={faUserGroup} /> {$relData.interest.size} 
       </div>
