@@ -94,7 +94,7 @@ export class EmergenceStore {
     debuggingEnabled: false,
     youPanel: "sessions",
     discoverPanel: "cloud",
-    filter: defaultSessionsFilter()
+    sessionsFilter: defaultSessionsFilter()
   })
 
   setUIprops(props:{}) {
@@ -111,8 +111,8 @@ export class EmergenceStore {
         if (props.hasOwnProperty("discoverPanel")) {
             n.discoverPanel = props["discoverPanel"]
         }
-        if (props.hasOwnProperty("filter")) {
-            n.filter = props["filter"]
+        if (props.hasOwnProperty("sessionsFilter")) {
+            n.sessionsFilter = props["sessionsFilter"]
         }
         return n
     })
@@ -621,7 +621,6 @@ export class EmergenceStore {
   }
 
   filterSession(session:Info<Session>, filter: SessionsFilter) : boolean {
-    console.log("HERE")
     const slot = this.getSessionSlot(session)
     if (!slot && (filter.timeNow || filter.timeNext || filter.timePast || filter.timeFuture)) return false
     if (slot && filter.timeUnscheduled) return false
@@ -652,6 +651,12 @@ export class EmergenceStore {
             session.record.entry.title.search(filter.keyword) < 0)
         return false
     }
+    if (filter.space.length>0) {
+        if (!slot) return false
+        const b64 = encodeHashToBase64(slot.space)
+        if (!filter.space.find(s=>encodeHashToBase64(s) === b64)) return false
+    }
+   
     return true
 
   }

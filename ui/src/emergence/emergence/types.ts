@@ -390,6 +390,7 @@ export interface UIProps {
   debuggingEnabled: boolean
   youPanel: string
   discoverPanel: string
+  sessionsFilter: SessionsFilter
 }
 
 export interface SessionsFilter {

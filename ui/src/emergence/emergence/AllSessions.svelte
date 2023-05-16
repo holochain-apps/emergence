@@ -8,7 +8,6 @@ import SessionFilter from './SessionFilter.svelte';
 import { defaultSessionsFilter, type SessionsFilter } from './types';
   import { faFilter } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
-  import { StoreSubscriber } from '@holochain-open-dev/stores';
 
 const dispatch = createEventDispatcher();
 
@@ -16,10 +15,9 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 let error: any = undefined;
 let showDeletedSessions = false
-let filter: SessionsFilter = defaultSessionsFilter()
 
 $: sessions = store.sessions
-$: error, filter;
+$: error;
 $: uiProps = store.uiProps
 
 let showFilter = false
@@ -32,6 +30,15 @@ onMount(async () => {
 
 <div class="pane-header">
   <h3>Sessions List</h3>
+  <sl-button style="margin-left: 8px; " size=small on:click={() => { showFilter = !showFilter } } circle>
+    <Fa icon={faFilter} />
+  </sl-button>
+  {#if showFilter}
+    <SessionFilter
+    on:close-filter={()=>showFilter = false}
+    on:update-filter={(e)=>{store.setUIprops({sessionsFilter: e.detail})}}
+    filter={$uiProps.sessionsFilter}></SessionFilter>
+  {/if}
 </div>
 <div class="pane-content">
   {#if error}
@@ -39,16 +46,7 @@ onMount(async () => {
   {:else if $sessions.length === 0}
     <span class="notice">No sessions found.</span>
   {:else}
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { showFilter = !showFilter } } circle>
-      <Fa icon={faFilter} />
-    </sl-button>
-    {#if showFilter}
-      <SessionFilter
-      on:close-filter={()=>showFilter = false}
-      on:update-filter={(e)=>{store.setUIprops({filter: e.detail})}}
-      filter={filter}></SessionFilter>
-    {/if}
-    {#each $sessions.filter(s=> (!s.record.entry.trashed || showDeletedSessions) && store.filterSession(s, $uiProps.filter)) as session}
+    {#each $sessions.filter(s=> (!s.record.entry.trashed || showDeletedSessions) && store.filterSession(s, $uiProps.sessionsFilter)) as session}
         <div class="session">
           <SessionSummary 
             showTags={true}
