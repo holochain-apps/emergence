@@ -25,7 +25,7 @@
 <div>
   {#if $tags.length > 0}
     <div class="cloud">
-        <WordCloud width={400} height={300} words={words}
+        <WordCloud backgroundColor={"lightGray"} width={400} height={300} words={words}
             on:click={(e)=> selectedTag = e.detail.target.innerHTML}
 
             on:mouseover={(e)=> selectedTag = e.detail.target.innerHTML}

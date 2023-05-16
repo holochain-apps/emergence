@@ -226,3 +226,9 @@ let dialog
 
 </div>
 </sl-dialog>
+
+<style>
+  sl-checkbox {
+    margin-right:15px;
+  }
+</style>

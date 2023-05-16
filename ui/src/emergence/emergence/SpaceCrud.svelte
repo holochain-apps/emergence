@@ -246,4 +246,7 @@ let dialog
   :global(.pic-upload) {
     width: 200px;
   }
+  sl-checkbox {
+    margin-right:15px;
+  }
 </style> 

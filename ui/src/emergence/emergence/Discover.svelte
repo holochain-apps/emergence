@@ -43,6 +43,7 @@
         width: 100%;
         display: block;
         flex-direction: column;
+        background-color: lightgray;
     }
     .discover-section {
         display: flex;
