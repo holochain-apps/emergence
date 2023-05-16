@@ -94,7 +94,6 @@ space={space}>
           {#each slottedSessions as session}
             <div class="session">
               <SessionSummary 
-                on:session-selected={()=>{dispatch('session-selected', session.session)}}
                 showSlot={true} session={session.session}></SessionSummary>
             </div>
           {/each}

@@ -40,12 +40,10 @@
   let pane = "sessions"
   let profilesStore: ProfilesStore | undefined
   let creatingMap = false
-  let selectedSession: Info<Session>|undefined = undefined
 
   $: client, fileStorageClient, store, loading;
   $: prof = profilesStore ? profilesStore.myProfile : undefined
   $: uiProps = store ? store.uiProps : undefined
-
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
@@ -100,10 +98,19 @@
 
     <profile-prompt>
       <file-storage-context client={fileStorageClient}>
+    {#if store &&  $uiProps.sessionDetails}
+      <div class="session-details" style="height:100vh">
+        <SessionDetail 
+        on:session-deleted={()=>store.setUIprops({sessionDetails:undefined})}
+        on:session-close={()=>store.setUIprops({sessionDetails:undefined})}
+        sessionHash={$uiProps.sessionDetails}></SessionDetail>
+      </div>
+    {/if}
     <div id="content" style="display: flex; flex-direction: column; flex: 1;">
+
       {#if pane=="sessions"}
       <div class="pane">
-        <AllSessions on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}></AllSessions>
+        <AllSessions></AllSessions>
         <div class="create-session" on:click={() => {createSessionDialog.open(undefined)} } >
           <div class="summary">
             <div class="slot">
@@ -130,19 +137,9 @@
       </div>
       {/if}
 
-      {#if pane==="sessions.detail"}
-        <div class="pane">
-          <SessionDetail 
-          on:session-deleted={()=>pane= "sessions"}
-          on:session-close={()=>pane= "sessions"}
-          sessionHash={selectedSession.original_hash}></SessionDetail>
-        </div>
-      {/if}
-
       {#if pane=="schedule"}
         <div class="pane">
           <ScheduleUpcoming
-            on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}
             on:open-slotting={()=>pane="schedule.slotting"}
           ></ScheduleUpcoming>
         </div>
@@ -191,9 +188,7 @@
 
       {#if pane=="you"}
       <div class="pane">
-        <You
-        on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}
-        ></You>
+        <You></You>
       </div>
       {/if}
       {#if pane=="admin"}
@@ -443,9 +438,6 @@
     cursor: pointer;
   }
 
-.dialog {
-  z-index: 10000;
-}
   .pane {
     width: 100vw;
   }
@@ -459,4 +451,16 @@
       max-width: 500px;
     }
   } */
+
+
+  .session-details {
+    background-color: white;
+    position: absolute;
+
+    border: solid 1px;
+    display: flex; flex-direction: column;
+    max-height: 100%;
+    overflow: auto;
+    z-index: 1000;
+  }
 </style>

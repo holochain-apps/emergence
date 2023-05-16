@@ -18,7 +18,7 @@ import InterestSelect from './InterestSelect.svelte';
 import NoteCrud from './NoteCrud.svelte';
 import NoteDetail from './NoteDetail.svelte';
 import SessionCrud from './SessionCrud.svelte';
-import { fly } from 'svelte/transition';
+import { slide } from 'svelte/transition';
 
 const dispatch = createEventDispatcher();
 
@@ -129,7 +129,7 @@ bind:this={updateSessionDialog}
   } }
 ></SessionCrud>
 
-<div transition:fly={{ x: -300, duration: 500 }}  class="pane-content">
+<div transition:slide={{ axis: 'x', duration: 400 }}  class="pane-content">
   <div class="pane-header">
 
     <div class="controls">

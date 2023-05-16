@@ -53,7 +53,6 @@
   {#each sortedSpaces as space}
     <div class="event-row">
       <SpaceEvents
-        on:session-selected={(event)=>{dispatch('session-selected', event.detail)}} 
         space={space}
         >
       </SpaceEvents>

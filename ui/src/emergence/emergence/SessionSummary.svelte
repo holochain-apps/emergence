@@ -55,7 +55,7 @@ space={undefined}>
 <div class="summary" on:click={(e)=>{
   // @ts-ignore
     if (e.target.tagName != "SL-SELECT")
-      dispatch('session-selected', session); 
+      store.setUIprops({sessionDetails:session.original_hash}); 
   }}>
   {#if showSlot}
     <div class="slot">

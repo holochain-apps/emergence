@@ -1,12 +1,9 @@
 <script lang="ts">
     import '@shoelace-style/shoelace/dist/components/select/select.js';
     import '@shoelace-style/shoelace/dist/components/option/option.js';
-    import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
-    import { decodeHashFromBase64, encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client';
     import type { EmergenceStore } from '../../emergence-store';
     import { getContext, onMount } from 'svelte';
     import { storeContext } from '../../contexts';
-    import type { TagUse } from './types';
 	import WordCloud from "svelte-d3-cloud";
     import TagCloudPeople from './TagCloudPeople.svelte';
   
@@ -20,21 +17,29 @@
         store.fetchTags()
     });
     let selectedTag = ""
+    let innerWidth = 0
+    let innerHeight = 0
 </script>
+<svelte:window bind:innerWidth bind:innerHeight />
 
 <div>
   {#if $tags.length > 0}
     <div class="cloud">
-        <WordCloud words={words} on:click={(e)=> selectedTag = e.detail.target.innerHTML}/>
+        <WordCloud width={400} height={300} words={words}
+            on:click={(e)=> selectedTag = e.detail.target.innerHTML}
+
+            on:mouseover={(e)=> selectedTag = e.detail.target.innerHTML}
+            on:mouseout={(e)=> selectedTag = ""}/>
     {#if selectedTag}
+    <div class="modal">
         <TagCloudPeople tag={selectedTag}></TagCloudPeople>
+    </div>
     {/if}
     </div>
 {:else}
   No tags yet!
   {/if}
 </div>
-
 <style>
     .cloud {
         display: flex;

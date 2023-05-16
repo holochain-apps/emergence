@@ -94,26 +94,14 @@ export class EmergenceStore {
     debuggingEnabled: false,
     youPanel: "sessions",
     discoverPanel: "cloud",
-    sessionsFilter: defaultSessionsFilter()
+    sessionsFilter: defaultSessionsFilter(),
+    sensing: false,
+    sessionDetails: undefined,
   })
 
   setUIprops(props:{}) {
     this.uiProps.update((n) => {
-        if (props.hasOwnProperty("amSteward")) {
-            n.amSteward = props["amSteward"]
-        }
-        if (props.hasOwnProperty("debuggingEnabled")) {
-            n.debuggingEnabled = props["debuggingEnabled"]
-        }
-        if (props.hasOwnProperty("youPanel")) {
-            n.youPanel = props["youPanel"]
-        }
-        if (props.hasOwnProperty("discoverPanel")) {
-            n.discoverPanel = props["discoverPanel"]
-        }
-        if (props.hasOwnProperty("sessionsFilter")) {
-            n.sessionsFilter = props["sessionsFilter"]
-        }
+        Object.keys(props).forEach(key=>n[key] = props[key])
         return n
     })
   }

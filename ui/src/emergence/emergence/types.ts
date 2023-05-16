@@ -327,41 +327,6 @@ export interface TagUse {
   session_agents: Array<SessionAgent>,
 }
 
-export class WRectangle {
-  constructor(public x:number, public y:number,public width:number,public height:number){}
-
-  getRight() {
-    return this.x + this.width;
-  }
-
-  getBottom() {
-    return this.y + this.height;
-  }
-
-  getCenterX() {
-    return this.x + this.width / 2;
-  }
-
-  getCenterY() {
-    return this.y + this.height / 2;
-  }
-
-  intersects(r2: WRectangle) {
-    return !(
-      r2.x > this.getRight() ||
-      r2.getRight() < this.x ||
-      r2.y > this.getBottom() ||
-      r2.getBottom() < this.y
-    );
-  }
-
-  toString() {
-    return (
-      `Rect: ${this.x} x ${ this.y}:  ${this.width} x ${this.height}`
-    );
-  }
-}
-
 export const sessionNotes = (session: Info<Session>):Array<ActionHash> => {
   return session.relations.filter(r=>r.relation.content.path == "session.note").map(r=> r.relation.dst)
 }
@@ -391,6 +356,8 @@ export interface UIProps {
   youPanel: string
   discoverPanel: string
   sessionsFilter: SessionsFilter
+  sensing: boolean,
+  sessionDetails: ActionHash|undefined
 }
 
 export interface SessionsFilter {

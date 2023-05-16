@@ -10,17 +10,10 @@ import type { ActionHash } from '@holochain/client';
 import NoteDetail from './NoteDetail.svelte';
 import NoteSummary from './NoteSummary.svelte';
 import TimeWindowSummary from './TimeWindowSummary.svelte';
+  import SessionLink from './SessionLink.svelte';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
-
-const sessionTitle = (sessionHash: ActionHash) => {
-  const session = store.getSession(sessionHash)
-  if (session) {
-    return session.record.entry.title
-  }
-  return "<deleted session>"
-}
 
 </script>
 
@@ -33,16 +26,16 @@ const sessionTitle = (sessionHash: ActionHash) => {
   {/if}
   <div class="elem-body">
     {#if feedElem.type === FeedType.SessionNew}
-      created session: {feedElem.detail}
+      created session: <SessionLink sessionHash={feedElem.about}></SessionLink>
     {/if}
     {#if feedElem.type === FeedType.SessionUpdate}
-    Updated session: {feedElem.detail.title}  changes: {feedElem.detail.changes.join("; ")}
+    Updated session: <SessionLink sessionHash={feedElem.about} linkText={feedElem.detail.title}></SessionLink>  changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SessionDelete}
     Deleted session: {feedElem.detail}
     {/if}
     {#if feedElem.type === FeedType.SessionSetInterest}
-    set interest in {sessionTitle(feedElem.about)} to {sessionInterestToString(feedElem.detail)}
+    set interest in <SessionLink sessionHash={feedElem.about}></SessionLink> to {sessionInterestToString(feedElem.detail)}
     {/if}
     {#if feedElem.type === FeedType.SpaceNew}
     created space: {feedElem.detail}
@@ -54,7 +47,7 @@ const sessionTitle = (sessionHash: ActionHash) => {
     deleted space {feedElem.detail}
     {/if}
     {#if feedElem.type === FeedType.SlotSession}
-    scheduled {sessionTitle(feedElem.about)} into {feedElem.detail.space} for <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary> 
+    scheduled <SessionLink sessionHash={feedElem.about}></SessionLink> into {feedElem.detail.space} for <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary> 
     {/if}
     {#if feedElem.type === FeedType.NoteNew}
       <NoteDetail noteHash={feedElem.about}></NoteDetail>
@@ -79,7 +72,7 @@ const sessionTitle = (sessionHash: ActionHash) => {
       deleted sitemap {feedElem.detail}
     {/if}
     {#if feedElem.type === FeedType.Sense}
-      sense added: {sessionInterestToString(JSON.parse(feedElem.detail))} for {store.getSession(feedElem.about).record.entry.title}
+      sense added: {sessionInterestToString(JSON.parse(feedElem.detail))} for <SessionLink sessionHash={feedElem.about}></SessionLink>
     {/if}
   </div>
 </div>
@@ -101,4 +94,5 @@ const sessionTitle = (sessionHash: ActionHash) => {
   .elem-body {
     display: flex; flex-direction: row;
   }
+  
 </style>

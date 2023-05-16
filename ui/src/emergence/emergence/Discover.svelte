@@ -1,12 +1,7 @@
 <script lang="ts">
     import { onMount, getContext } from 'svelte';
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-    import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
-    import type SlTabGroup from  '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
-    import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
-    import '@shoelace-style/shoelace/dist/components/tab/tab.js';
     import '@shoelace-style/shoelace/dist/components/button/button.js';
-    import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 
     import type {  Record } from '@holochain/client';
     import { storeContext } from '../../contexts';
@@ -16,12 +11,10 @@
     import Sense from './Sense.svelte';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
-    let tabs : SlTabGroup
     $: uiProps = store.uiProps
 
     onMount(async () => {        
         //await store.fetchMyStuff()
-        tabs.show($uiProps.discoverPanel)
 
     });
  
@@ -31,31 +24,27 @@
     <h3>Discover</h3>
 </div>
   
-<div class="pane-content flex-center">
-    <sl-tab-group
-        bind:this={tabs}
-        on:sl-tab-show={(e)=>store.setUIprops({discoverPanel:e.detail.name})}
-        >
-        <sl-tab slot="nav" panel="cloud">Tag Cloud
-        </sl-tab>
-        <sl-tab slot="nav" panel="feed">Feed
-        </sl-tab>
-        <sl-tab slot="nav" panel="sense">Swipe Game
-        </sl-tab>
-    
-        <sl-tab-panel name="feed">
-            <Feed></Feed>            
-        </sl-tab-panel>
-        <sl-tab-panel name="cloud">
-            <TagCloud></TagCloud>
-
-        </sl-tab-panel>
-        <sl-tab-panel name="sense">
+<div class="pane-content flex-center discover">
+    <div class="discover-section">
+        {#if $uiProps.sensing}
             <Sense></Sense>
-        </sl-tab-panel>
-    </sl-tab-group>
+        {/if}
+    </div>
+    <div class="discover-section">
+        <TagCloud></TagCloud>
+    </div>
+    <div class="discover-section" style="">
+        <Feed></Feed>            
+    </div>
 </div>
 
 <style>
-
+    .discover {
+        width: 100%;
+        display: block;
+        flex-direction: column;
+    }
+    .discover-section {
+        display: flex;
+    }
 </style>
