@@ -26,14 +26,16 @@ onMount(() => {
 
 </script>
 <div transition:fly={{ x: 300, duration: 500 }} class="filter-modal" style="display: flex; flex-direction: column">
-  <div style="align-self:flex-start; display: flex; flex-direction: row; margin-bottom: 16px">
-
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-filter') } } circle>
-      <Fa icon={faClose} />
-    </sl-button>
-    <sl-button style="align-self:flex-start; margin-left: 8px; " size=small on:click={() => { filter = defaultSessionsFilter(); dispatch('update-filter', filter) } } circle>
-      <Fa icon={faArrowRotateBack} />
-    </sl-button>
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px;     justify-content: space-between;border-bottom: 1px solid;">
+    <h3>Filters</h3>
+    <div style="display: flex; flex-direction: row; margin-bottom: 16px; ">
+      <sl-button style="align-self:flex-end; margin-left: 8px; " size=small on:click={() => { filter = defaultSessionsFilter(); dispatch('update-filter', filter) } } circle>
+        <Fa icon={faArrowRotateBack} />
+      </sl-button>
+      <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-filter') } } circle>
+        <Fa icon={faClose} />
+      </sl-button>
+    </div>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 10px"><strong>Time:</strong></span>
