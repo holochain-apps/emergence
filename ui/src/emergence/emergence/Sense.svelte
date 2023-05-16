@@ -4,7 +4,6 @@
   import type { Record } from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import FeedElemDetail from './FeedElemDetail.svelte';
   import { sessionTags, type Info, type Session, SessionInterest } from './types';
   import Avatar from './Avatar.svelte';
   import Fa from 'svelte-fa';
@@ -12,20 +11,19 @@
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
-  let loading = true;
   let error: any = undefined;
   let senseIdx = 0
   let sessions
 
   $: original = store.sessions
   $: count = $original.length < 10 ? sessions.length : 10
-  $: sessions = shuffle($original.filter(s=>!s.record.entry.trashed))
-  $: loading, error, senseIdx;
+  $: sessions = []
+  $: error, senseIdx;
   $: session = sessions ? sessions[senseIdx] : undefined
   $: slot = session ? store.getSessionSlot(session) : undefined
 
   onMount(async () => {
-    loading = false
+   sessions = shuffle($original.filter(s=>!s.record.entry.trashed))
   });
 
   const swipe = (interest: SessionInterest) => {
@@ -41,19 +39,15 @@
   }
 
 </script>
-{#if loading}
-<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-  <sl-spinner></sl-spinner>
-</div>
-{:else if error}
+{#if error}
 <span>Error fetching the sense: {error.data.data}.</span>
 {:else if !session}
 <span>All Done, thanks!</span>
 {:else}
-<div >
-    Remaining: {count - senseIdx}
+<div class="sense">
+    <div class="remaining">Remaining: {count - senseIdx}</div>
     <div class="sense-item">
-      <h1>{session.record.entry.title}</h1>
+      <h2>{session.record.entry.title}</h2>
       <div class="leaders">
         {#each session.record.entry.leaders as leader}
           <div><Avatar agentPubKey={leader}></Avatar></div>
@@ -124,8 +118,16 @@
 {/if}
 
 <style>
-  .sense-item{
+  .sense {
+    display: flex;
+    flex-direction: column;
     border: solid 1px gray;
+    background-color: white;
+    border-radius: 20px;
+    padding: 10px;
+    margin: 10px;
+  }
+  .sense-item {
     padding: 10px;
     width:100%; 
     height: 100%;

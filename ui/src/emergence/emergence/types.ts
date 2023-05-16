@@ -358,6 +358,7 @@ export interface UIProps {
   sessionsFilter: SessionsFilter
   sensing: boolean,
   sessionDetails: ActionHash|undefined
+  sessionListMode: boolean,
 }
 
 export interface SessionsFilter {

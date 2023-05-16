@@ -25,6 +25,7 @@
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let steward: SlCheckbox
     let debuging: SlCheckbox
+    let sensing: SlCheckbox
     let showDeletedSession = false
 
     onMount(async () => {
@@ -62,6 +63,13 @@
                 on:sl-change={e => { store.setUIprops({debuggingEnabled:debuging.checked})} }
                 >Enable Debugging
             </sl-checkbox>
+            <sl-checkbox
+                bind:this={sensing}
+                checked={$uiProps.sensing}
+                on:sl-change={e => { store.setUIprops({sensing:sensing.checked})} }
+                >Enable Sensemaking Game
+            </sl-checkbox>
+
             <sl-button style="margin-left: 8px;" size=small on:click={() => dialog.show()} circle>
                 <Fa icon={faEdit} />
             </sl-button>
