@@ -8,6 +8,7 @@
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
+  import { faCalendar } from "@fortawesome/free-solid-svg-icons";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -191,7 +192,11 @@
         &nbsp;
       </div>
     </div>
-  
+
+    <sl-button style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
+        Manage Schedule
+    </sl-button>
+   
     <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
         Site Maps
     </sl-button>
@@ -204,6 +209,7 @@
         Import
     </sl-button>
 
+  
 
    
 </div>

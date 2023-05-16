@@ -148,7 +148,7 @@
       {#if pane=="schedule.slotting"}
         <div class="pane">
           <ScheduleSlotting
-            on:slotting-close={()=>pane="schedule"}
+            on:slotting-close={()=>pane="admin"}
 
           ></ScheduleSlotting>
         </div>
@@ -195,6 +195,7 @@
       <div class="pane">
         <Admin
           on:open-sitemaps={()=>pane = 'admin.sitemaps'}
+          on:open-slotting={()=>pane="schedule.slotting"}
         ></Admin>
       </div>
       {/if}
@@ -237,17 +238,10 @@
           on:keypress={()=>{pane='sessions'}}
           on:click={()=>{pane='sessions'}}
         >
-          <Fa icon={faTicket} size="2x"/>
+          <Fa icon={faCalendar} size="2x"/>
            <span class="button-title">Sessions</span>
         </div>
-        <div class="nav-button {pane.startsWith("schedule")?"selected":""}"
-          title="Schedule"
-          on:keypress={()=>{pane='schedule'}}
-          on:click={()=>{pane='schedule'}}
-        >
-          <Fa icon={faCalendar} size="2x"/>
-          <span class="button-title">Schedule</span>
-        </div>
+
 
         <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
           title="Spaces"

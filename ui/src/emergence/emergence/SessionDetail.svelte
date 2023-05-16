@@ -146,7 +146,7 @@ bind:this={updateSessionDialog}
       </div>
     </div>
 
-    <h2 style="margin-left: 10px">{ entry.title }</h2>
+    <h3>{ entry.title }</h3>
 
     <span style="flex: 1"></span>
 

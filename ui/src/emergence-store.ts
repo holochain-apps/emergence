@@ -97,6 +97,7 @@ export class EmergenceStore {
     sessionsFilter: defaultSessionsFilter(),
     sensing: false,
     sessionDetails: undefined,
+    sessionListMode: true,
   })
 
   setUIprops(props:{}) {
@@ -649,6 +650,21 @@ export class EmergenceStore {
 
   }
   
+  sessionsInSpace = (window: TimeWindow, space: Info<Space>) : Array<Info<Session>> | undefined => {
+    let rel = space.relations.filter(r=>r.relation.content.path == "space.sessions")
+    const sessions: HoloHashMap<ActionHash, Info<Session>> = new HoloHashMap
+    rel.forEach(r=> {
+        const session = this.getSession(r.relation.dst)
+        if (session && !session.record.entry.trashed) {
+        const slot = this.getSessionSlot(session)
+        if (slotEqual({window,space:space.original_hash}, slot)) {
+            sessions.set(session.original_hash, session)
+        }
+        }
+    })
+    return Array.from(sessions.values())
+  }
+
   async createSpace(key:string, name: string, description: string, stewards:Array<AgentPubKey>, capacity: number, amenities: number, tags: Array<string>, pic: EntryHash | undefined, siteLocation: undefined | SiteLocation): Promise<EntryRecord<Space>> {
     const record = await this.client.createSpace(key, name, description, stewards, capacity, amenities, tags, pic)
     const relations = [

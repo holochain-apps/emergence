@@ -49,22 +49,23 @@
         <h3><Avatar agentPubKey={store.myPubKey}></Avatar></h3>
         {:else}<sl-spinner></sl-spinner>
         {/if}
-
-        <sl-checkbox
-            bind:this={steward}
-            checked={$uiProps.amSteward}
-            on:sl-change={e => { store.setUIprops({amSteward:steward.checked})} }
-            >Steward
-        </sl-checkbox>
-        <sl-checkbox
-            bind:this={debuging}
-            checked={$uiProps.debuggingEnabled}
-            on:sl-change={e => { store.setUIprops({debuggingEnabled:debuging.checked})} }
-            >Enable Debugging
-        </sl-checkbox>
-        <sl-button style="margin-left: 8px;" size=small on:click={() => dialog.show()} circle>
-            <Fa icon={faEdit} />
-        </sl-button>
+        <div style="display: flex; flex-direction: row; align-self:center">
+            <sl-checkbox
+                bind:this={steward}
+                checked={$uiProps.amSteward}
+                on:sl-change={e => { store.setUIprops({amSteward:steward.checked})} }
+                >Steward
+            </sl-checkbox>
+            <sl-checkbox
+                bind:this={debuging}
+                checked={$uiProps.debuggingEnabled}
+                on:sl-change={e => { store.setUIprops({debuggingEnabled:debuging.checked})} }
+                >Enable Debugging
+            </sl-checkbox>
+            <sl-button style="margin-left: 8px;" size=small on:click={() => dialog.show()} circle>
+                <Fa icon={faEdit} />
+            </sl-button>
+        </div>
     </div>
 
 <div class="pane-content flex-center">
@@ -109,5 +110,8 @@
 </div>
 
 <style>
-
-</style>
+    sl-checkbox {
+      margin-right:15px;
+    }
+  </style>
+  
