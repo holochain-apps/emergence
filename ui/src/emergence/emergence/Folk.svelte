@@ -40,7 +40,7 @@
     let tabs : SlTabGroup
 
 </script>
-{#if $profile.status === "complete"  && $profile.value}
+{#if $profile.status === "complete"  && $profile.value && $agentSessions.get(agentPubKey)}
     <div transition:slide={{ axis: 'x', duration: 400 }} class="pane-header">
         <div class="controls">
             <sl-button size=small on:click={() => { dispatch('folk-close') } } circle>
