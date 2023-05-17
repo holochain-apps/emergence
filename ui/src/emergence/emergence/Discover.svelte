@@ -18,7 +18,6 @@
     $: uiProps = store.uiProps
 
     onMount(async () => {        
-        //await store.fetchMyStuff()
 
     });
     let showFilter = false
@@ -33,9 +32,9 @@
         </sl-button>
       
         <div style="margin-left: 8px;">
-            <Sync></Sync>
+            <Sync agentPubKey={undefined}></Sync>
         </div>
-</div>
+    </div>
 </div>
 {#if showFilter}
 <FeedFilter

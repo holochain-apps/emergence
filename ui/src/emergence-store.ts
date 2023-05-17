@@ -96,8 +96,8 @@ export class EmergenceStore {
   noteHashes: Writable<Array<ActionHash>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
   allTags: Writable<Array<TagUse>> = writable([])
-  myNotes: Writable<Array<ActionHash>> = writable([])
-  mySessions: Writable<HoloHashMap<ActionHash,SessionInterest>> = writable(new HoloHashMap())
+  agentNotes: Writable<HoloHashMap<AgentPubKey, Array<ActionHash>>> = writable(new HoloHashMap())
+  agentSessions: Writable<HoloHashMap<AgentPubKey,HoloHashMap<ActionHash,SessionInterest>>> = writable(new HoloHashMap())
   neededStuff: GetStuffInput = {}
   myPubKeyBase64: string
   loader = undefined
@@ -111,6 +111,7 @@ export class EmergenceStore {
     feedFilter: defaultFeedFilter(),
     sensing: false,
     sessionDetails: undefined,
+    folk: undefined,
     sessionListMode: true,
   })
 
@@ -589,9 +590,14 @@ export class EmergenceStore {
         const noteHashes = []
         sessions.forEach(s=> s.record.entry.leaders.forEach(l=> 
             {
-                if (encodeHashToBase64(l) == this.myPubKeyBase64){
-                    this.mySessions.update((n) => {
-                        n.set(s.original_hash,SessionInterest.Interested)
+                if (encodeHashToBase64(l) == this.myPubKeyBase64) {
+                    this.agentSessions.update((n) => {
+                        let si = n.get(this.myPubKey)
+                        if (!si) {
+                            si = new HoloHashMap()
+                            n.set(l,si)
+                        }
+                        si.set(s.original_hash,SessionInterest.Interested)
                         return n
                     } )
                 }
@@ -1157,19 +1163,26 @@ export class EmergenceStore {
     }
   }
 
-  async fetchMyStuff() {
+  async fetchAgentStuff(agentPubKey) {
     try {
-        const feed = await this.client.getFeed(this.myPubKey)
-        this.myNotes.update((n) => {
-            return feed.filter(f=>f.type == FeedType.NoteNew ).map(f=>f.about)
+        const feed = await this.client.getFeed(agentPubKey)
+        this.agentNotes.update((n) => {
+            n.set(agentPubKey,feed.filter(f=>f.type == FeedType.NoteNew ).map(f=>f.about))
+            return n
         } )
-        this.mySessions.update((n) => {
+        this.agentSessions.update((n) => {
+            let si = n.get(agentPubKey)
+            if (!si) {
+                si = new HoloHashMap()
+                n.set(agentPubKey,si)
+            }
+
             feed.forEach(f=>{
                 if (f.type == FeedType.SessionSetInterest  && f.detail != SessionInterest.NoOpinion) {
-                    n.set(f.about,f.detail)
+                    si.set(f.about,f.detail)
                 }
                 if (f.type == FeedType.SessionSetInterest  && f.detail == SessionInterest.NoOpinion) {
-                    n.delete(f.about)
+                    si.delete(f.about)
                 }
             }
             )
@@ -1177,7 +1190,7 @@ export class EmergenceStore {
         } )
     }
     catch (e) {
-        console.log("Error fetching my stuff", e)
+        console.log("Error fetching agent stuff", e)
     }
   }
 
@@ -1202,10 +1215,13 @@ export class EmergenceStore {
         console.log("Error fetching tags", e)
     }
   }
-  async sync() {
+  async sync(agent: AgentPubKey | undefined) {
     await this.fetchTags()
     await this.fetchSessions() // fetches spaces and timewindows
-    await this.fetchMyStuff()
+    await this.fetchAgentStuff(!agent ? this.myPubKey: agent)
+    if (!agent) {
+        await this.fetchFeed()
+    }
     await this.fetchSiteMaps()
   }
 

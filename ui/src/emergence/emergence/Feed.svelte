@@ -9,23 +9,25 @@
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
   let error: any = undefined;
-  export let forMe = false
+  export let forAgent: AgentPubKey| undefined = undefined
 
-  $: mySessions = store.mySessions
-  $: mySessionsb64 = Array.from($mySessions).map(([s,_])=> encodeHashToBase64(s))
+  $: agentSessions = store.agentSessions
+  $: sessions = forAgent ? $agentSessions.get(forAgent) : undefined
+  $: agentSessionsb64 = Array.from(sessions ? sessions : []).map(([s,_])=> encodeHashToBase64(s))
   $: fullFeed = store.feed
   $: uiProps = store.uiProps
-  $: feed = !forMe ? $fullFeed.filter(f=>store.filterFeedElem(f,$uiProps.feedFilter)) : $fullFeed.filter(f=> {
-    encodeHashToBase64(f.author) == store.myPubKeyBase64 ||
-    mySessionsb64.includes(encodeHashToBase64(f.about))
+  $: agentB64 = forAgent ? encodeHashToBase64(forAgent) : undefined
+  $: feed = !forAgent ? $fullFeed.filter(f=>store.filterFeedElem(f,$uiProps.feedFilter)) : $fullFeed.filter(f=> {
+      encodeHashToBase64(f.author) == agentB64 ||
+      agentSessionsb64.includes(encodeHashToBase64(f.about))
      }
     )
   $: error;
 
   onMount(async () => {
     await store.fetchFeed();
-    if (forMe)
-      await store.fetchMyStuff();
+    if (forAgent)
+      await store.fetchAgentStuff(forAgent);
   });
 
 </script>

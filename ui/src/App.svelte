@@ -31,6 +31,7 @@
   import SiteMapDisplay from './emergence/emergence/SiteMapDisplay.svelte';
   import AllSiteMaps from './emergence/emergence/AllSiteMaps.svelte';
   import Discover from './emergence/emergence/Discover.svelte';
+  import Folk from './emergence/emergence/Folk.svelte';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -58,6 +59,18 @@
 
     profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
       avatarMode: "avatar-optional",
+      additionalFields: [
+        {
+          name: "location",
+          label: "Location",
+          required: false, 
+        },
+        {
+          name: "bio",
+          label: "Bio",
+          required: false,
+        }
+      ], 
     });
 
     fileStorageClient = new FileStorageClient(client, 'emergence');
@@ -79,10 +92,14 @@
 
   const setPane = (p) => {
     closeSessionDetails()
+    closeFolk()
     pane=p
   }
   const closeSessionDetails = () => {
     store.setUIprops({sessionDetails:undefined})
+  }
+  const closeFolk = () => {
+    store.setUIprops({folk:undefined})
   }
 </script>
 
@@ -113,6 +130,14 @@
         sessionHash={$uiProps.sessionDetails}></SessionDetail>
       </div>
     {/if}
+    {#if store &&  $uiProps.folk}
+      <div class="session-details" style="height:100vh">
+        <Folk 
+        on:folk-close={()=>closeFolk()}
+        agentPubKey={$uiProps.folk}></Folk>
+      </div>
+    {/if}
+
     <div id="content" style="display: flex; flex-direction: column; flex: 1;">
 
       {#if pane=="sessions"}

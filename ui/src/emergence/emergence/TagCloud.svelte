@@ -28,8 +28,13 @@
     <div class="cloud">
         <WordCloud backgroundColor={"lightGray"} width={400} height={300} words={words}
             on:click={(e)=> {
+                const tag = e.detail.target.innerHTML
                 const feedFilter = $uiProps.feedFilter
-                feedFilter.tags = [e.detail.target.innerHTML]
+                const idx = feedFilter.tags.indexOf(tag)
+                if (idx >= 0) {
+                    feedFilter.tags.splice(idx,1)
+                } else
+                    feedFilter.tags.push(tag)
                 store.setUIprops({feedFilter})
                 }}
 

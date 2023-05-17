@@ -286,7 +286,7 @@ bind:this={updateSessionDialog}
     margin: 0 auto;
   }
 
-  .controls {
+  :global(.controls) {
     width: 100%;
     display: flex;
     justify-content: space-between;

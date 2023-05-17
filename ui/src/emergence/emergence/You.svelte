@@ -30,13 +30,13 @@
     let showDeletedSession = false
 
     onMount(async () => {
-        await store.fetchMyStuff()
+        await store.fetchAgentStuff(store.myPubKey)
         tabs.show($uiProps.youPanel)
     });
 
     $: myProfile = store.profilesStore.myProfile
-    $: myNotes = store.myNotes
-    $: mySessions = store.mySessions
+    $: agentNotes = store.agentNotes
+    $: agentSessions = store.agentSessions
     $: uiProps = store.uiProps
     let dialog: SlDialog
     let tabs : SlTabGroup
@@ -56,7 +56,7 @@
                 <Fa icon={faEdit} />
             </sl-button>
             <div style="margin-left: 8px;">
-                <Sync></Sync>
+                <Sync agentPubKey={store.myPubKey}></Sync>
             </div>
         </div>
         <div style="display: flex; flex-direction: row; align-self:center">
@@ -94,11 +94,10 @@
             </sl-tab>
             <sl-tab slot="nav" panel="updates">Updates</sl-tab>
         <sl-tab-panel name="sessions">
-            {#if $mySessions.size == 0}
+            {#if $agentSessions.get(store.myPubKey).size == 0}
                 You haven't created or marked interest in any sessions yet.. 
             {/if}
-
-            {#each Array.from($mySessions.keys()).map(s =>store.getSession(s)) as session}
+            {#each Array.from($agentSessions.get(store.myPubKey).keys()).map(s =>store.getSession(s)) as session}
                 {#if !session.record.entry.trashed || showDeletedSession}
                 <SessionSummary 
                 showTags={true} showSlot={true} allowSetIntention={true} session={session}></SessionSummary>
@@ -108,16 +107,16 @@
 
         </sl-tab-panel>
         <sl-tab-panel name="notes">
-            {#if $myNotes.length == 0}
+            {#if $agentNotes.get(store.myPubKey).length == 0}
                 You haven't created any notes yet.. 
             {/if}
-            {#each $myNotes as note}
+            {#each $agentNotes.get(store.myPubKey) as note}
                 <NoteDetail showDeleted={false} showFrame={true} noteHash={note}></NoteDetail>
             {/each}
             
         </sl-tab-panel>
         <sl-tab-panel name="updates">
-            <Feed forMe={true}></Feed>
+            <Feed forAgent={store.myPubKey}></Feed>
         </sl-tab-panel>
     </sl-tab-group>
 

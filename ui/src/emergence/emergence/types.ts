@@ -359,6 +359,7 @@ export interface UIProps {
   feedFilter: FeedFilter
   sensing: boolean,
   sessionDetails: ActionHash|undefined
+  folk: ActionHash|undefined
   sessionListMode: boolean,
 }
 
