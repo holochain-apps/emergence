@@ -2,7 +2,6 @@
 import { onMount, getContext, createEventDispatcher } from 'svelte';
 import type { Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
-import SpaceDetail from './SpaceDetail.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import Fa from 'svelte-fa';
 import { faCircleArrowLeft, faSync } from '@fortawesome/free-solid-svg-icons';
@@ -23,7 +22,6 @@ $: error, spaceDetail;
 onMount(async () => {
   store.fetchSpaces();
 });
-let spaceDetailDialog
 
 </script>
 
@@ -36,7 +34,7 @@ let spaceDetailDialog
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
       <div style="margin-left: 8px;">
-        <Sync></Sync>
+        <Sync agentPubKey={undefined}></Sync>
       </div>
     </div>
 
@@ -46,16 +44,11 @@ let spaceDetailDialog
   {:else if $spaces.length === 0}
     <span class="notice">No spaces found.</span>
   {:else}
-    
-      <SpaceDetail
-        bind:this={spaceDetailDialog}
-        space={spaceDetail}>
-      </SpaceDetail>
 
     {#each $spaces as space}
       <div class="space">
         <SpaceSummary
-          on:space-selected={()=>{spaceDetail=space;spaceDetailDialog.open(space)}} 
+          on:space-selected={()=>{store.setUIprops({spaceDetails:space.original_hash})}} 
           space={space}>
         </SpaceSummary>
       </div>

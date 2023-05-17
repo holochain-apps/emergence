@@ -11,7 +11,6 @@ import Avatar from './Avatar.svelte';
 import InterestSelect from './InterestSelect.svelte';
 import { faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
-import SpaceDetail from './SpaceDetail.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -39,7 +38,6 @@ onMount(async () => {
     throw new Error(`The session input is required for the SessionSummary element`);
   }
 });
-let spaceDetailDialog
 $:space = slot? store.getSpace(slot.space) : undefined
 </script>
 {#if loading}
@@ -48,10 +46,6 @@ $:space = slot? store.getSpace(slot.space) : undefined
 
 </div>
 {:else}
-<SpaceDetail
-bind:this={spaceDetailDialog}
-space={undefined}>
-</SpaceDetail>
 <div class="summary" on:click={(e)=>{
   // @ts-ignore
     if (e.target.tagName != "SL-SELECT")
@@ -67,7 +61,7 @@ space={undefined}>
         <div class="time">
           {new Date(slot.window.start).toTimeString().slice(0,5)}
         </div>
-        <div class="space clickable" on:click={(e)=>{e.stopPropagation();spaceDetailDialog.open(space)}}>
+        <div class="space clickable" on:click={(e)=>{e.stopPropagation();store.setUIprops({spaceDetails: space.original_hash})}}>
           {space ? space.record.entry.name : "Unknown"}
         </div>
         {:else}

@@ -1,5 +1,5 @@
 <script lang="ts">
-import { faCircleArrowLeft, faEdit, faPlus, faTrash, faUserGroup } from '@fortawesome/free-solid-svg-icons';
+import { faCircleArrowLeft, faEdit, faTrash, faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';

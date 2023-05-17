@@ -10,7 +10,8 @@ import type { ActionHash } from '@holochain/client';
 import NoteDetail from './NoteDetail.svelte';
 import NoteSummary from './NoteSummary.svelte';
 import TimeWindowSummary from './TimeWindowSummary.svelte';
-  import SessionLink from './SessionLink.svelte';
+import SessionLink from './SessionLink.svelte';
+import SpaceLink from './SpaceLink.svelte';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -38,10 +39,10 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     set interest in <SessionLink sessionHash={feedElem.about}></SessionLink> to {sessionInterestToString(feedElem.detail)}
     {/if}
     {#if feedElem.type === FeedType.SpaceNew}
-    created space: {feedElem.detail}
+    created space: <SpaceLink spaceHash={feedElem.about}></SpaceLink>
     {/if}
     {#if feedElem.type === FeedType.SpaceUpdate}
-    updated space {feedElem.detail.name}  changes: {feedElem.detail.changes.join("; ")}
+    updated space <SpaceLink spaceHash={feedElem.about}></SpaceLink>  changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SpaceDelete}
     deleted space {feedElem.detail}

@@ -11,12 +11,13 @@ import { amenitiesList, timeWindowDurationToStr, type Info, type Space, timeWind
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
-import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit, faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import SpaceCrud from './SpaceCrud.svelte'; 
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
 import Avatar from './Avatar.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
+import { slide } from 'svelte/transition';
 
 const dispatch = createEventDispatcher();
 
@@ -24,24 +25,18 @@ export let space: Info<Space>;
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
-let loading = true;
 let error: any = undefined;
 
 let editing = false;
 
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, space;
+$: editing,  error, space;
 $: uiProps = store.uiProps
 
 onMount(async () => {
 });
 
-export const open = (spc) => {
-  space = spc
-  loading = false
-  dialog.show()
-}
 
 async function deleteSpace() {
   try {
@@ -73,20 +68,38 @@ let confirmDialog
   } }
 ></SpaceCrud>
 
-<sl-dialog label={space? space.record.entry.name : ""} bind:this={dialog} class="dialog-header-actions">
-  {#if $uiProps.amSteward}
-  <sl-button style="margin-top:12px" slot="header-actions" on:click={() => confirmDialog.open()} circle ><Fa icon={faTrash} ></Fa></sl-button>
-  <sl-button style="margin-top:12px" slot="header-actions" on:click={() => {dialog.hide();editDialog.open(space)}} circle ><Fa icon={faEdit} ></Fa></sl-button>
-  {/if}
-  
-{#if loading}
-<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-  <sl-spinner></sl-spinner>
 
-</div>
-{:else if error}
+{#if error}
 <span>Error fetching the space: {error.data.data}</span>
 {:else}
+
+<div transition:slide={{ axis: 'x', duration: 400 }}  class="pane-content">
+  <div class="pane-header">
+
+    <div class="controls">
+      <sl-button size=small on:click={() => { dispatch('space-close') } } circle>
+        <Fa icon={faCircleArrowLeft} />
+      </sl-button>
+      {#if $uiProps.amSteward}
+      <div>
+        <sl-button size=small on:click={() => { editDialog.open(space) } } circle>
+          <Fa icon={faEdit} />
+        </sl-button>
+        <sl-button size=small on:click={()=>confirmDialog.open()} circle>
+          <Fa icon={faTrash} />
+        </sl-button>
+      </div>
+      {/if}
+    </div>
+
+    <h3>{ space? space.record.entry.name : "" }</h3>
+
+    <span style="flex: 1"></span>
+
+ 
+  </div>
+
+
   <Confirm 
     bind:this={confirmDialog}
     message="This will remove this space for everyone!" 
@@ -162,8 +175,9 @@ let confirmDialog
   </div>
 
 </div>
+</div>
+
 {/if}
-</sl-dialog>
 
 <style>
   .pic {

@@ -32,6 +32,7 @@
   import AllSiteMaps from './emergence/emergence/AllSiteMaps.svelte';
   import Discover from './emergence/emergence/Discover.svelte';
   import Folk from './emergence/emergence/Folk.svelte';
+  import SpaceDetail from './emergence/emergence/SpaceDetail.svelte';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -92,15 +93,20 @@
 
   const setPane = (pane) => {
     closeSessionDetails()
+    closeSpaceDetails()
     closeFolk()
     store.setUIprops({pane})
   }
   const closeSessionDetails = () => {
     store.setUIprops({sessionDetails:undefined})
   }
+  const closeSpaceDetails = () => {
+    store.setUIprops({spaceDetails:undefined})
+  }
   const closeFolk = () => {
     store.setUIprops({folk:undefined})
   }
+
 </script>
 
 <main>
@@ -122,6 +128,15 @@
 
     <profile-prompt>
       <file-storage-context client={fileStorageClient}>
+      {#if store &&  $uiProps.spaceDetails}
+      <div class="session-details" style="height:100vh">
+        <SpaceDetail
+          on:space-deleted={()=>closeSpaceDetails()}
+          on:space-close={()=>closeSpaceDetails()}
+          space={store.getSpace($uiProps.spaceDetails)}>
+        </SpaceDetail>
+      </div>
+      {/if}
     {#if store &&  $uiProps.sessionDetails}
       <div class="session-details" style="height:100vh">
         <SessionDetail 
