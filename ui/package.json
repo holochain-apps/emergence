@@ -26,6 +26,7 @@
     "svelte-watch-resize": "1.0.3",
     "javascript-time-ago": "2.3.7",
     "sanitize-filename": "1.6.3",
+    "@ts-stack/markdown": "^1.4.0",
     "svelte-d3-cloud": "^0.0.2"
   },
   "devDependencies": {

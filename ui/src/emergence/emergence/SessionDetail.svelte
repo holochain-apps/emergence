@@ -240,7 +240,7 @@ bind:this={updateSessionDialog}
   
   </div>
   <div class="notes">
-    <div>
+    <div class="notes-add">
       <NoteCrud
         modal={false}
         bind:this={createNoteDialog}
@@ -249,20 +249,32 @@ bind:this={updateSessionDialog}
         on:edit-canceled={() => { creatingNote = false; } }
       ></NoteCrud>
     </div>
+    <div class="notes-list">
       {#each notes.reverse() as note}
         <NoteDetail showFrame={true} showSession={false} noteHash={note}></NoteDetail>
-    {/each}
+      {/each}
+    </div>
   </div>
 
 </div>
 {/if}
 
 <style>
-  .notes{
-    border-top: solid 1px;
+  .notes {
+    display:flex;
+    flex-direction: column;
     max-width: 720px;
     margin: 0 auto;
     width: 100%;
+  }
+  .notes-add {
+    background-color: lightgray;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  .notes-list {
+    flex:1;
+    overflow-y: scroll;
   }
   .details {
     display: flex;

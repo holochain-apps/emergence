@@ -13,6 +13,7 @@
     import NoteCrud from './NoteCrud.svelte';
     import Confirm from './Confirm.svelte';
     import SessionLink from './SessionLink.svelte';
+    import { Marked } from "@ts-stack/markdown";
 
     const dispatch = createEventDispatcher();
 
@@ -105,7 +106,7 @@
         {/if}
 
         <div class="post-content">
-          {$note.value.record.entry.text}
+          {@html Marked.parse($note.value.record.entry.text)}
         </div>
         <div class="tags">
           {#each $note.value.record.entry.tags as tag}
