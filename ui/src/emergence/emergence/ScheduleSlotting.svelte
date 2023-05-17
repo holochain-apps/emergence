@@ -5,6 +5,7 @@
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, slotEqual } from './types';
+  import {calcDays, dayToStr, sortWindows, windowsInDay} from './utils'
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
   import { faCalendarPlus, faTrash, faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
@@ -37,43 +38,11 @@
   let selectedWindow: TimeWindow|undefined = undefined
 
   $: selectedSessions, selectedSpaceIdx, selectedWindow
-  $: sessionsInSpace
-  $: amSteward = store.amSteward
-
-
-  const calcDays = (windows, slotTypeFilter, dayFilter): Array<Date> => {
-    const days = []
-    const dayStrings = {}
-    
-    windows.forEach(w=> {
-      if ((!slotTypeFilter || w.tags.includes(slotTypeFilter)) &&
-          (!dayFilter || w.start == dayFilter))
-       {
-        dayStrings[new Date(w.start).toDateString()] = new Date(w.start)
-      }
-    })
-    Object.values(dayStrings).forEach((d:Date)=>days.push(d))
-    days.sort((a,b)=> a-b)
-    return days
-  }
+  $: uiProps = store.uiProps
 
   onMount(async () => {
     loading = false
   });
-  const sessionsInSpace = (window: TimeWindow, space: Info<Space>) : Array<Info<Session>> | undefined => {
-    let rel = space.relations.filter(r=>r.relation.content.path == "space.sessions")
-    const sessions: HoloHashMap<ActionHash, Info<Session>> = new HoloHashMap
-    rel.forEach(r=> {
-      const session = store.getSession(r.relation.dst)
-      const slot = store.getSessionSlot(session)
-      if (slotEqual({window,space:space.original_hash}, slot)) {
-        sessions.set(session.original_hash, session)
-      }
-    })
-    return Array.from(sessions.values())
-  }
-  // @ts-ignore
-  const sortWindows = (a,b) : number => {return new Date(a.start) - new Date(b.start)}
 
   const selectSpace = (idx, space) => {
     selectedSessions = new HoloHashMap()
@@ -113,7 +82,7 @@
 
 
   const selectSessions = (window: TimeWindow, space: Info<Space>) => {
-    const sessions = sessionsInSpace(window, space)
+    const sessions = store.sessionsInSpace(window, space)
     sessions.forEach(s=>{
       if (selectedSessions.get(s.record.actionHash)) {
         selectedSessions.delete(s.record.actionHash)
@@ -210,12 +179,7 @@
 
   let bySpace = false
 
-  const windowsInDay = (day, type) : Array<TimeWindow> => {
-    return $windows.filter(w=>{
-                // @ts-ignore
-                return new Date(w.start).toDateString()  == day.toDateString()
-              }).filter(w => w.tags.includes(type) || !type )
-  }
+  
   const windowToolTip = (window) => {
     return `${timeWindowDurationToStr(window)} ${window.tags.length > 0 ? `slot types: ${window.tags.join(",")}`:""}`
   }
@@ -236,7 +200,7 @@
 
   const deleteWindow = async (window: TimeWindow) => {
 
-    for (const s of $sessions) {
+    for (const s of $sessions.filter(s=>!s.record.entry.trashed)) {
       const slot = store.getSessionSlot(s)
       if ( JSON.stringify(slot.window) == JSON.stringify(window)) {
         alert("Time window has scheduled sessions, can't delete! Please move the sessions first.")
@@ -246,9 +210,7 @@
     await store.deleteTimeWindow(window)
     store.fetchTimeWindows()
   }
-  const dayToStr = (day) => {
-    return `${day.getMonth()+1}/${day.getDate()}`
-  }
+  
 </script>
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -286,7 +248,7 @@
         <sl-option value={type}> {type}</sl-option>
       {/each}
     </sl-select>
-    {#if $amSteward}
+    {#if $uiProps.amSteward}
       <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
         <Fa icon={faCalendarPlus} />
       </sl-button>
@@ -312,7 +274,7 @@
 
       <div class="orphans">
         <div><strong>Orphan Sessions</strong></div>
-        {#each $sessions.filter((s)=>!store.getSessionSlot(s)) as session}
+        {#each $sessions.filter((s)=>!s.record.entry.trashed && !store.getSessionSlot(s)) as session}
           <div
             id={encodeHashToBase64(session.original_hash)}
             class="orphaned-session"
@@ -352,7 +314,7 @@
             <tr>
               <td colspan="{$spaces.length+1}" >{day.toDateString()}</td>
             </tr>
-            {#each windowsInDay(day, slotType).sort(sortWindows) as window}
+            {#each windowsInDay($windows, day, slotType).sort(sortWindows) as window}
             <tr>
               <td class="time-title"
                 class:tagged={window.tags.length > 0}
@@ -362,7 +324,7 @@
               >
                 
                   {new Date(window.start).toTimeString().slice(0,5)}
-                  {#if $amSteward}
+                  {#if $uiProps.amSteward}
                     <sl-button style="margin-left: 4px;" size=small on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                       <Fa icon={faTrash} />
                     </sl-button>
@@ -373,7 +335,7 @@
                   id={`${JSON.stringify(window)}-${idx}}`}
                   class="schedule-slot"
                   class:glowing={dragTarget == `${JSON.stringify(window)}-${idx}}`}
-                  class:selected={selectedSpaceIdx ==  idx  || JSON.stringify(selectedWindow) ==  JSON.stringify(window) || sessionsInSpace(window, space).find(s=>selectedSessions.get(s.record.actionHash))}
+                  class:selected={selectedSpaceIdx ==  idx  || JSON.stringify(selectedWindow) ==  JSON.stringify(window) || store.sessionsInSpace(window, space).find(s=>selectedSessions.get(s.record.actionHash))}
 
                   on:dragenter={handleDragEnter} 
                   on:dragleave={handleDragLeave}  
@@ -381,7 +343,7 @@
                   on:dragover={handleDragOver}          
                   on:click={(e)=>{selectSlot(window, space); e.stopPropagation()}}
                 >
-                  {#each sessionsInSpace(window, space) as session}
+                  {#each store.sessionsInSpace(window, space) as session}
                     <div class="slotted-session"
                     id={encodeHashToBase64(session.original_hash)}
                     class:tilted={draggedItemId == encodeHashToBase64(session.original_hash)}
@@ -403,7 +365,7 @@
           <tr>
             <th class="empty"></th>
             {#each days as day}
-            <th style="text-align:left" colspan="{windowsInDay(day, slotType).length+1}">{dayToStr(day)}</th>
+            <th style="text-align:left" colspan="{windowsInDay($windows, day, slotType).length+1}">{dayToStr(day)}</th>
 
             {/each}
           </tr>
@@ -412,7 +374,7 @@
 
           {#each days as day}
             <th style=""></th>
-            {#each windowsInDay(day, slotType).sort(sortWindows) as window}
+            {#each windowsInDay($windows, day, slotType).sort(sortWindows) as window}
               <th class="time-title"
                 class:selected={JSON.stringify(selectedWindow) ==  JSON.stringify(window)}
                 class:tagged={window.tags.length > 0}
@@ -421,7 +383,7 @@
               >
     
                 {new Date(window.start).toTimeString().slice(0,5)}
-                {#if $amSteward}
+                {#if $uiProps.amSteward}
                   <sl-button style="margin-left: 4px;" size=small on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                     <Fa icon={faTrash} />
                   </sl-button>
@@ -459,7 +421,7 @@
                   class="schedule-slot"
                   class:glowing={dragTarget == `${JSON.stringify(window)}-${idx}}`}
                   class:excluded={isExcluded(window, space)}
-                  class:selected={selectedSpaceIdx ==  idx  || JSON.stringify(selectedWindow) ==  JSON.stringify(window) || sessionsInSpace(window, space).find(s=>selectedSessions.get(s.record.actionHash))}
+                  class:selected={selectedSpaceIdx ==  idx  || JSON.stringify(selectedWindow) ==  JSON.stringify(window) || store.sessionsInSpace(window, space).find(s=>selectedSessions.get(s.record.actionHash))}
 
                   on:dragenter={handleDragEnter} 
                   on:dragleave={handleDragLeave}  
@@ -467,7 +429,7 @@
                   on:dragover={handleDragOver}          
                   on:click={(e)=>{selectSlot(window, space); e.stopPropagation()}}
                 >
-                  {#each sessionsInSpace(window, space) as session}
+                  {#each store.sessionsInSpace(window, space) as session}
                     <div class="slotted-session"
                     id={encodeHashToBase64(session.original_hash)}
                     class:tilted={draggedItemId == encodeHashToBase64(session.original_hash)}
@@ -489,7 +451,7 @@
 
       <div class="selected-sessions">
         <div><strong>Selected</strong></div>
-        {#each $sessions.filter((s)=>selectedSessions.get(s.record.actionHash))
+        {#each $sessions.filter((s)=>!s.record.entry.trashed && selectedSessions.get(s.record.actionHash))
           .sort((a,b)=>store.getSessionSlot(a).window.start - store.getSessionSlot(b).window.start) as session}
           <div style="margin-bottom: 8px;">
             <SessionSummary 

@@ -21,15 +21,9 @@
     export let showAvatar = true
     export let showSession = true
     export let showTimestamp = true
-    export let showFrame = false
-    export let showDeleted = true
 
     $: note = store.neededStuffStore.notes.get(noteHash)
-    $: uiProps = store.uiProps
-
-    $: session = $note.value?  store.getSession($note.value.record.entry.session) : undefined
-
-      onDestroy(() => {
+    onDestroy(() => {
         store.neededStuffStore.notes.clear(noteHash)
     }); 
 
@@ -39,6 +33,8 @@
     }
 
     let confirmDialog
+    $: uiProps = store.uiProps
+
 </script>
   <Confirm 
     bind:this={confirmDialog}
@@ -48,18 +44,18 @@
 {#if $note.status=== "pending"}
   <sl-spinner></sl-spinner>
 {:else}
-  <div class="note {showFrame ? "note-frame" : ""} {!showDeleted &&  $note.value.record.entry.trashed ? "hidden" : ""}">
-    {#if $note.value}
+  <div class="note">
+      {#if $note.value}
         <NoteCrud 
         bind:this={updateNoteDialog}
         sessionHash={undefined}
         on:note-updated={() => {} }
         ></NoteCrud>
-        <div class="post-header">
+
+          {#if showAvatar}
+            <div class="avatar"><Avatar agentPubKey={$note.value.record.action.author}></Avatar></div>
+          {/if}
           <div class="header-left">
-            {#if showAvatar}
-              <div class="avatar"><Avatar agentPubKey={$note.value.record.action.author}></Avatar></div>
-            {/if}
             <div class="author-name">
               <!-- TODO: SEPERATE AUTHOR NAME AND AVATAR -->
             </div>
@@ -68,10 +64,32 @@
                 {timestampToStr($note.value.record.action.timestamp)}
               </div>
             {/if}
+            "{$note.value.record.entry.text.length > 50 ? 
+              `${$note.value.record.entry.text.substring(0,50)}...` : 
+              $note.value.record.entry.text}"
+            {#if showSession}
+              in session {store.getSession($note.value.record.entry.session).record.entry.title}
+            {/if}
+            {#if $uiProps.debuggingEnabled}
+            <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+               <span style="margin-right: 4px"><strong>Deleted:</strong></span>
+               <span style="white-space: pre-line">{$note.value.record.entry.trashed}</span>
+             </div>
+             <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+               <span style="margin-right: 4px"><strong>Original Hash:</strong></span>
+               <span style="white-space: pre-line">{ encodeHashToBase64($note.value.original_hash) }</span>
+             </div>
+             <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+                 <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
+               <span style="white-space: pre-line">{ encodeHashToBase64($note.value.record.actionHash) }</span>
+             </div>
+           {/if}    
           </div>
+ 
           {#if encodeHashToBase64($note.value.record.action.author) === store.myPubKeyBase64 &&
             !$note.value.record.entry.trashed
           }
+
             <div class="crud">
               <sl-button style="margin-left: 8px;" size=small on:click={()=>confirmDialog.open()} circle>
                 <Fa icon={faTrash} />
@@ -81,40 +99,6 @@
               </sl-button>        
             </div>
           {/if}
-     </div>
-     {#if $uiProps.debuggingEnabled}
-       <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-          <span style="margin-right: 4px"><strong>Deleted:</strong></span>
-          <span style="white-space: pre-line">{$note.value.record.entry.trashed}</span>
-        </div>
-        <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-          <span style="margin-right: 4px"><strong>Original Hash:</strong></span>
-          <span style="white-space: pre-line">{ encodeHashToBase64($note.value.original_hash) }</span>
-        </div>
-        <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-            <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
-          <span style="white-space: pre-line">{ encodeHashToBase64($note.value.record.actionHash) }</span>
-        </div>
-      {/if}     
-        {#if showSession}
-        <div class="post-session"> 
-          <strong>{ session && session.record.entry.trashed ? "Deleted ":""}Session:</strong> { session ? session.record.entry.title : "unknown"}
-        </div>         
-        {/if}
-
-        <div class="post-content">
-          {$note.value.record.entry.text}
-        </div>
-        <div class="tags">
-          {#each $note.value.record.entry.tags as tag}
-            <div class="tag">{tag}</div>
-          {/each}
-        </div>
-        {#if $note.value.record.entry.pic}
-          <div class="post-pic">
-          <show-image image-hash={encodeHashToBase64($note.value.record.entry.pic)}></show-image>
-          </div>
-        {/if}
       {:else}
         Not found on DHT
       {/if}
@@ -124,27 +108,12 @@
 <style>
   .note{
     background-color: white;
-  }
-  .hidden {
-    display: none;
-  }
-  .note-frame {
-    border: 1px solid #e9e9e9;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    border-radius: 3px;
-    margin: .5em;
-    padding: .5em;
-  }
-  .post-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: .25em;
-  }
+    display:flex;
+  }  
   .header-left {
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    margin-left: 1em;
   }
   .author-name {
     font-weight: bold;
@@ -166,14 +135,6 @@
     margin-bottom: .25em;
     font-size: .9em;
     padding: 0px;
-  }
-  .post-pic {
-    /*TODO: figure out best way to control content width 
-    higher up the dom like at the pane level 
-    so that images can take up 100% width of the post*/
-    width: 300px;
-    margin: 0 auto;
-    margin:auto;
   }
   :global(.tag) {
     color: white;

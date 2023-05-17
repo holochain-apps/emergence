@@ -34,33 +34,55 @@ async function setSessionInterest(interest: SessionInterest) {
   }
 }
 let open = false
-
+let menu
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-{#if !open}
   <div class="select" on:mousedown={(e)=>{open = true;e.stopPropagation()}}
-    on:mouseup={(e)=>{open = false;e.stopPropagation()}}
     >
-    
-  {#if $relData.myInterest === SessionInterest.NoOpinion}RSVP{/if}
-  {#if $relData.myInterest === SessionInterest.Going}<Fa icon={faStar} />{/if}
-  {#if $relData.myInterest === SessionInterest.Interested}<Fa icon={faBookmark} />{/if}
-  <Fa icon={faChevronDown} />
+  <div style="margin-right: 5px">
+    {#if $relData.myInterest === SessionInterest.NoOpinion}RSVP{/if}
+    {#if $relData.myInterest === SessionInterest.Going}<Fa icon={faStar} />{/if}
+    {#if $relData.myInterest === SessionInterest.Interested}<Fa icon={faBookmark} />{/if}
   </div>
-{:else}
-  <sl-menu 
-  value={`${$relData.myInterest}`}
-  on:sl-select={(e) =>   {e.stopPropagation(); setSessionInterest(parseInt(e.detail.item.value)) }}
-  >
-    <sl-menu-item value={SessionInterest.NoOpinion}>RSVP</sl-menu-item>
-    <sl-menu-item value={SessionInterest.Going}><Fa slot="prefix" icon={faStar} />Going</sl-menu-item>
-    <sl-menu-item value={SessionInterest.Interested}><Fa slot="prefix" icon={faBookmark} /> Interested</sl-menu-item>
-  </sl-menu>
-{/if}
+  <Fa icon={faChevronDown} />
+  {#if open}
+    <div class="menu">  
+      <sl-menu 
+      bind:this={menu}
+      value={`${$relData.myInterest}`}
+      on:mouseleave={(e)=>{ 
+        if (e.target == menu) {
+          open = false;e.stopPropagation()
+        }
+        }}
+
+      on:sl-select={(e) =>   {e.stopPropagation(); setSessionInterest(parseInt(e.detail.item.value)) }}
+      >
+        <sl-menu-item value={SessionInterest.NoOpinion}>RSVP</sl-menu-item>
+        <sl-menu-item value={SessionInterest.Going}><Fa slot="prefix" icon={faStar} />Going</sl-menu-item>
+        <sl-menu-item value={SessionInterest.Interested}><Fa slot="prefix" icon={faBookmark} /> Interested</sl-menu-item>
+      </sl-menu>
+    </div>
+  {/if}
+  </div>
 
 <style>
   .select {
+    position: relative;
     display:flex;
+    border: 1px solid rgba(212, 212, 214, 1.0);
+    padding: 0 10px;
+    font-size: 14px;
+    border-radius: 5px;
+    align-items: center;
+    height: 35px;
+  }
+  .menu {
+    background-color: white;
+    position: absolute;
+    top: 1px;
+    right: 5px;   
+    z-index: 1000;
   }
 </style>

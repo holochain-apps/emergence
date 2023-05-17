@@ -63,9 +63,11 @@
 
         rel.forEach(r=> {
             const session = store.getSession(r.relation.dst)
-            const slot = store.getSessionSlot(session)
-            if (spaceB64 == encodeHashToBase64(slot.space)) {
-                sessions.set(session.original_hash, {title: session.record.entry.title, window: slot.window})
+            if (session && !session.record.entry.trashed) {
+                const slot = store.getSessionSlot(session)
+                if (spaceB64 == encodeHashToBase64(slot.space)) {
+                    sessions.set(session.original_hash, {title: session.record.entry.title, window: slot.window})
+                }
             }
          })
         return Array.from(sessions.values())
@@ -97,7 +99,7 @@
             {#if file && picB64}
             
             {#each locations as loc}
-            <sl-tooltip  trigger="click">
+            <sl-tooltip >
                 <div slot="content">
                     <div style="display:flex; flex-direction:column">
                         <span>{loc.space.record.entry.name}</span>

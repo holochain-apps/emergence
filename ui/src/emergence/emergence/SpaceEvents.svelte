@@ -4,6 +4,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
+
 import { storeContext } from '../../contexts';
 import type {  Info, Space,  Session,  TimeWindow } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
@@ -12,8 +13,7 @@ import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
 import SessionSummary from './SessionSummary.svelte';
-    import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
-    import Fa from 'svelte-fa';
+import SpaceDetail from './SpaceDetail.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -31,7 +31,6 @@ let loading = true;
 let error: any = undefined;
 
 let errorSnackbar: Snackbar;
-let showImage = ""
 
 $: error, loading, space;
 
@@ -43,6 +42,7 @@ onMount(async () => {
 });
 
 $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
+let spaceDetailDialog
 
 </script>
 
@@ -56,21 +56,15 @@ $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
 {:else if error}
 <span>Error fetching the space: {error.data.data}</span>
 {:else}
-
+<SpaceDetail
+bind:this={spaceDetailDialog}
+space={space}>
+</SpaceDetail>
 <div class="events">
-  {#if showImage}
-  <div class="modal">
-    <sl-button style="margin-left: 8px; " size=small on:click={() => showImage ="" } circle>
-      <Fa icon={faCircleArrowLeft} />
-    </sl-button>
-  
-    <show-image image-hash={showImage}></show-image>
-  </div>
-  {/if}
-  <div class="summary"
-    on:click={() => dispatch('space-selected', space)}
+  <div class="summary clickable"
+    on:click={() => spaceDetailDialog.open(space)}
   >
-    <div class="pic" on:click={()=>showImage=encodeHashToBase64(space.record.entry.pic)}>
+    <div class="pic">
       {#if space.record.entry.pic}
       <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
       {:else}
@@ -93,13 +87,14 @@ $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
       </div>
     </div>
   </div>
-  <div class="sessions">
+  <div class="sessions clickable">
         {#if slottedSessions.length == 0}
           No Sessions Scheduled
         {:else}
           {#each slottedSessions as session}
             <div class="session">
-              <SessionSummary showSlot={true} session={session.session}></SessionSummary>
+              <SessionSummary 
+                showSlot={true} session={session.session}></SessionSummary>
             </div>
           {/each}
         {/if}
@@ -110,6 +105,7 @@ $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
 <style>
   .events {
     display: flex;
+    justify-content: center;
   }
   .summary {
     display: flex;

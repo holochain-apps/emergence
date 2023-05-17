@@ -8,10 +8,13 @@
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
+    import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
     const dispatch = createEventDispatcher();
+    let sensing: SlCheckbox
+    $:uiProps = store.uiProps
 
     onMount(() => {
     })
@@ -191,22 +194,34 @@
         &nbsp;
       </div>
     </div>
-  
-    <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
-        Site Maps
-    </sl-button>
+    <div>
+        <sl-button style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
+            Manage Schedule
+        </sl-button>
 
-    <sl-button style="margin: 8px;"  on:click={async () => await doExport()}>
-        Export
-    </sl-button>
+        <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
+            Site Maps
+        </sl-button>
 
-    <sl-button style="margin: 8px;" on:click={()=>fileinput.click()}>
-        Import
-    </sl-button>
+        <sl-button style="margin: 8px;"  on:click={async () => await doExport()}>
+            Export
+        </sl-button>
+
+        <sl-button style="margin: 8px;" on:click={()=>fileinput.click()}>
+            Import
+        </sl-button>
+    </div>
+    <div>
+
+    </div>
+
 
 
    
 </div>
   <style>
-
+    sl-checkbox {
+        margin-right:15px;
+        margin-left:15px;
+    }
   </style>

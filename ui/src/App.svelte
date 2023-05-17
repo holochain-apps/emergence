@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, type ActionHash, type AppAgentClient } from '@holochain/client';
+  import { AdminWebsocket, type AppAgentClient } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faTicket, faUser, faGear, faRss, faCalendar, faPlus, faAmericanSignLanguageInterpreting, faHome } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faTicket, faUser, faGear, faCalendar, faPlus, faHome } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -40,12 +40,10 @@
   let pane = "sessions"
   let profilesStore: ProfilesStore | undefined
   let creatingMap = false
-  let selectedSession: Info<Session>|undefined = undefined
 
   $: client, fileStorageClient, store, loading;
   $: prof = profilesStore ? profilesStore.myProfile : undefined
-  $: amSteward = store ? store.amSteward : undefined
-
+  $: uiProps = store ? store.uiProps : undefined
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
@@ -54,7 +52,7 @@
     client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, 'emergence');
     if (adminPort) {
       const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
-      const x = await adminWebsocket.listApps({})
+      //const x = await adminWebsocket.listApps({})
       const cellIds = await adminWebsocket.listCellIds()
       await adminWebsocket.authorizeSigningCredentials(cellIds[0])
     }
@@ -77,8 +75,8 @@
   setContext(clientContext, {
     getClient: () => client,
   });
-  let createSessionDialog
-  let createSpaceDialog
+  let createSessionDialog: SessionCrud
+  let createSpaceDialog: SpaceCrud
 </script>
 
 <main>
@@ -100,11 +98,20 @@
 
     <profile-prompt>
       <file-storage-context client={fileStorageClient}>
+    {#if store &&  $uiProps.sessionDetails}
+      <div class="session-details" style="height:100vh">
+        <SessionDetail 
+        on:session-deleted={()=>store.setUIprops({sessionDetails:undefined})}
+        on:session-close={()=>store.setUIprops({sessionDetails:undefined})}
+        sessionHash={$uiProps.sessionDetails}></SessionDetail>
+      </div>
+    {/if}
     <div id="content" style="display: flex; flex-direction: column; flex: 1;">
+
       {#if pane=="sessions"}
       <div class="pane">
-        <AllSessions on:session-selected={(event)=>{pane="sessions.detail"; selectedSession = event.detail}}></AllSessions>
-        <div class="create-session" on:click={() => {createSessionDialog.open()} } >
+        <AllSessions></AllSessions>
+        <div class="create-session" on:click={() => {createSessionDialog.open(undefined)} } >
           <div class="summary">
             <div class="slot">
               <div class="slot-wrapper">
@@ -130,15 +137,6 @@
       </div>
       {/if}
 
-      {#if pane==="sessions.detail"}
-        <div class="pane">
-          <SessionDetail 
-          on:session-deleted={()=>pane= "sessions"}
-          on:session-close={()=>pane= "sessions"}
-          sessionHash={selectedSession.original_hash}></SessionDetail>
-        </div>
-      {/if}
-
       {#if pane=="schedule"}
         <div class="pane">
           <ScheduleUpcoming
@@ -150,7 +148,7 @@
       {#if pane=="schedule.slotting"}
         <div class="pane">
           <ScheduleSlotting
-            on:slotting-close={()=>pane="schedule"}
+            on:slotting-close={()=>pane="admin"}
 
           ></ScheduleSlotting>
         </div>
@@ -174,9 +172,9 @@
         <AllSpaces
           on:all-spaces-close={()=>pane= "spaces"}
         ></AllSpaces>
-        {#if $amSteward}
+        {#if $uiProps.amSteward}
           Create Space:
-          <sl-button on:click={() => {createSpaceDialog.open() } } circle>
+          <sl-button on:click={() => {createSpaceDialog.open(undefined) } } circle>
             <Fa icon={faPlus} />
           </sl-button>
         {/if}
@@ -197,6 +195,7 @@
       <div class="pane">
         <Admin
           on:open-sitemaps={()=>pane = 'admin.sitemaps'}
+          on:open-slotting={()=>pane="schedule.slotting"}
         ></Admin>
       </div>
       {/if}
@@ -239,17 +238,10 @@
           on:keypress={()=>{pane='sessions'}}
           on:click={()=>{pane='sessions'}}
         >
-          <Fa icon={faTicket} size="2x"/>
+          <Fa icon={faCalendar} size="2x"/>
            <span class="button-title">Sessions</span>
         </div>
-        <div class="nav-button {pane.startsWith("schedule")?"selected":""}"
-          title="Schedule"
-          on:keypress={()=>{pane='schedule'}}
-          on:click={()=>{pane='schedule'}}
-        >
-          <Fa icon={faCalendar} size="2x"/>
-          <span class="button-title">Schedule</span>
-        </div>
+
 
         <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
           title="Spaces"
@@ -267,7 +259,7 @@
            <Fa icon={faUser} size="2x"/>
            <span class="button-title">You</span>
         </div>
-        {#if store && $amSteward}
+        {#if store && $uiProps.amSteward}
           <div class="nav-button {pane.startsWith("admin")?"selected":""}"
             title="Admin"
             on:keypress={()=>{pane='admin'}}
@@ -297,6 +289,13 @@
   .pane {
     position: relative;
   }
+
+  :global(sl-dialog) {
+    z-index: 10000000;
+    position: relative;
+    display: block;
+  }
+
   :global(.modal) {
     background-color: white;
     padding: 10px;
@@ -322,7 +321,10 @@
     padding: .5em;
     margin-bottom: 1em;
   }
-
+  :global(.flex-center) {
+        display: flex;
+        justify-content: center;
+    }
   .nav {
     display: flex; flex-direction: row; flex: 1;
     padding-left: 10px;
@@ -443,4 +445,16 @@
       max-width: 500px;
     }
   } */
+
+
+  .session-details {
+    background-color: white;
+    position: absolute;
+
+    border: solid 1px;
+    display: flex; flex-direction: column;
+    max-height: 100%;
+    overflow: auto;
+    z-index: 1000;
+  }
 </style>

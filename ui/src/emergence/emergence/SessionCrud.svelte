@@ -11,8 +11,8 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionTags, sessionSelfTags } from './types';
-import SlotSelect from './Slot.svelte';
+import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags } from './types';
+import SlotSelect from './SlotSelect.svelte';
 import { encodeHashToBase64, type AgentPubKey } from '@holochain/client';
 import Avatar from './Avatar.svelte';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
@@ -165,21 +165,21 @@ let dialog
   <div style="margin-bottom: 16px">
     <sl-input
     label="Smallest Group-Size"
-    value={`${smallest}`}
+    value={isNaN(smallest)? '' : `${smallest}`}
     on:input={e => { smallest = parseInt(e.target.value); } }
   ></sl-input>
   </div>
   <div style="margin-bottom: 16px">
     <sl-input
     label="Largest Group-Size"
-    value={`${largest}`}
+    value={isNaN(largest)? '' : `${largest}`}
     on:input={e => { largest = parseInt(e.target.value); } }
   ></sl-input>
   </div>
   <div style="margin-bottom: 16px">
     <sl-input
     label="Duration (min)"
-    value={`${duration}`}
+    value={isNaN(duration)? '' : `${duration}`}
     on:input={e => { duration = parseInt(e.target.value); } }
   ></sl-input>
   </div>
@@ -226,3 +226,9 @@ let dialog
 
 </div>
 </sl-dialog>
+
+<style>
+  sl-checkbox {
+    margin-right:15px;
+  }
+</style>

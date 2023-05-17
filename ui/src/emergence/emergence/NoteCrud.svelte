@@ -23,6 +23,7 @@ let amenityElems: Array<SlCheckbox> = []
 const dispatch = createEventDispatcher();
 export let note: Info<Note>|undefined = undefined;  // set this if update
 export let sessionHash: ActionHash;
+export let modal = true
 
 let text: string = '';
 let pic: EntryHash | undefined = undefined;
@@ -36,15 +37,6 @@ $: isNoteValid = text !== ""
 $: tagUses = store.allTags
 $: allTags = $tagUses.map(t=>t.tag)
 
-
-// $: tagOpts = tagOptions()
-
-// const tagOptions = () : ObjectOption[] => {
-//   const options:ObjectOption[] = $allTags.map(tag => 
-//   {return {label: `${tag}`, value: tag}} )
-//   return options
-// }
-
 onMount(() => {
 });
 export const open = (n) => {
@@ -56,11 +48,16 @@ export const open = (n) => {
     tags = note.record.entry.tags
     sessionHash = note.record.entry.session
   } else {
-    text = ""
+    clear()
+  }
+  if (modal)
+    dialog.show()
+}
+
+export const clear = () =>{
+  text = ""
     pic = undefined
     tags = []
-  }
-  dialog.show()
 }
 
 async function updateNote() {
@@ -69,7 +66,8 @@ async function updateNote() {
     if (updateRecord) {
       dispatch('note-updated', { actionHash: updateRecord.actionHash });
     } 
-    dialog.hide()
+    if (modal)
+      dialog.hide()
   }
 }
 
@@ -82,7 +80,9 @@ async function createNote() {
     errorSnackbar.labelText = `Error creating the note: ${e.data.data}`;
     errorSnackbar.show();
   }
-  dialog.hide()
+  if (modal)
+    dialog.hide()
+  clear()
 }
 
 let dialog
@@ -90,8 +90,8 @@ let dialog
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
+{#if modal}
 <sl-dialog label={note ? "Edit Note" : "Create Note"} bind:this={dialog}>
-
 <div style="display: flex; flex-direction: column">
               
   <div style="margin-bottom: 16px">
@@ -151,3 +151,63 @@ let dialog
 
 </div>
 </sl-dialog>
+{:else}
+<div style="display: flex; flex-direction: column; width: 100%; max-width: 720px; ">
+  <div style="display:flex;flex-direction: row">
+    <div style="display: flex; flex-direction: column; width: 80%; margin-right: 10px;">
+
+      <div style="margin-bottom: 16px; ">
+        <sl-textarea 
+          label=Text 
+          value={ text } on:input={e => { text = e.target.value;} }
+        ></sl-textarea>
+      </div>
+      <div style="margin-bottom: 16px">
+        <span>Tags:</span >
+        <MultiSelect 
+          bind:selected={tags} 
+          options={allTags} 
+          allowUserOptions={true}
+          />
+      </div>
+      {#if note}
+      <div style="display: flex; flex-direction: row">
+        <sl-button
+        label="Cancel"
+        on:click={() =>  dialog.hide()}
+        style="flex: 1; margin-right: 16px"
+        >Cancel</sl-button>
+        <sl-button 
+        style="flex: 1;"
+        on:click={() => updateNote()}
+        disabled={!isNoteValid}
+        variant=primary>Save</sl-button>
+      </div>
+    {:else}
+    <div style="display: flex; flex-direction: row">
+      <sl-button 
+      on:click={() => createNote()}
+      disabled={!isNoteValid}
+      variant=primary>Create Note</sl-button>
+      </div>
+    {/if}
+  
+
+    </div>    
+    <div style="margin-bottom: 16px;">
+      <span>Add a pic (optional):</span >
+      <upload-files
+      one-file
+      accepted-files="image/jpeg,image/png,image/gif"
+      defaultValue={pic ? encodeHashToBase64(pic) : undefined}
+      on:file-uploaded={(e) => {
+        pic = e.detail.file.hash;
+      }}
+    ></upload-files>
+    </div>
+  </div>
+  
+
+
+</div>
+{/if}

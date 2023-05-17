@@ -10,12 +10,12 @@ export let timeWindow: TimeWindow;
 </script>
 
 
-<div class="slot">
+<div class="window-summary">
   { timeWindowStartToStr(timeWindow) } for { timeWindowDurationToStr(timeWindow) } {timeWindow.tags.length > 0 ? timeWindow.tags.join(", ") : "" }
 </div>
 
 <style>
-  .slot{
+  .window-summary {
     margin-left:5px;
   }
 </style>

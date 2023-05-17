@@ -25,11 +25,10 @@ let loading = true;
 let error: any = undefined;
 
 let editing = false;
-let showConfirm = false
 
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, sitemap, showConfirm;
+$: editing,  error, loading, sitemap;
 
 onMount(async () => {
   if (sitemap === undefined) {
@@ -48,6 +47,7 @@ async function deleteSiteMap() {
     errorSnackbar.show();
   }
 }
+let confirmDialog
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -72,13 +72,10 @@ async function deleteSiteMap() {
   ></SiteMapCrud>
   </div>
 {:else}
-{#if showConfirm}
-<div class="modal">
-  <Confirm message="This will remove this sitemap for everyone!" 
-    on:confirm-canceled={()=>showConfirm=false} 
+  <Confirm 
+    bind:this={confirmDialog}
+    message="This will remove this sitemap for everyone!" 
     on:confirm-confirmed={deleteSiteMap}></Confirm>
-</div>
-{/if}
 
 <div style="display: flex; flex-direction: column">
   <div style="display: flex; flex-direction: row">
@@ -86,7 +83,7 @@ async function deleteSiteMap() {
     <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
       <Fa icon={faEdit} />
     </sl-button>
-    <sl-button style="margin-left: 8px;" size=small on:click={() => showConfirm=true} circle>
+    <sl-button style="margin-left: 8px;" size=small on:click={() => {confirmDialog.open()}} circle>
       <Fa icon={faTrash} />
     </sl-button>
   </div>

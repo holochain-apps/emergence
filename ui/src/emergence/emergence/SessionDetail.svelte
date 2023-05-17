@@ -11,17 +11,19 @@ import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
 import { SessionInterest, amenitiesList, durationToStr, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags } from './types';
 
-import type { ActionHash } from '@holochain/client';
+import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 import Avatar from './Avatar.svelte';
 import Confirm from './Confirm.svelte';
 import InterestSelect from './InterestSelect.svelte';
 import NoteCrud from './NoteCrud.svelte';
 import NoteDetail from './NoteDetail.svelte';
 import SessionCrud from './SessionCrud.svelte';
-//
+import { slide } from 'svelte/transition';
+
 const dispatch = createEventDispatcher();
 
 export let sessionHash: ActionHash;
+export let opened = false
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -30,7 +32,6 @@ let error: any = undefined;
 
 let editing = false;
 let creatingNote = false;
-let showConfirm = false
 
 let errorSnackbar: Snackbar;
 
@@ -39,6 +40,8 @@ $: entry = $session.record.entry
 $: slot = sessionSlot($session)
 $: notes = sessionNotes($session)
 $: tags = sessionTags($session)
+
+$: uiProps = store.uiProps
 
 let updateSessionDialog
 
@@ -85,6 +88,9 @@ onMount(async () => {
   if (session === undefined) {
     throw new Error(`The session input is required for the SessionDetail element`);
   }
+  if (opened) {
+    open()
+  }
 });
 
 async function deleteSession() {
@@ -99,6 +105,8 @@ async function deleteSession() {
   }
 }
 let createNoteDialog
+let confirmDialog
+
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -121,7 +129,7 @@ bind:this={updateSessionDialog}
   } }
 ></SessionCrud>
 
-<div class="pane-content">
+<div transition:slide={{ axis: 'x', duration: 400 }}  class="pane-content">
   <div class="pane-header">
 
     <div class="controls">
@@ -132,28 +140,38 @@ bind:this={updateSessionDialog}
         <sl-button size=small on:click={() => { updateSessionDialog.open($session) } } circle>
           <Fa icon={faEdit} />
         </sl-button>
-        <sl-button size=small on:click={()=>showConfirm=true} circle>
+        <sl-button size=small on:click={()=>confirmDialog.open()} circle>
           <Fa icon={faTrash} />
         </sl-button>
       </div>
     </div>
 
-    <h2 style="margin-left: 10px">{ entry.title }</h2>
+    <h3>{ entry.title }</h3>
 
     <span style="flex: 1"></span>
 
-    <div class="action">
-      <InterestSelect sessionHash={sessionHash}></InterestSelect>
-    </div>
-
+ 
   </div>
-  {#if showConfirm}
-    <div class="modal">
-      <Confirm message="This will remove this session for everyone!" on:confirm-canceled={()=>showConfirm=false} on:confirm-confirmed={deleteSession}></Confirm>
-    </div>
-  {/if}
+
+  <Confirm bind:this={confirmDialog}
+    message="This will remove this session for everyone!" on:confirm-confirmed={deleteSession}></Confirm>
+
   <div class="details">
+
     <div class="properties">
+
+      {#if $uiProps.debuggingEnabled}
+        <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+          <span style="margin-right: 4px"><strong>Original Hash:</strong></span>
+          <span style="white-space: pre-line">{ encodeHashToBase64($session.original_hash) }</span>
+        </div>
+        <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+            <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
+          <span style="white-space: pre-line">{ encodeHashToBase64($session.record.actionHash) }</span>
+        </div>
+      {/if}
+
+
       <div style="display: flex; flex-direction: row; margin-bottom: 16px">
         <span style="margin-right: 4px"><strong>Key:</strong></span>
         <span style="white-space: pre-line">{ entry.key }</span>
@@ -198,6 +216,10 @@ bind:this={updateSessionDialog}
     </div>
 
     <div class="stats">
+      <div class="action">
+        <InterestSelect sessionHash={sessionHash}></InterestSelect>
+      </div>
+  
       <div>
         Total Interested: <Fa icon={faUserGroup} /> {$relData.interest.size} 
       </div>
@@ -218,20 +240,19 @@ bind:this={updateSessionDialog}
   
   </div>
   <div class="notes">
-    {#each notes as note}
-        <NoteDetail showSession={false} noteHash={note}></NoteDetail>
+    <div>
+      <NoteCrud
+        modal={false}
+        bind:this={createNoteDialog}
+        sessionHash={$session.original_hash}
+        on:note-created={() => {creatingNote = false;} }
+        on:edit-canceled={() => { creatingNote = false; } }
+      ></NoteCrud>
+    </div>
+      {#each notes.reverse() as note}
+        <NoteDetail showFrame={true} showSession={false} noteHash={note}></NoteDetail>
     {/each}
   </div>
-    Create Note:  <sl-button on:click={() => {createNoteDialog.open() } } circle>
-    <Fa icon={faPlus} />
-  </sl-button>
-
-    <NoteCrud
-      bind:this={createNoteDialog}
-      sessionHash={$session.original_hash}
-      on:note-created={() => {creatingNote = false;} }
-      on:edit-canceled={() => { creatingNote = false; } }
-    ></NoteCrud>
 
 </div>
 {/if}
@@ -239,6 +260,9 @@ bind:this={updateSessionDialog}
 <style>
   .notes{
     border-top: solid 1px;
+    max-width: 720px;
+    margin: 0 auto;
+    width: 100%;
   }
   .details {
     display: flex;
@@ -246,6 +270,8 @@ bind:this={updateSessionDialog}
     align-items: flex-start;
     margin-bottom: 16px;
     justify-content: space-between;
+    max-width: 720px;
+    margin: 0 auto;
   }
 
   .controls {

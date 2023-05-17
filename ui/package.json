@@ -3,16 +3,17 @@
   "version": "0.1.0",
   "scripts": {
     "start": "vite --clearScreen false --port $UI_PORT",
-    "build": "npm run check && vite build",
+    "build": "vite build",
+    "build-check": "npm run check && vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "package": "npm run build && cd public && bestzip ../dist.zip *"
+    "package": "npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "^0.12.2",
-    "@holochain-open-dev/profiles": "^0.13.2",
+    "@holochain-open-dev/profiles": "^0.14.1",
     "@holochain-open-dev/stores": "^0.4.0",
     "@holochain-open-dev/utils": "^0.12.2",
-    "@holochain-open-dev/file-storage": "0.3.0",
+    "@holochain-open-dev/file-storage": "0.4.1",
     "@shoelace-style/shoelace": "^2.3.0",
     "@material/mwc-snackbar": "^0.27.0",
     "@msgpack/msgpack": "^2.7.2",

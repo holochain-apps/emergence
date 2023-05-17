@@ -6,7 +6,7 @@
     "scale": "vitest run scale"
   },
   "dependencies": {
-    "@holochain-open-dev/file-storage": "0.3.0",
+    "@holochain-open-dev/file-storage": "0.4.1",
     "@msgpack/msgpack": "^2.7.0",
     "@holochain/client": "^0.12.2",
     "@holochain/tryorama": "^0.11.2",

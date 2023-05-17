@@ -11,13 +11,16 @@ import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+import type {
+  UploadFiles,
+} from "@holochain-open-dev/file-storage/dist/elements/upload-files.js";
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import Avatar from './Avatar.svelte';
-import { faClose, faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
+import { faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import SiteMapLocation from './SiteMapLocation.svelte';
 import MultiSelect from 'svelte-multiselect'
@@ -39,6 +42,7 @@ let tags: Array<string> = []
 let location: SiteLocation | undefined;
 let sitemap: Info<SiteMap> | undefined;
 
+let uploadFiles: UploadFiles
 
 let errorSnackbar: Snackbar;
 
@@ -61,6 +65,8 @@ export const open = (spc) => {
     pic = space.record.entry.pic
     tags = space.record.entry.tags
     location = store.getSpaceSiteLocation(space)
+    uploadFiles.defaultValue = pic
+
   } else {
     key = ""
     name = ""
@@ -70,7 +76,10 @@ export const open = (spc) => {
     pic = undefined
     tags = []
     location = undefined
+    uploadFiles.defaultValue = undefined
   }
+  uploadFiles.reset()
+  console.log("RESET")
   dialog.show()
 }
 
@@ -180,7 +189,7 @@ let dialog
   <div style="margin-bottom: 16px">
     <sl-input
     label="Capacity"
-    value={`${capacity}`}
+    value={isNaN(capacity)? '' : `${capacity}`}
     on:input={e => { capacity = parseInt(e.target.value); } }
     ></sl-input>
   </div>
@@ -209,6 +218,7 @@ let dialog
     <span>Add a pic (optional):</span >
       <div class="pic-upload">
           <upload-files
+          bind:this={uploadFiles}
           one-file
           accepted-files="image/jpeg,image/png,image/gif"
           defaultValue={pic ? encodeHashToBase64(pic) : undefined}
@@ -235,5 +245,8 @@ let dialog
 <style>
   :global(.pic-upload) {
     width: 200px;
+  }
+  sl-checkbox {
+    margin-right:15px;
   }
 </style> 

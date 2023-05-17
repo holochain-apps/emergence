@@ -1,36 +1,39 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import type { Record } from '@holochain/client';
+  import { encodeHashToBase64, type AgentPubKey, type Record } from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import FeedElemDetail from './FeedElemDetail.svelte';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
-  let loading = true;
   let error: any = undefined;
+  export let forMe = false
 
-  $: feed = store.feed
-  $: loading, error;
+  $: mySessions = store.mySessions
+  $: mySessionsb64 = Array.from($mySessions).map(([s,_])=> encodeHashToBase64(s))
+  $: fullFeed = store.feed
+  $: feed = !forMe ? $fullFeed : $fullFeed.filter(f=>
+    encodeHashToBase64(f.author) == store.myPubKeyBase64 ||
+    mySessionsb64.includes(encodeHashToBase64(f.about))
+    )
+  $: error;
 
   onMount(async () => {
     await store.fetchFeed();
-    loading = false
+    if (forMe)
+      await store.fetchMyStuff();
   });
 
 </script>
-{#if loading}
-<div style="display: flex; flex: 1; align-items: center; justify-content: center">
-  <sl-spinner></sl-spinner>
-</div>
-{:else if error}
+{#if error}
 <span>Error fetching the feed: {error.data.data}.</span>
-{:else if $feed.length === 0}
+{:else if feed.length === 0}
 <span>No Activity</span>
 {:else}
 <div >
-  {#each $feed.reverse() as f}
+  {#each feed.sort((a,b)=>b.timestamp - a.timestamp) as f}
     <div class="feed-item">
       <FeedElemDetail feedElem={f}></FeedElemDetail>
     </div>

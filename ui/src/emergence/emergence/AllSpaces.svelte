@@ -1,6 +1,5 @@
 <script lang="ts">
 import { onMount, getContext, createEventDispatcher } from 'svelte';
-import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import type { Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SpaceDetail from './SpaceDetail.svelte';
@@ -14,16 +13,14 @@ const dispatch = createEventDispatcher();
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
-let loading = true;
 let error: any = undefined;
 let spaceDetail: Info<Space> | undefined
 
 $: spaces = store.spaces
-$: loading, error, spaceDetail;
+$: error, spaceDetail;
 
 onMount(async () => {
-  await store.fetchSpaces();
-  loading = false;
+  store.fetchSpaces();
 });
 let spaceDetailDialog
 
@@ -37,15 +34,10 @@ let spaceDetailDialog
 
     <h3>Spaces List</h3>
   </div>
-  {#if loading}
-    <div style="display: flex; flex: 1; align-items: center; justify-content: center">
-      <sl-spinner></sl-spinner>
-
-    </div>
-  {:else if error}
-    <span>Error fetching the spaces: {error.data.data}.</span>
+  {#if error}
+    <span class="notice">Error fetching the spaces: {error.data.data}.</span>
   {:else if $spaces.length === 0}
-    <span>No spaces found.</span>
+    <span class="notice">No spaces found.</span>
   {:else}
     
       <SpaceDetail
@@ -54,7 +46,7 @@ let spaceDetailDialog
       </SpaceDetail>
 
     {#each $spaces as space}
-      <div style="margin-bottom: 8px; width:100%;">
+      <div class="space">
         <SpaceSummary
           on:space-selected={()=>{spaceDetail=space;spaceDetailDialog.open(space)}} 
           space={space}>
@@ -68,5 +60,16 @@ let spaceDetailDialog
   :global(.pane-content) {
     overflow-y: auto;
     height: 95%;
+  }
+  .notice {
+    display: block;
+    text-align: center;
+    padding: 25px;
+  }
+
+  .space {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto 10px auto;
   }
 </style>
