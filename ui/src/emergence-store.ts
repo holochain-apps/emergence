@@ -15,10 +15,11 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
+import type Feed from './emergence/emergence/Feed.svelte';
 Marked.setOptions
 ({
   renderer: new Renderer,
@@ -107,6 +108,7 @@ export class EmergenceStore {
     youPanel: "sessions",
     discoverPanel: "cloud",
     sessionsFilter: defaultSessionsFilter(),
+    feedFilter: defaultFeedFilter(),
     sensing: false,
     sessionDetails: undefined,
     sessionListMode: true,
@@ -619,6 +621,53 @@ export class EmergenceStore {
       }
     })
     return Array.from(sessions.values()).sort((a,b)=>a.window.start - b.window.start);
+  }
+
+  filterFeedElem(elem:FeedElem, filter: FeedFilter) : boolean {
+
+    if (filter.tags.length > 0) {
+        const elemTags: string[] = this.getFeedElementTags(elem)
+        for (const tag of filter.tags) {
+            if (!elemTags.includes(tag)) return false
+        }
+    }
+    if (filter.author) {
+        if (encodeHashToBase64(filter.author) !== encodeHashToBase64(elem.author)) return false
+    }
+    if (filter.space.length>0) {
+        const space = this.getFeedElementSpace(elem)
+        if (!space) return false
+        const b64 = encodeHashToBase64(space)
+        if (!filter.space.find(s=>encodeHashToBase64(s) === b64)) return false
+    }
+   
+    return true
+  }
+  getFeedElementSpace(elem:FeedElem) : ActionHash|undefined {
+    switch(elem.type) {
+        case FeedType.SpaceNew: 
+        case FeedType.SpaceUpdate: 
+            return elem.about
+    }
+    return undefined
+  }
+
+  getFeedElementTags(elem:FeedElem) : string[] {
+    switch(elem.type) {
+        case FeedType.SessionNew: 
+        case FeedType.SessionUpdate: 
+            const session = this.getSession(elem.about)
+            if (session) {
+                return session.relations.filter(ri=>
+                    ri.relation.content.path == "session.tag"
+                    ).map(ri=>ri.relation.content.data)
+            }
+            break;
+        case FeedType.NoteNew:
+        case FeedType.NoteUpdate:
+
+      }
+    return []
   }
 
   filterSession(session:Info<Session>, filter: SessionsFilter) : boolean {

@@ -9,6 +9,7 @@
   
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     $: tags = store.allTags
+    $: uiProps = store.uiProps
 	$: words = calcWords($tags)
 	const calcWords = (tags) => {
 		return tags.map(t => {return{text: t.tag, count: t.session_agents.length}})
@@ -26,7 +27,11 @@
   {#if $tags.length > 0}
     <div class="cloud">
         <WordCloud backgroundColor={"lightGray"} width={400} height={300} words={words}
-            on:click={(e)=> selectedTag = e.detail.target.innerHTML}
+            on:click={(e)=> {
+                const feedFilter = $uiProps.feedFilter
+                feedFilter.tags = [e.detail.target.innerHTML]
+                store.setUIprops({feedFilter})
+                }}
 
             on:mouseover={(e)=> selectedTag = e.detail.target.innerHTML}
             on:mouseout={(e)=> selectedTag = ""}/>

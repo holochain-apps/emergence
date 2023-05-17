@@ -1,0 +1,92 @@
+<script lang="ts">
+import { createEventDispatcher, getContext, onMount } from 'svelte';
+import '@shoelace-style/shoelace/dist/components/button/button.js';
+import '@shoelace-style/shoelace/dist/components/input/input.js';
+import '@shoelace-style/shoelace/dist/components/dialog/dialog';
+import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
+import '@shoelace-style/shoelace/dist/components/select/select.js';
+import '@shoelace-style/shoelace/dist/components/option/option.js';
+import { faArrowRotateBack, faClose } from '@fortawesome/free-solid-svg-icons';
+import Fa from 'svelte-fa';
+import { defaultFeedFilter, defaultSessionsFilter, type FeedFilter, type SessionsFilter } from './types';
+import { fly } from 'svelte/transition';
+import type { EmergenceStore } from '../../emergence-store';
+import { storeContext } from '../../contexts';
+import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
+import "@holochain-open-dev/profiles/dist/elements/search-agent.js";
+  import Avatar from './Avatar.svelte';
+
+let store: EmergenceStore = (getContext(storeContext) as any).getStore();
+
+const dispatch = createEventDispatcher();
+
+export let filter: FeedFilter
+$: spaces = store.spaces
+$: uiProps = store.uiProps
+onMount(() => {
+});
+
+</script>
+<div transition:fly={{ x: 300, duration: 500 }} class="filter-modal" style="display: flex; flex-direction: column">
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px;     justify-content: space-between;border-bottom: 1px solid;">
+    <h3>Filters</h3>
+    <div style="display: flex; flex-direction: row; margin-bottom: 16px; ">
+      <sl-button style="align-self:flex-end; margin-left: 8px; " size=small on:click={() => { filter = defaultFeedFilter(); dispatch('update-filter', filter) } } circle>
+        <Fa icon={faArrowRotateBack} />
+      </sl-button>
+      <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-filter') } } circle>
+        <Fa icon={faClose} />
+      </sl-button>
+    </div>
+  </div>
+  <div style="display: flex; flex-direction: column; margin-bottom: 16px">
+    <div  style="display: flex; flex-direction: row;">
+    <span style="margin-right: 10px"><strong>Person:</strong></span>
+    {#if $uiProps.feedFilter.author}
+    <Avatar agentPubKey={$uiProps.feedFilter.author}></Avatar>
+    {/if}
+    </div>
+    <search-agent include-myself={true} clear-on-select={true} on:agent-selected={(e)=>filter.author=e.detail.agentPubKey}></search-agent>
+  </div> 
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 10px"><strong>Tags:</strong></span>
+    <sl-input
+      value={filter.tags.join(", ")}
+      on:input={e => { filter.tags = e.target.value.split(/,\W*/); ; dispatch('update-filter', filter)} }
+    ></sl-input>
+  </div> 
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Contains:</strong></span>
+      <sl-input
+      value={filter.keyword}
+      on:input={e => { filter.keyword = e.target.value; ; dispatch('update-filter', filter)} }
+    ></sl-input>
+  </div>
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 10px"><strong>Space:</strong></span>
+    <sl-select style="min-width:100px" multiple clearable
+      value={filter.space.map(h=>encodeHashToBase64(h))}
+      placeholder="filter by spaces"
+      on:sl-change={(e)=>{filter.space = e.target.value.map(h => decodeHashFromBase64(h)); dispatch('update-filter', filter)}}
+      >
+      {#each $spaces as space}
+      <sl-option value={encodeHashToBase64(space.original_hash)}>{space.record.entry.name} ({space.record.entry.key})</sl-option>
+      {/each}
+    </sl-select>
+  </div>
+  </div>
+<style>
+  .filter-modal {
+    max-width: 90%;
+    background-color: white;
+    padding: 10px;
+    position: absolute;
+    top: 5px;
+    right: 5px;
+
+    border: solid 1px;
+    display: flex; flex-direction: column;
+    max-height: 100%;
+    z-index: 2;
+  }
+</style>

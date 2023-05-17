@@ -356,9 +356,28 @@ export interface UIProps {
   youPanel: string
   discoverPanel: string
   sessionsFilter: SessionsFilter
+  feedFilter: FeedFilter
   sensing: boolean,
   sessionDetails: ActionHash|undefined
   sessionListMode: boolean,
+}
+
+export interface FeedFilter {
+  tags: Array<string>,
+  space: Array<ActionHash>,
+  sessions: Array<ActionHash>,
+  author: AgentPubKey | undefined
+  keyword: string,
+}
+
+export const defaultFeedFilter = () : FeedFilter => {
+  return {
+    tags: [],
+    sessions: [],
+    space: [],
+    author: undefined,
+    keyword: "",
+  }
 }
 
 export interface SessionsFilter {

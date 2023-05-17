@@ -14,9 +14,11 @@
   $: mySessions = store.mySessions
   $: mySessionsb64 = Array.from($mySessions).map(([s,_])=> encodeHashToBase64(s))
   $: fullFeed = store.feed
-  $: feed = !forMe ? $fullFeed : $fullFeed.filter(f=>
+  $: uiProps = store.uiProps
+  $: feed = !forMe ? $fullFeed.filter(f=>store.filterFeedElem(f,$uiProps.feedFilter)) : $fullFeed.filter(f=> {
     encodeHashToBase64(f.author) == store.myPubKeyBase64 ||
     mySessionsb64.includes(encodeHashToBase64(f.about))
+     }
     )
   $: error;
 

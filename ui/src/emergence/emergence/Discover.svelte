@@ -9,7 +9,10 @@
     import Feed from './Feed.svelte';
     import TagCloud from './TagCloud.svelte'
     import Sense from './Sense.svelte';
+    import FeedFilter from './FeedFilter.svelte';
   import Sync from './Sync.svelte';
+  import { faFilter } from '@fortawesome/free-solid-svg-icons';
+  import Fa from 'svelte-fa';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     $: uiProps = store.uiProps
@@ -18,18 +21,28 @@
         //await store.fetchMyStuff()
 
     });
- 
+    let showFilter = false
+
 </script>
 
 <div class="pane-header">
     <h3>Discover</h3>
     <div style="display: flex; flex-direction: row; align-self:center">
-        <div style="">
+        <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } circle>
+            <Fa icon={faFilter} />
+        </sl-button>
+      
+        <div style="margin-left: 8px;">
             <Sync></Sync>
         </div>
 </div>
 </div>
-  
+{#if showFilter}
+<FeedFilter
+    on:close-filter={()=>showFilter = false}
+    on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
+    filter={$uiProps.feedFilter}></FeedFilter>
+{/if}
 <div class="pane-content flex-center discover">
     <div class="discover-section">
         {#if $uiProps.sensing}
