@@ -121,7 +121,7 @@ let dialog
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<sl-dialog label={session ? "Edit Session" : "Create Session"} bind:this={dialog}>
+<sl-dialog style="--width: 80vw;" label={session ? "Edit Session" : "Create Session"} bind:this={dialog}>
 <div style="display: flex; flex-direction: column">
   {#if session}
     Key: {session.record.entry.key}
@@ -162,28 +162,36 @@ let dialog
       allowUserOptions={true}
       />
   </div>
-  <div style="margin-bottom: 16px">
-    <sl-input
-    label="Smallest Group-Size"
-    value={isNaN(smallest)? '' : `${smallest}`}
-    on:input={e => { smallest = parseInt(e.target.value); } }
-  ></sl-input>
+  <div style="display:flex">
+    <div style="margin-bottom: 16px; display:flex; flex-direction:column">
+      <span>Group Size:</span >
+        <div style="display:flex; ">
+            <sl-input
+            style="width:70px;margin-right:10px"
+            maxlength=4
+            label="Smallest"
+            value={isNaN(smallest)? '' : `${smallest}`}
+            on:input={e => { smallest = parseInt(e.target.value); } }
+          ></sl-input>
+            <sl-input
+            style="width:70px"
+            maxlength=4
+            label="Largest"
+            value={isNaN(largest)? '' : `${largest}`}
+            on:input={e => { largest = parseInt(e.target.value); } }
+          ></sl-input>
+          </div>
+    </div>
+    <div style="margin-bottom: 16px; margin-left:50px">
+      <sl-input
+      style="width:70px"
+      maxlength=4
+      label="Duration (min)"
+      value={isNaN(duration)? '' : `${duration}`}
+      on:input={e => { duration = parseInt(e.target.value); } }
+    ></sl-input>
+    </div>
   </div>
-  <div style="margin-bottom: 16px">
-    <sl-input
-    label="Largest Group-Size"
-    value={isNaN(largest)? '' : `${largest}`}
-    on:input={e => { largest = parseInt(e.target.value); } }
-  ></sl-input>
-  </div>
-  <div style="margin-bottom: 16px">
-    <sl-input
-    label="Duration (min)"
-    value={isNaN(duration)? '' : `${duration}`}
-    on:input={e => { duration = parseInt(e.target.value); } }
-  ></sl-input>
-  </div>
-
   <div style="margin-bottom: 16px">
     <div style="font-size: 16px" on:click={()=>amenities = 0}>Required Amenities </div>
     {#each Amenities as amenity, i}

@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faTicket, faUser, faGear, faCalendar, faPlus, faHome } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faUser, faGear, faCalendar, faPlus, faHome } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -26,7 +26,6 @@
   import ScheduleSlotting from './emergence/emergence/ScheduleSlotting.svelte';
   import ScheduleUpcoming from './emergence/emergence/ScheduleUpcoming.svelte';
   import SessionDetail from './emergence/emergence/SessionDetail.svelte';
-  import type { Info, Session } from './emergence/emergence/types';
   import You from './emergence/emergence/You.svelte'
   import Admin from './emergence/emergence/Admin.svelte';
   import SiteMapDisplay from './emergence/emergence/SiteMapDisplay.svelte';
@@ -77,6 +76,15 @@
   });
   let createSessionDialog: SessionCrud
   let createSpaceDialog: SpaceCrud
+
+  const setPane = (p) => {
+    closeSessionDetails()
+    pane=p
+  }
+  const closeSessionDetails = () => {
+    console.log("FISH")
+    store.setUIprops({sessionDetails:undefined})
+  }
 </script>
 
 <main>
@@ -101,8 +109,8 @@
     {#if store &&  $uiProps.sessionDetails}
       <div class="session-details" style="height:100vh">
         <SessionDetail 
-        on:session-deleted={()=>store.setUIprops({sessionDetails:undefined})}
-        on:session-close={()=>store.setUIprops({sessionDetails:undefined})}
+        on:session-deleted={()=>closeSessionDetails()}
+        on:session-close={()=>closeSessionDetails()}
         sessionHash={$uiProps.sessionDetails}></SessionDetail>
       </div>
     {/if}
@@ -140,7 +148,7 @@
       {#if pane=="schedule"}
         <div class="pane">
           <ScheduleUpcoming
-            on:open-slotting={()=>pane="schedule.slotting"}
+            on:open-slotting={()=>setPane("schedule.slotting")}
           ></ScheduleUpcoming>
         </div>
       {/if}
@@ -148,7 +156,7 @@
       {#if pane=="schedule.slotting"}
         <div class="pane">
           <ScheduleSlotting
-            on:slotting-close={()=>pane="admin"}
+            on:slotting-close={()=>setPane("admin")}
 
           ></ScheduleSlotting>
         </div>
@@ -159,7 +167,7 @@
         {#if store.getCurrentSiteMap()}
           <SiteMapDisplay 
             sitemap={store.getCurrentSiteMap()}
-            on:show-all-spaces={()=>pane= "spaces.list"}
+            on:show-all-spaces={()=>setPane("spaces.list")}
             ></SiteMapDisplay>
         {:else}
           <h5>No Sitemap configured yet</h5>
@@ -170,7 +178,7 @@
       {#if pane=="spaces.list"}
       <div class="pane">
         <AllSpaces
-          on:all-spaces-close={()=>pane= "spaces"}
+          on:all-spaces-close={()=>setPane("spaces")}
         ></AllSpaces>
         {#if $uiProps.amSteward}
           Create Space:
@@ -195,7 +203,7 @@
       <div class="pane">
         <Admin
           on:open-sitemaps={()=>pane = 'admin.sitemaps'}
-          on:open-slotting={()=>pane="schedule.slotting"}
+          on:open-slotting={()=>setPane("schedule.slotting")}
         ></Admin>
       </div>
       {/if}
@@ -227,16 +235,16 @@
       <div class="nav">
         <div class="nav-button {pane === "discover" ? "selected":""}"
           title="Discover"
-          on:keypress={()=>{pane='discover'}}
-          on:click={()=>{pane='discover'}}
+          on:keypress={()=>{setPane('discover')}}
+          on:click={()=>{setPane('discover')}}
         >
            <Fa icon={faHome} size="2x"/>
            <span class="button-title">Discover</span>
         </div>
         <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
           title="Sessions"
-          on:keypress={()=>{pane='sessions'}}
-          on:click={()=>{pane='sessions'}}
+          on:keypress={()=>{setPane('sessions')}}
+          on:click={()=>{setPane('sessions')}}
         >
           <Fa icon={faCalendar} size="2x"/>
            <span class="button-title">Sessions</span>
@@ -245,16 +253,16 @@
 
         <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
           title="Spaces"
-          on:keypress={()=>{pane='spaces'}}
-          on:click={()=>{pane='spaces'}}
+          on:keypress={()=>{setPane('spaces')}}
+          on:click={()=>{setPane('spaces')}}
         >
           <Fa icon={faMap} size="2x"/>
          <span class="button-title">Spaces</span>
         </div>
         <div class="nav-button {pane=="you"?"selected":""}"
           title="You"
-          on:keypress={()=>{pane='you'}}
-          on:click={()=>{pane='you'}}
+          on:keypress={()=>{setPane('you')}}
+          on:click={()=>{setPane('you')}}
         >
            <Fa icon={faUser} size="2x"/>
            <span class="button-title">You</span>
@@ -262,8 +270,8 @@
         {#if store && $uiProps.amSteward}
           <div class="nav-button {pane.startsWith("admin")?"selected":""}"
             title="Admin"
-            on:keypress={()=>{pane='admin'}}
-            on:click={()=>{pane='admin'}}
+            on:keypress={()=>{setPane('admin')}}
+            on:click={()=>{setPane('admin')}}
           >
             <Fa icon={faGear} size="2x"/>
            <span class="button-title">Settings</span>
@@ -455,6 +463,6 @@
     display: flex; flex-direction: column;
     max-height: 100%;
     overflow: auto;
-    z-index: 1000;
+    z-index: 1;
   }
 </style>

@@ -71,7 +71,7 @@ onMount(() => {
     <sl-select style="min-width:100px" multiple clearable
       value={filter.space.map(h=>encodeHashToBase64(h))}
       placeholder="filter by spaces"
-      on:sl-change={(e)=>{console.log("FISH", e.target.value) ;filter.space = e.target.value.map(h => decodeHashFromBase64(h)); dispatch('update-filter', filter)}}
+      on:sl-change={(e)=>{filter.space = e.target.value.map(h => decodeHashFromBase64(h)); dispatch('update-filter', filter)}}
       >
       {#each $spaces as space}
       <sl-option value={encodeHashToBase64(space.original_hash)}>{space.record.entry.name} ({space.record.entry.key})</sl-option>
@@ -94,6 +94,6 @@ onMount(() => {
     border: solid 1px;
     display: flex; flex-direction: column;
     max-height: 100%;
-    z-index: 1000;
+    z-index: 2;
   }
 </style>
