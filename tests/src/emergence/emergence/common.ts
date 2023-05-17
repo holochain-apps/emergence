@@ -1,5 +1,6 @@
+import { Record, Timestamp } from '@holochain/client';
 import { CallableCell } from '@holochain/tryorama';
-import { Timestamp, NewEntryAction, ActionHash, Record, AppBundleSource, fakeActionHash, fakeAgentPubKey, fakeEntryHash, fakeDnaHash } from '@holochain/client';
+import { Note } from '../../../../ui/src/emergence/emergence/types';
 
 export async function sampleSession(cell: CallableCell, partialSession = {}) {
     return {
@@ -54,7 +55,7 @@ export async function createSpace(cell: CallableCell, space = undefined): Promis
     });
 }
 
-export async function sampleNote(cell: CallableCell, partialNote = {}) {
+export async function sampleNote(cell: CallableCell, partialNote = {}): Promise<Partial<Note>> {
   return {
       ...{
   text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
@@ -65,7 +66,7 @@ export async function sampleNote(cell: CallableCell, partialNote = {}) {
   };
 }
 
-export async function createNote(cell: CallableCell, note = undefined): Promise<Record> {
+export async function createNote(cell: CallableCell, note: Note = undefined): Promise<Record> {
   return cell.callZome({
     zome_name: "emergence",
     fn_name: "create_note",
