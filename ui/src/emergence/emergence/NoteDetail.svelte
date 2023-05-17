@@ -12,6 +12,7 @@
     import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
     import NoteCrud from './NoteCrud.svelte';
     import Confirm from './Confirm.svelte';
+    import SessionLink from './SessionLink.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -98,7 +99,8 @@
       {/if}     
         {#if showSession}
         <div class="post-session"> 
-          <strong>{ session && session.record.entry.trashed ? "Deleted ":""}Session:</strong> { session ? session.record.entry.title : "unknown"}
+          <strong>{ session && session.record.entry.trashed ? "Deleted ":""}Session:</strong>
+           {#if  session}<SessionLink sessionHash={$note.value.record.entry.session}></SessionLink> {:else}unknown{/if}
         </div>         
         {/if}
 
@@ -140,6 +142,9 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: .25em;
+  }
+  .post-session {
+    display: flex;
   }
   .header-left {
     display: flex;
