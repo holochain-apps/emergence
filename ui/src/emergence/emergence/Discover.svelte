@@ -9,6 +9,7 @@
     import Feed from './Feed.svelte';
     import TagCloud from './TagCloud.svelte'
     import Sense from './Sense.svelte';
+  import Sync from './Sync.svelte';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     $: uiProps = store.uiProps
@@ -22,6 +23,11 @@
 
 <div class="pane-header">
     <h3>Discover</h3>
+    <div style="display: flex; flex-direction: row; align-self:center">
+        <div style="">
+            <Sync></Sync>
+        </div>
+</div>
 </div>
   
 <div class="pane-content flex-center discover">

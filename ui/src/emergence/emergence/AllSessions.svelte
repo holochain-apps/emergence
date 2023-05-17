@@ -5,9 +5,10 @@ import { storeContext } from '../../contexts';
 import SessionSummary from './SessionSummary.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
+import Sync from './Sync.svelte';
 import { faFilter, faList, faTable } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
-  import { calcDays, dayToStr, sortWindows, windowsInDay } from './utils';
+import { calcDays, dayToStr, sortWindows, windowsInDay } from './utils';
 
 const dispatch = createEventDispatcher();
 
@@ -31,7 +32,6 @@ $: days = calcDays($windows, slotType, filteredDay)
 let showFilter = false
 
 onMount(async () => {
-   store.fetchSessions();
 });
 
 </script>
@@ -46,7 +46,10 @@ onMount(async () => {
     <sl-button style="margin-left: 8px; " size=small on:click={() => { store.setUIprops({sessionListMode:!$uiProps.sessionListMode }) }} circle>
       <Fa icon={$uiProps.sessionListMode ? faTable : faList} />
     </sl-button>
+    <div style="margin-left: 8px;">
+      <Sync></Sync>
     </div>
+  </div>
   {#if showFilter}
     <SessionFilter
     on:close-filter={()=>showFilter = false}

@@ -5,8 +5,9 @@ import { storeContext } from '../../contexts';
 import SpaceDetail from './SpaceDetail.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import Fa from 'svelte-fa';
-import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faCircleArrowLeft, faSync } from '@fortawesome/free-solid-svg-icons';
 import SpaceSummary from './SpaceSummary.svelte';
+import Sync from './Sync.svelte';
 import type { Info, Space } from './types';
 const dispatch = createEventDispatcher();
 
@@ -28,11 +29,17 @@ let spaceDetailDialog
 
 <div class="pane-content">
   <div class="pane-header">
+    <div style="display: flex; flex-direction: row; align-self:center">
+      <h3>Spaces List</h3>
+
       <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('all-spaces-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
+      <div style="margin-left: 8px;">
+        <Sync></Sync>
+      </div>
+    </div>
 
-    <h3>Spaces List</h3>
   </div>
   {#if error}
     <span class="notice">Error fetching the spaces: {error.data.data}.</span>

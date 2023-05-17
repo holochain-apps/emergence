@@ -1141,6 +1141,11 @@ export class EmergenceStore {
         console.log("Error fetching tags", e)
     }
   }
-
+  async sync() {
+    await this.fetchTags()
+    await this.fetchSessions() // fetches spaces and timewindows
+    await this.fetchMyStuff()
+    await this.fetchSiteMaps()
+  }
 
 }

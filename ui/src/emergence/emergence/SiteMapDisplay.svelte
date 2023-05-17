@@ -6,12 +6,13 @@
     import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
     import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
     import { type Info, type SiteLocation, type SiteMap, type Space, timeWindowStartToStr } from './types';
-    import { faList } from '@fortawesome/free-solid-svg-icons';
+    import { faList, faSync } from '@fortawesome/free-solid-svg-icons';
     import Fa from 'svelte-fa';
     import { fromUint8Array } from "js-base64";
     import { watchResize } from "svelte-watch-resize";
     import  { HoloHashMap } from '@holochain-open-dev/utils';
     import { encodeHashToBase64, type ActionHash } from '@holochain/client';
+  import Sync from './Sync.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -82,9 +83,15 @@
 
 <div class="pane-header">
     <h3>SiteMap</h3>
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('show-all-spaces') } } circle>
-        <Fa icon={faList} />
-      </sl-button>
+    <div style="display: flex; flex-direction: row; align-self:center">
+        <sl-button style="" size=small on:click={() => { dispatch('show-all-spaces') } } circle>
+            <Fa icon={faList} />
+        </sl-button>
+        <div style="margin-left: 8px;">
+            <Sync></Sync>
+          </div>
+        </div>
+
 </div>
 
 <div class="pane-content">

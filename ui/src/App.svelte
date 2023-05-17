@@ -63,7 +63,7 @@
     fileStorageClient = new FileStorageClient(client, 'emergence');
 
     store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
-    store.fetchSiteMaps()
+    await store.sync()
     loading = false;
   });
 
@@ -82,7 +82,6 @@
     pane=p
   }
   const closeSessionDetails = () => {
-    console.log("FISH")
     store.setUIprops({sessionDetails:undefined})
   }
 </script>

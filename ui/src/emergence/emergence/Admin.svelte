@@ -182,6 +182,7 @@
             }
  
         }
+        store.sync()
     }
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >

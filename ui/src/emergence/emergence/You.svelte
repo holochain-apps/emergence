@@ -19,6 +19,7 @@
     import SessionSummary from './SessionSummary.svelte';
     import Avatar from './Avatar.svelte';
     import Feed from './Feed.svelte';
+    import Sync from './Sync.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -51,6 +52,14 @@
         {:else}<sl-spinner></sl-spinner>
         {/if}
         <div style="display: flex; flex-direction: row; align-self:center">
+            <sl-button style="margin-left: 8px;" size=small on:click={() => dialog.show()} circle>
+                <Fa icon={faEdit} />
+            </sl-button>
+            <div style="margin-left: 8px;">
+                <Sync></Sync>
+            </div>
+        </div>
+        <div style="display: flex; flex-direction: row; align-self:center">
             <sl-checkbox
                 bind:this={steward}
                 checked={$uiProps.amSteward}
@@ -69,10 +78,7 @@
                 on:sl-change={e => { store.setUIprops({sensing:sensing.checked})} }
                 >Enable Sensemaking Game
             </sl-checkbox>
-
-            <sl-button style="margin-left: 8px;" size=small on:click={() => dialog.show()} circle>
-                <Fa icon={faEdit} />
-            </sl-button>
+          
         </div>
     </div>
 
