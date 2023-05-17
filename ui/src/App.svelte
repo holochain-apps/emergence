@@ -37,13 +37,13 @@
   let store: EmergenceStore | undefined;
   let fileStorageClient: FileStorageClient | undefined;
   let loading = true;
-  let pane = "sessions"
   let profilesStore: ProfilesStore | undefined
   let creatingMap = false
 
   $: client, fileStorageClient, store, loading;
   $: prof = profilesStore ? profilesStore.myProfile : undefined
   $: uiProps = store ? store.uiProps : undefined
+  $: pane = store ? $uiProps.pane : "sessions"
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
@@ -76,7 +76,7 @@
     fileStorageClient = new FileStorageClient(client, 'emergence');
 
     store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
-    await store.sync()
+    await store.sync(undefined)
     loading = false;
   });
 
@@ -90,10 +90,10 @@
   let createSessionDialog: SessionCrud
   let createSpaceDialog: SpaceCrud
 
-  const setPane = (p) => {
+  const setPane = (pane) => {
     closeSessionDetails()
     closeFolk()
-    pane=p
+    store.setUIprops({pane})
   }
   const closeSessionDetails = () => {
     store.setUIprops({sessionDetails:undefined})

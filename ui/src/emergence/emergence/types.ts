@@ -361,6 +361,7 @@ export interface UIProps {
   sessionDetails: ActionHash|undefined
   folk: ActionHash|undefined
   sessionListMode: boolean,
+  pane:string
 }
 
 export interface FeedFilter {

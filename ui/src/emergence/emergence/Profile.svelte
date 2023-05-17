@@ -13,7 +13,7 @@
   $: agentPubKey
   $: s = store.profilesStore.profiles.get(agentPubKey)
   $: nickname = $s.status == "complete" ? $s.value?.nickname : "..."
-  $: fields = $s.status == "complete" ? Object.entries($s.value?.fields) : undefined
+  $: fields = $s.status == "complete" ? Object.entries($s.value?.fields).filter(([k,_])=>k!="avatar") : undefined
 </script>
 
 {#if $s.status == "complete" && $s.value}
