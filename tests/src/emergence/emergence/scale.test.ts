@@ -272,15 +272,19 @@ export class FileStorageClient {
 test.only('scale test using scenario', async () => {
   await runScenario(async scenario => {
 
-    const conductorCount = 2
-    const agentsPerConductor = 10
-    const spacesCount = 1
-    const sessionsCount = 1
-    const notesPerMin = 500
-    const minutesOfNotes = 2
-    const testDuration = 1000 * 5; // 5 seconds
-    const windowsCount = 4
+test.only('scale test using scenario', async () => {
+  await runScenario(async scenario => {
+    const conductorCount = 2;
+    const agentsPerConductor = 1;
+    const spacesCount = 1;
+    const sessionsCount = 1;
+    const notesPerMin = 100;
+    const testDuration = 1000 * 5; // 60 seconds
     const outputInterval = 1000; // each second
+
+    console.log("Setting up conductors and installing agent apps...");
+
+    const metricsPerMin: { timeElapsedToCreateAllNotes: number }[] = [];
 
     const testAppPath = process.cwd() + '/../workdir/emergence.happ';
 
@@ -288,6 +292,7 @@ test.only('scale test using scenario', async () => {
     const appDef: AppBundleSource = { path: testAppPath };
     const appSource = { appBundleSource: appDef };
 
+    // add conductors to scenario
     const appSources = []
     for (let x = 0; x < conductorCount; x++) {
       appSources.push(appSource)
@@ -296,6 +301,7 @@ test.only('scale test using scenario', async () => {
 
     const agentAppsPerConductor: AgentApp[][] = new Array(conductorCount);
 
+    // install apps for additional agents for each conductor
     const appDefs = []
     for (let x = 1; x < agentsPerConductor; x++) { // one agent is part of the players array
       appDefs.push({ app: appDef })
@@ -314,6 +320,10 @@ test.only('scale test using scenario', async () => {
     }
 
     await scenario.shareAllAgents();
+
+    console.log(`Created ${conductorCount} conductors with ${agentsPerConductor} agents each.`);
+
+    // *** CREATE SPACES AND SESSIONS ***
 
     const aliceAppAgentWs = players[0].conductor.appAgentWs();
     const emergenceClient = new EmergenceClient(aliceAppAgentWs, "emergence");
@@ -334,26 +344,36 @@ test.only('scale test using scenario', async () => {
       const session = await store.createSession(`session ${x}`, "description", [], 2, 10, 60, 1, null, [])
       assert.ok(session);
     }
-    await pause(100);  // we wait here because creating sessions calls fetchSessions and doesn't await
+    await pause(200);  // we wait here because creating sessions calls fetchSessions and doesn't await
 
-    let sessions = get(store.sessions);
+    const sessions = get(store.sessions);
     assert.equal(sessions.length, sessionsCount);
 
+    // *** START TEST ***
+
     let startTime = Date.now();
-    let timePassed: number;
+    let totalTimeElapsed: number;
     let outputPrinted = false;
     let notesCreatedThisMinute = 0;
     let notesCreatedTotal = 0;
+    let thisMinuteStartTime = startTime;
+    let thisMinuteMetricsSaved = false;
 
     do {
-      timePassed = Date.now() - startTime;
+      totalTimeElapsed = Date.now() - startTime;
 
       if (notesCreatedThisMinute < notesPerMin) {
         for (let i = 0; i < conductorCount; i++) {
           const notesForConductor = [];
           for (let j = 0; j < agentsPerConductor; j++) {
             const cell = agentAppsPerConductor[i][j].cells[0];
-            const note = { text: `note: minute ${Math.ceil(timePassed / 1000 / 60)}`, tags: [] };
+            const sessionIndex = getRandomNumber(sessions);
+            const note: Note = {
+              session: sessions[sessionIndex].original_hash,
+              text: `note: minute ${Math.ceil(totalTimeElapsed / 1000 / 60)}`,
+              tags: [],
+              trashed: false
+            };
             notesForConductor.push(createNote(cell, note));
           }
           const notes = await Promise.all(notesForConductor);
@@ -361,28 +381,45 @@ test.only('scale test using scenario', async () => {
           notesCreatedThisMinute += notes.length;
           notesCreatedTotal += notes.length;
         }
+      } else if (!thisMinuteMetricsSaved) {
+        const timeElapsedToCreateAllNotes = Date.now() - thisMinuteStartTime;
+        metricsPerMin.push({ timeElapsedToCreateAllNotes });
+        thisMinuteMetricsSaved = true;
       }
 
-      if (!outputPrinted && (timePassed % outputInterval === 0)) {
-        console.log(`checkpoint at ${timePassed} ms: ${notesCreatedThisMinute} have been created this minute and ${notesCreatedTotal} in total`);
+      if (totalTimeElapsed % outputInterval <= 10) {
+        if (!outputPrinted) {
+          const secondsElapsed = Math.floor(totalTimeElapsed / 1000);
+          console.log(`Checkpoint at ${secondsElapsed} s: ${notesCreatedThisMinute} notes have been created this minute and ${notesCreatedTotal} in total.`);
         outputPrinted = true;
-        await pause(0);
+          await pause(0); // needed because otherwise all output is printed at the end
+        }
       } else {
         outputPrinted = false;
       }
 
-      if (timePassed > 0 && timePassed % (1000 * 60) === 0) { // a minute has passed
+      if (totalTimeElapsed > 0 && totalTimeElapsed % (1000 * 60) === 0) { // a minute has passed
         notesCreatedThisMinute = 0;
+        thisMinuteStartTime = Date.now();
+        thisMinuteMetricsSaved = false;
       }
-    } while (timePassed < testDuration);
+    } while (totalTimeElapsed < testDuration);
 
     await pause(1000);  // we wait here because creating notes calls fetchSessions and doesn't await
 
-    // for (const conductor of agentAppsPerConductor) {
-    //   for (const agentApps of conductor) {
-    //     const seshon = await store.client.getFeed(agentApps.agentPubKey);
-    //     console.log('seson', seshon);
-    //   }
+    let avgToCreateNotes = 0;
+    metricsPerMin.forEach((metrics) => {
+      console.log(`It took ${metrics.timeElapsedToCreateAllNotes} ms to create ${notesPerMin} notes.`);
+      avgToCreateNotes += metrics.timeElapsedToCreateAllNotes;
+    });
+    avgToCreateNotes /= metricsPerMin.length;
+    console.log(`On average it took ${avgToCreateNotes} ms to create ${notesPerMin} notes.`);
+
+    // // for (const conductor of agentAppsPerConductor) {
+    //   // for (const agentApps of conductor) {
+    // const seshon = await store.client.getFeed(undefined);
+    // console.log('seson', seshon);
+    // }
     // }
 
     // for (let x = 0; x < sessionsCount; x++) {
@@ -417,7 +454,7 @@ test.only('scale test using scenario', async () => {
 
 const getRandomNumber = (items: Array<any>) => {
   const randomNumber = Math.floor(Math.random() * items.length);
-  console.log('number of items', items.length, 'random number', randomNumber);
+  // console.log('number of items', items.length, 'random number', randomNumber);
   return randomNumber;
 };
 
