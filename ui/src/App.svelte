@@ -111,56 +111,7 @@
 
 <main>
 
-  <div class="nav">
-    <div class="button-group">
-      <div class="nav-button {pane === "discover" ? "selected":""}"
-        title="Discover"
-        on:keypress={()=>{setPane('discover')}}
-        on:click={()=>{setPane('discover')}}
-      >
-        <Fa class="nav-icon" icon={faHome} size="2x"/>
-        <span class="button-title">Discover</span>
-      </div>
-      <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
-        title="Sessions"
-        on:keypress={()=>{setPane('sessions')}}
-        on:click={()=>{setPane('sessions')}}
-      >
-        <Fa class="nav-icon" icon={faCalendar} size="2x"/>
-        <span class="button-title">Sessions</span>
-      </div>
-
-
-      <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
-        title="Spaces"
-        on:keypress={()=>{setPane('spaces')}}
-        on:click={()=>{setPane('spaces')}}
-      >
-        <Fa class="nav-icon" icon={faMap} size="2x"/>
-      <span class="button-title">Spaces</span>
-      </div>
-    </div>
-    <div class="button-group settings">
-      <div class="nav-button {pane=="you"?"selected":""}"
-        title="You"
-        on:keypress={()=>{setPane('you')}}
-        on:click={()=>{setPane('you')}}
-      >
-        <Fa class="nav-icon" icon={faUser} size="2x"/>
-        <span class="button-title you">You</span>
-      </div>
-      {#if store && $uiProps.amSteward}
-        <div class="nav-button {pane.startsWith("admin")?"selected":""}"
-          title="Admin"
-          on:keypress={()=>{setPane('admin')}}
-          on:click={()=>{setPane('admin')}}
-        >
-          <Fa class="nav-icon" icon={faGear} size="2x"/>
-        <span class="button-title settings">Settings</span>
-        </div>
-      {/if}
-    </div>
-  </div>
+  
 
   {#if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -169,6 +120,9 @@
     </div>
   {:else}
   <profiles-context store="{profilesStore}">
+
+   
+
     {#if $prof && ($prof.status!=="complete" || $prof.value===undefined)}
     <div style="text-align:center">
       <h1>Hello.</h1>
@@ -179,6 +133,58 @@
     {/if}
 
     <profile-prompt>
+
+      <div class="nav">
+        <div class="button-group">
+          <div class="nav-button {pane === "discover" ? "selected":""}"
+            title="Discover"
+            on:keypress={()=>{setPane('discover')}}
+            on:click={()=>{setPane('discover')}}
+          >
+            <Fa class="nav-icon" icon={faHome} size="2x"/>
+            <span class="button-title">Discover</span>
+          </div>
+          <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
+            title="Sessions"
+            on:keypress={()=>{setPane('sessions')}}
+            on:click={()=>{setPane('sessions')}}
+          >
+            <Fa class="nav-icon" icon={faCalendar} size="2x"/>
+            <span class="button-title">Sessions</span>
+          </div>
+    
+    
+          <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
+            title="Spaces"
+            on:keypress={()=>{setPane('spaces')}}
+            on:click={()=>{setPane('spaces')}}
+          >
+            <Fa class="nav-icon" icon={faMap} size="2x"/>
+          <span class="button-title">Spaces</span>
+          </div>
+        </div>
+        <div class="button-group settings">
+          <div class="nav-button {pane=="you"?"selected":""}"
+            title="You"
+            on:keypress={()=>{setPane('you')}}
+            on:click={()=>{setPane('you')}}
+          >
+            <Fa class="nav-icon" icon={faUser} size="2x"/>
+            <span class="button-title you">You</span>
+          </div>
+          {#if store && $uiProps.amSteward}
+            <div class="nav-button {pane.startsWith("admin")?"selected":""}"
+              title="Admin"
+              on:keypress={()=>{setPane('admin')}}
+              on:click={()=>{setPane('admin')}}
+            >
+              <Fa class="nav-icon" icon={faGear} size="2x"/>
+            <span class="button-title settings">Settings</span>
+            </div>
+          {/if}
+        </div>
+      </div>
+
       <file-storage-context client={fileStorageClient}>
       {#if store &&  $uiProps.spaceDetails}
       <div class="session-details" style="height:100vh">
