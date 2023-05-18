@@ -76,7 +76,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
       </div>
     </div>
   {/if}
-  <div class="info">
+  <div class="info clickable">
     <div class="top-area">
       <div class="left-side">
         <div class="title">
