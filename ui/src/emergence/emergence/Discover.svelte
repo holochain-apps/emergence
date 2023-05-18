@@ -11,7 +11,7 @@
     import Sense from './Sense.svelte';
     import FeedFilter from './FeedFilter.svelte';
   import Sync from './Sync.svelte';
-  import { faFilter } from '@fortawesome/free-solid-svg-icons';
+  import { faClose, faFilter, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -28,6 +28,20 @@
     <div class="header-content">
         <h3>Discover</h3>
         <div style="display: flex; flex-direction: row; align-self:center">
+            {#if $uiProps.feedFilter.keyword}
+            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"feedFilter")}} >
+              <Fa size="xs" icon={faMagnifyingGlass} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+            {/if}
+      
+            {#if $uiProps.feedFilter.tags.length>0}
+            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"feedFilter")}} >
+              <Fa size="xs" icon={faTag} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+            {/if}
+            {#if $uiProps.feedFilter.space.length>0}
+            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["space"],"feedFilter")}} >
+                <Fa size="xs" icon={faMap} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+            {/if}
+
             <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } circle>
                 <Fa icon={faFilter} />
             </sl-button>

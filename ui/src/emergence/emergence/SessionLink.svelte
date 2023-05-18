@@ -3,6 +3,7 @@
   import type { EmergenceStore } from '../../emergence-store';
   import { getContext, onMount } from 'svelte';
   import { storeContext } from '../../contexts';
+  import { DetailsType } from './types';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
   $: uiProps = store.uiProps
@@ -14,7 +15,7 @@
   });
 
   const handleClick = ()=> {
-    store.setUIprops({sessionDetails:sessionHash})
+    store.openDetails(DetailsType.Session, sessionHash)
   }
   const sessionTitle = (sessionHash: ActionHash) => {
     const session = store.getSession(sessionHash)

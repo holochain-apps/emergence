@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter, type Details, DetailsType } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
@@ -111,9 +111,7 @@ export class EmergenceStore {
     sessionsFilter: defaultSessionsFilter(),
     feedFilter: defaultFeedFilter(),
     sensing: false,
-    sessionDetails: undefined,
-    spaceDetails: undefined,
-    folk: undefined,
+    detailsStack: [],
     sessionListMode: true,
   })
 
@@ -122,6 +120,22 @@ export class EmergenceStore {
         Object.keys(props).forEach(key=>n[key] = props[key])
         return n
     })
+  }
+
+  openDetails = (type: DetailsType, hash: ActionHash) => {
+    const detailsStack = get(this.uiProps).detailsStack
+    detailsStack.unshift({type,hash})
+    this.setUIprops({detailsStack})
+  }
+
+  closeDetails = () => {
+    const detailsStack = get(this.uiProps).detailsStack
+    detailsStack.shift()
+    this.setUIprops({detailsStack})
+  }
+
+  setPane = (pane) => {
+    this.setUIprops({pane, detailsStack:[]})
   }
 
   stuffIsNeeded() {
@@ -649,9 +663,41 @@ export class EmergenceStore {
         const b64 = encodeHashToBase64(space)
         if (!filter.space.find(s=>encodeHashToBase64(s) === b64)) return false
     }
-   
+    if (filter.keyword) {
+        const keyword = filter.keyword.toLowerCase() 
+        if (!this.searchInFeedElem(elem, keyword))
+        return false
+    }
+
     return true
   }
+  searchInFeedElem(elem:FeedElem, keyword: string) : boolean {
+    let text = ""
+    switch(elem.type) {
+        case FeedType.SpaceNew: 
+        case FeedType.SpaceUpdate: 
+            const space = this.getSpace(elem.about)
+            if (space) {
+                text = space.record.entry.name+space.record.entry.description
+            }
+            break;
+        case FeedType.SessionNew: 
+        case FeedType.SessionUpdate: 
+            const session = this.getSession(elem.about)
+            if (space) {
+                text = session.record.entry.title+space.record.entry.description
+            }
+            break;
+        case FeedType.NoteNew:
+        case FeedType.NoteUpdate:
+            const note = this.getNote(elem.about)
+            if (note) {
+                text = note.record.entry.text
+            }
+        }
+    return text.toLowerCase().search(keyword) >= 0
+  }
+
   getFeedElementSpace(elem:FeedElem) : ActionHash|undefined {
     switch(elem.type) {
         case FeedType.SpaceNew: 
@@ -674,7 +720,10 @@ export class EmergenceStore {
             break;
         case FeedType.NoteNew:
         case FeedType.NoteUpdate:
-
+            const note = this.getNote(elem.about)
+            if (note) {
+                return note.record.entry.tags
+            }
       }
     return []
   }

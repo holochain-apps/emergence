@@ -6,9 +6,10 @@ import SessionSummary from './SessionSummary.svelte';
   import SessionCrud from './SessionCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
-import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck } from '@fortawesome/free-solid-svg-icons';
+import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck, faMap } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { calcDays, dayToStr, sortWindows, windowsInDay } from './utils';
+  import { DetailsType } from './types';
 
 const dispatch = createEventDispatcher();
 
@@ -62,6 +63,10 @@ on:session-created={() => {} }
       {#if $uiProps.sessionsFilter.tags.length>0}
       <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"sessionsFilter")}} >
         <Fa size="xs" icon={faTag} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+      {/if}
+      {#if $uiProps.sessionsFilter.space.length>0}
+      <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["space"],"sessionsFilter")}} >
+        <Fa size="xs" icon={faMap} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
       {/if}
       <sl-button style="margin-left: 8px; " size=small on:click={() => { showFilter = !showFilter } } circle>
         <Fa icon={faFilter} />
@@ -145,7 +150,7 @@ on:session-created={() => {} }
             >
               {#each store.sessionsInSpace(window, space).filter(s=>store.filterSession(s, $uiProps.sessionsFilter)) as session}
                 <div class="slotted-session"
-                  on:click={()=>store.setUIprops({sessionDetails: session.original_hash})}
+                  on:click={()=>store.openDetails(DetailsType.Session, session.original_hash)}
                 id={encodeHashToBase64(session.original_hash)}
                 >
                   {session.record.entry.title}

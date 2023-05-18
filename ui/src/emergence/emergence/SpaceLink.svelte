@@ -3,6 +3,7 @@
   import type { EmergenceStore } from '../../emergence-store';
   import { getContext, onMount } from 'svelte';
   import { storeContext } from '../../contexts';
+  import { DetailsType } from './types';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
   $: uiProps = store.uiProps
@@ -14,7 +15,7 @@
   });
 
   const handleClick = ()=> {
-    store.setUIprops({spaceDetails:spaceHash})
+    store.openDetails(DetailsType.Space, spaceHash)
   }
   const spaceTitle = (spaceHash: ActionHash) => {
     const space = store.getSpace(spaceHash)

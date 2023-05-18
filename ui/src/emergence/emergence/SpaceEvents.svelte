@@ -6,7 +6,7 @@ import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 
 import { storeContext } from '../../contexts';
-import type {  Info, Space,  Session,  TimeWindow } from './types';
+import {  type Info, type Space,  type Session,  type TimeWindow, DetailsType } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
@@ -56,7 +56,7 @@ $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
 {:else}
 <div class="events">
   <div class="summary clickable"
-    on:click={() => store.setUIprops({spaceDetails:space})}
+    on:click={() => store.openDetails(DetailsType.Space, space.original_hash)}
   >
     <div class="pic">
       {#if space.record.entry.pic}

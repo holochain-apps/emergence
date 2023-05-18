@@ -2,7 +2,7 @@
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { type Slot, type Session, type Info, amenitiesList, sessionTags, SessionInterest, sessionInterestToString } from './types';
+import { type Slot, type Session, type Info, amenitiesList, sessionTags, SessionInterest, sessionInterestToString, DetailsType } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -51,7 +51,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
 
   // @ts-ignore
     if (e.target.tagName != "SL-SELECT")
-      store.setUIprops({sessionDetails:session.original_hash}); 
+      store.openDetails(DetailsType.Session, session.original_hash); 
   }}>
   {#if showSlot}
     <div class="slot">
@@ -63,7 +63,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
         <div class="time">
           {new Date(slot.window.start).toTimeString().slice(0,5)}
         </div>
-        <div class="space clickable" on:click={(e)=>{e.stopPropagation();store.setUIprops({spaceDetails: space.original_hash})}}>
+        <div class="space clickable" on:click={(e)=>{e.stopPropagation();store.openDetails(DetailsType.Space, space.original_hash)}}>
           {space ? space.record.entry.name : "Unknown"}
         </div>
         {:else}

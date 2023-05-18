@@ -7,7 +7,7 @@ import Fa from 'svelte-fa';
 import { faCircleArrowLeft, faSync } from '@fortawesome/free-solid-svg-icons';
 import SpaceSummary from './SpaceSummary.svelte';
 import Sync from './Sync.svelte';
-import type { Info, Space } from './types';
+import { DetailsType, type Info, type Space } from './types';
 const dispatch = createEventDispatcher();
 
 
@@ -46,7 +46,7 @@ onMount(async () => {
     {#each $spaces as space}
       <div class="space">
         <SpaceSummary
-          on:space-selected={()=>{store.setUIprops({spaceDetails:space.original_hash})}} 
+          on:space-selected={()=>{store.openDetails(DetailsType.Space, space.original_hash)}} 
           space={space}>
         </SpaceSummary>
       </div>

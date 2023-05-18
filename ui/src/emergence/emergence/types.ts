@@ -365,6 +365,17 @@ export interface UIProps {
   pane:string
 }
 
+export enum DetailsType {
+  Session = 0,
+  Space,
+  Folk
+}
+
+export interface Details {
+  type: DetailsType
+  hash: ActionHash
+}
+
 export interface FeedFilter {
   tags: Array<string>,
   space: Array<ActionHash>,

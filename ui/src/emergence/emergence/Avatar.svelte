@@ -4,6 +4,7 @@
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import { getContext } from "svelte";
+  import { DetailsType } from "./types";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -20,8 +21,7 @@
 
 <div class="avatar-{namePosition}"
     on:click={(e)=>{
-        const prop = /*encodeHashToBase64(agentPubKey) == store.myPubKeyBase64 ? {pane:"you"} :*/ {folk:agentPubKey}
-        store.setUIprops(prop)
+        store.openDetails(DetailsType.Folk,agentPubKey)
         e.stopPropagation()
     }}
     >

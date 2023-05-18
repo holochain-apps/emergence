@@ -6,7 +6,7 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
-import { faArrowRotateBack, faClose } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRotateBack, faClose, faMagnifyingGlass, faMap, faTag, faUser } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { defaultFeedFilter, defaultSessionsFilter, type FeedFilter, type SessionsFilter } from './types';
 import { fly } from 'svelte/transition';
@@ -21,6 +21,8 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 const dispatch = createEventDispatcher();
 
 export let filter: FeedFilter
+
+$: filter
 $: spaces = store.spaces
 $: uiProps = store.uiProps
 onMount(() => {
@@ -41,29 +43,32 @@ onMount(() => {
   </div>
   <div style="display: flex; flex-direction: column; margin-bottom: 16px">
     <div  style="display: flex; flex-direction: row;">
-    <span style="margin-right: 10px"><strong>Person:</strong></span>
-    {#if $uiProps.feedFilter.author}
-    <Avatar agentPubKey={$uiProps.feedFilter.author}></Avatar>
-    {/if}
+      <span style="margin-right: 10px"><Fa icon={faUser} /></span>
+      {#if filter.author}
+        <Avatar agentPubKey={filter.author}></Avatar>
+        <div style="margin-left:5px;" class="micro-button" on:click={()=> {filter.author=undefined}} ><Fa  icon={faClose} /></div>
+      {:else}
+        <search-agent include-myself={true} clear-on-select={true} on:agent-selected={(e)=>filter.author=e.detail.agentPubKey}></search-agent>
+      {/if}
+    
     </div>
-    <search-agent include-myself={true} clear-on-select={true} on:agent-selected={(e)=>filter.author=e.detail.agentPubKey}></search-agent>
   </div> 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 10px"><strong>Tags:</strong></span>
+    <span style="margin-right: 10px"><Fa icon={faTag} /></span>
     <sl-input
       value={filter.tags.join(", ")}
-      on:input={e => { filter.tags = e.target.value.split(/,\W*/); ; dispatch('update-filter', filter)} }
+      on:input={e => { filter.tags = e.target.value.split(/,\W*/).filter((w)=>w) ; dispatch('update-filter', filter)} }
     ></sl-input>
   </div> 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Contains:</strong></span>
+    <span style="margin-right: 4px"><Fa icon={faMagnifyingGlass} /></span>
       <sl-input
       value={filter.keyword}
       on:input={e => { filter.keyword = e.target.value; ; dispatch('update-filter', filter)} }
     ></sl-input>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 10px"><strong>Space:</strong></span>
+    <span style="margin-right: 10px"><Fa icon={faMap} /></span>
     <sl-select style="min-width:100px" multiple clearable
       value={filter.space.map(h=>encodeHashToBase64(h))}
       placeholder="filter by spaces"
@@ -87,6 +92,18 @@ onMount(() => {
     border: solid 1px;
     display: flex; flex-direction: column;
     max-height: 100%;
-    z-index: 2;
+    z-index: 11;
+  }
+  .micro-button {
+    cursor:pointer;
+    border: solid 1px #f0f0f0;
+    border-radius: 3px;
+    height: 23px;
+    padding: 0 4px 0 4px;
+  }
+  .micro-button:hover {
+    background-color: rgb(240, 249, 2244);
+    border: solid 1px rgb(149, 219, 252);
+    color:  rgb(3, 105, 161);
   }
 </style>

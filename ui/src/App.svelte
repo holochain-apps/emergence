@@ -33,6 +33,7 @@
   import Discover from './emergence/emergence/Discover.svelte';
   import Folk from './emergence/emergence/Folk.svelte';
   import SpaceDetail from './emergence/emergence/SpaceDetail.svelte';
+  import { DetailsType } from './emergence/emergence/types';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -92,21 +93,6 @@
   let createSessionDialog: SessionCrud
   let createSpaceDialog: SpaceCrud
 
-  const setPane = (pane) => {
-    closeSessionDetails()
-    closeSpaceDetails()
-    closeFolk()
-    store.setUIprops({pane})
-  }
-  const closeSessionDetails = () => {
-    store.setUIprops({sessionDetails:undefined})
-  }
-  const closeSpaceDetails = () => {
-    store.setUIprops({spaceDetails:undefined})
-  }
-  const closeFolk = () => {
-    store.setUIprops({folk:undefined})
-  }
   const doSync=async () => {
         syncing = true;
         console.log("start sync", new Date);
@@ -145,16 +131,16 @@
         <div class="button-group">
           <div class="nav-button {pane === "discover" ? "selected":""}"
             title="Discover"
-            on:keypress={()=>{setPane('discover')}}
-            on:click={()=>{setPane('discover')}}
+            on:keypress={()=>{store.setPane('discover')}}
+            on:click={()=>{store.setPane('discover')}}
           >
             <Fa class="nav-icon" icon={faHome} size="2x"/>
             <span class="button-title">Discover</span>
           </div>
           <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
             title="Sessions"
-            on:keypress={()=>{setPane('sessions')}}
-            on:click={()=>{setPane('sessions')}}
+            on:keypress={()=>{store.setPane('sessions')}}
+            on:click={()=>{store.setPane('sessions')}}
           >
             <Fa class="nav-icon" icon={faCalendar} size="2x"/>
             <span class="button-title">Sessions</span>
@@ -163,8 +149,8 @@
     
           <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
             title="Spaces"
-            on:keypress={()=>{setPane('spaces')}}
-            on:click={()=>{setPane('spaces')}}
+            on:keypress={()=>{store.setPane('spaces')}}
+            on:click={()=>{store.setPane('spaces')}}
           >
             <Fa class="nav-icon" icon={faMap} size="2x"/>
           <span class="button-title">Spaces</span>
@@ -173,8 +159,8 @@
         <div class="button-group settings">
           <div class="nav-button {pane=="you"?"selected":""}"
             title="You"
-            on:keypress={()=>{setPane('you')}}
-            on:click={()=>{setPane('you')}}
+            on:keypress={()=>{store.setPane('you')}}
+            on:click={()=>{store.setPane('you')}}
           >
             <Fa class="nav-icon" icon={faUser} size="2x"/>
             <span class="button-title you">You</span>
@@ -182,8 +168,8 @@
           {#if store && $uiProps.amSteward}
             <div class="nav-button {pane.startsWith("admin")?"selected":""}"
               title="Admin"
-              on:keypress={()=>{setPane('admin')}}
-              on:click={()=>{setPane('admin')}}
+              on:keypress={()=>{store.setPane('admin')}}
+              on:click={()=>{store.setPane('admin')}}
             >
               <Fa class="nav-icon" icon={faGear} size="2x"/>
             <span class="button-title settings">Settings</span>
@@ -204,28 +190,28 @@
       </div>
 
       <file-storage-context client={fileStorageClient}>
-      {#if store &&  $uiProps.spaceDetails}
+      {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Space }
       <div class="session-details" style="height:100vh">
         <SpaceDetail
-          on:space-deleted={()=>closeSpaceDetails()}
-          on:space-close={()=>closeSpaceDetails()}
-          space={store.getSpace($uiProps.spaceDetails)}>
+          on:space-deleted={()=>store.closeDetails()}
+          on:space-close={()=>store.closeDetails()}
+          space={store.getSpace($uiProps.detailsStack[0].hash)}>
         </SpaceDetail>
       </div>
       {/if}
-    {#if store &&  $uiProps.sessionDetails}
+      {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Session }
       <div class="session-details" style="height:100vh">
         <SessionDetail 
-        on:session-deleted={()=>closeSessionDetails()}
-        on:session-close={()=>closeSessionDetails()}
-        sessionHash={$uiProps.sessionDetails}></SessionDetail>
+        on:session-deleted={()=>store.closeDetails()}
+        on:session-close={()=>store.closeDetails()}
+        sessionHash={$uiProps.detailsStack[0].hash}></SessionDetail>
       </div>
     {/if}
-    {#if store &&  $uiProps.folk}
-      <div class="session-details" style="height:100vh">
+    {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Folk }
+    <div class="session-details" style="height:100vh">
         <Folk 
-        on:folk-close={()=>closeFolk()}
-        agentPubKey={$uiProps.folk}></Folk>
+        on:folk-close={()=>store.closeDetails()}
+        agentPubKey={$uiProps.detailsStack[0].hash}></Folk>
       </div>
     {/if}
 
@@ -263,7 +249,7 @@
       {#if pane=="schedule"}
         <div class="pane">
           <ScheduleUpcoming
-            on:open-slotting={()=>setPane("schedule.slotting")}
+            on:open-slotting={()=>store.setPane("schedule.slotting")}
           ></ScheduleUpcoming>
         </div>
       {/if}
@@ -271,7 +257,7 @@
       {#if pane=="schedule.slotting"}
         <div class="pane">
           <ScheduleSlotting
-            on:slotting-close={()=>setPane("admin")}
+            on:slotting-close={()=>store.setPane("admin")}
 
           ></ScheduleSlotting>
         </div>
@@ -282,7 +268,7 @@
         {#if store.getCurrentSiteMap()}
           <SiteMapDisplay 
             sitemap={store.getCurrentSiteMap()}
-            on:show-all-spaces={()=>setPane("spaces.list")}
+            on:show-all-spaces={()=>store.setPane("spaces.list")}
             ></SiteMapDisplay>
         {:else}
           <h5>No Sitemap configured yet</h5>
@@ -298,7 +284,7 @@
           </div>
         {/if}
         <AllSpaces
-          on:all-spaces-close={()=>setPane("spaces")}
+          on:all-spaces-close={()=>store.setPane("spaces")}
         ></AllSpaces>
     
           <SpaceCrud
@@ -317,7 +303,7 @@
       <div class="pane">
         <Admin
           on:open-sitemaps={()=>pane = 'admin.sitemaps'}
-          on:open-slotting={()=>setPane("schedule.slotting")}
+          on:open-slotting={()=>store.setPane("schedule.slotting")}
         ></Admin>
       </div>
       {/if}

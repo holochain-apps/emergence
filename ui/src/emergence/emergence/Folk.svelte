@@ -73,7 +73,7 @@
             {/if}
 
             {#each Array.from($agentSessions.get(agentPubKey).keys()).map(s =>store.getSession(s)) as session}
-                {#if !session.record.entry.trashed || showDeletedSession}
+                {#if session && (!session.record.entry.trashed || showDeletedSession)}
                 <SessionSummary 
                 showTags={true} showSlot={true} allowSetIntention={true} session={session}></SessionSummary>
                 {/if}

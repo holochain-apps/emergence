@@ -88,9 +88,6 @@
             <sl-button style="" size=small on:click={() => { dispatch('show-all-spaces') } } circle>
                 <Fa icon={faList} />
             </sl-button>
-            <div style="margin-left: 8px;">
-                <Sync></Sync>
-            </div>
         </div>
     </div>
 </div>
