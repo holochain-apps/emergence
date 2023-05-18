@@ -157,7 +157,7 @@ bind:this={updateSessionDialog}
         <Avatar agentPubKey={leader}></Avatar>
       {/each}
     </div>
-    <span class="description">{ entry.description }</span>
+    <div class="description">{ entry.description }</div>
     <div class="tags">
       {#each tags as tag}
         <div class="tag">
