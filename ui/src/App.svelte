@@ -268,15 +268,14 @@
 
       {#if pane=="spaces.list"}
       <div class="pane spaces">
+        {#if $uiProps.amSteward}
+          <div class="create" on:click={() => {createSpaceDialog.open(undefined) } }>
+            <span>+</span> Create
+          </div>
+        {/if}
         <AllSpaces
           on:all-spaces-close={()=>setPane("spaces")}
         ></AllSpaces>
-        {#if $uiProps.amSteward}
-          Create Space:
-          <sl-button on:click={() => {createSpaceDialog.open(undefined) } } circle>
-            <Fa icon={faPlus} />
-          </sl-button>
-        {/if}
     
           <SpaceCrud
             bind:this={createSpaceDialog}

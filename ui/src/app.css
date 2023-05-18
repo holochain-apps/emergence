@@ -292,6 +292,15 @@ html{
     display: flex;
     align-items: center;
     box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
+    cursor: pointer;
+    border: solid 1px rgb(203, 203, 203);
+  }
+
+  .create:hover {
+    background-color: rgb(240, 249, 2244);
+    border: solid 1px rgb(149, 219, 252);
+    color:  rgb(3, 105, 161);
+    cursor: pointer;
   }
 
   .create span {
