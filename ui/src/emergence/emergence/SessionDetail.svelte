@@ -145,14 +145,27 @@ bind:this={updateSessionDialog}
         </sl-button>
       </div>
     </div>
-
-
     <span style="flex: 1"></span>
-
  
   </div>
-
-  <h3 class="title">{ entry.title }</h3>
+  <div class="event-image"></div>
+  <div class="general-info">
+    <h3 class="title">{ entry.title }</h3>
+    <div class="leaders">
+      <span style="margin-right: 4px"><strong>Hosted by </strong></span>
+      {#each entry.leaders as leader}
+        <Avatar agentPubKey={leader}></Avatar>
+      {/each}
+    </div>
+    <span class="description">{ entry.description }</span>
+    <div class="tags">
+      {#each tags as tag}
+        <div class="tag">
+          {tag}
+        </div>
+      {/each}
+    </div>
+  </div>
   <Confirm bind:this={confirmDialog}
     message="This will remove this session for everyone!" on:confirm-confirmed={deleteSession}></Confirm>
 
@@ -178,24 +191,8 @@ bind:this={updateSessionDialog}
       </div>
 
       <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-        <span style="margin-right: 4px"><strong>Description:</strong></span>
-        <span style="white-space: pre-line">{ entry.description }</span>
-      </div>
-
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-        <span style="margin-right: 4px"><strong>Leaders:</strong></span>
-        {#each entry.leaders as leader}
-          <Avatar agentPubKey={leader}></Avatar>
-        {/each}
-      </div>
-
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
         <span style="margin-right: 4px"><strong>Smallest Group Size:</strong></span>
         <span style="white-space: pre-line">{ entry.smallest }</span>
-      </div>
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-        <span style="margin-right: 4px"><strong>Largest Group Size:</strong></span>
-        <span style="white-space: pre-line">{ entry.largest }</span>
       </div>
       <div style="display: flex; flex-direction: row; margin-bottom: 16px">
         <span style="margin-right: 4px"><strong>Duration:</strong></span>
@@ -220,20 +217,12 @@ bind:this={updateSessionDialog}
         <InterestSelect sessionHash={sessionHash}></InterestSelect>
       </div>
   
-      <div>
-        Total Interested: <Fa icon={faUserGroup} /> {$relData.interest.size} 
+      <div class="interest">
+          <Fa icon={faUserGroup} /> {$relData.interest.size} <span class="interest-max">/ { entry.largest }</span>
       </div>
-      <div>
-        Attenders: {#each Array.from($relData.interest.entries()).filter(([key,value])=>value==SessionInterest.Going) as [key,value]}
+      <div class="attenders">
+          {#each Array.from($relData.interest.entries()).filter(([key,value])=>value==SessionInterest.Going) as [key,value]}
           <Avatar agentPubKey={key}></Avatar>
-        {/each}
-      </div>
-      <div class="tags">
-        Tags: 
-        {#each tags as tag}
-          <div class="tag">
-            {tag}
-          </div>
         {/each}
       </div>
     </div>
@@ -260,8 +249,28 @@ bind:this={updateSessionDialog}
 {/if}
 
 <style>
+  .general-info {
+    max-width: 720px;
+    margin: 0 auto;
+    padding-bottom: 30px;
+  }
   .title {
-    text-align: center;
+    font-size: 36px;
+    text-align: left;
+  }
+  .leaders {
+    font-size: 12px;
+    display: inline-flex;
+  }
+
+  .leaders holo-identicon {
+    display: none;
+  }
+  .description {
+    padding-bottom: 8px;
+  }
+  .tags {
+    padding-top: 8px;
   }
   .notes {
     display:flex;
@@ -310,6 +319,10 @@ bind:this={updateSessionDialog}
     line-height: 30px;
     margin: 40px 0 20px 0;
     letter-spacing: -0.01rem;
+  }
+
+  .interest-max {
+    opacity: .5;
   }
 
   .properties {
