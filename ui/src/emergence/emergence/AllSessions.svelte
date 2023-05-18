@@ -54,9 +54,6 @@ on:session-created={() => {} }
       <sl-button style="margin-left: 8px; " size=small on:click={() => { store.setUIprops({sessionListMode:!$uiProps.sessionListMode }) }} circle>
         <Fa icon={$uiProps.sessionListMode ? faTable : faList} />
       </sl-button>
-      <div style="margin-left: 8px;">
-        <Sync></Sync>
-      </div>
     </div>
   </div>
   {#if showFilter}

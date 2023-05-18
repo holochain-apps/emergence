@@ -31,10 +31,6 @@
             <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } circle>
                 <Fa icon={faFilter} />
             </sl-button>
-        
-            <div style="margin-left: 8px;">
-                <Sync agentPubKey={undefined}></Sync>
-            </div>
         </div>
     </div>
 </div>

@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faUser, faGear, faCalendar, faPlus, faHome } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -40,6 +40,7 @@
   let loading = true;
   let profilesStore: ProfilesStore | undefined
   let creatingMap = false
+  let syncing = false
 
   $: client, fileStorageClient, store, loading;
   $: prof = profilesStore ? profilesStore.myProfile : undefined
@@ -106,7 +107,13 @@
   const closeFolk = () => {
     store.setUIprops({folk:undefined})
   }
-
+  const doSync=async () => {
+        syncing = true;
+        console.log("start sync", new Date);
+        await store.sync(undefined);
+        console.log("end sync", new Date);
+        syncing=false 
+    }
 </script>
 
 <main>
@@ -182,6 +189,17 @@
             <span class="button-title settings">Settings</span>
             </div>
           {/if}
+          <div class="nav-button"
+            class:spinning={syncing}
+            title="Sync"
+            on:keypress={()=>{doSync()}}
+            on:click={()=>{doSync()}}
+          >
+            <Fa 
+              class="nav-icon "
+              icon={faSync} size="2x"/>
+            <span class="button-title sync">Sync</span>
+          </div>
         </div>
       </div>
 
@@ -456,7 +474,17 @@
   }
 
 
-
+  .spinning {
+  animation: spin-animation 1s infinite;
+}
+@keyframes spin-animation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(359deg);
+  }
+}
   .session-details {
     background-color: white;
     position: absolute;

@@ -31,9 +31,6 @@ onMount(async () => {
       <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('all-spaces-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
-      <div style="margin-left: 8px;">
-        <Sync agentPubKey={undefined}></Sync>
-      </div>
     </div>
   </div>
 

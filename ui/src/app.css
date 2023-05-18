@@ -230,6 +230,11 @@ html{
   background-color: #ff00ff;
 }
 
+.spinning {
+  animation: spin-animation 0.5s infinite;
+  display: inline-block;
+}
+
 @media (min-width: 720px) {
   .nav {
     top: 0;

@@ -53,9 +53,7 @@
 
      
         <div style="display: flex; flex-direction: row; align-self:center">
-            <div style="margin-left: 8px;">
-                <Sync agentPubKey={agentPubKey}></Sync>
-            </div>
+
         </div>
     </div>
 

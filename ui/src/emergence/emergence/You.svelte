@@ -55,9 +55,6 @@
             <sl-button style="margin-left: 8px;" size=small on:click={() => dialog.show()} circle>
                 <Fa icon={faEdit} />
             </sl-button>
-            <div style="margin-left: 8px;">
-                <Sync agentPubKey={store.myPubKey}></Sync>
-            </div>
         </div>
         <div style="display: flex; flex-direction: row; align-self:center">
             <sl-checkbox

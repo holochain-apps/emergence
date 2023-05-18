@@ -635,7 +635,8 @@ export class EmergenceStore {
 
     if (filter.tags.length > 0) {
         const elemTags: string[] = this.getFeedElementTags(elem)
-        for (const tag of filter.tags) {
+        for (let tag of filter.tags) {
+            tag = tag.toLowerCase()
             if (!elemTags.includes(tag)) return false
         }
     }
@@ -668,7 +669,7 @@ export class EmergenceStore {
             if (session) {
                 return session.relations.filter(ri=>
                     ri.relation.content.path == "session.tag"
-                    ).map(ri=>ri.relation.content.data)
+                    ).map(ri=>ri.relation.content.data.toLowerCase())
             }
             break;
         case FeedType.NoteNew:
@@ -697,16 +698,18 @@ export class EmergenceStore {
         if (filter.involvementInterested  && rel.myInterest != SessionInterest.Interested) return false
         if (filter.involvementNoOpinion  && rel.myInterest != SessionInterest.NoOpinion) return false
     }
-    for (const tag of filter.tags) {
+    for (let tag of filter.tags) {
+        tag = tag.toLowerCase()
         const foundTag = session.relations.find(ri=>
             ri.relation.content.path == "session.tag" &&
-            ri.relation.content.data == tag
+            ri.relation.content.data.toLowerCase() == tag
             )
         if (!foundTag) return false
     }
     if (filter.keyword) {
-        if (session.record.entry.description.search(filter.keyword) < 0 &&
-            session.record.entry.title.search(filter.keyword) < 0)
+        const word = filter.keyword.toLowerCase() 
+        if (session.record.entry.description.toLowerCase().search(word) < 0 &&
+            session.record.entry.title.toLowerCase().search(word) < 0)
         return false
     }
     if (filter.space.length>0) {
