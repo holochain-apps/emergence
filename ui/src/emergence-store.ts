@@ -112,6 +112,7 @@ export class EmergenceStore {
     feedFilter: defaultFeedFilter(),
     sensing: false,
     sessionDetails: undefined,
+    spaceDetails: undefined,
     folk: undefined,
     sessionListMode: true,
   })
@@ -717,7 +718,15 @@ export class EmergenceStore {
     return true
 
   }
-  
+  filterTag = (tag:string, filterName: string) => {
+    const filter = get(this.uiProps)[filterName]
+    const idx = filter.tags.indexOf(tag)
+    if (idx >= 0) {
+        filter.tags.splice(idx,1)
+    } else
+    filter.tags.push(tag)
+    this.setUIprops({"filterName": filter})
+  }
   sessionsInSpace = (window: TimeWindow, space: Info<Space>) : Array<Info<Session>> | undefined => {
     let rel = space.relations.filter(r=>r.relation.content.path == "space.sessions")
     const sessions: HoloHashMap<ActionHash, Info<Session>> = new HoloHashMap

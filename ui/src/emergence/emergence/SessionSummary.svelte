@@ -113,7 +113,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
       {#if showTags}
         <div class="tags">
           {#each tags as tag}
-          <div class="tag">
+          <div class="tag clickable-tag" on:click={(e)=>{e.stopPropagation(); store.filterTag(tag,"sessionsFilter")}}>
             {tag}
           </div>
           {/each}
@@ -143,6 +143,14 @@ $:space = slot? store.getSpace(slot.space) : undefined
     background-color: transparent;
   }
 
+  .clickable-tag {
+    cursor: pointer;
+  }
+  .clickable-tag:hover {
+    border: 1px solid #25bab054;
+    color: #25BAB1;
+    background-color: rgb(240, 249, 2244);
+  }
 
   .time {
     font-size: 1.7em;
