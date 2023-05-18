@@ -146,13 +146,13 @@ bind:this={updateSessionDialog}
       </div>
     </div>
 
-    <h3>{ entry.title }</h3>
 
     <span style="flex: 1"></span>
 
  
   </div>
 
+  <h3 class="title">{ entry.title }</h3>
   <Confirm bind:this={confirmDialog}
     message="This will remove this session for everyone!" on:confirm-confirmed={deleteSession}></Confirm>
 
@@ -260,6 +260,9 @@ bind:this={updateSessionDialog}
 {/if}
 
 <style>
+  .title {
+    text-align: center;
+  }
   .notes {
     display:flex;
     flex-direction: column;

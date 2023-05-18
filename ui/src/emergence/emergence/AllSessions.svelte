@@ -3,6 +3,7 @@ import { onMount, getContext, createEventDispatcher } from 'svelte';
 import { encodeHashToBase64, type Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SessionSummary from './SessionSummary.svelte';
+  import SessionCrud from './SessionCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
 import Sync from './Sync.svelte';
@@ -31,23 +32,31 @@ $: days = calcDays($windows, slotType, filteredDay)
 
 let showFilter = false
 
+let createSessionDialog: SessionCrud
+
 onMount(async () => {
 });
 
 </script>
-
+<SessionCrud
+bind:this={createSessionDialog}
+on:session-created={() => {} }
+></SessionCrud>
 <div class="pane-header">
+  <div class="header-content">
+    <h3>Sessions</h3>
+    <div class="create"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
 
-  <h3>Sessions</h3>
-  <div style="display: flex; flex-direction: row; align-self:center">
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { showFilter = !showFilter } } circle>
-      <Fa icon={faFilter} />
-    </sl-button>
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { store.setUIprops({sessionListMode:!$uiProps.sessionListMode }) }} circle>
-      <Fa icon={$uiProps.sessionListMode ? faTable : faList} />
-    </sl-button>
-    <div style="margin-left: 8px;">
-      <Sync></Sync>
+    <div class="section-controls">
+      <sl-button style="margin-left: 8px; " size=small on:click={() => { showFilter = !showFilter } } circle>
+        <Fa icon={faFilter} />
+      </sl-button>
+      <sl-button style="margin-left: 8px; " size=small on:click={() => { store.setUIprops({sessionListMode:!$uiProps.sessionListMode }) }} circle>
+        <Fa icon={$uiProps.sessionListMode ? faTable : faList} />
+      </sl-button>
+      <div style="margin-left: 8px;">
+        <Sync></Sync>
+      </div>
     </div>
   </div>
   {#if showFilter}

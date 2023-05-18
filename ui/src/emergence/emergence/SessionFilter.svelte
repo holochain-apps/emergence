@@ -88,12 +88,18 @@ onMount(() => {
     background-color: white;
     padding: 10px;
     position: absolute;
-    top: 5px;
-    right: 5px;
-
-    border: solid 1px;
+    top: 0px;
+    right: 0px;
     display: flex; flex-direction: column;
     max-height: 100%;
     z-index: 2;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, .15);
+  }
+
+
+  @media (min-width: 720px) {
+    .filter-modal {
+      height: calc(100% - 56px);
+    }
   }
 </style>

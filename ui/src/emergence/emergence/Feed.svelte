@@ -36,9 +36,9 @@
 {:else if feed.length === 0}
 <span>No Activity</span>
 {:else}
-<div >
+<div class="activity">
   {#each feed.sort((a,b)=>b.timestamp - a.timestamp) as f}
-    <div class="feed-item">
+    <div class="feed-item card">
       <FeedElemDetail feedElem={f}></FeedElemDetail>
     </div>
   {/each}
@@ -51,5 +51,9 @@
     width:100%; 
     display: flex;
     justify-content: left;
+  }
+
+  .activity {
+    width: 100%;
   }
 </style>

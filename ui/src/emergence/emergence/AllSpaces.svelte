@@ -24,12 +24,10 @@ onMount(async () => {
 });
 
 </script>
-
-<div class="pane-content">
-  <div class="pane-header">
-    <div style="display: flex; flex-direction: row; align-self:center">
-      <h3>Spaces List</h3>
-
+<div class="pane-header">
+  <div class="header-content">
+    <h3>Spaces List</h3>
+    <div class="section-controls">
       <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('all-spaces-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
@@ -37,8 +35,11 @@ onMount(async () => {
         <Sync agentPubKey={undefined}></Sync>
       </div>
     </div>
-
   </div>
+
+</div>
+<div class="pane-content">
+
   {#if error}
     <span class="notice">Error fetching the spaces: {error.data.data}.</span>
   {:else if $spaces.length === 0}
@@ -57,10 +58,6 @@ onMount(async () => {
 </div>
 
 <style>
-  :global(.pane-content) {
-    overflow-y: auto;
-    height: 95%;
-  }
   .notice {
     display: block;
     text-align: center;

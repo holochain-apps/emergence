@@ -23,10 +23,10 @@
 </script>
 <svelte:window bind:innerWidth bind:innerHeight />
 
-<div>
+<div class="cloud-container">
   {#if $tags.length > 0}
     <div class="cloud">
-        <WordCloud backgroundColor={"lightGray"} width={400} height={300} words={words}
+        <WordCloud backgroundColor={"lightGray"} width={320} height={300} words={words}
             on:click={(e)=> {
                 const tag = e.detail.target.innerHTML
                 const feedFilter = $uiProps.feedFilter
@@ -53,5 +53,13 @@
 <style>
     .cloud {
         display: flex;
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    .cloud-container {
+        width: 100%;
+        text-align: center;
+        padding-bottom: 30px;
     }
 </style>

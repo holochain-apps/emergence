@@ -46,7 +46,9 @@ $:space = slot? store.getSpace(slot.space) : undefined
 
 </div>
 {:else}
-<div class="summary" on:click={(e)=>{
+
+<div class="summary card" on:click={(e)=>{
+
   // @ts-ignore
     if (e.target.tagName != "SL-SELECT")
       store.setUIprops({sessionDetails:session.original_hash}); 
@@ -134,6 +136,14 @@ $:space = slot? store.getSpace(slot.space) : undefined
 {/if}
 
 <style>
+
+  .tag {
+    border: 1px solid #25bab054;
+    color: #25BAB1;
+    background-color: transparent;
+  }
+
+
   .time {
     font-size: 1.7em;
     margin-top: -6px;
@@ -142,21 +152,13 @@ $:space = slot? store.getSpace(slot.space) : undefined
   .date, .space {
     font-size: .7em;
   }
-  .summary {
-    display: flex;
-    flex-direction: row;
-    border: solid 1px #EFF0F3;
-    align-items: stretch;
-    max-width: 720px;
-    margin: 0 auto 10px auto;
-
-  }
   .slot {
     display: flex;
     align-items: center;
     width: 105px;
     background-color: rgba(243, 243, 245, 1.0);
     text-align: center;
+    border-radius: 10px 0 0 10px;
   }
   .slot-wrapper {
     padding: 5px;
@@ -167,7 +169,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
     border-left: solid 1px rgba(239, 240, 243, 1.0);
     display: flex;
     flex-direction: column;
-    padding: 5px;
+    padding: 10px 15px;
     background-color: #fff;
     width: 100%;
   }
@@ -183,6 +185,8 @@ $:space = slot? store.getSpace(slot.space) : undefined
   .right-side {
     display: flex;
     flex: 0;
+    justify-content: center;
+    align-items: center;
     padding: 10px;
   }
 

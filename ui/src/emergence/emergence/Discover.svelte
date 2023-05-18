@@ -25,14 +25,16 @@
 </script>
 
 <div class="pane-header">
-    <h3>Discover</h3>
-    <div style="display: flex; flex-direction: row; align-self:center">
-        <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } circle>
-            <Fa icon={faFilter} />
-        </sl-button>
-      
-        <div style="margin-left: 8px;">
-            <Sync agentPubKey={undefined}></Sync>
+    <div class="header-content">
+        <h3>Discover</h3>
+        <div style="display: flex; flex-direction: row; align-self:center">
+            <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } circle>
+                <Fa icon={faFilter} />
+            </sl-button>
+        
+            <div style="margin-left: 8px;">
+                <Sync agentPubKey={undefined}></Sync>
+            </div>
         </div>
     </div>
 </div>
@@ -61,9 +63,13 @@
         width: 100%;
         display: block;
         flex-direction: column;
-        background-color: lightgray;
     }
     .discover-section {
         display: flex;
+        width: 100%;
+        max-width: 720px;
+        margin: 0 auto;
+        justify-content: center;
     }
+
 </style>

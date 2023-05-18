@@ -110,6 +110,58 @@
 </script>
 
 <main>
+
+  <div class="nav">
+    <div class="button-group">
+      <div class="nav-button {pane === "discover" ? "selected":""}"
+        title="Discover"
+        on:keypress={()=>{setPane('discover')}}
+        on:click={()=>{setPane('discover')}}
+      >
+        <Fa class="nav-icon" icon={faHome} size="2x"/>
+        <span class="button-title">Discover</span>
+      </div>
+      <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
+        title="Sessions"
+        on:keypress={()=>{setPane('sessions')}}
+        on:click={()=>{setPane('sessions')}}
+      >
+        <Fa class="nav-icon" icon={faCalendar} size="2x"/>
+        <span class="button-title">Sessions</span>
+      </div>
+
+
+      <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
+        title="Spaces"
+        on:keypress={()=>{setPane('spaces')}}
+        on:click={()=>{setPane('spaces')}}
+      >
+        <Fa class="nav-icon" icon={faMap} size="2x"/>
+      <span class="button-title">Spaces</span>
+      </div>
+    </div>
+    <div class="button-group settings">
+      <div class="nav-button {pane=="you"?"selected":""}"
+        title="You"
+        on:keypress={()=>{setPane('you')}}
+        on:click={()=>{setPane('you')}}
+      >
+        <Fa class="nav-icon" icon={faUser} size="2x"/>
+        <span class="button-title you">You</span>
+      </div>
+      {#if store && $uiProps.amSteward}
+        <div class="nav-button {pane.startsWith("admin")?"selected":""}"
+          title="Admin"
+          on:keypress={()=>{setPane('admin')}}
+          on:click={()=>{setPane('admin')}}
+        >
+          <Fa class="nav-icon" icon={faGear} size="2x"/>
+        <span class="button-title settings">Settings</span>
+        </div>
+      {/if}
+    </div>
+  </div>
+
   {#if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
       <sl-spinner
@@ -215,7 +267,7 @@
       {/if}
 
       {#if pane=="spaces.list"}
-      <div class="pane">
+      <div class="pane spaces">
         <AllSpaces
           on:all-spaces-close={()=>setPane("spaces")}
         ></AllSpaces>
@@ -234,7 +286,7 @@
       {/if}
 
       {#if pane=="you"}
-      <div class="pane">
+      <div class="pane you">
         <You></You>
       </div>
       {/if}
@@ -270,53 +322,6 @@
         <Discover></Discover>
       </div>
       {/if}
-
-      <div class="nav">
-        <div class="nav-button {pane === "discover" ? "selected":""}"
-          title="Discover"
-          on:keypress={()=>{setPane('discover')}}
-          on:click={()=>{setPane('discover')}}
-        >
-           <Fa icon={faHome} size="2x"/>
-           <span class="button-title">Discover</span>
-        </div>
-        <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
-          title="Sessions"
-          on:keypress={()=>{setPane('sessions')}}
-          on:click={()=>{setPane('sessions')}}
-        >
-          <Fa icon={faCalendar} size="2x"/>
-           <span class="button-title">Sessions</span>
-        </div>
-
-
-        <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
-          title="Spaces"
-          on:keypress={()=>{setPane('spaces')}}
-          on:click={()=>{setPane('spaces')}}
-        >
-          <Fa icon={faMap} size="2x"/>
-         <span class="button-title">Spaces</span>
-        </div>
-        <div class="nav-button {pane=="you"?"selected":""}"
-          title="You"
-          on:keypress={()=>{setPane('you')}}
-          on:click={()=>{setPane('you')}}
-        >
-           <Fa icon={faUser} size="2x"/>
-           <span class="button-title">You</span>
-        </div>
-        {#if store && $uiProps.amSteward}
-          <div class="nav-button {pane.startsWith("admin")?"selected":""}"
-            title="Admin"
-            on:keypress={()=>{setPane('admin')}}
-            on:click={()=>{setPane('admin')}}
-          >
-            <Fa icon={faGear} size="2x"/>
-           <span class="button-title">Settings</span>
-          </div>
-        {/if}
-      </div>
     </div>
     </file-storage-context>
     </profile-prompt>
@@ -353,52 +358,6 @@
     display: flex; flex-direction: column;
     max-height: 100%;
     overflow: auto;
-  }
-  :global(.pane-contents) {
-    display: flex; flex-direction: column;
-  }
-  :global(.pane){
-    width: 100%;
-  }
-  :global(.pane-header){
-    display: flex; 
-    flex-direction: column;
-    justify-content:space-between; 
-    align-items: left;
-    padding: .5em;
-    margin-bottom: 1em;
-  }
-  :global(.flex-center) {
-        display: flex;
-        justify-content: center;
-    }
-  .nav {
-    display: flex; flex-direction: row; flex: 1;
-    padding-left: 10px;
-    padding-right: 10px;
-    width: 100%;
-    margin: auto;
-    justify-content: center;
-  }
-
-  .nav-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 50px;
-    max-width: 50px;
-    border-radius: 50%;
-    padding: 5px;
-    margin: 5px;
-    background-color: transparent;
-    color: rgba(86, 94, 109, 1);
-    transition: color .25s ease;
-  }
-
-  .nav-button .button-title {
-    font-size: 9px;
-    padding-top: 5px;
   }
 
   .create-session {
@@ -444,6 +403,10 @@
     opacity: .5;
    }
 
+   .button-group {
+    display: flex;
+   }
+
   .info {
     width: 100%;
     flex-stretch: 1;
@@ -487,21 +450,20 @@
     height: 100vh;
   }
 
-  /* @media (min-width: 500px) {
-    main {
-      max-width: 500px;
-    }
-  } */
 
 
   .session-details {
     background-color: white;
     position: absolute;
-
     border: solid 1px;
     display: flex; flex-direction: column;
-    max-height: 100%;
+    height: calc(100vh - 76px);
     overflow: auto;
-    z-index: 1;
+    z-index: 100;
   }
+@media (min-width: 720px) {
+  .create-session {
+    display: none;
+  }
+}
 </style>
