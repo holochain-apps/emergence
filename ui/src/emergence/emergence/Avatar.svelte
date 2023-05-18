@@ -20,7 +20,7 @@
 
 <div class="avatar-{namePosition}"
     on:click={(e)=>{
-        const prop = encodeHashToBase64(agentPubKey) == store.myPubKeyBase64 ? {pane:"you"} : {folk:agentPubKey}
+        const prop = /*encodeHashToBase64(agentPubKey) == store.myPubKeyBase64 ? {pane:"you"} :*/ {folk:agentPubKey}
         store.setUIprops(prop)
         e.stopPropagation()
     }}
