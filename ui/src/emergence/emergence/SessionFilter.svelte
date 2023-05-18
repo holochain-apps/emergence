@@ -6,7 +6,7 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
-import { faArrowRotateBack, faClose } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRotateBack, faCheck, faClock, faClose, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { defaultSessionsFilter, type SessionsFilter } from './types';
 import { fly } from 'svelte/transition';
@@ -38,7 +38,7 @@ onMount(() => {
     </div>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 10px"><strong>Time:</strong></span>
+    <span style="margin-right: 10px"><Fa icon={faClock} /></span>
     <sl-checkbox checked={filter.timeNow} on:sl-change={e => { filter.timeNow = e.target.checked ; dispatch('update-filter', filter)} }>Now</sl-checkbox>
     <sl-checkbox checked={filter.timeNext} on:sl-change={e => { filter.timeNext = e.target.checked; dispatch('update-filter', filter)} }>Next</sl-checkbox>
     <sl-checkbox checked={filter.timePast} on:sl-change={e => { filter.timePast = e.target.checked; dispatch('update-filter', filter)} }>Past</sl-checkbox>
@@ -46,28 +46,30 @@ onMount(() => {
     <sl-checkbox checked={filter.timeUnscheduled} on:sl-change={e => { filter.timeUnscheduled = e.target.checked; dispatch('update-filter', filter)} }>Unscheduled</sl-checkbox>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 10px"><strong>Your Involvement:</strong></span>
+    <span style="margin-right: 10px"><Fa icon={faCheck} /></span>
     <sl-checkbox checked={filter.involvementLeading} on:sl-change={e => { filter.involvementLeading = e.target.checked; dispatch('update-filter', filter)} }>Leading</sl-checkbox>
     <sl-checkbox checked={filter.involvementGoing} on:sl-change={e => { filter.involvementGoing = e.target.checked; dispatch('update-filter', filter)} }>Going</sl-checkbox>
     <sl-checkbox checked={filter.involvementInterested} on:sl-change={e => { filter.involvementInterested = e.target.checked; dispatch('update-filter', filter)} }>Interested</sl-checkbox>
     <sl-checkbox checked={filter.involvementNoOpinion} on:sl-change={e => { filter.involvementNoOpinion = e.target.checked; dispatch('update-filter', filter)} }>No Opinion</sl-checkbox>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 10px"><strong>Tags:</strong></span>
+    <span style="margin-right: 10px"><Fa icon={faTag} /></span>
     <sl-input
+      placeholder="comma separated tags"
       value={filter.tags.join(", ")}
-      on:input={e => { filter.tags = e.target.value.split(/,\W*/); ; dispatch('update-filter', filter)} }
+      on:input={e => { filter.tags = e.target.value.split(/,\W*/).filter((w)=>w); console.log(filter.tags); dispatch('update-filter', filter)} }
     ></sl-input>
   </div> 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Contains:</strong></span>
+    <span style="margin-right: 4px"><Fa icon={faMagnifyingGlass} /></span>
       <sl-input
+      placeholder="search text"
       value={filter.keyword}
       on:input={e => { filter.keyword = e.target.value; ; dispatch('update-filter', filter)} }
     ></sl-input>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 10px"><strong>Space:</strong></span>
+    <span style="margin-right: 10px"><Fa icon={faMap} /></span>
     <sl-select style="min-width:100px" multiple clearable
       value={filter.space.map(h=>encodeHashToBase64(h))}
       placeholder="filter by spaces"

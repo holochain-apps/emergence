@@ -230,10 +230,7 @@ html{
   background-color: #ff00ff;
 }
 
-.spinning {
-  animation: spin-animation 0.5s infinite;
-  display: inline-block;
-}
+
 
 @media (min-width: 720px) {
   .nav {
@@ -286,7 +283,7 @@ html{
     background-color: transparent;
   }
 
-  .create {
+  .pill-button {
     display: block;
     position: sticky;
     top: 15px;
@@ -301,14 +298,14 @@ html{
     border: solid 1px rgb(203, 203, 203);
   }
 
-  .create:hover {
+  .pill-button:hover {
     background-color: rgb(240, 249, 2244);
     border: solid 1px rgb(149, 219, 252);
     color:  rgb(3, 105, 161);
     cursor: pointer;
   }
 
-  .create span {
+  .pill-button span {
     display: block;
     padding: 0 5px 0 0;
   }

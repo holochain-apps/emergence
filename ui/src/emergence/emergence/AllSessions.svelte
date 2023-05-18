@@ -6,8 +6,7 @@ import SessionSummary from './SessionSummary.svelte';
   import SessionCrud from './SessionCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
-import Sync from './Sync.svelte';
-import { faFilter, faList, faTable } from '@fortawesome/free-solid-svg-icons';
+import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { calcDays, dayToStr, sortWindows, windowsInDay } from './utils';
 
@@ -45,9 +44,25 @@ on:session-created={() => {} }
 <div class="pane-header">
   <div class="header-content">
     <h3>Sessions</h3>
-    <div class="create"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
+    <div class="pill-button"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
 
     <div class="section-controls">
+      {#if $uiProps.sessionsFilter.timeNow || $uiProps.sessionsFilter.timeNext|| $uiProps.sessionsFilter.timePast|| $uiProps.sessionsFilter.timeFuture|| $uiProps.sessionsFilter.timeUnscheduled}
+      <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["timeNow","timeNext","timePast","timeFuture","timeUnscheduled"],"sessionsFilter")}} >
+        <Fa size="xs" icon={faClock} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+      {/if}
+      {#if $uiProps.sessionsFilter.involvementLeading || $uiProps.sessionsFilter.involvementGoing|| $uiProps.sessionsFilter.involvementInterested|| $uiProps.sessionsFilter.involvementNoOpinion}
+      <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["involvementLeading","involvementGoing","involvementInterested","involvementNoOpinion"],"sessionsFilter")}} >
+        <Fa size="xs" icon={faCheck} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+      {/if}
+      {#if $uiProps.sessionsFilter.keyword}
+      <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"sessionsFilter")}} >
+        <Fa size="xs" icon={faMagnifyingGlass} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+      {/if}
+      {#if $uiProps.sessionsFilter.tags.length>0}
+      <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"sessionsFilter")}} >
+        <Fa size="xs" icon={faTag} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+      {/if}
       <sl-button style="margin-left: 8px; " size=small on:click={() => { showFilter = !showFilter } } circle>
         <Fa icon={faFilter} />
       </sl-button>

@@ -730,6 +730,19 @@ export class EmergenceStore {
     filter.tags.push(tag)
     this.setUIprops({"filterName": filter})
   }
+  resetFilterAttributes = (attributes:string[], filterName: string) => {
+    const filter = get(this.uiProps)[filterName]
+    switch (filterName) {
+        case "sessionsFilter": attributes.map(a=> filter[a] =  defaultSessionsFilter()[a])
+        break;
+        case "feedFilter": attributes.map(a=> filter[a] =  defaultFeedFilter()[a])
+        break;
+    }
+    const props=[]
+    props[filterName]=filter
+    this.setUIprops(props)
+  }
+
   sessionsInSpace = (window: TimeWindow, space: Info<Space>) : Array<Info<Session>> | undefined => {
     let rel = space.relations.filter(r=>r.relation.content.path == "space.sessions")
     const sessions: HoloHashMap<ActionHash, Info<Session>> = new HoloHashMap
