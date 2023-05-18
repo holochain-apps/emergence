@@ -744,13 +744,18 @@ export class EmergenceStore {
     if ( filter.timeFuture && (now < (slot.window.start + slot.window.duration*60))) return false
     if ( filter.timeFuture && (now >= slot.window.start)) return false
 
-    if (filter.involvementLeading && !session.record.entry.leaders.find(l=>encodeHashToBase64(l) === this.myPubKeyBase64))
-        return false
-    if (filter.involvementGoing || filter.involvementInterested || filter.involvementNoOpinion) {
-        const rel: SessionRelationData = this.getSessionReleationData(session)
-        if (filter.involvementGoing  && rel.myInterest != SessionInterest.Going) return false
-        if (filter.involvementInterested  && rel.myInterest != SessionInterest.Interested) return false
-        if (filter.involvementNoOpinion  && rel.myInterest != SessionInterest.NoOpinion) return false
+    if (filter.involvementLeading || filter.involvementGoing || filter.involvementInterested || filter.involvementNoOpinion || filter.involvementLeading) {
+        let found = false
+        if (filter.involvementLeading && session.record.entry.leaders.find(l=>encodeHashToBase64(l) === this.myPubKeyBase64)) found = true
+        else {
+            const rel: SessionRelationData = this.getSessionReleationData(session)
+            if (filter.involvementGoing && rel.myInterest === SessionInterest.Going) found = true
+            else
+            if (filter.involvementInterested && rel.myInterest === SessionInterest.Interested) found = true
+            else
+            if (filter.involvementNoOpinion && rel.myInterest === SessionInterest.NoOpinion) found = true
+        }
+        if (!found) return false
     }
 
     if (filter.tags.length > 0) {
