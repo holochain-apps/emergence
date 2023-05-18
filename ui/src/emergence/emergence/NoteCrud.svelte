@@ -104,6 +104,7 @@ let dialog
   <div style="margin-bottom: 16px">
     <span>Tags:</span >
     <MultiSelect 
+      --sms-bg="white"
       bind:selected={tags} 
       options={allTags} 
       allowUserOptions={true}
@@ -165,6 +166,7 @@ let dialog
       <div style="margin-bottom: 16px">
         <span>Tags:</span >
         <MultiSelect 
+          --sms-bg="white"
           bind:selected={tags} 
           options={allTags} 
           allowUserOptions={true}
