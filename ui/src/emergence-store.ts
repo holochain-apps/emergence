@@ -649,10 +649,15 @@ export class EmergenceStore {
 
     if (filter.tags.length > 0) {
         const elemTags: string[] = this.getFeedElementTags(elem)
+        let found = false
         for (let tag of filter.tags) {
             tag = tag.toLowerCase()
-            if (!elemTags.includes(tag)) return false
+            if (elemTags.includes(tag)) {
+                found = true
+                break;
+            }
         }
+        if (!found) return false
     }
     if (filter.author) {
         if (encodeHashToBase64(filter.author) !== encodeHashToBase64(elem.author)) return false
@@ -747,13 +752,20 @@ export class EmergenceStore {
         if (filter.involvementInterested  && rel.myInterest != SessionInterest.Interested) return false
         if (filter.involvementNoOpinion  && rel.myInterest != SessionInterest.NoOpinion) return false
     }
-    for (let tag of filter.tags) {
-        tag = tag.toLowerCase()
-        const foundTag = session.relations.find(ri=>
-            ri.relation.content.path == "session.tag" &&
-            ri.relation.content.data.toLowerCase() == tag
-            )
-        if (!foundTag) return false
+
+    if (filter.tags.length > 0) {
+        let found = false
+        for (let tag of filter.tags) {
+            tag = tag.toLowerCase()
+            if (session.relations.find(ri=>
+                ri.relation.content.path == "session.tag" &&
+                ri.relation.content.data.toLowerCase() == tag
+                )) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) return false
     }
     if (filter.keyword) {
         const word = filter.keyword.toLowerCase() 
