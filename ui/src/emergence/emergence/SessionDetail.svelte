@@ -149,29 +149,30 @@ bind:this={updateSessionDialog}
  
   </div>
   <div class="event-image"></div>
-  <div class="general-info">
-    <h3 class="title">{ entry.title }</h3>
-    <div class="leaders">
-      <span style="margin-right: 4px"><strong>Hosted by </strong></span>
-      {#each entry.leaders as leader}
-        <Avatar agentPubKey={leader}></Avatar>
-      {/each}
-    </div>
-    <div class="description">{ entry.description }</div>
-    <div class="tags">
-      {#each tags as tag}
-        <div class="tag">
-          {tag}
-        </div>
-      {/each}
-    </div>
-  </div>
+ 
   <Confirm bind:this={confirmDialog}
     message="This will remove this session for everyone!" on:confirm-confirmed={deleteSession}></Confirm>
 
   <div class="details">
 
     <div class="properties">
+      <div class="general-info">
+        <h3 class="title">{ entry.title }</h3>
+        <div class="leaders">
+          <span style="margin-right: 4px"><strong>Hosted by </strong></span>
+          {#each entry.leaders as leader}
+            <Avatar agentPubKey={leader}></Avatar>
+          {/each}
+        </div>
+        <div class="description">{ entry.description }</div>
+        <div class="tags">
+          {#each tags as tag}
+            <div class="tag">
+              {tag}
+            </div>
+          {/each}
+        </div>
+      </div>
 
       {#if $uiProps.debuggingEnabled}
         <div style="display: flex; flex-direction: row; margin-bottom: 16px">
@@ -250,9 +251,19 @@ bind:this={updateSessionDialog}
 
 <style>
   .general-info {
-    max-width: 720px;
+    width: 100%;
     margin: 0 auto;
     padding-bottom: 30px;
+  }
+  .event-image {
+    height: 300px;
+    width: 100%;
+    background-image: url(images/default-image.png);
+    background-size: cover;
+    max-width: 720px;
+    margin: 0 auto;
+    border-radius: 10px;
+    margin-bottom: 15px;
   }
   .title {
     font-size: 36px;
