@@ -21,15 +21,13 @@ onMount(async () => {
 });
 
 </script>
-
+<div class="pane-header">
+  <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('sitemaps-close') } } circle>
+    <Fa icon={faCircleArrowLeft} />
+  </sl-button>
+<h3>SiteMaps List</h3>
+</div>
 <div class="pane-content">
-  <div class="pane-header">
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('sitemaps-close') } } circle>
-      <Fa icon={faCircleArrowLeft} />
-    </sl-button>
-  <h3>SiteMaps List</h3>
-  </div>
-
   {#if error}
     <span>Error fetching the sitemaps: {error.data.data}.</span>
   {:else if $sitemaps.length === 0}
@@ -44,9 +42,4 @@ onMount(async () => {
 </div>
 
 <style>
-  :global(.pane-content) {
-    overflow-y: auto;
-    height: auto;
-    width: 100%;
-  }
 </style>

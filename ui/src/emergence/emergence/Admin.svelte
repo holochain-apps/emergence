@@ -187,15 +187,16 @@
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
 
-
-<div class="pane-content">
-    <div class="pane-header">
-      <h3>Admin</h3>
-      <div style="display:flex">
-        &nbsp;
-      </div>
+<div class="pane-header">
+    <div class="header-content">
+        <h3>Admin</h3>
+        <div style="display:flex">
+            &nbsp;
+        </div>
     </div>
-    <div>
+  </div>
+<div class="pane-content">
+    <div class="admin-controls">
         <sl-button style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
             Manage Schedule
         </sl-button>
@@ -224,5 +225,17 @@
     sl-checkbox {
         margin-right:15px;
         margin-left:15px;
+    }
+
+    .admin-controls {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    
+    }
+
+    .header-content h3 {
+        text-align: center;
+        width: 100%;
     }
   </style>

@@ -262,7 +262,7 @@
 
 
     {#if creatingTimeWindow}
-    <div class="modal">
+    <div class="modal create-slot">
       <CreateTimeWindow 
         on:timeWindow-created={()=>creatingTimeWindow=false}
         on:close-create-timeWindow={()=>creatingTimeWindow=false}>
@@ -532,6 +532,10 @@
   border-color: #9ecaed;
   box-shadow: 0 0 10px #9ecaed !important;
   background-color: green;
+}
+
+.modal.create-slot {
+  z-index: 100;
 }
 
 </style>

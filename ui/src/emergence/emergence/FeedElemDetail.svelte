@@ -11,7 +11,7 @@ import NoteDetail from './NoteDetail.svelte';
 import NoteSummary from './NoteSummary.svelte';
 import TimeWindowSummary from './TimeWindowSummary.svelte';
 import SessionLink from './SessionLink.svelte';
-import SpaceLink from './SpaceLink.svelte';
+//import SpaceLink from './SpaceLink.svelte';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -83,7 +83,6 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     flex-direction: column; 
     align-items: left;
     margin: 0 5px 0 10px;
-    border: solid 1px grey;
     padding: 10px;
     border-radius: 5px;
     background-color: white;

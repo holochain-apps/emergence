@@ -19,6 +19,10 @@ html, body {
   height: 100%; overflow: hidden; /* In general, it's a good idea to have the body take up the full viewport height and have a fixed layout with no scrollbar. Then, you can have a scrollable inner container like .pane-content to handle the overflow of the content. This approach helps keep the page structure clean and allows you to control the scrolling behavior more effectively. */
 }
 
+body {
+  background: linear-gradient(360deg, #D5D5D5 1.94%, #fafafa 90.23%);
+}
+
 #content {
   height: 100%;
   padding: 0px;
@@ -37,7 +41,7 @@ input, button {
   font-family: inherit;
   font-size: inherit;
 }
-
+  
 .container {
   max-width: 1200px;
   margin: 0 auto;
@@ -65,6 +69,8 @@ input, button {
 
 /*Now, let's style the bottom navigation.*/
 .nav {
+  background-color: #fff;
+  box-shadow: 0px -10px 15px rgba(0, 0, 0, .15);
   display: flex;
   justify-content: space-between;
   background-color: var(--primary-color);
@@ -83,10 +89,28 @@ input, button {
   color: var(--light-text-color);
   padding: 0.5rem;
   font-size: 0.875rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 50px;
+  max-width: 50px;
+  border-radius: 50%;
+  padding: 5px;
+  margin: 5px;
+  background-color: transparent;
+  color: rgba(86, 94, 109, 1);
+  transition: color .25s ease;
 }
 
 .nav-button.selected {
   background-color: var(--secondary-color);
+}
+
+
+.nav-button .button-title {
+  font-size: 9px;
+  padding-top: 5px;
 }
 
 /*Here are some basic styles for the pane and modal:*/
@@ -99,10 +123,34 @@ input, button {
   display: flex;
   justify-content: flex-start;
   align-items: center;
+  overflow: auto;
   flex-direction: column;
 }
 
+.pane.spaces {
+  padding-bottom: 100px;
+}
+
+.pane.you .pane-header {
+  text-align: center;
+  justify-content: center;
+  display: flex;
+}
+
+.card {
+  display: flex;
+  flex-direction: row;
+  border-radius: 10px;
+  background-color: white;
+  box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.15);
+  align-items: stretch;
+  max-width: 720px;
+  margin: 0 auto 10px auto;
+}
+
 .pane-content {
+  padding-top: 30px;
+  width: 100%;
   height: 100%;
 }
 
@@ -116,15 +164,34 @@ input, button {
 
 /* Finally, let's style the header: */
 .pane-header{
-  background-color: var(--primary-color);
-  color: var(--light-text-color);
-  background-color: #F8F9FA;
+  background-color: rgba(255, 255, 255, 1);
   color: rgba(22, 26, 30, 1.0);
   padding: .5rem;
   font-size: 1rem;
   font-weight: 400;
   width: 100vw;
   text-align: center;
+  box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
+  z-index: 10;
+  align-items: center;
+  align-content: center;
+  display: flex;
+}
+
+.header-content {
+  max-width: 720px;
+  width: 100%;
+  display: flex;
+  margin: 0 auto;
+  justify-content: space-between;
+}
+
+.create {
+  display: none;
+}
+
+.details {
+
 }
 
 .space-pic{
@@ -137,10 +204,13 @@ input, button {
   width:100%;
 }
 
-/*color theme*/
-.nav{
-  background-color: #e6f2f5;
+.section-controls {
+  display: flex; 
+  flex-direction: row;
+  align-self:center
 }
+
+/*color theme*/
 html{
   background-color: #e6f2f5;
 }
@@ -151,15 +221,99 @@ html{
 
 /*debug*/
 #content{
-  background-color: green;
 }
 
-.pane-content{
-  background-color: #fff;
-}
 html{
   background-color: #cadddf;
 }
 .note{
   background-color: #ff00ff;
+}
+
+@media (min-width: 720px) {
+  .nav {
+    top: 0;
+    bottom: auto;
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
+    justify-content: space-between;
+    padding: 0;
+  }
+
+  .nav-button {
+    flex-direction: row;
+    padding: 10px 10px;
+    max-width: 100%;
+    margin: 0;
+    border-right: 1px
+  }
+
+  .nav-button .button-title {
+    font-size: 16px;
+  }
+
+  svg.nav-icon {
+    height: 20px !important;
+    margin-right: 8px;
+  }
+  
+  html {
+    padding-bottom: 0;
+  }
+
+  body {
+    padding-bottom: 0;
+    padding-top: 50px;
+  }
+
+  .pane-header {
+    background-color: transparent;
+    z-index: 10;
+    box-shadow: none;
+  }
+
+  .pane-content {
+    height: auto;
+    padding-top: 10px;
+  }
+
+  .pane {
+    height: 100%;
+    background-color: transparent;
+  }
+
+  .create {
+    display: block;
+    position: sticky;
+    top: 15px;
+    background-color: rgba(255, 255, 255, 1);
+    border-radius: 25px;
+    padding: 0 15px;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
+  }
+
+  .create span {
+    display: block;
+    padding: 0 5px 0 0;
+  }
+  
+  .header-content h3, .create-session, .button-group.settings .button-title {
+    display: none;
+  }
+
+  .header-content {
+    padding-top: 15px;
+  }
+
+  .button-group.settings svg {
+    margin-right: 0;
+  }
+
+  .section-controls sl-button {
+    border: none;
+    border-radius: 100%;
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
+  }
 }

@@ -71,18 +71,21 @@ let menu
   .select {
     position: relative;
     display:flex;
-    border: 1px solid rgba(212, 212, 214, 1.0);
+    border: 2px solid rgba(70, 47, 216, .20);
     padding: 0 10px;
     font-size: 14px;
     border-radius: 5px;
     align-items: center;
+    color: #462FD8;
+    font-weight: bold;
     height: 35px;
+    z-index: 0;
   }
   .menu {
     background-color: white;
     position: absolute;
-    top: 1px;
-    right: 5px;   
+    top: 0;
+    right: 0;   
     z-index: 1000;
   }
 </style>
