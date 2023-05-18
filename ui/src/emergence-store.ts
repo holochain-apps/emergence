@@ -11,11 +11,11 @@ import {
 import type { EmergenceClient } from './emergence-client';
 
 import TimeAgo from "javascript-time-ago"
-import en from 'javascript-time-ago/locale/en'
+import en from 'javascript-time-ago/locale/en/index.js';
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter } from './emergence/emergence/types.js';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 
@@ -26,7 +26,7 @@ export const neededStuffStore = (client: EmergenceClient) => {
     const notes = writable(new HoloHashMap<ActionHash, Info<Note>| undefined>())
     const neededStuff: GetStuffInput = {}
 
-    setInterval(async ()=>{
+    const intervalId = setInterval(async ()=>{
         if(neededStuff.notes ? true : false) {
             const stuff = await client.getStuff(neededStuff)
             if (stuff.notes) {
@@ -43,6 +43,7 @@ export const neededStuffStore = (client: EmergenceClient) => {
         }}
     , 1000);
     return {
+        intervalId,
         notes: {
             get: (actionHash:ActionHash) : AsyncReadable<Info<Note>|undefined> =>{
                 if (neededStuff.notes) {
