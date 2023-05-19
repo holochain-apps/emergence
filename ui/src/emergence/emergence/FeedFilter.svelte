@@ -30,19 +30,19 @@ onMount(() => {
 
 </script>
 <div transition:fly={{ x: 300, duration: 500 }} class="filter-modal" style="display: flex; flex-direction: column">
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px;     justify-content: space-between;border-bottom: 1px solid;">
+  <div class="center-row" style="  justify-content: space-between;border-bottom: 1px solid;">
     <h3>Filters</h3>
-    <div style="display: flex; flex-direction: row; margin-bottom: 16px; ">
-      <sl-button style="align-self:flex-end; margin-left: 8px; " size=small on:click={() => { filter = defaultFeedFilter(); dispatch('update-filter', filter) } } circle>
+    <div class="center-row">
+      <sl-button style="align-self:flex-end; margin-left: 8px; " on:click={() => { filter = defaultFeedFilter(); dispatch('update-filter', filter) } } circle>
         <Fa icon={faArrowRotateBack} />
       </sl-button>
-      <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-filter') } } circle>
+      <sl-button style="margin-left: 8px; " on:click={() => { dispatch('close-filter') } } circle>
         <Fa icon={faClose} />
       </sl-button>
     </div>
   </div>
   <div style="display: flex; flex-direction: column; margin-bottom: 16px">
-    <div  style="display: flex; flex-direction: row;">
+    <div  class="center-row">
       <span style="margin-right: 10px"><Fa icon={faUser} /></span>
       {#if filter.author}
         <Avatar agentPubKey={filter.author}></Avatar>
@@ -53,21 +53,21 @@ onMount(() => {
     
     </div>
   </div> 
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+  <div class="center-row">
     <span style="margin-right: 10px"><Fa icon={faTag} /></span>
     <sl-input
       value={filter.tags.join(", ")}
       on:input={e => { filter.tags = e.target.value.split(/,\W*/).filter((w)=>w) ; dispatch('update-filter', filter)} }
     ></sl-input>
   </div> 
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+  <div class="center-row">
     <span style="margin-right: 4px"><Fa icon={faMagnifyingGlass} /></span>
       <sl-input
       value={filter.keyword}
       on:input={e => { filter.keyword = e.target.value; ; dispatch('update-filter', filter)} }
     ></sl-input>
   </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+  <div class="center-row">
     <span style="margin-right: 10px"><Fa icon={faMap} /></span>
     <sl-select style="min-width:100px" multiple clearable
       value={filter.space.map(h=>encodeHashToBase64(h))}
@@ -81,18 +81,6 @@ onMount(() => {
   </div>
   </div>
 <style>
-  .filter-modal {
-    max-width: 90%;
-    background-color: white;
-    padding: 10px;
-    position: absolute;
-    top: 5px;
-    right: 5px;
 
-    border: solid 1px;
-    display: flex; flex-direction: column;
-    max-height: 100%;
-    z-index: 11;
-  }
 
 </style>

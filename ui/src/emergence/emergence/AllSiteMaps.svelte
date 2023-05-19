@@ -22,7 +22,7 @@ onMount(async () => {
 
 </script>
 <div class="pane-header">
-  <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('sitemaps-close') } } circle>
+  <sl-button style="margin-left: 8px; " on:click={() => { dispatch('sitemaps-close') } } circle>
     <Fa icon={faCircleArrowLeft} />
   </sl-button>
 <h3>SiteMaps List</h3>

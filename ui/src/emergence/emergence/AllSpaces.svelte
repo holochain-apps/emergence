@@ -28,7 +28,7 @@ onMount(async () => {
   <div class="header-content">
     <h3>Spaces List</h3>
     <div class="section-controls">
-      <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('all-spaces-close') } } circle>
+      <sl-button style="margin-left: 8px; " on:click={() => { dispatch('all-spaces-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
     </div>

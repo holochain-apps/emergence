@@ -17,7 +17,7 @@ import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 $: windows = store.timeWindows
-$: days = calcDays($windows, "", undefined, defaultSessionsFilter()) 
+$: days = calcDays($windows, "", defaultSessionsFilter()) 
 
 const dispatch = createEventDispatcher();
 
@@ -39,42 +39,44 @@ const toggleDayInFilter = (day:Date) => {
 }
 </script>
 <div transition:fly={{ x: 300, duration: 500 }} class="filter-modal" style="display: flex; flex-direction: column">
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px;     justify-content: space-between;border-bottom: 1px solid;">
+  <div class="center-row" style=" justify-content: space-between;border-bottom: 1px solid;">
     <h3>Filters</h3>
     <div style="display: flex; flex-direction: row; margin-bottom: 16px; ">
-      <sl-button style="align-self:flex-end; margin-left: 8px; " size=small on:click={() => { filter = defaultSessionsFilter(); dispatch('update-filter', filter) } } circle>
+      <sl-button style="align-self:flex-end; margin-left: 8px; " on:click={() => { filter = defaultSessionsFilter(); dispatch('update-filter', filter) } } circle>
         <Fa icon={faArrowRotateBack} />
       </sl-button>
-      <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-filter') } } circle>
+      <sl-button style="margin-left: 8px; " on:click={() => { dispatch('close-filter') } } circle>
         <Fa icon={faClose} />
       </sl-button>
     </div>
   </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px; align-items: center">
+  <div class="center-row">
     <span style="margin-right: 10px"><Fa icon={faClock} /></span>
     <div style="display: flex; flex-direction: column;">
-      <div style="display: flex; flex-direction: row;">
+      <div class="wrap-row">
         <sl-checkbox checked={filter.timeNow} on:sl-change={e => { filter.timeNow = e.target.checked ; dispatch('update-filter', filter)} }>Now</sl-checkbox>
         <sl-checkbox checked={filter.timeNext} on:sl-change={e => { filter.timeNext = e.target.checked; dispatch('update-filter', filter)} }>Next</sl-checkbox>
         <sl-checkbox checked={filter.timePast} on:sl-change={e => { filter.timePast = e.target.checked; dispatch('update-filter', filter)} }>Past</sl-checkbox>
         <sl-checkbox checked={filter.timeFuture} on:sl-change={e => { filter.timeFuture = e.target.checked; dispatch('update-filter', filter)} }>Future</sl-checkbox>
         <sl-checkbox checked={filter.timeUnscheduled} on:sl-change={e => { filter.timeUnscheduled = e.target.checked; dispatch('update-filter', filter)} }>Unscheduled</sl-checkbox>
       </div>
-      <div style="display: flex; flex-direction: row;">
+      <div class="wrap-row">
         {#each days as day}
           <sl-checkbox checked={filter.timeDays.includes(day.getTime())} on:sl-change={e => { toggleDayInFilter(day)} }>{dayToStr(day)}</sl-checkbox>
         {/each}
       </div>
     </div>
   </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+  <div class="center-row">
     <span style="margin-right: 10px"><Fa icon={faCheck} /></span>
-    <sl-checkbox checked={filter.involvementLeading} on:sl-change={e => { filter.involvementLeading = e.target.checked; dispatch('update-filter', filter)} }>Leading</sl-checkbox>
-    <sl-checkbox checked={filter.involvementGoing} on:sl-change={e => { filter.involvementGoing = e.target.checked; dispatch('update-filter', filter)} }>Going</sl-checkbox>
-    <sl-checkbox checked={filter.involvementInterested} on:sl-change={e => { filter.involvementInterested = e.target.checked; dispatch('update-filter', filter)} }>Interested</sl-checkbox>
-    <sl-checkbox checked={filter.involvementNoOpinion} on:sl-change={e => { filter.involvementNoOpinion = e.target.checked; dispatch('update-filter', filter)} }>No Opinion</sl-checkbox>
-  </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <div class="wrap-row">
+      <sl-checkbox checked={filter.involvementLeading} on:sl-change={e => { filter.involvementLeading = e.target.checked; dispatch('update-filter', filter)} }>Leading</sl-checkbox>
+      <sl-checkbox checked={filter.involvementGoing} on:sl-change={e => { filter.involvementGoing = e.target.checked; dispatch('update-filter', filter)} }>Going</sl-checkbox>
+      <sl-checkbox checked={filter.involvementInterested} on:sl-change={e => { filter.involvementInterested = e.target.checked; dispatch('update-filter', filter)} }>Interested</sl-checkbox>
+      <sl-checkbox checked={filter.involvementNoOpinion} on:sl-change={e => { filter.involvementNoOpinion = e.target.checked; dispatch('update-filter', filter)} }>No Opinion</sl-checkbox>
+    </div>
+    </div>
+  <div class="center-row">
     <span style="margin-right: 10px"><Fa icon={faTag} /></span>
     <sl-input
       placeholder="comma separated tags"
@@ -82,7 +84,7 @@ const toggleDayInFilter = (day:Date) => {
       on:input={e => { filter.tags = e.target.value.split(/,\W*/).filter((w)=>w); console.log(filter.tags); dispatch('update-filter', filter)} }
     ></sl-input>
   </div> 
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+  <div class="center-row">
     <span style="margin-right: 4px"><Fa icon={faMagnifyingGlass} /></span>
       <sl-input
       placeholder="search text"
@@ -90,7 +92,7 @@ const toggleDayInFilter = (day:Date) => {
       on:input={e => { filter.keyword = e.target.value; ; dispatch('update-filter', filter)} }
     ></sl-input>
   </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+  <div class="center-row">
     <span style="margin-right: 10px"><Fa icon={faMap} /></span>
     <sl-select style="min-width:100px" multiple clearable
       value={filter.space.map(h=>encodeHashToBase64(h))}
@@ -107,23 +109,30 @@ const toggleDayInFilter = (day:Date) => {
   sl-checkbox {
     margin-right: 10px;
   }
-  .filter-modal {
+  :global(.filter-modal) {
     max-width: 90%;
     background-color: white;
     padding: 10px;
     position: absolute;
-    top: 0px;
-    right: 0px;
-    display: flex; flex-direction: column;
+    top: 5px;
+    right: 5px;
+
+    border: solid 1px;
     max-height: 100%;
     z-index: 2;
     box-shadow: 0px 0px 20px rgba(0, 0, 0, .15);
+    overflow: auto;
+  }
+  :global(.wrap-row) {
+    display: flex; flex-direction: row;flex-wrap: wrap;
+  } 
+  :global(.center-row) {
+    display: flex; flex-direction: row; margin-bottom: 16px; align-items: center;
   }
 
-
-  @media (min-width: 720px) {
+  /* @media (min-width: 720px) {
     .filter-modal {
       height: calc(100% - 56px);
     }
-  }
+  } */
 </style>

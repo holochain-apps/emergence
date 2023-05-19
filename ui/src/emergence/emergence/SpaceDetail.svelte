@@ -77,15 +77,15 @@ let confirmDialog
   <div class="pane-header">
 
     <div class="controls">
-      <sl-button size=small on:click={() => { dispatch('space-close') } } circle>
+      <sl-button on:click={() => { dispatch('space-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
       {#if $uiProps.amSteward}
       <div>
-        <sl-button size=small on:click={() => { editDialog.open(space) } } circle>
+        <sl-button on:click={() => { editDialog.open(space) } } circle>
           <Fa icon={faEdit} />
         </sl-button>
-        <sl-button size=small on:click={()=>confirmDialog.open()} circle>
+        <sl-button on:click={()=>confirmDialog.open()} circle>
           <Fa icon={faTrash} />
         </sl-button>
       </div>

@@ -23,7 +23,7 @@
 {#if syncing}
 <sl-spinner></sl-spinner>
 {:else}
-<sl-button style="" size=small on:click={doSync} circle>
+<sl-button style="" on:click={doSync} circle>
     <Fa icon={faSync} />
 </sl-button>
 {/if}

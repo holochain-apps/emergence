@@ -85,7 +85,7 @@
     <div class="header-content">
         <h3>Spaces</h3>
         <div style="display: flex; flex-direction: row; align-self:center">
-            <sl-button style="" size=small on:click={() => { dispatch('show-all-spaces') } } circle>
+            <sl-button style="" on:click={() => { dispatch('show-all-spaces') } } circle>
                 <Fa icon={faList} />
             </sl-button>
         </div>

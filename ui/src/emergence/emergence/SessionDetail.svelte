@@ -133,14 +133,14 @@ bind:this={updateSessionDialog}
   <div class="pane-header">
 
     <div class="controls">
-      <sl-button size=small on:click={() => { dispatch('session-close') } } circle>
+      <sl-button on:click={() => { dispatch('session-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
       <div>
-        <sl-button size=small on:click={() => { updateSessionDialog.open($session) } } circle>
+        <sl-button on:click={() => { updateSessionDialog.open($session) } } circle>
           <Fa icon={faEdit} />
         </sl-button>
-        <sl-button size=small on:click={()=>confirmDialog.open()} circle>
+        <sl-button on:click={()=>confirmDialog.open()} circle>
           <Fa icon={faTrash} />
         </sl-button>
       </div>

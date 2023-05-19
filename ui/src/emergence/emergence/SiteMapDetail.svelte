@@ -80,10 +80,10 @@ let confirmDialog
 <div style="display: flex; flex-direction: column">
   <div style="display: flex; flex-direction: row">
     <span style="flex: 1"></span>
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { editing = true; } } circle>
+    <sl-button style="margin-left: 8px; " on:click={() => { editing = true; } } circle>
       <Fa icon={faEdit} />
     </sl-button>
-    <sl-button style="margin-left: 8px;" size=small on:click={() => {confirmDialog.open()}} circle>
+    <sl-button style="margin-left: 8px;" on:click={() => {confirmDialog.open()}} circle>
       <Fa icon={faTrash} />
     </sl-button>
   </div>

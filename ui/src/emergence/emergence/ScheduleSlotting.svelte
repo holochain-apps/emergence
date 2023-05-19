@@ -14,6 +14,8 @@
   import { HoloHashMap } from '@holochain-open-dev/utils';
   import '@shoelace-style/shoelace/dist/components/select/select.js';
   import '@shoelace-style/shoelace/dist/components/option/option.js';
+  import SessionFilterCtrls from './SessionFilterCtrls.svelte';
+  import SessionFilter from './SessionFilter.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -25,13 +27,11 @@
   let slotType: string 
   $: slotType
   $: uiProps = store.uiProps
-  let filteredDay: number | undefined
-  $: filteredDay
 
   $: loading, error, creatingTimeWindow;
   $: spaces = store.spaces
   $: windows = store.timeWindows
-  $: days = calcDays($windows, slotType, filteredDay, $uiProps.sessionsFilter) 
+  $: days = calcDays($windows, slotType, $uiProps.sessionsFilter) 
   $: sessions = store.sessions
 
   let selectedSessions:HoloHashMap<ActionHash,boolean> = new HoloHashMap()
@@ -210,7 +210,7 @@
     await store.deleteTimeWindow(window)
     store.fetchTimeWindows()
   }
-  
+  let showFilter = false
 </script>
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -220,24 +220,25 @@
 <span>Error fetching the wall: {error.data.data}.</span>
 {:else}
 
+{#if showFilter}
+<SessionFilter
+on:close-filter={()=>showFilter = false}
+on:update-filter={(e)=>{store.setUIprops({sessionsFilter: e.detail})}}
+filter={$uiProps.sessionsFilter}></SessionFilter>
+{/if}
+
 <div class="pane-header">
   <div >
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('slotting-close') } } circle>
+    <sl-button style="margin-left: 8px; " on:click={() => { dispatch('slotting-close') } } circle>
       <Fa icon={faCircleArrowLeft} />
     </sl-button>
     <h3>Schedule</h3>
   </div>
   <div style="display:flex">
-    <sl-select style="margin-right: 5px;width: 150px;"
-    placeholder="Filter by Day"
-    on:sl-change={(e) => filteredDay = parseInt(e.target.value) }
-    pill
-    clearable
-    >
-      {#each days as day}
-        <sl-option value={day.getTime()}> {dayToStr(day)}</sl-option>
-      {/each}
-    </sl-select>
+    <SessionFilterCtrls
+          on:toggle-filter={()=>{showFilter = !showFilter;}}
+        ></SessionFilterCtrls>
+  
     <sl-select style="margin-right: 5px;width: 200px;"
     placeholder="Filter by Slot Type"
     on:sl-change={(e) => slotType = e.target.value }
@@ -325,7 +326,7 @@
                 
                   {new Date(window.start).toTimeString().slice(0,5)}
                   {#if $uiProps.amSteward}
-                    <sl-button style="margin-left: 4px;" size=small on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
+                    <sl-button style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                       <Fa icon={faTrash} />
                     </sl-button>
                   {/if}
@@ -384,7 +385,7 @@
     
                 {new Date(window.start).toTimeString().slice(0,5)}
                 {#if $uiProps.amSteward}
-                  <sl-button style="margin-left: 4px;" size=small on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
+                  <sl-button style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                     <Fa icon={faTrash} />
                   </sl-button>
                 {/if}

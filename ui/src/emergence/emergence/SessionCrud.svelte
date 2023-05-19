@@ -121,7 +121,12 @@ let dialog
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<sl-dialog style="--width: 80vw;" label={session ? "Edit Session" : "Create Session"} bind:this={dialog}>
+<sl-dialog
+  on:sl-request-close={(event)=>{
+    if (event.detail.source === 'overlay') {
+      event.preventDefault();    
+  }}}
+  style="--width: 80vw;" label={session ? "Edit Session" : "Create Session"} bind:this={dialog}>
 <div style="display: flex; flex-direction: column">
   {#if session}
     Key: {session.record.entry.key}
@@ -144,7 +149,7 @@ let dialog
     {#each leaders as leader, i}
     <div style="display:flex;">
       <Avatar agentPubKey={leader}></Avatar>
-      <sl-button style="margin-left: 8px;" size=small on:click={() => deleteLeader(i)} circle>
+      <sl-button style="margin-left: 8px;" on:click={() => deleteLeader(i)} circle>
         <Fa icon={faTrash} />
       </sl-button>
 
@@ -205,24 +210,24 @@ let dialog
   <SlotSelect bind:slot={slot} bind:valid={slotValid}></SlotSelect>
   {#if !slotValid} *You must select both a time and a space or neither {/if}
   {#if session}
-    <div style="display: flex; flex-direction: row">
+    <div style="display: flex; flex-direction: row; justify-content:flex-end;">
       <sl-button
       label="Cancel"
       on:click={() => dialog.hide()}
-      style="flex: 1; margin-right: 16px"
+      style=" margin-right: 16px"
       >Cancel</sl-button>
       <sl-button 
-      style="flex: 1;"
+      style=""
       on:click={() => updateSession()}
       disabled={!isSessionValid}
       variant=primary>Save</sl-button>
     </div>
   {:else}
-  <div style="display: flex; flex-direction: row">
+  <div style="display: flex; flex-direction: row; justify-content:flex-end;">
     <sl-button
     label="Cancel"
     on:click={() => {dialog.hide()}}
-    style="flex: 1; margin-right: 16px"
+    style="margin-right: 16px"
     >Cancel</sl-button>
 
     <sl-button 

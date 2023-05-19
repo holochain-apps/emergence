@@ -30,19 +30,19 @@
         <div style="display: flex; flex-direction: row; align-self:center">
             {#if $uiProps.feedFilter.keyword}
             <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"feedFilter")}} >
-              <Fa size="xs" icon={faMagnifyingGlass} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+              <Fa size="sm" icon={faMagnifyingGlass} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
             {/if}
       
             {#if $uiProps.feedFilter.tags.length>0}
             <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"feedFilter")}} >
-              <Fa size="xs" icon={faTag} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+              <Fa size="sm" icon={faTag} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
             {/if}
             {#if $uiProps.feedFilter.space.length>0}
             <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["space"],"feedFilter")}} >
-                <Fa size="xs" icon={faMap} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+                <Fa size="sm" icon={faMap} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
             {/if}
 
-            <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } circle>
+            <sl-button style=" " on:click={() => { showFilter = !showFilter } } circle>
                 <Fa icon={faFilter} />
             </sl-button>
         </div>

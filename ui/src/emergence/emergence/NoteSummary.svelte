@@ -94,10 +94,10 @@
           }
 
             <div class="crud">
-              <sl-button style="margin-left: 8px;" size=small on:click={()=>confirmDialog.open()} circle>
+              <sl-button style="margin-left: 8px;" on:click={()=>confirmDialog.open()} circle>
                 <Fa icon={faTrash} />
               </sl-button>
-              <sl-button style="margin-left: 8px; " size=small on:click={() => { updateNoteDialog.open($note.value) } } circle>
+              <sl-button style="margin-left: 8px; " on:click={() => { updateNoteDialog.open($note.value) } } circle>
                 <Fa icon={faEdit} />
               </sl-button>        
             </div>

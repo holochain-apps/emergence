@@ -38,14 +38,13 @@ export const filterTime = (now: number, filter:SessionsFilter, window: TimeWindo
   return false
 }
 
-export const calcDays = (windows, slotTypeFilter, dayFilter, filter: SessionsFilter): Array<Date> => {
+export const calcDays = (windows, slotTypeFilter, filter: SessionsFilter): Array<Date> => {
  const days = []
  const dayStrings = {}
 
  const now = (new Date).getTime()
  windows.forEach(w=> {
        if ((!slotTypeFilter || w.tags.includes(slotTypeFilter)) &&
-       (!dayFilter || w.start == dayFilter) &&
        filterTime(now, filter, w )
    )
     {

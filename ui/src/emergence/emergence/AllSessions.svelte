@@ -10,6 +10,7 @@ import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, 
 import Fa from 'svelte-fa';
 import { calcDays, dayToStr, sortWindows, windowDay, windowsInDay } from './utils';
   import { DetailsType, SessionSortOrder, type Info, type Session, type TimeWindow } from './types';
+  import SessionFilterCtrls from './SessionFilterCtrls.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -25,10 +26,8 @@ $: error;
 $: uiProps = store.uiProps
 let slotType: string 
 $: slotType  
-let filteredDay: number | undefined
-$: filteredDay
 
-$: _days = calcDays($windows, slotType, filteredDay, $uiProps.sessionsFilter) 
+$: _days = calcDays($windows, slotType, $uiProps.sessionsFilter) 
 $: days = $uiProps.sessionSort == SessionSortOrder.Ascending ? _days : _days.reverse()
 const windowsInDaySorted = (w: Array<TimeWindow>, day: Date, type): Array<TimeWindow> => {
   let  wid: Array<TimeWindow> = windowsInDay(w, day, type).sort(sortWindows)
@@ -61,43 +60,23 @@ on:session-created={() => {} }
     <div class="pill-button"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
 
       <div class="section-controls">
-
-        {#if $uiProps.sessionsFilter.timeNow || $uiProps.sessionsFilter.timeNext|| $uiProps.sessionsFilter.timePast|| $uiProps.sessionsFilter.timeFuture|| $uiProps.sessionsFilter.timeUnscheduled}
-        <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["timeNow","timeNext","timePast","timeFuture","timeUnscheduled"],"sessionsFilter")}} >
-          <Fa size="xs" icon={faClock} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-        {/if}
-        {#if $uiProps.sessionsFilter.involvementLeading || $uiProps.sessionsFilter.involvementGoing|| $uiProps.sessionsFilter.involvementInterested|| $uiProps.sessionsFilter.involvementNoOpinion}
-        <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["involvementLeading","involvementGoing","involvementInterested","involvementNoOpinion"],"sessionsFilter")}} >
-          <Fa size="xs" icon={faCheck} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-        {/if}
-        {#if $uiProps.sessionsFilter.keyword}
-        <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"sessionsFilter")}} >
-          <Fa size="xs" icon={faMagnifyingGlass} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-        {/if}
-        {#if $uiProps.sessionsFilter.tags.length>0}
-        <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"sessionsFilter")}} >
-          <Fa size="xs" icon={faTag} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-        {/if}
-        {#if $uiProps.sessionsFilter.space.length>0}
-        <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["space"],"sessionsFilter")}} >
-          <Fa size="xs" icon={faMap} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-        {/if}
-        <sl-button title="Filter" style="margin-left: 8px; " size=small on:click={() => { showFilter = !showFilter } } circle>
-          <Fa icon={faFilter} />
-        </sl-button>
         
-        <sl-button title="Toggle Sort Order" style="margin-left: 8px; " size=small on:click={() => { 
+        <SessionFilterCtrls
+          on:toggle-filter={()=>{showFilter = !showFilter;}}
+        ></SessionFilterCtrls>
+
+        <sl-button title="Toggle Sort Order" style="margin-left: 8px; " on:click={() => { 
             store.setUIprops({sessionSort: $uiProps.sessionSort == SessionSortOrder.Ascending?SessionSortOrder.Descending : SessionSortOrder.Ascending  }) }} circle>
           <Fa icon={$uiProps.sessionSort == SessionSortOrder.Ascending ? faArrowUpShortWide : faArrowDownWideShort} />
         </sl-button>
 
-        <sl-button title="Toggle List/Grid" style="margin-left: 8px; " size=small on:click={() => { store.setUIprops({sessionListMode:!$uiProps.sessionListMode }) }} circle>
+        <sl-button title={$uiProps.sessionListMode ? "Switch to Grid View" : "Switch to List View"} style="margin-left: 8px; " on:click={() => { store.setUIprops({sessionListMode:!$uiProps.sessionListMode }) }} circle>
           <Fa icon={$uiProps.sessionListMode ? faTable : faList} />
         </sl-button>
 
 
         {#if !$uiProps.sessionListMode}
-          <sl-button title="Toggle Axes"  style="margin-left: 8px; " size=small on:click={() => { bySpace = !bySpace }} circle>
+          <sl-button title="Toggle Axes"  style="margin-left: 8px; " on:click={() => { bySpace = !bySpace }} circle>
             <Fa icon={faArrowsUpDownLeftRight} />
           </sl-button>
         {/if}

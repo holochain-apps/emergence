@@ -43,7 +43,7 @@
 <div class="pane-header">
   <h3>Upcoming Events</h3>
   <div style="display:flex">
-    <sl-button style="margin: 8px;" size=small on:click={() => {  dispatch('open-slotting')} } circle>
+    <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-slotting')} } circle>
       <Fa icon={faCalendarTimes} />
     </sl-button>
   </div>

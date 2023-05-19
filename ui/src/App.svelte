@@ -42,7 +42,9 @@
   let profilesStore: ProfilesStore | undefined
   let creatingMap = false
   let syncing = false
+  let error: any = undefined;
 
+  $: error
   $: client, fileStorageClient, store, loading;
   $: prof = profilesStore ? profilesStore.myProfile : undefined
   $: uiProps = store ? store.uiProps : undefined
@@ -52,12 +54,17 @@
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
     const appPort : string = import.meta.env.VITE_APP_PORT
 
-    client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, 'emergence');
+    try {
+      client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, 'emergence');
     if (adminPort) {
       const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
       //const x = await adminWebsocket.listApps({})
       const cellIds = await adminWebsocket.listCellIds()
       await adminWebsocket.authorizeSigningCredentials(cellIds[0])
+    }
+  }
+    catch(e) {
+      error =e
     }
 
     profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
@@ -104,9 +111,9 @@
 
 <main>
 
-  
-
-  {#if loading}
+  {#if error}
+    <span class="notice">{error}</span>
+  {:else if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
       <sl-spinner
  />
