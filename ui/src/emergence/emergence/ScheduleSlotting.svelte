@@ -8,7 +8,7 @@
   import {calcDays, dayToStr, sortWindows, windowsInDay} from './utils'
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
-  import { faCalendarPlus, faTrash, faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
+  import { faCalendarPlus, faTrash, faCircleArrowLeft, faArrowsUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
   import SessionSummary from './SessionSummary.svelte';
   import { HoloHashMap } from '@holochain-open-dev/utils';
@@ -253,9 +253,9 @@
         <Fa icon={faCalendarPlus} />
       </sl-button>
     {/if}
-    <!-- <sl-button on:click={() => {bySpace = !bySpace } } circle>
+    <sl-button on:click={() => {bySpace = !bySpace } } circle>
       <Fa icon={faArrowsUpDownLeftRight} />
-    </sl-button> -->
+    </sl-button>
   </div>
 </div>
   <div class="pane-content pane-desktop">

@@ -6,7 +6,7 @@ import SessionSummary from './SessionSummary.svelte';
   import SessionCrud from './SessionCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
-import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck, faMap } from '@fortawesome/free-solid-svg-icons';
+import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck, faMap, faArrowsUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { calcDays, dayToStr, sortWindows, windowsInDay } from './utils';
   import { DetailsType } from './types';
@@ -33,6 +33,7 @@ $: days = calcDays($windows, slotType, filteredDay)
 let showFilter = false
 
 let createSessionDialog: SessionCrud
+let bySpace = false
 
 onMount(async () => {
 });
@@ -71,9 +72,18 @@ on:session-created={() => {} }
       <sl-button style="margin-left: 8px; " size=small on:click={() => { showFilter = !showFilter } } circle>
         <Fa icon={faFilter} />
       </sl-button>
+      
+      
       <sl-button style="margin-left: 8px; " size=small on:click={() => { store.setUIprops({sessionListMode:!$uiProps.sessionListMode }) }} circle>
         <Fa icon={$uiProps.sessionListMode ? faTable : faList} />
       </sl-button>
+      {#if !$uiProps.sessionListMode}
+      <sl-button style="margin-left: 8px; " size=small on:click={() => { bySpace = !bySpace }} circle>
+        <Fa icon={faArrowsUpDownLeftRight} />
+      </sl-button>
+      {/if}
+
+
     </div>
   </div>
   {#if showFilter}
@@ -101,87 +111,172 @@ on:session-created={() => {} }
         </div>
       {/each}
     {:else}
-    <table style="margin:auto">
-      <tr>
-        <th class="empty"></th>
-        {#each days as day}
-        <th style="text-align:left" colspan="{windowsInDay($windows, day, slotType).length+1}">{dayToStr(day)}</th>
-
-        {/each}
-      </tr>
-      <tr>
-      <th class="empty"></th>
-
-      {#each days as day}
-        <th style=""></th>
-        {#each windowsInDay($windows, day, slotType).sort(sortWindows) as window}
-          <th class="time-title"
-          >
-
-            {new Date(window.start).toTimeString().slice(0,5)}
-
-          </th>
-        
-        {/each}
-      {/each}
-      </tr>
-      {#each $spaces as space, idx}
-      <tr>
-        <td class="space-title"
->
-            {space.record.entry.name}{#if space.record.entry.key} ({space.record.entry.key}){/if}
-            {#if space.record.entry.pic}
-              <div class="space-pic">
-                <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
-              </div>
-            {/if}
-        </td>
-
-        {#each days as day}
-          <td class="empty"></td>
-
-          {#each $windows.filter(w=>{
-              // @ts-ignore
-              return new Date(w.start).toDateString()  == day.toDateString()
-            }).sort(sortWindows) as window}
-            <td 
-              id={`${JSON.stringify(window)}-${idx}}`}
-              class="schedule-slot"
+      {#if bySpace}
+      <div class="fix-table-head">
+      <table style="max-width:100%">
+        <th class="empty top-sticky"></th>
+        {#each $spaces as space, idx}
+          <th class="space-title top-sticky"
             >
-              {#each store.sessionsInSpace(window, space).filter(s=>store.filterSession(s, $uiProps.sessionsFilter)) as session}
-                <div class="slotted-session"
-                  on:click={()=>store.openDetails(DetailsType.Session, session.original_hash)}
-                id={encodeHashToBase64(session.original_hash)}
-                >
-                  {session.record.entry.title}
+              {space.record.entry.name}
+              {#if space.record.entry.pic}
+                <div class="space-pic">
+                  <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
                 </div>
-              {/each}
-            </td>
+              {/if}
+          </th>
+        {/each}
+        {#each days as day}
+          <tr>
+            <th class="left-sticky day-row" colspan={4} >{day.toDateString()}</th>
+          </tr>
+          {#each windowsInDay($windows, day, slotType).sort(sortWindows) as window}
+          <tr>
+            <th class="time-title left-sticky"
+            >
+              
+                {new Date(window.start).toTimeString().slice(0,5)}
+            </th>
+            {#each $spaces as space, idx}
+              <td 
+                id={`${JSON.stringify(window)}-${idx}}`}
+                class="schedule-slot"
+              >
+                {#each store.sessionsInSpace(window, space) as session}
+                  <div class="slotted-session"
+                  on:click={()=>store.openDetails(DetailsType.Session, session.original_hash)}
+                  id={encodeHashToBase64(session.original_hash)}
+                  >
+                    {session.record.entry.title}
+                  </div>
+                {/each}
+              </td>
+            {/each}
+          </tr>
           {/each}
         {/each}
-      </tr>
-      {/each}
-    </table>
+      </table>
+    </div>
+      {:else}
+      <div class="fix-table-head">
+      <table >
+        <tr>
+          <th class="top-sticky"></th>
+          {#each days as day}
+          <th class="top-sticky"></th>
+          <th class=" top-sticky" style="text-align:left" colspan="{windowsInDay($windows, day, slotType).length}">{dayToStr(day)}</th>
+
+          {/each}
+        </tr>
+        <tr>
+        <th class="top-sticky empty"></th>
+        {#each days as day}
+          <th class="day-col top-sticky"></th>
+          {#each windowsInDay($windows, day, slotType).sort(sortWindows) as window}
+            <th class="time-title top-sticky"
+            >
+
+              {new Date(window.start).toTimeString().slice(0,5)}
+
+            </th>
+          
+          {/each}
+        {/each}
+        </tr>
+        {#each $spaces as space, idx}
+        <tr>
+          <th class="space-title left-sticky"
+  >
+              {space.record.entry.name}{#if space.record.entry.key} ({space.record.entry.key}){/if}
+              {#if space.record.entry.pic}
+                <div class="space-pic">
+                  <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
+                </div>
+              {/if}
+          </th>
+
+          {#each days as day}
+            <td class="day-col "></td>
+
+            {#each $windows.filter(w=>{
+                // @ts-ignore
+                return new Date(w.start).toDateString()  == day.toDateString()
+              }).sort(sortWindows) as window}
+              <td 
+                id={`${JSON.stringify(window)}-${idx}}`}
+                class="schedule-slot"
+              >
+                {#each store.sessionsInSpace(window, space).filter(s=>store.filterSession(s, $uiProps.sessionsFilter)) as session}
+                  <div class="slotted-session"
+                    on:click={()=>store.openDetails(DetailsType.Session, session.original_hash)}
+                    id={encodeHashToBase64(session.original_hash)}
+                  >
+                    {session.record.entry.title}
+                  </div>
+                {/each}
+              </td>
+            {/each}
+          {/each}
+        </tr>
+        {/each}
+      </table>
+    </div>
+    {/if}
 {/if}
   {/if}
 </div>
 
 <style>
-
+.empty {
+  background-color: white;
+  outline: solid 1px lightgray;
+}
 .notice {
   display: block;
   text-align: center;
   padding: 25px;
 }
 
+  .fix-table-head {
+    overflow: auto;
+    height: 100%;
+    width: 100%;
+    margin: 20px;
+    padding: 1px;
+    }
+  table {
+    border-collapse: collapse;        
+    width: 100%;
+  }
  .space-title {
-  outline: solid 1px;
+  background-color: white;
+  outline: solid 1px lightgray;
  }
  .time-title {
-  outline: solid 1px;
+  background-color: white;
+  outline: solid 1px lightgray;
  }
+
+ .day-row {
+  text-align: left;
+ }
+ .day-col {
+  background-color: lightgray;
+  width: 4px;
+  outline: solid 1px lightgray;
+ }
+ .left-sticky {
+  position: sticky;
+  left: 0;
+ }
+ .top-sticky {
+  position: sticky;
+  top: 0;
+ }
+
  .schedule-slot {
-  outline: solid 1px;
+  outline: solid 1px lightgray;
+  background-color: white;
  }
  .slotted-session {
   background-color: lightgreen;
