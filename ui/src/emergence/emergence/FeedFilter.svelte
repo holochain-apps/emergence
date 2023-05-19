@@ -94,16 +94,5 @@ onMount(() => {
     max-height: 100%;
     z-index: 11;
   }
-  .micro-button {
-    cursor:pointer;
-    border: solid 1px #f0f0f0;
-    border-radius: 3px;
-    height: 23px;
-    padding: 0 4px 0 4px;
-  }
-  .micro-button:hover {
-    background-color: rgb(240, 249, 2244);
-    border: solid 1px rgb(149, 219, 252);
-    color:  rgb(3, 105, 161);
-  }
+
 </style>

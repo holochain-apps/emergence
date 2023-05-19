@@ -4,8 +4,8 @@
   import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64} from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, slotEqual } from './types';
-  import {calcDays, dayToStr, sortWindows, windowsInDay} from './utils'
+  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr } from './types';
+  import { calcDays, dayToStr, sortWindows, windowsInDay} from './utils'
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
   import { faCalendarPlus, faTrash, faCircleArrowLeft, faArrowsUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
@@ -23,14 +23,15 @@
   let error: any = undefined;
   let creatingTimeWindow = false
   let slotType: string 
-  $: slotType  
+  $: slotType
+  $: uiProps = store.uiProps
   let filteredDay: number | undefined
   $: filteredDay
 
   $: loading, error, creatingTimeWindow;
   $: spaces = store.spaces
   $: windows = store.timeWindows
-  $: days = calcDays($windows, slotType, filteredDay) 
+  $: days = calcDays($windows, slotType, filteredDay, $uiProps.sessionsFilter) 
   $: sessions = store.sessions
 
   let selectedSessions:HoloHashMap<ActionHash,boolean> = new HoloHashMap()
@@ -38,7 +39,6 @@
   let selectedWindow: TimeWindow|undefined = undefined
 
   $: selectedSessions, selectedSpaceIdx, selectedWindow
-  $: uiProps = store.uiProps
 
   onMount(async () => {
     loading = false

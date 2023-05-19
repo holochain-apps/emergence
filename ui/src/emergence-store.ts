@@ -15,11 +15,11 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter, type Details, DetailsType } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
-import type Feed from './emergence/emergence/Feed.svelte';
+import { filterTime } from './emergence/emergence/utils';
 Marked.setOptions
 ({
   renderer: new Renderer,
@@ -33,7 +33,6 @@ Marked.setOptions
 });
 
 TimeAgo.addDefaultLocale(en)
-const ONE_HOUR = 60*60*60
 
 export const neededStuffStore = (client: EmergenceClient) => {
     const notes = writable(new HoloHashMap<ActionHash, Info<Note>| undefined>())
@@ -732,6 +731,7 @@ export class EmergenceStore {
       }
     return []
   }
+  
 
   filterSession(session:Info<Session>, filter: SessionsFilter) : boolean {
     const slot = this.getSessionSlot(session)
@@ -739,10 +739,7 @@ export class EmergenceStore {
     if (slot && filter.timeUnscheduled) return false
     const now = (new Date).getTime()
 
-    if ( filter.timeNow && (now < slot.window.start || now > (slot.window.start + slot.window.duration*60))) return false
-    if ( filter.timeNext && (now < (slot.window.start + slot.window.duration*60) || now > (slot.window.start + slot.window.duration*60*60 + ONE_HOUR))) return false
-    if ( filter.timeFuture && (now < (slot.window.start + slot.window.duration*60))) return false
-    if ( filter.timeFuture && (now >= slot.window.start)) return false
+    if (slot && !filterTime(now, filter, slot.window)) return false
 
     if (filter.involvementLeading || filter.involvementGoing || filter.involvementInterested || filter.involvementNoOpinion || filter.involvementLeading) {
         let found = false

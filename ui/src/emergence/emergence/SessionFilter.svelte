@@ -8,13 +8,16 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import { faArrowRotateBack, faCheck, faClock, faClose, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
-import { defaultSessionsFilter, type SessionsFilter } from './types';
+import { calcDays, defaultSessionsFilter, type SessionsFilter } from './types';
 import { fly } from 'svelte/transition';
 import type { EmergenceStore } from '../../emergence-store';
 import { storeContext } from '../../contexts';
 import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
+  import { dayToStr } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
+$: windows = store.timeWindows
+$: days = calcDays($windows, "", undefined, defaultSessionsFilter()) 
 
 const dispatch = createEventDispatcher();
 
@@ -23,7 +26,16 @@ $: spaces = store.spaces
 
 onMount(() => {
 });
-
+const toggleDayInFilter = (day:Date) => {
+  const dayNum = day.getTime()
+  const idx = filter.timeDays.indexOf(dayNum)
+  if (idx < 0) {  
+    filter.timeDays.push(dayNum)
+  } else {
+    filter.timeDays.splice(idx,1)
+  }
+  dispatch('update-filter', filter)
+}
 </script>
 <div transition:fly={{ x: 300, duration: 500 }} class="filter-modal" style="display: flex; flex-direction: column">
   <div style="display: flex; flex-direction: row; margin-bottom: 16px;     justify-content: space-between;border-bottom: 1px solid;">
@@ -37,13 +49,22 @@ onMount(() => {
       </sl-button>
     </div>
   </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px; align-items: center">
     <span style="margin-right: 10px"><Fa icon={faClock} /></span>
-    <sl-checkbox checked={filter.timeNow} on:sl-change={e => { filter.timeNow = e.target.checked ; dispatch('update-filter', filter)} }>Now</sl-checkbox>
-    <sl-checkbox checked={filter.timeNext} on:sl-change={e => { filter.timeNext = e.target.checked; dispatch('update-filter', filter)} }>Next</sl-checkbox>
-    <sl-checkbox checked={filter.timePast} on:sl-change={e => { filter.timePast = e.target.checked; dispatch('update-filter', filter)} }>Past</sl-checkbox>
-    <sl-checkbox checked={filter.timeFuture} on:sl-change={e => { filter.timeFuture = e.target.checked; dispatch('update-filter', filter)} }>Future</sl-checkbox>
-    <sl-checkbox checked={filter.timeUnscheduled} on:sl-change={e => { filter.timeUnscheduled = e.target.checked; dispatch('update-filter', filter)} }>Unscheduled</sl-checkbox>
+    <div style="display: flex; flex-direction: column;">
+      <div style="display: flex; flex-direction: row;">
+        <sl-checkbox checked={filter.timeNow} on:sl-change={e => { filter.timeNow = e.target.checked ; dispatch('update-filter', filter)} }>Now</sl-checkbox>
+        <sl-checkbox checked={filter.timeNext} on:sl-change={e => { filter.timeNext = e.target.checked; dispatch('update-filter', filter)} }>Next</sl-checkbox>
+        <sl-checkbox checked={filter.timePast} on:sl-change={e => { filter.timePast = e.target.checked; dispatch('update-filter', filter)} }>Past</sl-checkbox>
+        <sl-checkbox checked={filter.timeFuture} on:sl-change={e => { filter.timeFuture = e.target.checked; dispatch('update-filter', filter)} }>Future</sl-checkbox>
+        <sl-checkbox checked={filter.timeUnscheduled} on:sl-change={e => { filter.timeUnscheduled = e.target.checked; dispatch('update-filter', filter)} }>Unscheduled</sl-checkbox>
+      </div>
+      <div style="display: flex; flex-direction: row;">
+        {#each days as day}
+          <sl-checkbox checked={filter.timeDays.includes(day.getTime())} on:sl-change={e => { toggleDayInFilter(day)} }>{dayToStr(day)}</sl-checkbox>
+        {/each}
+      </div>
+    </div>
   </div>
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 10px"><Fa icon={faCheck} /></span>

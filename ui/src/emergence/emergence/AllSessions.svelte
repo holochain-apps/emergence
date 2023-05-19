@@ -8,8 +8,8 @@ import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
 import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck, faMap, faArrowsUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
-import { calcDays, dayToStr, sortWindows, windowsInDay } from './utils';
-  import { DetailsType } from './types';
+import { calcDays, dayToStr, sortWindows, windowDay, windowsInDay } from './utils';
+  import { DetailsType, type Info, type Session, type SessionsFilter, type TimeWindow } from './types';
 
 const dispatch = createEventDispatcher();
 
@@ -28,7 +28,7 @@ $: slotType
 let filteredDay: number | undefined
 $: filteredDay
 
-$: days = calcDays($windows, slotType, filteredDay) 
+$: days = calcDays($windows, slotType, filteredDay, $uiProps.sessionsFilter) 
 
 let showFilter = false
 
@@ -37,7 +37,15 @@ let bySpace = false
 
 onMount(async () => {
 });
-
+const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
+  const slota = store.getSessionSlot(a)
+  const slotb = store.getSessionSlot(b)
+  let vala =  Number. MAX_SAFE_INTEGER
+  let valb =  Number. MAX_SAFE_INTEGER
+  if (slota) vala = slota.window.start
+  if (slotb) valb = slotb.window.start
+  return vala - valb
+}
 </script>
 <SessionCrud
 bind:this={createSessionDialog}
@@ -100,7 +108,7 @@ on:session-created={() => {} }
     <span class="notice">No sessions found.</span>
   {:else}
     {#if $uiProps.sessionListMode}
-      {#each $sessions.filter(s=> (!s.record.entry.trashed || showDeletedSessions) && store.filterSession(s, $uiProps.sessionsFilter)) as session}
+      {#each $sessions.filter(s=> (!s.record.entry.trashed || showDeletedSessions) && store.filterSession(s, $uiProps.sessionsFilter)).sort(sortSessions) as session}
         <div class="session">
           <SessionSummary 
             showTags={true}
@@ -171,11 +179,11 @@ on:session-created={() => {} }
         <tr>
         <th class="top-sticky empty"></th>
         {#each days as day}
-          <th class="day-col top-sticky"></th>
+          <th class="day-col top-sticky">
+          </th>
           {#each windowsInDay($windows, day, slotType).sort(sortWindows) as window}
             <th class="time-title top-sticky"
             >
-
               {new Date(window.start).toTimeString().slice(0,5)}
 
             </th>
@@ -199,8 +207,7 @@ on:session-created={() => {} }
             <td class="day-col "></td>
 
             {#each $windows.filter(w=>{
-                // @ts-ignore
-                return new Date(w.start).toDateString()  == day.toDateString()
+                 return windowDay(w).getTime() === day.getTime()
               }).sort(sortWindows) as window}
               <td 
                 id={`${JSON.stringify(window)}-${idx}}`}
