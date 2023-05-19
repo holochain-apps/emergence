@@ -6,10 +6,10 @@ import SessionSummary from './SessionSummary.svelte';
   import SessionCrud from './SessionCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
-import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck, faMap, faArrowsUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
+import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck, faMap, faArrowsUpDownLeftRight, faArrowUpShortWide, faArrowDownWideShort } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { calcDays, dayToStr, sortWindows, windowDay, windowsInDay } from './utils';
-  import { DetailsType, type Info, type Session, type SessionsFilter, type TimeWindow } from './types';
+  import { DetailsType, SessionSortOrder, type Info, type Session, type TimeWindow } from './types';
 
 const dispatch = createEventDispatcher();
 
@@ -28,8 +28,12 @@ $: slotType
 let filteredDay: number | undefined
 $: filteredDay
 
-$: days = calcDays($windows, slotType, filteredDay, $uiProps.sessionsFilter) 
-
+$: _days = calcDays($windows, slotType, filteredDay, $uiProps.sessionsFilter) 
+$: days = $uiProps.sessionSort == SessionSortOrder.Ascending ? _days : _days.reverse()
+const windowsInDaySorted = (w: Array<TimeWindow>, day: Date, type): Array<TimeWindow> => {
+  let  wid: Array<TimeWindow> = windowsInDay(w, day, type).sort(sortWindows)
+  return $uiProps.sessionSort == SessionSortOrder.Ascending ? wid : wid.reverse()
+}
 let showFilter = false
 
 let createSessionDialog: SessionCrud
@@ -44,7 +48,7 @@ const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
   let valb =  Number. MAX_SAFE_INTEGER
   if (slota) vala = slota.window.start
   if (slotb) valb = slotb.window.start
-  return vala - valb
+  return $uiProps.sessionSort == SessionSortOrder.Ascending ? vala - valb : valb - vala
 }
 </script>
 <SessionCrud
@@ -56,40 +60,47 @@ on:session-created={() => {} }
     <h3>Sessions</h3>
     <div class="pill-button"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
 
-    <div class="section-controls">
-      {#if $uiProps.sessionsFilter.timeNow || $uiProps.sessionsFilter.timeNext|| $uiProps.sessionsFilter.timePast|| $uiProps.sessionsFilter.timeFuture|| $uiProps.sessionsFilter.timeUnscheduled}
-      <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["timeNow","timeNext","timePast","timeFuture","timeUnscheduled"],"sessionsFilter")}} >
-        <Fa size="xs" icon={faClock} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-      {/if}
-      {#if $uiProps.sessionsFilter.involvementLeading || $uiProps.sessionsFilter.involvementGoing|| $uiProps.sessionsFilter.involvementInterested|| $uiProps.sessionsFilter.involvementNoOpinion}
-      <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["involvementLeading","involvementGoing","involvementInterested","involvementNoOpinion"],"sessionsFilter")}} >
-        <Fa size="xs" icon={faCheck} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-      {/if}
-      {#if $uiProps.sessionsFilter.keyword}
-      <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"sessionsFilter")}} >
-        <Fa size="xs" icon={faMagnifyingGlass} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-      {/if}
-      {#if $uiProps.sessionsFilter.tags.length>0}
-      <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"sessionsFilter")}} >
-        <Fa size="xs" icon={faTag} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-      {/if}
-      {#if $uiProps.sessionsFilter.space.length>0}
-      <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["space"],"sessionsFilter")}} >
-        <Fa size="xs" icon={faMap} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-      {/if}
-      <sl-button style="margin-left: 8px; " size=small on:click={() => { showFilter = !showFilter } } circle>
-        <Fa icon={faFilter} />
-      </sl-button>
-      
-      
-      <sl-button style="margin-left: 8px; " size=small on:click={() => { store.setUIprops({sessionListMode:!$uiProps.sessionListMode }) }} circle>
-        <Fa icon={$uiProps.sessionListMode ? faTable : faList} />
-      </sl-button>
-      {#if !$uiProps.sessionListMode}
-      <sl-button style="margin-left: 8px; " size=small on:click={() => { bySpace = !bySpace }} circle>
-        <Fa icon={faArrowsUpDownLeftRight} />
-      </sl-button>
-      {/if}
+      <div class="section-controls">
+
+        {#if $uiProps.sessionsFilter.timeNow || $uiProps.sessionsFilter.timeNext|| $uiProps.sessionsFilter.timePast|| $uiProps.sessionsFilter.timeFuture|| $uiProps.sessionsFilter.timeUnscheduled}
+        <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["timeNow","timeNext","timePast","timeFuture","timeUnscheduled"],"sessionsFilter")}} >
+          <Fa size="xs" icon={faClock} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+        {/if}
+        {#if $uiProps.sessionsFilter.involvementLeading || $uiProps.sessionsFilter.involvementGoing|| $uiProps.sessionsFilter.involvementInterested|| $uiProps.sessionsFilter.involvementNoOpinion}
+        <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["involvementLeading","involvementGoing","involvementInterested","involvementNoOpinion"],"sessionsFilter")}} >
+          <Fa size="xs" icon={faCheck} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+        {/if}
+        {#if $uiProps.sessionsFilter.keyword}
+        <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"sessionsFilter")}} >
+          <Fa size="xs" icon={faMagnifyingGlass} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+        {/if}
+        {#if $uiProps.sessionsFilter.tags.length>0}
+        <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"sessionsFilter")}} >
+          <Fa size="xs" icon={faTag} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+        {/if}
+        {#if $uiProps.sessionsFilter.space.length>0}
+        <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["space"],"sessionsFilter")}} >
+          <Fa size="xs" icon={faMap} /><Fa size="xs" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+        {/if}
+        <sl-button title="Filter" style="margin-left: 8px; " size=small on:click={() => { showFilter = !showFilter } } circle>
+          <Fa icon={faFilter} />
+        </sl-button>
+        
+        <sl-button title="Toggle Sort Order" style="margin-left: 8px; " size=small on:click={() => { 
+            store.setUIprops({sessionSort: $uiProps.sessionSort == SessionSortOrder.Ascending?SessionSortOrder.Descending : SessionSortOrder.Ascending  }) }} circle>
+          <Fa icon={$uiProps.sessionSort == SessionSortOrder.Ascending ? faArrowUpShortWide : faArrowDownWideShort} />
+        </sl-button>
+
+        <sl-button title="Toggle List/Grid" style="margin-left: 8px; " size=small on:click={() => { store.setUIprops({sessionListMode:!$uiProps.sessionListMode }) }} circle>
+          <Fa icon={$uiProps.sessionListMode ? faTable : faList} />
+        </sl-button>
+
+
+        {#if !$uiProps.sessionListMode}
+          <sl-button title="Toggle Axes"  style="margin-left: 8px; " size=small on:click={() => { bySpace = !bySpace }} circle>
+            <Fa icon={faArrowsUpDownLeftRight} />
+          </sl-button>
+        {/if}
 
 
     </div>
@@ -138,7 +149,7 @@ on:session-created={() => {} }
           <tr>
             <th class="left-sticky day-row" colspan={4} >{day.toDateString()}</th>
           </tr>
-          {#each windowsInDay($windows, day, slotType).sort(sortWindows) as window}
+          {#each windowsInDaySorted($windows, day, slotType) as window}
           <tr>
             <th class="time-title left-sticky"
             >
@@ -181,7 +192,7 @@ on:session-created={() => {} }
         {#each days as day}
           <th class="day-col top-sticky">
           </th>
-          {#each windowsInDay($windows, day, slotType).sort(sortWindows) as window}
+          {#each windowsInDaySorted($windows, day, slotType) as window}
             <th class="time-title top-sticky"
             >
               {new Date(window.start).toTimeString().slice(0,5)}

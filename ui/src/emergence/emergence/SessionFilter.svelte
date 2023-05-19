@@ -8,12 +8,12 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import { faArrowRotateBack, faCheck, faClock, faClose, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
-import { calcDays, defaultSessionsFilter, type SessionsFilter } from './types';
+import { defaultSessionsFilter, type SessionsFilter } from './types';
 import { fly } from 'svelte/transition';
 import type { EmergenceStore } from '../../emergence-store';
 import { storeContext } from '../../contexts';
 import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
-  import { dayToStr } from './utils';
+  import { calcDays, dayToStr } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 $: windows = store.timeWindows
@@ -34,6 +34,7 @@ const toggleDayInFilter = (day:Date) => {
   } else {
     filter.timeDays.splice(idx,1)
   }
+  console.log("FISH", filter.timeDays)
   dispatch('update-filter', filter)
 }
 </script>
