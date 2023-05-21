@@ -200,6 +200,7 @@ export const sessionInterestToString = (interest: SessionInterest) : string=> {
 export const Amenities = [
   "Electricty",
   "Whiteboard",
+  "Table",
   "Screen/Proj",
   "Seating",
   "Wifi",
