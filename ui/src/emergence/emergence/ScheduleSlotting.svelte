@@ -4,7 +4,7 @@
   import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64} from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr } from './types';
+  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities } from './types';
   import { calcDays, dayToStr, sortWindows, windowsInDay} from './utils'
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
@@ -97,6 +97,14 @@
 
   let draggingHandled = true
   let draggedItemId = ""
+  let draggedSession : Info<Session> | undefined
+  $: draggedAmenitiesCount =  draggedItemId ? amenitiesList(draggedSession.record.entry.amenities).length : 0
+  $: draggedSession, draggedItemId
+  $: overlappingAmenities = (space: Info<Space>) => {
+    if (!draggedItemId) return undefined
+    const overlapping =  draggedItemId && draggedSession.record.entry.amenities & space.record.entry.amenities
+    return amenitiesList(overlapping)
+  }
   let dragOn = true
   let dragTarget = ""
   function handleDragStart(e) {
@@ -104,6 +112,7 @@
     //console.log("handleDragStart", e)
     e.dataTransfer.dropEffect = "move";
     draggedItemId = e.target.getAttribute('id')
+    draggedSession = store.getSession(decodeHashFromBase64(draggedItemId))
     e.dataTransfer
       .setData("text", e.target.getAttribute('id'));
   }
@@ -173,6 +182,7 @@
   const clearDrag = () => {
     draggingHandled = true
     draggedItemId = ""
+    draggedSession = undefined
     dragTarget = ""
   }
   let dragDuration = 300
@@ -232,7 +242,6 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
     <sl-button style="margin-left: 8px; " on:click={() => { dispatch('slotting-close') } } circle>
       <Fa icon={faCircleArrowLeft} />
     </sl-button>
-    <h3>Schedule</h3>
   </div>
   <div style="display:flex">
     <SessionFilterCtrls
@@ -301,6 +310,9 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
             <th class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
               class:tagged={space.record.entry.tags.length > 0}
+              class:amo-bad={draggedAmenitiesCount > 0 && overlappingAmenities(space).length == 0}
+              class:amo-ok={draggedAmenitiesCount > 0 && overlappingAmenities(space).length == draggedAmenitiesCount}
+              class:amo-warn={draggedAmenitiesCount > 0 && overlappingAmenities(space).length < draggedAmenitiesCount }
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
                 {space.record.entry.name}
@@ -308,6 +320,9 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
                   <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
                   </div>
+                {/if}
+                {#if overlappingAmenities(space)}
+                  {overlappingAmenities(space).join(", ")}
                 {/if}
             </th>
           {/each}
@@ -400,6 +415,9 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
             <td class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
               class:tagged={space.record.entry.tags.length > 0}
+              class:amo-bad={draggedAmenitiesCount > 0 && overlappingAmenities(space).length == 0}
+              class:amo-ok={draggedAmenitiesCount > 0 && overlappingAmenities(space).length == draggedAmenitiesCount}
+              class:amo-warn={draggedAmenitiesCount > 0 && overlappingAmenities(space).length < draggedAmenitiesCount }
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
                 {space.record.entry.name}{#if space.record.entry.key} ({space.record.entry.key}){/if}
@@ -407,6 +425,9 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
                   <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
                   </div>
+                {/if}
+                {#if overlappingAmenities(space)}
+                  {overlappingAmenities(space).join(", ")}
                 {/if}
             </td>
 
@@ -539,4 +560,14 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   z-index: 100;
 }
 
+
+.amo-warn {
+  background-color: lightgoldenrodyellow;
+}
+.amo-ok {
+  background-color: lightgreen;
+}
+.amo-bad {
+  background-color: lightcoral;
+}
 </style>
