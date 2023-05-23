@@ -10,12 +10,12 @@
     import TagCloud from './TagCloud.svelte'
     import Sense from './Sense.svelte';
     import FeedFilter from './FeedFilter.svelte';
-  import Sync from './Sync.svelte';
-  import { faClose, faFilter, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
-  import Fa from 'svelte-fa';
+    import { faClose, faFilter, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
+    import Fa from 'svelte-fa';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     $: uiProps = store.uiProps
+    $: settings = store.settings
 
     onMount(async () => {        
 
@@ -56,7 +56,7 @@
 {/if}
 <div class="pane-content flex-center discover">
     <div class="discover-section">
-        {#if $uiProps.sensing}
+        {#if $settings.game_active}
             <Sense></Sense>
         {/if}
     </div>

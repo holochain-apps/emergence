@@ -8,7 +8,7 @@ import type {
      EntryHash,
      HoloHash,
 } from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse, Settings } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
@@ -238,6 +238,13 @@ export class EmergenceClient {
     return stuff
   }
 
+  async setSettings(input: Settings) : Promise<ActionHash> {
+    return await this.callZome('set_settings', input)
+  }
+
+  async getSettings() : Promise<Settings> {
+    return await this.callZome('get_settings', undefined)
+  }
 
   private callZome(fn_name: string, payload: any) {
     const req: AppAgentCallZomeRequest = {

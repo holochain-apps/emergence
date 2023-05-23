@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, type AppAgentClient } from '@holochain/client';
+  import { AdminWebsocket, decodeHashFromBase64, type AppAgentClient, encodeHashToBase64 } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
@@ -56,13 +56,13 @@
 
     try {
       client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, 'emergence');
-    if (adminPort) {
-      const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
-      //const x = await adminWebsocket.listApps({})
-      const cellIds = await adminWebsocket.listCellIds()
-      await adminWebsocket.authorizeSigningCredentials(cellIds[0])
+      if (adminPort) {
+        const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
+        //const x = await adminWebsocket.listApps({})
+        const cellIds = await adminWebsocket.listCellIds()
+        await adminWebsocket.authorizeSigningCredentials(cellIds[0])
+      }
     }
-  }
     catch(e) {
       error =e
     }

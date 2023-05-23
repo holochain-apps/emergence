@@ -69,13 +69,6 @@
                 on:sl-change={e => { store.setUIprops({debuggingEnabled:debuging.checked})} }
                 >Enable Debugging
             </sl-checkbox>
-            <sl-checkbox
-                bind:this={sensing}
-                checked={$uiProps.sensing}
-                on:sl-change={e => { store.setUIprops({sensing:sensing.checked})} }
-                >Enable Sensemaking Game
-            </sl-checkbox>
-          
         </div>
     </div>
 

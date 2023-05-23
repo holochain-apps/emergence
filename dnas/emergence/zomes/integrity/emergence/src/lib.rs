@@ -6,6 +6,8 @@ pub mod session;
 pub use session::*;
 pub mod time_window;
 pub use time_window::*;
+pub mod settings;
+pub use settings::*;
 pub mod map;
 pub use map::*;
 use hdi::prelude::*;
@@ -25,6 +27,7 @@ pub enum EntryTypes {
 #[hdk_link_types]
 pub enum LinkTypes {
     TimeWindows,
+    Settings,
     Relations,
     SessionUpdates,
     AllSessions,
@@ -218,6 +221,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::Settings => {
+                    validate_create_link_settings(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
                 LinkTypes::NoteUpdates => {
                     validate_create_link_note_updates(
                         action,
@@ -296,6 +307,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::TimeWindows => {
                     validate_delete_link_time_windows(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::Settings => {
+                    validate_delete_link_settings(
                         action,
                         original_action,
                         base_address,
@@ -651,6 +671,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 tag,
                             )
                         }
+                        LinkTypes::Settings => {
+                            validate_create_link_settings(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
                         LinkTypes::NoteUpdates => {
                             validate_create_link_note_updates(
                                 action,
@@ -743,6 +771,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::TimeWindows => {
                             validate_delete_link_time_windows(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::Settings => {
+                            validate_delete_link_settings(
                                 action,
                                 create_link.clone(),
                                 base_address,

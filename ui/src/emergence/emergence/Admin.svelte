@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { encodeHashToBase64, type EntryHash } from "@holochain/client";
+    import { decodeHashFromBase64, encodeHashToBase64, type EntryHash } from "@holochain/client";
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
@@ -14,7 +14,7 @@
     let exportJSON = ""
     const dispatch = createEventDispatcher();
     let sensing: SlCheckbox
-    $:uiProps = store.uiProps
+    $:settings = store.settings
 
     onMount(() => {
     })
@@ -224,6 +224,15 @@
         <sl-button style="margin: 8px;" on:click={()=>fileinput.click()}>
             Import
         </sl-button>
+        <sl-button style="margin: 8px;" on:click={()=> {
+            const s= $settings
+            s.game_active = ! s.game_active
+            store.setSettings(s)
+        }
+        }>
+            {$settings.game_active ? 'Deactivate Sensing Game' : 'Activate Sensing Game'}
+        </sl-button>
+        
     </div>
     <div>
 

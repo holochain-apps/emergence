@@ -236,7 +236,8 @@ export interface GetFeedInput {
 }
 
 export enum FeedType {
-   SessionNew = 1,
+   SetSettings = 0,
+   SessionNew,
    SessionUpdate,
    SessionDelete,
    SessionSetInterest,
@@ -280,6 +281,7 @@ export const getTypeName = (type: FeedType) : string  => {
     case FeedType.SlotSession: return "Scheduled Session"
     case FeedType.TimeWindowNew: return "New Slot"
     case FeedType.Sense: return "Sense Added"
+    case FeedType.SetSettings: return "Global State Set"
   }
   return "Unknown feed type"
 }
@@ -363,7 +365,6 @@ export interface UIProps {
   discoverPanel: string
   sessionsFilter: SessionsFilter
   feedFilter: FeedFilter
-  sensing: boolean,
   detailsStack: Array<Details>,
   sessionListMode: boolean,
   pane:string,
@@ -431,4 +432,9 @@ export const defaultSessionsFilter = () : SessionsFilter => {
     space: [],
     keyword: "",
   }
+}
+
+
+export interface Settings {
+  game_active: boolean,
 }
