@@ -11,7 +11,7 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterest } from './types';
+import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterestBit } from './types';
 import SlotSelect from './SlotSelect.svelte';
 import { encodeHashToBase64, type AgentPubKey } from '@holochain/client';
 import Avatar from './Avatar.svelte';
@@ -91,7 +91,7 @@ async function createSession() {
     const record = await store.createSession(title!, description, leaders, smallest, largest, duration, amenities, slot, tags)
 
     if (leaders.find(l=>encodeHashToBase64(l) === store.myPubKeyBase64))
-      await store.setSessionInterest(record.actionHash, SessionInterest.Going )
+      await store.setSessionInterest(record.actionHash, SessionInterestBit.Going )
 
     title = ""
     description = ""

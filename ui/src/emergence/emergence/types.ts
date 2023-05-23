@@ -181,20 +181,33 @@ export interface RelationInfo {
   relation: Relation,
 }
 
-
-export enum SessionInterest {
-  NoOpinion = 0,
-  Interested,
-  Going
+export const sessionInterestToString = (interest: SessionInterest) => {
+  let interests = []
+  if (interest & SessionInterestBit.Interested) interests.push("Interested")
+  if (interest & SessionInterestBit.Going) interests.push("Going")
+  if (interest & SessionInterestBit.Hidden) interests.push("Hidden")
+  if (interests.length == 0) interests.push("No Opinion")
+  return interests.join(", ")
 }
 
-export const sessionInterestToString = (interest: SessionInterest) : string=> {
-  switch(interest) {
-    case SessionInterest.NoOpinion: return "No Opinion"
-    case SessionInterest.Interested: return "Interested"
-    case SessionInterest.Going: return "Going"
+export type SessionInterest = number
+
+export const SessionInterestDefault = 0
+
+export enum SessionInterestBit {
+  NoOpinion = 0,
+  Interested = 1,
+  Going = 2,
+  Hidden = 4,
+}
+
+export const setInterestBit = (interest:SessionInterest, i:SessionInterestBit, value:boolean) : SessionInterest => {
+  if (value) {
+    interest |= 1 << i
+  } else {
+    interest &= ~(1 << i)
   }
-  return `unknown session interest type:${interest}`
+  return interest
 }
 
 export const Amenities = [
@@ -402,6 +415,7 @@ export const defaultFeedFilter = () : FeedFilter => {
 
 export interface SessionsFilter {
   timeNow: boolean,
+  timeToday: boolean,
   timeNext: boolean,
   timePast: boolean,
   timeFuture: boolean,
@@ -411,6 +425,7 @@ export interface SessionsFilter {
   involvementGoing: boolean,
   involvementInterested: boolean,
   involvementNoOpinion: boolean,
+  involvementHidden: boolean,
   tags: Array<string>,
   space: Array<ActionHash>,
   keyword: string,
@@ -419,6 +434,7 @@ export interface SessionsFilter {
 export const defaultSessionsFilter = () : SessionsFilter => {
   return {
     timeNow: false,
+    timeToday: false,
     timeNext: false,
     timePast: false,
     timeFuture: false,
@@ -427,6 +443,7 @@ export const defaultSessionsFilter = () : SessionsFilter => {
     involvementLeading: false,
     involvementGoing: false,
     involvementInterested: false,
+    involvementHidden: false,
     involvementNoOpinion: false,
     tags: [],
     space: [],

@@ -55,6 +55,7 @@ const toggleDayInFilter = (day:Date) => {
     <div style="display: flex; flex-direction: column;">
       <div class="wrap-row">
         <sl-checkbox checked={filter.timeNow} on:sl-change={e => { filter.timeNow = e.target.checked ; dispatch('update-filter', filter)} }>Now</sl-checkbox>
+        <sl-checkbox checked={filter.timeToday} on:sl-change={e => { filter.timeToday = e.target.checked ; dispatch('update-filter', filter)} }>Today</sl-checkbox>
         <sl-checkbox checked={filter.timeNext} on:sl-change={e => { filter.timeNext = e.target.checked; dispatch('update-filter', filter)} }>Next</sl-checkbox>
         <sl-checkbox checked={filter.timePast} on:sl-change={e => { filter.timePast = e.target.checked; dispatch('update-filter', filter)} }>Past</sl-checkbox>
         <sl-checkbox checked={filter.timeFuture} on:sl-change={e => { filter.timeFuture = e.target.checked; dispatch('update-filter', filter)} }>Future</sl-checkbox>
@@ -73,6 +74,7 @@ const toggleDayInFilter = (day:Date) => {
       <sl-checkbox checked={filter.involvementLeading} on:sl-change={e => { filter.involvementLeading = e.target.checked; dispatch('update-filter', filter)} }>Leading</sl-checkbox>
       <sl-checkbox checked={filter.involvementGoing} on:sl-change={e => { filter.involvementGoing = e.target.checked; dispatch('update-filter', filter)} }>Going</sl-checkbox>
       <sl-checkbox checked={filter.involvementInterested} on:sl-change={e => { filter.involvementInterested = e.target.checked; dispatch('update-filter', filter)} }>Interested</sl-checkbox>
+      <sl-checkbox checked={filter.involvementHidden} on:sl-change={e => { filter.involvementHidden = e.target.checked; dispatch('update-filter', filter)} }>Hidden</sl-checkbox>
       <sl-checkbox checked={filter.involvementNoOpinion} on:sl-change={e => { filter.involvementNoOpinion = e.target.checked; dispatch('update-filter', filter)} }>No Opinion</sl-checkbox>
     </div>
     </div>
@@ -119,7 +121,7 @@ const toggleDayInFilter = (day:Date) => {
 
     border: solid 1px;
     max-height: 100%;
-    z-index: 2;
+    z-index: 11;
     box-shadow: 0px 0px 20px rgba(0, 0, 0, .15);
     overflow: auto;
   }

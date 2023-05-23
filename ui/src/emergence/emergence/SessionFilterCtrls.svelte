@@ -20,12 +20,12 @@ export const open = ()=>{
 
 </script>
 
-{#if $uiProps.sessionsFilter.timeNow || $uiProps.sessionsFilter.timeNext|| $uiProps.sessionsFilter.timePast|| $uiProps.sessionsFilter.timeFuture|| $uiProps.sessionsFilter.timeUnscheduled || $uiProps.sessionsFilter.timeDays.length > 0}
-<div class="pill-button"  on:click={() => {store.resetFilterAttributes(["timeNow","timeNext","timePast","timeFuture","timeUnscheduled", "timeDays"],"sessionsFilter")}} >
+{#if $uiProps.sessionsFilter.timeNow ||$uiProps.sessionsFilter.timeToday || $uiProps.sessionsFilter.timeNext|| $uiProps.sessionsFilter.timePast|| $uiProps.sessionsFilter.timeFuture|| $uiProps.sessionsFilter.timeUnscheduled || $uiProps.sessionsFilter.timeDays.length > 0}
+<div class="pill-button"  on:click={() => {store.resetFilterAttributes(["timeNow","timeToday","timeNext","timePast","timeFuture","timeUnscheduled", "timeDays"],"sessionsFilter")}} >
   <Fa size="sm" icon={faClock} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
 {/if}
-{#if $uiProps.sessionsFilter.involvementLeading || $uiProps.sessionsFilter.involvementGoing|| $uiProps.sessionsFilter.involvementInterested|| $uiProps.sessionsFilter.involvementNoOpinion}
-<div class="pill-button"  on:click={() => {store.resetFilterAttributes(["involvementLeading","involvementGoing","involvementInterested","involvementNoOpinion"],"sessionsFilter")}} >
+{#if $uiProps.sessionsFilter.involvementLeading || $uiProps.sessionsFilter.involvementGoing|| $uiProps.sessionsFilter.involvementInterested|| $uiProps.sessionsFilter.involvementNoOpinion || $uiProps.sessionsFilter.involvementHidden}
+<div class="pill-button"  on:click={() => {store.resetFilterAttributes(["involvementLeading","involvementGoing","involvementInterested","involvementNoOpinion" ,"involvementHidden"],"sessionsFilter")}} >
   <Fa size="sm" icon={faCheck} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
 {/if}
 {#if $uiProps.sessionsFilter.keyword}

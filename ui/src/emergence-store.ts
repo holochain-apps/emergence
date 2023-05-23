@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
@@ -256,7 +256,7 @@ export class EmergenceStore {
 
   getSessionReleationData(session: Info<Session>) : SessionRelationData {
     const rel: SessionRelationData = {
-        myInterest: SessionInterest.NoOpinion,
+        myInterest: SessionInterestDefault,
         interest: new HoloHashMap(),
         slot: undefined
     }
@@ -626,21 +626,21 @@ export class EmergenceStore {
         const sessions = await this.client.getSessions()
         this.sessions.update((n) => {return sessions} )
         const noteHashes = []
-        sessions.forEach(s=> s.record.entry.leaders.forEach(l=> 
-            {
-                if (encodeHashToBase64(l) == this.myPubKeyBase64) {
-                    this.agentSessions.update((n) => {
-                        let si = n.get(this.myPubKey)
-                        if (!si) {
-                            si = new HoloHashMap()
-                            n.set(l,si)
-                        }
-                        si.set(s.original_hash,SessionInterest.Interested)
-                        return n
-                    } )
-                }
-            }    
-        ))
+        // sessions.forEach(s=> s.record.entry.leaders.forEach(l=> 
+        //     {
+        //         if (encodeHashToBase64(l) == this.myPubKeyBase64) {
+        //             this.agentSessions.update((n) => {
+        //                 let si = n.get(this.myPubKey)
+        //                 if (!si) {
+        //                     si = new HoloHashMap()
+        //                     n.set(l,si)
+        //                 }
+        //                 si.set(s.original_hash,SessionInterest.Interested)
+        //                 return n
+        //             } )
+        //         }
+        //     }    
+        // ))
         sessions.forEach(s=>s.relations.filter(r=>r.relation.content.path === "session.space").forEach(r=>noteHashes.push(r.relation.dst)))
         this.noteHashes.update((n) => {return noteHashes} )
 
@@ -758,25 +758,27 @@ export class EmergenceStore {
 
   filterSession(session:Info<Session>, filter: SessionsFilter) : boolean {
     const slot = this.getSessionSlot(session)
-    if (!slot && (filter.timeNow || filter.timeNext || filter.timePast || filter.timeFuture)) return false
+    if (!slot && (filter.timeNow || filter.timeToday ||  filter.timeNext || filter.timePast || filter.timeFuture)) return false
     if (slot && filter.timeUnscheduled) return false
     const now = (new Date).getTime()
 
     if (slot && !filterTime(now, filter, slot.window)) return false
 
-    if (filter.involvementLeading || filter.involvementGoing || filter.involvementInterested || filter.involvementNoOpinion || filter.involvementLeading) {
+    const rel: SessionRelationData = this.getSessionReleationData(session)
+    if (filter.involvementLeading || filter.involvementGoing || filter.involvementInterested || filter.involvementNoOpinion  || filter.involvementHidden || filter.involvementLeading) {
         let found = false
         if (filter.involvementLeading && session.record.entry.leaders.find(l=>encodeHashToBase64(l) === this.myPubKeyBase64)) found = true
         else {
-            const rel: SessionRelationData = this.getSessionReleationData(session)
-            if (filter.involvementGoing && rel.myInterest === SessionInterest.Going) found = true
+            if (filter.involvementGoing && rel.myInterest & SessionInterestBit.Going) found = true
             else
-            if (filter.involvementInterested && rel.myInterest === SessionInterest.Interested) found = true
+            if (filter.involvementInterested && rel.myInterest & SessionInterestBit.Interested) found = true
             else
-            if (filter.involvementNoOpinion && rel.myInterest === SessionInterest.NoOpinion) found = true
+            if (filter.involvementHidden && rel.myInterest & SessionInterestBit.Hidden) found = true
+            else
+            if (filter.involvementNoOpinion && ((rel.myInterest & SessionInterestBit.NoOpinion) || (rel.myInterest == SessionInterestDefault))) found = true
         }
         if (!found) return false
-    }
+    } else if (rel.myInterest & SessionInterestBit.Hidden) return false
 
     if (filter.tags.length > 0) {
         let found = false
@@ -1290,12 +1292,7 @@ export class EmergenceStore {
             }
 
             feed.forEach(f=>{
-                if (f.type == FeedType.SessionSetInterest  && f.detail != SessionInterest.NoOpinion) {
-                    si.set(f.about,f.detail)
-                }
-                if (f.type == FeedType.SessionSetInterest  && f.detail == SessionInterest.NoOpinion) {
-                    si.delete(f.about)
-                }
+                si.set(f.about,f.detail)
             }
             )
             return n
@@ -1328,7 +1325,7 @@ export class EmergenceStore {
     }
   }
   async sync(agent: AgentPubKey | undefined) {
-    await this.getSettings();
+    await this.getSettings()
     await this.fetchTags()
     await this.fetchSessions() // fetches spaces and timewindows
     await this.fetchAgentStuff(!agent ? this.myPubKey: agent)

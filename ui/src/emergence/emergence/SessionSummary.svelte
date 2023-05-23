@@ -2,7 +2,7 @@
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { type Slot, type Session, type Info, amenitiesList, sessionTags, SessionInterest, sessionInterestToString, DetailsType } from './types';
+import { type Slot, type Session, type Info, amenitiesList, sessionTags, DetailsType, SessionInterestBit } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -30,7 +30,7 @@ $: relData = store.sessionReleationDataStore(store.sessionStore(session.original
 $: loading, session, slot;
 $: tags = sessionTags(session)
 $: slot = store.getSessionSlot(session)
-$: going = Array.from($relData.interest).filter(([_,i])=> i!=SessionInterest.NoOpinion)
+$: going = Array.from($relData.interest).filter(([_,i])=> i & (SessionInterestBit.Going+SessionInterestBit.Interested))
 
 onMount(async () => {
   loading = false
@@ -87,7 +87,9 @@ $:space = slot? store.getSpace(slot.space) : undefined
                 <div slot="content">
                   <div style="display:flex">
                     {#each going as [agent,interest]}
-                    <Avatar agentPubKey={agent}></Avatar>:{sessionInterestToString(interest)}
+                    <Avatar agentPubKey={agent}></Avatar>: 
+                      {#if interest & SessionInterestBit.Going} Going {/if}
+                      {#if interest & SessionInterestBit.Interested} Interested {/if}
                     {/each}
                     </div>
                 </div>
