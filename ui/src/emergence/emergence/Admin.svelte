@@ -78,8 +78,10 @@
             sessions.push(info)
         }
         const notes = []
-        for (const s of get(store.notes)) { 
-            notes.push(await serializeInfo(s, true))
+        for (const s of get(store.notes)) {
+            const info = await serializeInfo(s, true)
+            info.entry['session'] = encodeHashToBase64(info.entry['session'])
+            notes.push(info)
         }
         
         const maps = []
@@ -165,6 +167,7 @@
             }
 
         }
+        const sessions = {}
         for (const s of data.sessions) {
             const leaders = [] // fixme
             const e = s.entry
@@ -172,6 +175,7 @@
             let record
             try {
              record = await store.createSession(e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, tags)
+             sessions[s.original_hash] = record.actionHash
             } catch(e) {
                 console.log("Import Error",e)
             }
@@ -180,7 +184,15 @@
                 const window = JSON.parse(relation.content.data)
                 await store.slot(record.actionHash, {window, space: spaces[relation.dst]})
             }
- 
+
+        }
+        for (const n of data.notes) {
+            const e = n.entry
+            let pic = await uploadImportedFile(e)
+            if (!e.trashed) {
+                const record = await store.createNote(sessions[e.session], e.text, e.tags, pic)
+            }
+
         }
         store.sync()
     }

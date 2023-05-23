@@ -64,7 +64,7 @@ async function createSiteMap() {
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<div style="display: flex; flex-direction: column">
+<div style="display: flex; flex-direction: column; z-index:2;">
   {#if sitemap}
     <span style="font-size: 18px">Edit SiteMap</span>
   {:else}
