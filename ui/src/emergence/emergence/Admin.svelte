@@ -91,6 +91,13 @@
             maps.push(mapEntry)
         }
 
+        const proxyAgents = []
+        for (const s of get(store.proxyAgents)) { 
+            const proxyAgentEntry = await serializeInfo(s, true)
+            proxyAgentEntry.entryHash = encodeHashToBase64(s.record.entryHash)
+            proxyAgents.push(proxyAgentEntry)
+        }
+
         exportJSON= JSON.stringify(
             {
                 spaces,
@@ -98,6 +105,7 @@
                 notes,
                 windows: get(store.timeWindows),
                 maps,
+                proxyAgents
             }
         )
         const fileName = sanitize(`emergence.json`)
@@ -137,6 +145,15 @@
             maps[s.entryHash] = record.entryHash
 
         }
+
+        const proxyAgents = {}
+        for (const s of data.proxyAgents) {
+            const e = s.entry
+            let pic = await uploadImportedFile(e)
+            const record = await store.createProxyAgent(e.nickname, e.bio, e.location, pic)
+            proxyAgents[s.entryHash] = record.entryHash
+        }
+
         for (const s of data.windows) {
             if (! s.tags) {
                 s.tags = []
@@ -194,7 +211,7 @@
             }
 
         }
-        store.sync()
+        store.sync(undefined)
     }
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
@@ -215,6 +232,10 @@
 
         <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
             Site Maps
+        </sl-button>
+
+        <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
+            Proxy Agents
         </sl-button>
 
         <sl-button style="margin: 8px;"  on:click={async () => await doExport()}>

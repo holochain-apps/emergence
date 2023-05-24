@@ -74,6 +74,15 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     {#if feedElem.type === FeedType.Sense}
       sense added: {sessionInterestToString(JSON.parse(feedElem.detail))} for <SessionLink sessionHash={feedElem.about}></SessionLink>
     {/if}
+    {#if feedElem.type === FeedType.ProxyAgentNew}
+      created proxy agent: {feedElem.detail}
+    {/if}
+    {#if feedElem.type === FeedType.ProxyAgentUpdate}
+      updated proxy agent changes: {feedElem.detail.changes.join("; ")}
+    {/if}
+    {#if feedElem.type === FeedType.ProxyAgentDelete}
+      deleted proxy agent {feedElem.detail}
+    {/if}
   </div>
 </div>
 <style>

@@ -6,6 +6,8 @@ pub mod session;
 pub use session::*;
 pub mod time_window;
 pub use time_window::*;
+pub mod proxy_agent;
+pub use proxy_agent::*;
 pub mod settings;
 pub use settings::*;
 pub mod map;
@@ -22,6 +24,7 @@ pub enum EntryTypes {
     Space(Space),
     Note(Note),
     Map(Map),
+    ProxyAgent(ProxyAgent)
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
@@ -34,8 +37,10 @@ pub enum LinkTypes {
     SpaceUpdates,
     NoteUpdates,
     MapUpdates,
+    ProxyAgentUpdates,
     AllSpaces,
     AllMaps,
+    AllProxyAgents,
 }
 #[hdk_extern]
 pub fn genesis_self_check(
@@ -80,6 +85,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 map,
                             )
                         }
+                        EntryTypes::ProxyAgent(proxy_agent) => {
+                            validate_create_proxy_agent(
+                                EntryCreationAction::Create(action),
+                                proxy_agent,
+                            )
+                        }
                     }
                 }
                 OpEntry::UpdateEntry { app_entry, action, .. } => {
@@ -106,6 +117,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_map(
                                 EntryCreationAction::Update(action),
                                 map,
+                            )
+                        }
+                        EntryTypes::ProxyAgent(proxy_agent) => {
+                            validate_create_proxy_agent(
+                                EntryCreationAction::Update(action),
+                                proxy_agent,
                             )
                         }
                     }
@@ -192,6 +209,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         EntryTypes::Map(map) => {
                             validate_delete_map(action, original_action, map)
                         }
+                        EntryTypes::ProxyAgent(proxy_agent) => {
+                            validate_delete_proxy_agent(action, original_action, proxy_agent)
+                        }
                     }
                 }
                 _ => Ok(ValidateCallbackResult::Valid),
@@ -245,6 +265,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::ProxyAgentUpdates => {
+                    validate_create_link_proxy_agent_updates(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
                 LinkTypes::SessionUpdates => {
                     validate_create_link_session_updates(
                         action,
@@ -279,6 +307,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                 }
                 LinkTypes::AllMaps => {
                     validate_create_link_all_maps(
+                        action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
+                LinkTypes::AllProxyAgents => {
+                    validate_create_link_all_proxy_agents(
                         action,
                         base_address,
                         target_address,
@@ -341,6 +377,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::ProxyAgentUpdates => {
+                    validate_delete_link_proxy_agent_updates(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
                 LinkTypes::SessionUpdates => {
                     validate_delete_link_session_updates(
                         action,
@@ -386,6 +431,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         tag,
                     )
                 }
+                LinkTypes::AllProxyAgents => {
+                    validate_delete_link_all_proxy_agents(
+                        action,
+                        original_action,
+                        base_address,
+                        target_address,
+                        tag,
+                    )
+                }
             }
         }
         OpType::StoreRecord(store_record) => {
@@ -414,6 +468,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_map(
                                 EntryCreationAction::Create(action),
                                 map,
+                            )
+                        }
+                        EntryTypes::ProxyAgent(proxy_agent) => {
+                            validate_create_proxy_agent(
+                                EntryCreationAction::Create(action),
+                                proxy_agent,
                             )
                         }
                     }
@@ -563,6 +623,37 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 Ok(result)
                             }
                         }
+                        EntryTypes::ProxyAgent(proxy_agent) => {
+                            let result = validate_create_proxy_agent(
+                                EntryCreationAction::Update(action.clone()),
+                                proxy_agent.clone(),
+                            )?;
+                            if let ValidateCallbackResult::Valid = result {
+                                let original_proxy_agent: Option<ProxyAgent> = original_record
+                                    .entry()
+                                    .to_app_option()
+                                    .map_err(|e| wasm_error!(e))?;
+                                let original_proxy_agent = match original_proxy_agent {
+                                    Some(proxy_agent) => proxy_agent,
+                                    None => {
+                                        return Ok(
+                                            ValidateCallbackResult::Invalid(
+                                                "The updated entry type must be the same as the original entry type"
+                                                    .to_string(),
+                                            ),
+                                        );
+                                    }
+                                };
+                                validate_update_proxy_agent(
+                                    action,
+                                    proxy_agent,
+                                    original_action,
+                                    original_proxy_agent,
+                                )
+                            } else {
+                                Ok(result)
+                            }
+                        }
                     }
                 }
                 OpRecord::DeleteEntry { original_action_hash, action, .. } => {
@@ -645,6 +736,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 original_map,
                             )
                         }
+                        EntryTypes::ProxyAgent(original_proxy_agent) => {
+                            validate_delete_proxy_agent(
+                                action,
+                                original_action,
+                                original_proxy_agent,
+                            )
+                        }
                     }
                 }
                 OpRecord::CreateLink {
@@ -695,6 +793,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 tag,
                             )
                         }
+                        LinkTypes::ProxyAgentUpdates => {
+                            validate_create_link_proxy_agent_updates(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }                        
                         LinkTypes::SessionUpdates => {
                             validate_create_link_session_updates(
                                 action,
@@ -729,6 +835,14 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::AllMaps => {
                             validate_create_link_all_maps(
+                                action,
+                                base_address,
+                                target_address,
+                                tag,
+                            )
+                        }
+                        LinkTypes::AllProxyAgents => {
+                            validate_create_link_all_proxy_agents(
                                 action,
                                 base_address,
                                 target_address,
@@ -805,6 +919,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 create_link.tag,
                             )
                         }
+                        LinkTypes::ProxyAgentUpdates => {
+                            validate_delete_link_proxy_agent_updates(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
                         LinkTypes::SessionUpdates => {
                             validate_delete_link_session_updates(
                                 action,
@@ -843,6 +966,15 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                         }
                         LinkTypes::AllMaps => {
                             validate_delete_link_all_maps(
+                                action,
+                                create_link.clone(),
+                                base_address,
+                                create_link.target_address,
+                                create_link.tag,
+                            )
+                        }
+                        LinkTypes::AllProxyAgents => {
+                            validate_delete_link_all_proxy_agents(
                                 action,
                                 create_link.clone(),
                                 base_address,

@@ -9,6 +9,8 @@ pub mod relation;
 pub mod utils;
 pub mod map;
 pub mod all_maps;
+pub mod proxy_agent;
+pub mod all_proxy_agents;
 pub mod messages;
 
 use all_sessions::SessionInfo;

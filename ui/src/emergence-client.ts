@@ -8,7 +8,7 @@ import type {
      EntryHash,
      HoloHash,
 } from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse, Settings } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse, Settings, ProxyAgent, UpdateProxyAgentInput } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
@@ -196,6 +196,38 @@ export class EmergenceClient {
         return info
     }).filter(r=>!r.record.entry.trashed);
   }
+
+
+  async createProxyAgent(nickname: string, bio: string, location: string,  pic: EntryHash | undefined) : Promise<EntryRecord<ProxyAgent>> {
+    const proxyAgentEntry: ProxyAgent = { 
+        nickname,
+        bio,
+        location,
+        pic,
+      };
+    
+    return new EntryRecord(await this.callZome('create_proxy_agent', proxyAgentEntry))
+  }
+
+  async updateProxyAgent(update: UpdateProxyAgentInput) : Promise<EntryRecord<ProxyAgent>> {
+    return new EntryRecord(await this.callZome('update_proxy_agent', update))
+  }
+
+  deleteProxyAgent(actionHash: ActionHash) {
+    return this.callZome('delete_proxy_agent', actionHash)
+  }
+
+  async getProxyAgents() : Promise<Array<Info<ProxyAgent>>> {
+    const agents = await this.callZome('get_all_proxy_agents',null)
+    return agents.map(r => {
+        const info: Info<ProxyAgent> = {
+        original_hash: r.original_hash,
+        record: new EntryRecord(r.record), 
+        relations: r.relations}
+        return info
+    });
+  }
+
 
   async getStuff(input: GetStuffInput) : Promise<GetStuffOutput> {
     const stuff = await this.callZome('get_stuff', input)

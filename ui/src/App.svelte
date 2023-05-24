@@ -34,6 +34,8 @@
   import Folk from './emergence/emergence/Folk.svelte';
   import SpaceDetail from './emergence/emergence/SpaceDetail.svelte';
   import { DetailsType } from './emergence/emergence/types';
+  import ProxyAgentCrud from './emergence/emergence/ProxyAgentCrud.svelte';
+  import AllProxyAgents from './emergence/emergence/AllProxyAgents.svelte';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -41,6 +43,7 @@
   let loading = true;
   let profilesStore: ProfilesStore | undefined
   let creatingMap = false
+  let creatingProxyAgent = false
   let syncing = false
   let error: any = undefined;
 
@@ -310,6 +313,7 @@
       <div class="pane">
         <Admin
           on:open-sitemaps={()=>pane = 'admin.sitemaps'}
+          on:open-proxyagents={()=>pane = 'admin.proxyagents'}
           on:open-slotting={()=>store.setPane("schedule.slotting")}
         ></Admin>
       </div>
@@ -333,7 +337,25 @@
         </sl-button>
       </div>
       {/if}
-      {#if pane=="discover"}
+      {#if pane=="admin.proxyagents"}
+      <div class="pane">
+        {#if creatingProxyAgent}
+          <div class="modal">
+              <ProxyAgentCrud
+              on:proxyagent-created={() => {creatingProxyAgent = false;} }
+              on:edit-canceled={() => { creatingProxyAgent = false; } }
+              ></ProxyAgentCrud>
+          </div>
+        {/if}
+        <AllProxyAgents
+        on:proxyagents-close={()=>pane = 'admin'}
+        ></AllProxyAgents>
+        Create Proxy Agent:
+        <sl-button on:click={() => {creatingProxyAgent = true; } } circle>
+          <Fa icon={faPlus} />
+        </sl-button>
+      </div>
+      {/if}      {#if pane=="discover"}
       <div class="pane">
         <Discover></Discover>
       </div>

@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
@@ -92,6 +92,7 @@ export class EmergenceStore {
   spaces: Writable<Array<Info<Space>>> = writable([])
   notes: Writable<Array<Info<Note>>> = writable([])
   maps: Writable<Array<Info<SiteMap>>> = writable([])
+  proxyAgents: Writable<Array<Info<ProxyAgent>>> = writable([])
   noteHashes: Writable<Array<ActionHash>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
   allTags: Writable<Array<TagUse>> = writable([])
@@ -228,6 +229,18 @@ export class EmergenceStore {
       return maps[0]
     }
     return undefined
+  }
+
+  getProxyAgentIdx(proxyAgentHash: ActionHash) : number {
+    const b64 = encodeHashToBase64(proxyAgentHash)
+    const proxyAgents = get(this.proxyAgents)
+    return proxyAgents.findIndex((s)=> encodeHashToBase64(s.original_hash) === b64)
+  }
+
+  getProxyAgent(proxyAgentHash: ActionHash) : Info<ProxyAgent> | undefined {
+    const proxyAgentIdx = this.getProxyAgentIdx(proxyAgentHash)
+    if (proxyAgentIdx == -1) return undefined
+    return get(this.proxyAgents)[proxyAgentIdx]
   }
 
   getSessionSlot(session: Info<Session>) : Slot|undefined {
@@ -626,21 +639,21 @@ export class EmergenceStore {
         const sessions = await this.client.getSessions()
         this.sessions.update((n) => {return sessions} )
         const noteHashes = []
-        // sessions.forEach(s=> s.record.entry.leaders.forEach(l=> 
-        //     {
-        //         if (encodeHashToBase64(l) == this.myPubKeyBase64) {
-        //             this.agentSessions.update((n) => {
-        //                 let si = n.get(this.myPubKey)
-        //                 if (!si) {
-        //                     si = new HoloHashMap()
-        //                     n.set(l,si)
-        //                 }
-        //                 si.set(s.original_hash,SessionInterest.Interested)
-        //                 return n
-        //             } )
-        //         }
-        //     }    
-        // ))
+        sessions.forEach(s=> s.record.entry.leaders.forEach(l=> 
+            {
+                if (encodeHashToBase64(l) == this.myPubKeyBase64) {
+                    this.agentSessions.update((n) => {
+                        let si = n.get(this.myPubKey)
+                        if (!si) {
+                            si = new HoloHashMap()
+                            n.set(l,si)
+                        }
+                        si.set(s.original_hash,SessionInterestBit.Interested)
+                        return n
+                    } )
+                }
+            }    
+        ))
         sessions.forEach(s=>s.relations.filter(r=>r.relation.content.path === "session.space").forEach(r=>noteHashes.push(r.relation.dst)))
         this.noteHashes.update((n) => {return noteHashes} )
 
@@ -1236,6 +1249,109 @@ export class EmergenceStore {
     }
   }
 
+
+  async createProxyAgent(nickname: string, bio: string, location: string,  pic: EntryHash | undefined): Promise<EntryRecord<ProxyAgent>> {
+    const record = await this.client.createProxyAgent(nickname, bio, location, pic)
+    const relations = [
+        {   src: record.actionHash, // should be agent key
+            dst: record.actionHash,
+            content:  {
+                path: `feed.${FeedType.ProxyAgentNew}`,
+                data: JSON.stringify("nickname")
+            }
+        },
+    ]
+    await this.client.createRelations(relations)
+    this.fetchProxyAgents()
+    return record
+  }
+
+  async updateProxyAgent(proxyAgentHash: ActionHash, nickname: string, bio: string, location: string,  pic: EntryHash | undefined): Promise<EntryRecord<ProxyAgent>> {
+    const idx = this.getProxyAgentIdx(proxyAgentHash)
+    if (idx >= 0) {
+        const map = get(this.proxyAgents)[idx]
+
+        const updatedProxyAgent: UpdateProxyAgentInput = {
+            original_hash: proxyAgentHash,
+            previous_hash: map.record.actionHash,
+            updated_proxy_agent: {
+                nickname,
+                bio,
+                location,
+                pic,
+            }
+        }
+        const entry = map.record.entry
+        let changes = []
+        if (entry.nickname != nickname) {
+            changes.push(`nickname`)
+        }
+        if (entry.bio != bio) {
+            changes.push(`bio`)
+        }
+        if (entry.location != location) {
+            changes.push(`location`)
+        }
+        if (entry.pic != pic) {
+            changes.push(`pic`)
+        }
+        if (changes.length > 0) {
+            const record = await this.client.updateProxyAgent(updatedProxyAgent)
+            this.client.createRelations([
+                {   src: record.actionHash, // should be agent key
+                    dst: record.actionHash,
+                    content:  {
+                        path: `feed.${FeedType.ProxyAgentUpdate}`,
+                        data: JSON.stringify({changes})
+                    }
+                },
+            ])
+            this.proxyAgents.update((agents) => {
+                agents[idx].record = record
+                return agents
+            })
+            return record
+        }
+        else {
+            console.log("No changes detected ignoring...")
+        }
+    } else {
+        throw new Error(`could not find proxy agent`)
+    }
+  }
+
+  async deleteProxyAgent(mapHash: ActionHash) {
+    const idx = this.getProxyAgentIdx(mapHash)
+    if (idx >= 0) {
+        const agent = get(this.proxyAgents)[idx]
+        await this.client.deleteProxyAgent(agent.record.actionHash)
+        this.maps.update((agents) => {
+            agents.splice(idx, 1);
+            return agents
+        })
+        this.client.createRelations([
+            {   src: agent.original_hash, // should be agent key
+                dst: agent.original_hash,
+                content:  {
+                    path: `feed.${FeedType.ProxyAgentDelete}`,
+                    data: JSON.stringify("")
+                }
+            },
+        ])
+    }
+  }
+
+  async fetchProxyAgents() {
+    try {
+        const proxyAgents = await this.client.getProxyAgents()
+        this.proxyAgents.update((n) => {return proxyAgents} )
+    }
+    catch (e) {
+        console.log("Error fetching sitemaps", e)
+    }
+  }
+
+
   async fetchStuff() {
     let stuff = await this.client.getStuff(this.neededStuff)
     if (stuff.notes) {
@@ -1291,10 +1407,13 @@ export class EmergenceStore {
                 n.set(agentPubKey,si)
             }
 
-            feed.forEach(f=>{
-                si.set(f.about,f.detail)
-            }
-            )
+            feed.filter(f=>f.type == FeedType.SessionSetInterest).forEach(f=>{
+                console.log("SessionSetInterest", f.detail)
+                if (f.detail & (SessionInterestBit.NoOpinion + SessionInterestBit.Hidden) || f.detail == 0)
+                    si.delete(f.about)
+                else
+                    si.set(f.about, f.detail)
+            })
             return n
         } )
     }
@@ -1333,6 +1452,7 @@ export class EmergenceStore {
         await this.fetchFeed()
     }
     await this.fetchSiteMaps()
+    await this.fetchProxyAgents()
   }
 
 }

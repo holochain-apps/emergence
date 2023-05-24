@@ -120,6 +120,20 @@ export interface SiteMap {
   pic: EntryHash,
 }
 
+export interface ProxyAgent {
+  nickname: string,
+  bio: string,
+  location: string,
+  pic?: EntryHash,
+}
+
+export interface UpdateProxyAgentInput {
+  original_hash: ActionHash,
+  previous_hash: ActionHash,
+  updated_proxy_agent: ProxyAgent,
+}
+
+
 export interface UpdateSiteMapInput {
   original_map_hash: ActionHash,
   previous_map_hash: ActionHash,
@@ -266,6 +280,9 @@ export enum FeedType {
    SiteMapDelete,
    TimeWindowNew,
    Sense,
+   ProxyAgentNew,
+   ProxyAgentUpdate,
+   ProxyAgentDelete,
 }
 
 export interface FeedElem {
@@ -295,6 +312,9 @@ export const getTypeName = (type: FeedType) : string  => {
     case FeedType.TimeWindowNew: return "New Slot"
     case FeedType.Sense: return "Sense Added"
     case FeedType.SetSettings: return "Global State Set"
+    case FeedType.ProxyAgentNew: return "New Proxy Agent"
+    case FeedType.ProxyAgentUpdate: return "Update Proxy Agent"
+    case FeedType.ProxyAgentDelete: return "Delete Proxy Agent"
   }
   return "Unknown feed type"
 }
