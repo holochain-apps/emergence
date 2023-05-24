@@ -36,6 +36,7 @@
   import { DetailsType } from './emergence/emergence/types';
   import ProxyAgentCrud from './emergence/emergence/ProxyAgentCrud.svelte';
   import AllProxyAgents from './emergence/emergence/AllProxyAgents.svelte';
+  import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -87,7 +88,6 @@
     });
 
     fileStorageClient = new FileStorageClient(client, 'emergence');
-
     store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
     await store.sync(undefined)
     loading = false;
@@ -200,6 +200,15 @@
       </div>
 
       <file-storage-context client={fileStorageClient}>
+      {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.ProxyAgent }
+      <div class="session-details" style="height:100vh">
+        <ProxyAgentDetail
+          on:proxyagent-deleted={()=>store.closeDetails()}
+          on:proxyagent-close={()=>store.closeDetails()}
+          proxyAgent={store.getProxyAgent($uiProps.detailsStack[0].hash)}>
+        </ProxyAgentDetail>
+      </div>
+      {/if}
       {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Space }
       <div class="session-details" style="height:100vh">
         <SpaceDetail

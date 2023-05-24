@@ -7,21 +7,22 @@ import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import "@holochain-open-dev/profiles/dist/elements/search-agent.js";
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+import '@shoelace-style/shoelace/dist/components/select/select.js';
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterestBit } from './types';
+import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent } from './types';
 import SlotSelect from './SlotSelect.svelte';
-import { encodeHashToBase64, type AgentPubKey } from '@holochain/client';
-import Avatar from './Avatar.svelte';
+import { encodeHashToBase64, type AgentPubKey, decodeHashFromBase64 } from '@holochain/client';
+import AnyAvatar from './AnyAvatar.svelte';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import MultiSelect from 'svelte-multiselect'
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
-
+$: uiProps = store.uiProps
 const dispatch = createEventDispatcher();
 
 export let session: Info<Session>|undefined = undefined;  // set this if update
@@ -45,7 +46,7 @@ export const open = (ses) => {
     largest = 100;
     duration = 30
     amenities = 0;
-    leaders = [store.myPubKey]
+    leaders = [{type:"Agent", hash:store.myPubKey}]
     tags = []
     slot = undefined
   }
@@ -59,8 +60,13 @@ let smallest: number = 2;
 let largest: number = 100;
 let duration: number = 30
 let amenities: number = 0;
-let leaders:Array<AgentPubKey> = []
+let leaders:Array<AnyAgent> = []
 let tags:Array<string> = []
+
+$: proxyAgents = store.proxyAgents
+$: proxyAgentOptions = $proxyAgents.map(a=>{return {label: a.record.entry.nickname, value: encodeHashToBase64(a.original_hash)}})
+let selectedProxyAgents = []
+
 
 let errorSnackbar: Snackbar;
 
@@ -90,7 +96,7 @@ async function createSession() {
   try {
     const record = await store.createSession(title!, description, leaders, smallest, largest, duration, amenities, slot, tags)
 
-    if (leaders.find(l=>encodeHashToBase64(l) === store.myPubKeyBase64))
+    if (leaders.find(l=>encodeHashToBase64(l.hash) === store.myPubKeyBase64))
       await store.setSessionInterest(record.actionHash, SessionInterestBit.Going )
 
     title = ""
@@ -109,9 +115,10 @@ async function createSession() {
   dialog.hide()
 }
 
-function addleader(agent: AgentPubKey) {
-  const agentB64 = encodeHashToBase64(agent)
-  if (leaders.findIndex(l=>encodeHashToBase64(l)=== agentB64) == -1 ) {
+function addleader(agent: AnyAgent) {
+  
+  const agentB64 = encodeHashToBase64(agent.hash)
+  if (leaders.findIndex(l=>encodeHashToBase64(l.hash)=== agentB64) == -1 ) {
     leaders.push(agent)
     leaders = leaders
   }
@@ -149,18 +156,34 @@ let dialog
   </div>
   <div style="margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Leaders:</strong></span>
-    {#each leaders as leader, i}
     <div style="display:flex;">
-      <Avatar agentPubKey={leader}></Avatar>
-      <sl-button style="margin-left: 8px;" on:click={() => deleteLeader(i)} circle>
-        <Fa icon={faTrash} />
-      </sl-button>
-
+      {#each leaders as leader, i}
+        <div style="display:flex;margin-right:10px">
+          <AnyAvatar agent={leader}></AnyAvatar>
+          <sl-button style="margin-left: 8px;" on:click={() => deleteLeader(i)} circle>
+            <Fa icon={faTrash} />
+          </sl-button>
+        </div>      
+      {/each}
     </div>
-      
-    {/each}
+    <div style="margin-bottom: 16px; display:flex; ">
+      <search-agent field-label="Add Leader" include-myself={true} clear-on-select={true} on:agent-selected={(e)=>addleader({type:"Agent", hash:e.detail.agentPubKey})}></search-agent>
 
-    <search-agent field-label="Add Leader" include-myself={true} clear-on-select={true} on:agent-selected={(e)=>addleader(e.detail.agentPubKey)}></search-agent>
+      {#if $uiProps.amSteward}
+          <sl-select 
+            label="Add Proxy Agent"
+            on:sl-change={(e) => {
+              const hash = decodeHashFromBase64(e.target.value)
+              addleader({type:"ProxyAgent", hash})
+             } }
+          >
+          {#each proxyAgentOptions as option}
+          <sl-option value={option.value}>{option.label}</sl-option>
+          {/each}
+          </sl-select>
+
+      {/if}
+      </div>  
   </div>
   <div style="margin-bottom: 16px">
     <span>Tags:</span >

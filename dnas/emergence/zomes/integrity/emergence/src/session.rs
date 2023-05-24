@@ -1,11 +1,19 @@
 use hdi::prelude::*;
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[serde(tag = "type", content = "hash")]
+pub enum AnyAgent {
+    Agent(AgentPubKey),
+    ProxyAgent(ActionHash),
+}
+
 #[hdk_entry_helper]
 #[derive(Clone, PartialEq)]
 pub struct Session {
     pub key: String,
     pub title: String,
     pub description: String,
-    pub leaders: Vec<AgentPubKey>,
+    pub leaders: Vec<AnyAgent>,
     pub smallest: u32,
     pub largest: u32,
     pub duration: u32,

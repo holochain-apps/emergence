@@ -8,6 +8,7 @@ import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import Avatar from './Avatar.svelte';
+import AnyAvatar from './AnyAvatar.svelte';
 import InterestSelect from './InterestSelect.svelte';
 import { faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
@@ -106,7 +107,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
         <div class="leaders">
             <span>Hosted by</span>
             {#each session.record.entry.leaders as leader}
-              <Avatar showAvatar={false} agentPubKey={leader}></Avatar>
+              <AnyAvatar showAvatar={false} agent={leader}></AnyAvatar>
             {/each}
         </div>
       </div>

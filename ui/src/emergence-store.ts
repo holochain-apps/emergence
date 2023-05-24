@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
@@ -412,7 +412,7 @@ export class EmergenceStore {
     return Array.from(tags) as Array<string>
   }
 
-  async createSession(title: string, description: string, leaders:Array<AgentPubKey>,  smallest: number, largest: number, duration: number, amenities: number, slot: Slot|undefined, tags: Array<string>): Promise<EntryRecord<Session>> {
+  async createSession(title: string, description: string, leaders:Array<AnyAgent>,  smallest: number, largest: number, duration: number, amenities: number, slot: Slot|undefined, tags: Array<string>): Promise<EntryRecord<Session>> {
     const record = await this.client.createSession(title, amenities, description, leaders, smallest, largest, duration)
     const sessionHash = record.actionHash
     if (slot) {
@@ -641,12 +641,12 @@ export class EmergenceStore {
         const noteHashes = []
         sessions.forEach(s=> s.record.entry.leaders.forEach(l=> 
             {
-                if (encodeHashToBase64(l) == this.myPubKeyBase64) {
+                if (encodeHashToBase64(l.hash) == this.myPubKeyBase64) {
                     this.agentSessions.update((n) => {
                         let si = n.get(this.myPubKey)
                         if (!si) {
                             si = new HoloHashMap()
-                            n.set(l,si)
+                            n.set(l.hash,si)
                         }
                         si.set(s.original_hash,SessionInterestBit.Interested)
                         return n
@@ -780,7 +780,7 @@ export class EmergenceStore {
     const rel: SessionRelationData = this.getSessionReleationData(session)
     if (filter.involvementLeading || filter.involvementGoing || filter.involvementInterested || filter.involvementNoOpinion  || filter.involvementHidden || filter.involvementLeading) {
         let found = false
-        if (filter.involvementLeading && session.record.entry.leaders.find(l=>encodeHashToBase64(l) === this.myPubKeyBase64)) found = true
+        if (filter.involvementLeading && session.record.entry.leaders.find(l=>encodeHashToBase64(l.hash) === this.myPubKeyBase64)) found = true
         else {
             if (filter.involvementGoing && rel.myInterest & SessionInterestBit.Going) found = true
             else
@@ -1408,7 +1408,6 @@ export class EmergenceStore {
             }
 
             feed.filter(f=>f.type == FeedType.SessionSetInterest).forEach(f=>{
-                console.log("SessionSetInterest", f.detail)
                 if (f.detail & (SessionInterestBit.NoOpinion + SessionInterestBit.Hidden) || f.detail == 0)
                     si.delete(f.about)
                 else

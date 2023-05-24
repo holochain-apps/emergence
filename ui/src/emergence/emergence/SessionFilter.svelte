@@ -34,7 +34,6 @@ const toggleDayInFilter = (day:Date) => {
   } else {
     filter.timeDays.splice(idx,1)
   }
-  console.log("FISH", filter.timeDays)
   dispatch('update-filter', filter)
 }
 </script>

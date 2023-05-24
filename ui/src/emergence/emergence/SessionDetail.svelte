@@ -13,6 +13,7 @@ import { amenitiesList, durationToStr, timeWindowDurationToStr, timeWindowStartT
 
 import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 import Avatar from './Avatar.svelte';
+import AnyAvatar from './AnyAvatar.svelte';
 import Confirm from './Confirm.svelte';
 import InterestSelect from './InterestSelect.svelte';
 import NoteCrud from './NoteCrud.svelte';
@@ -161,7 +162,7 @@ bind:this={updateSessionDialog}
         <div class="leaders">
           <span style="margin-right: 4px"><strong>Hosted by </strong></span>
           {#each entry.leaders as leader}
-            <Avatar agentPubKey={leader}></Avatar>
+            <AnyAvatar agent={leader}></AnyAvatar>
           {/each}
         </div>
         <div class="description">{ entry.description }</div>
