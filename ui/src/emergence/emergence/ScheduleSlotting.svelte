@@ -16,6 +16,7 @@
   import '@shoelace-style/shoelace/dist/components/option/option.js';
   import SessionFilterCtrls from './SessionFilterCtrls.svelte';
   import SessionFilter from './SessionFilter.svelte';
+  import SpaceLink from './SpaceLink.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -315,7 +316,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
               class:amo-warn={draggedAmenitiesCount > 0 && overlappingAmenities(space).length < draggedAmenitiesCount }
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
-                {space.record.entry.name}
+                <SpaceLink spaceHash={space.original_hash}></SpaceLink>
                 {#if space.record.entry.pic}
                   <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
@@ -420,7 +421,8 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
               class:amo-warn={draggedAmenitiesCount > 0 && overlappingAmenities(space).length < draggedAmenitiesCount }
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
-                {space.record.entry.name}{#if space.record.entry.key} ({space.record.entry.key}){/if}
+                <SpaceLink spaceHash={space.original_hash}></SpaceLink>
+             
                 {#if space.record.entry.pic}
                   <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
