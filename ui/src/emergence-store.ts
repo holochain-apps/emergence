@@ -104,7 +104,7 @@ export class EmergenceStore {
   neededStuffStore = undefined
   uiProps: Writable<UIProps> = writable({
     pane: "sessions",
-    amSteward: true,
+    amSteward: false,
     debuggingEnabled: false,
     youPanel: "sessions",
     discoverPanel: "cloud",

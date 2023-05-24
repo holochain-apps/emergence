@@ -147,11 +147,13 @@
         }
 
         const proxyAgents = {}
-        for (const s of data.proxyAgents) {
-            const e = s.entry
-            let pic = await uploadImportedFile(e)
-            const record = await store.createProxyAgent(e.nickname, e.bio, e.location, pic)
-            proxyAgents[s.entryHash] = record.entryHash
+        if (data.proxyAgents) {
+            for (const s of data.proxyAgents) {
+                const e = s.entry
+                let pic = await uploadImportedFile(e)
+                const record = await store.createProxyAgent(e.nickname, e.bio, e.location, pic)
+                proxyAgents[s.entryHash] = record.entryHash
+            }
         }
 
         for (const s of data.windows) {
