@@ -14,6 +14,7 @@ import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
   import { slide } from 'svelte/transition';
+  import SessionSummary from './SessionSummary.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -30,6 +31,8 @@ let editing = false;
 let errorSnackbar: Snackbar;
   
 $: editing,  error, loading, proxyAgent;
+$: allSessions = store.sessions
+$: sessions = $allSessions.filter(s=>s.record.entry.leaders.find(l=>encodeHashToBase64(l.hash) == encodeHashToBase64(proxyAgent.original_hash)))  
 
 onMount(async () => {
   if (proxyAgent === undefined) {
@@ -108,14 +111,28 @@ let confirmDialog
           </div>
           <div style="display: flex; flex-direction: column; margin-left:10px">
             <h1>{ proxyAgent.record.entry.nickname }</h1>
-            <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-              <span style="margin-right: 4px"><strong>Bio:</strong></span>
-              <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.bio }</span>
+            {#if proxyAgent.record.entry.bio}
+              <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+                <span style="margin-right: 4px"><strong>Bio:</strong></span>
+                <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.bio }</span>
+              </div>
+            {/if}
+            {#if proxyAgent.record.entry.location}
+              <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+                <span style="margin-right: 4px"><strong>Location:</strong></span>
+                <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.location }</span>
+              </div>
+            {/if}
+            {#if sessions}
+            <div style="display: flex; flex-direction: column; margin-bottom: 16px">
+              <span style="margin-right: 4px"><strong>Sessions:</strong></span>
+              <div style="display: flex; flex-direction: row;">
+                {#each Array.from(sessions ? sessions : []) as session}
+                  <SessionSummary session={session}></SessionSummary>
+                {/each}
+              </div>
             </div>
-            <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-              <span style="margin-right: 4px"><strong>Location:</strong></span>
-              <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.location }</span>
-            </div>
+            {/if}
           </div>
         </div>
       </div>

@@ -131,7 +131,7 @@ bind:this={updateSessionDialog}
     await store.fetchSessions()
   } }
 ></SessionCrud>
-npm
+
 <div transition:slide={{ axis: 'x', duration: 400 }}  class="pane-content">
   <div class="pane-header">
 
