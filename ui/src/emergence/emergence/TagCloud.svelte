@@ -44,24 +44,25 @@
     <div class="cloud">
         {#each words as word}
         <div class="word" style="font-size:{fontSize(word.count)};color:#{Math.floor(Math.random()*16777215).toString(16)};"
-            class:neonText={$uiProps.feedFilter.tags.includes(word.text)}
+            class:neonText={$uiProps.feedFilter.tags.find(t=>t.toLocaleLowerCase() == word.text.toLowerCase())}
             on:click={(e)=> {
                 const tag = word.text
                 store.filterTag(tag, "feedFilter")
                 }}
-
-            on:mouseover={(e)=> selectedTag = word.text}
-            on:mouseout={(e)=> selectedTag = ""}
             >
             {word.text}
         </div>
         {/each}
-        {#if selectedTag}
-        <div class="modal">
-            <TagCloudPeople tag={selectedTag}></TagCloudPeople>
-        </div>
-        {/if}
     </div>
+    {#if $uiProps.feedFilter.tags.length>0}
+    <div style="display:flex;">
+        {#each $uiProps.feedFilter.tags as tag}
+        <div style="display:flex;">
+            <TagCloudPeople tag={tag}></TagCloudPeople>
+        </div>
+    {/each}
+    </div>
+{/if}
 {:else}
   No tags yet!
   {/if}
