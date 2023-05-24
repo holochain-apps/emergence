@@ -1,5 +1,5 @@
 <script lang="ts">
-import { faCircleArrowLeft, faEdit, faPlus, faTrash, faUserGroup } from '@fortawesome/free-solid-svg-icons';
+import { faCircleArrowLeft, faEdit, faTrash, faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -9,7 +9,7 @@ import { createEventDispatcher, getContext, onMount } from 'svelte';
 import Fa from 'svelte-fa';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
-import { SessionInterest, amenitiesList, durationToStr, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags } from './types';
+import { amenitiesList, durationToStr, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit } from './types';
 
 import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 import Avatar from './Avatar.svelte';
@@ -133,32 +133,46 @@ bind:this={updateSessionDialog}
   <div class="pane-header">
 
     <div class="controls">
-      <sl-button size=small on:click={() => { dispatch('session-close') } } circle>
+      <sl-button on:click={() => { dispatch('session-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
       <div>
-        <sl-button size=small on:click={() => { updateSessionDialog.open($session) } } circle>
+        <sl-button on:click={() => { updateSessionDialog.open($session) } } circle>
           <Fa icon={faEdit} />
         </sl-button>
-        <sl-button size=small on:click={()=>confirmDialog.open()} circle>
+        <sl-button on:click={()=>confirmDialog.open()} circle>
           <Fa icon={faTrash} />
         </sl-button>
       </div>
     </div>
-
-    <h3>{ entry.title }</h3>
-
     <span style="flex: 1"></span>
-
  
   </div>
-
+  <div class="event-image"></div>
+ 
   <Confirm bind:this={confirmDialog}
     message="This will remove this session for everyone!" on:confirm-confirmed={deleteSession}></Confirm>
 
   <div class="details">
 
     <div class="properties">
+      <div class="general-info">
+        <h3 class="title">{ entry.title }</h3>
+        <div class="leaders">
+          <span style="margin-right: 4px"><strong>Hosted by </strong></span>
+          {#each entry.leaders as leader}
+            <Avatar agentPubKey={leader}></Avatar>
+          {/each}
+        </div>
+        <div class="description">{ entry.description }</div>
+        <div class="tags">
+          {#each tags as tag}
+            <div class="tag">
+              {tag}
+            </div>
+          {/each}
+        </div>
+      </div>
 
       {#if $uiProps.debuggingEnabled}
         <div style="display: flex; flex-direction: row; margin-bottom: 16px">
@@ -178,24 +192,8 @@ bind:this={updateSessionDialog}
       </div>
 
       <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-        <span style="margin-right: 4px"><strong>Description:</strong></span>
-        <span style="white-space: pre-line">{ entry.description }</span>
-      </div>
-
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-        <span style="margin-right: 4px"><strong>Leaders:</strong></span>
-        {#each entry.leaders as leader}
-          <Avatar agentPubKey={leader}></Avatar>
-        {/each}
-      </div>
-
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
         <span style="margin-right: 4px"><strong>Smallest Group Size:</strong></span>
         <span style="white-space: pre-line">{ entry.smallest }</span>
-      </div>
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-        <span style="margin-right: 4px"><strong>Largest Group Size:</strong></span>
-        <span style="white-space: pre-line">{ entry.largest }</span>
       </div>
       <div style="display: flex; flex-direction: row; margin-bottom: 16px">
         <span style="margin-right: 4px"><strong>Duration:</strong></span>
@@ -220,27 +218,19 @@ bind:this={updateSessionDialog}
         <InterestSelect sessionHash={sessionHash}></InterestSelect>
       </div>
   
-      <div>
-        Total Interested: <Fa icon={faUserGroup} /> {$relData.interest.size} 
+      <div class="interest">
+          <Fa icon={faUserGroup} /> {$relData.interest.size} <span class="interest-max">/ { entry.largest }</span>
       </div>
-      <div>
-        Attenders: {#each Array.from($relData.interest.entries()).filter(([key,value])=>value==SessionInterest.Going) as [key,value]}
+      <div class="attenders">
+          {#each Array.from($relData.interest.entries()).filter(([key,value])=>value & SessionInterestBit.Going) as [key,value]}
           <Avatar agentPubKey={key}></Avatar>
-        {/each}
-      </div>
-      <div class="tags">
-        Tags: 
-        {#each tags as tag}
-          <div class="tag">
-            {tag}
-          </div>
         {/each}
       </div>
     </div>
   
   </div>
   <div class="notes">
-    <div>
+    <div class="notes-add">
       <NoteCrud
         modal={false}
         bind:this={createNoteDialog}
@@ -249,20 +239,65 @@ bind:this={updateSessionDialog}
         on:edit-canceled={() => { creatingNote = false; } }
       ></NoteCrud>
     </div>
+    <div class="notes-list">
       {#each notes.reverse() as note}
         <NoteDetail showFrame={true} showSession={false} noteHash={note}></NoteDetail>
-    {/each}
+      {/each}
+    </div>
   </div>
 
 </div>
 {/if}
 
 <style>
-  .notes{
-    border-top: solid 1px;
+  .general-info {
+    width: 100%;
+    margin: 0 auto;
+    padding-bottom: 30px;
+  }
+  .event-image {
+    height: 300px;
+    width: 100%;
+    background-image: url(images/default-image.png);
+    background-size: cover;
+    max-width: 720px;
+    margin: 0 auto;
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+  .title {
+    font-size: 36px;
+    text-align: left;
+  }
+  .leaders {
+    font-size: 12px;
+    display: inline-flex;
+  }
+
+  .leaders holo-identicon {
+    display: none;
+  }
+  .description {
+    padding-bottom: 8px;
+  }
+  .tags {
+    padding-top: 8px;
+  }
+  .notes {
+    display:flex;
+    flex-direction: column;
     max-width: 720px;
     margin: 0 auto;
     width: 100%;
+  }
+  .notes-add {
+    background-color: lightgray;
+    padding: 10px;
+    border-radius: 10px;
+  }
+  .notes-list {
+    flex:1;
+    overflow-y: scroll;
   }
   .details {
     display: flex;
@@ -274,7 +309,7 @@ bind:this={updateSessionDialog}
     margin: 0 auto;
   }
 
-  .controls {
+  :global(.controls) {
     width: 100%;
     display: flex;
     justify-content: space-between;
@@ -295,6 +330,10 @@ bind:this={updateSessionDialog}
     line-height: 30px;
     margin: 40px 0 20px 0;
     letter-spacing: -0.01rem;
+  }
+
+  .interest-max {
+    opacity: .5;
   }
 
   .properties {

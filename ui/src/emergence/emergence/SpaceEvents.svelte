@@ -6,14 +6,13 @@ import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 
 import { storeContext } from '../../contexts';
-import type {  Info, Space,  Session,  TimeWindow } from './types';
+import {  type Info, type Space,  type Session,  type TimeWindow, DetailsType } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
 import SessionSummary from './SessionSummary.svelte';
-import SpaceDetail from './SpaceDetail.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -42,7 +41,6 @@ onMount(async () => {
 });
 
 $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
-let spaceDetailDialog
 
 </script>
 
@@ -56,13 +54,9 @@ let spaceDetailDialog
 {:else if error}
 <span>Error fetching the space: {error.data.data}</span>
 {:else}
-<SpaceDetail
-bind:this={spaceDetailDialog}
-space={space}>
-</SpaceDetail>
 <div class="events">
   <div class="summary clickable"
-    on:click={() => spaceDetailDialog.open(space)}
+    on:click={() => store.openDetails(DetailsType.Space, space.original_hash)}
   >
     <div class="pic">
       {#if space.record.entry.pic}

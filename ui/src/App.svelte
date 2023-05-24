@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, type AppAgentClient } from '@holochain/client';
+  import { AdminWebsocket, decodeHashFromBase64, type AppAgentClient, encodeHashToBase64 } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faTicket, faUser, faGear, faCalendar, faPlus, faHome } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -26,45 +26,70 @@
   import ScheduleSlotting from './emergence/emergence/ScheduleSlotting.svelte';
   import ScheduleUpcoming from './emergence/emergence/ScheduleUpcoming.svelte';
   import SessionDetail from './emergence/emergence/SessionDetail.svelte';
-  import type { Info, Session } from './emergence/emergence/types';
   import You from './emergence/emergence/You.svelte'
   import Admin from './emergence/emergence/Admin.svelte';
   import SiteMapDisplay from './emergence/emergence/SiteMapDisplay.svelte';
   import AllSiteMaps from './emergence/emergence/AllSiteMaps.svelte';
   import Discover from './emergence/emergence/Discover.svelte';
+  import Folk from './emergence/emergence/Folk.svelte';
+  import SpaceDetail from './emergence/emergence/SpaceDetail.svelte';
+  import { DetailsType } from './emergence/emergence/types';
+  import ProxyAgentCrud from './emergence/emergence/ProxyAgentCrud.svelte';
+  import AllProxyAgents from './emergence/emergence/AllProxyAgents.svelte';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
   let fileStorageClient: FileStorageClient | undefined;
   let loading = true;
-  let pane = "sessions"
   let profilesStore: ProfilesStore | undefined
   let creatingMap = false
+  let creatingProxyAgent = false
+  let syncing = false
+  let error: any = undefined;
 
+  $: error
   $: client, fileStorageClient, store, loading;
   $: prof = profilesStore ? profilesStore.myProfile : undefined
   $: uiProps = store ? store.uiProps : undefined
+  $: pane = store ? $uiProps.pane : "sessions"
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
     const appPort : string = import.meta.env.VITE_APP_PORT
 
-    client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, 'emergence');
-    if (adminPort) {
-      const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
-      //const x = await adminWebsocket.listApps({})
-      const cellIds = await adminWebsocket.listCellIds()
-      await adminWebsocket.authorizeSigningCredentials(cellIds[0])
+    try {
+      client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, 'emergence');
+      if (adminPort) {
+        const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
+        //const x = await adminWebsocket.listApps({})
+        const cellIds = await adminWebsocket.listCellIds()
+        await adminWebsocket.authorizeSigningCredentials(cellIds[0])
+      }
+    }
+    catch(e) {
+      error =e
     }
 
     profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
       avatarMode: "avatar-optional",
+      additionalFields: [
+        {
+          name: "location",
+          label: "Location",
+          required: false, 
+        },
+        {
+          name: "bio",
+          label: "Bio",
+          required: false,
+        }
+      ], 
     });
 
     fileStorageClient = new FileStorageClient(client, 'emergence');
 
     store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
-    store.fetchSiteMaps()
+    await store.sync(undefined)
     loading = false;
   });
 
@@ -77,16 +102,30 @@
   });
   let createSessionDialog: SessionCrud
   let createSpaceDialog: SpaceCrud
+
+  const doSync=async () => {
+        syncing = true;
+        console.log("start sync", new Date);
+        await store.sync(undefined);
+        console.log("end sync", new Date);
+        syncing=false 
+    }
 </script>
 
 <main>
-  {#if loading}
+
+  {#if error}
+    <span class="notice">{error}</span>
+  {:else if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
       <sl-spinner
  />
     </div>
   {:else}
   <profiles-context store="{profilesStore}">
+
+   
+
     {#if $prof && ($prof.status!=="complete" || $prof.value===undefined)}
     <div style="text-align:center">
       <h1>Hello.</h1>
@@ -97,15 +136,95 @@
     {/if}
 
     <profile-prompt>
+
+      <div class="nav">
+        <div class="button-group">
+          <div class="nav-button {pane === "discover" ? "selected":""}"
+            title="Discover"
+            on:keypress={()=>{store.setPane('discover')}}
+            on:click={()=>{store.setPane('discover')}}
+          >
+            <Fa class="nav-icon" icon={faHome} size="2x"/>
+            <span class="button-title">Discover</span>
+          </div>
+          <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
+            title="Sessions"
+            on:keypress={()=>{store.setPane('sessions')}}
+            on:click={()=>{store.setPane('sessions')}}
+          >
+            <Fa class="nav-icon" icon={faCalendar} size="2x"/>
+            <span class="button-title">Sessions</span>
+          </div>
+    
+    
+          <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
+            title="Spaces"
+            on:keypress={()=>{store.setPane('spaces')}}
+            on:click={()=>{store.setPane('spaces')}}
+          >
+            <Fa class="nav-icon" icon={faMap} size="2x"/>
+          <span class="button-title">Spaces</span>
+          </div>
+        </div>
+        <div class="button-group settings">
+          <div class="nav-button {pane=="you"?"selected":""}"
+            title="You"
+            on:keypress={()=>{store.setPane('you')}}
+            on:click={()=>{store.setPane('you')}}
+          >
+            <Fa class="nav-icon" icon={faUser} size="2x"/>
+            <span class="button-title you">You</span>
+          </div>
+          {#if store && $uiProps.amSteward}
+            <div class="nav-button {pane.startsWith("admin")?"selected":""}"
+              title="Admin"
+              on:keypress={()=>{store.setPane('admin')}}
+              on:click={()=>{store.setPane('admin')}}
+            >
+              <Fa class="nav-icon" icon={faGear} size="2x"/>
+            <span class="button-title settings">Settings</span>
+            </div>
+          {/if}
+          <div class="nav-button"
+            class:spinning={syncing}
+            title="Sync"
+            on:keypress={()=>{doSync()}}
+            on:click={()=>{doSync()}}
+          >
+            <Fa 
+              class="nav-icon "
+              icon={faSync} size="2x"/>
+            <span class="button-title sync">Sync</span>
+          </div>
+        </div>
+      </div>
+
       <file-storage-context client={fileStorageClient}>
-    {#if store &&  $uiProps.sessionDetails}
+      {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Space }
+      <div class="session-details" style="height:100vh">
+        <SpaceDetail
+          on:space-deleted={()=>store.closeDetails()}
+          on:space-close={()=>store.closeDetails()}
+          space={store.getSpace($uiProps.detailsStack[0].hash)}>
+        </SpaceDetail>
+      </div>
+      {/if}
+      {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Session }
       <div class="session-details" style="height:100vh">
         <SessionDetail 
-        on:session-deleted={()=>store.setUIprops({sessionDetails:undefined})}
-        on:session-close={()=>store.setUIprops({sessionDetails:undefined})}
-        sessionHash={$uiProps.sessionDetails}></SessionDetail>
+        on:session-deleted={()=>store.closeDetails()}
+        on:session-close={()=>store.closeDetails()}
+        sessionHash={$uiProps.detailsStack[0].hash}></SessionDetail>
       </div>
     {/if}
+    {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Folk }
+    <div class="session-details" style="height:100vh">
+        <Folk 
+        on:folk-close={()=>store.closeDetails()}
+        agentPubKey={$uiProps.detailsStack[0].hash}></Folk>
+      </div>
+    {/if}
+
     <div id="content" style="display: flex; flex-direction: column; flex: 1;">
 
       {#if pane=="sessions"}
@@ -140,7 +259,7 @@
       {#if pane=="schedule"}
         <div class="pane">
           <ScheduleUpcoming
-            on:open-slotting={()=>pane="schedule.slotting"}
+            on:open-slotting={()=>store.setPane("schedule.slotting")}
           ></ScheduleUpcoming>
         </div>
       {/if}
@@ -148,7 +267,7 @@
       {#if pane=="schedule.slotting"}
         <div class="pane">
           <ScheduleSlotting
-            on:slotting-close={()=>pane="admin"}
+            on:slotting-close={()=>store.setPane("admin")}
 
           ></ScheduleSlotting>
         </div>
@@ -159,7 +278,7 @@
         {#if store.getCurrentSiteMap()}
           <SiteMapDisplay 
             sitemap={store.getCurrentSiteMap()}
-            on:show-all-spaces={()=>pane= "spaces.list"}
+            on:show-all-spaces={()=>store.setPane("spaces.list")}
             ></SiteMapDisplay>
         {:else}
           <h5>No Sitemap configured yet</h5>
@@ -168,16 +287,15 @@
       {/if}
 
       {#if pane=="spaces.list"}
-      <div class="pane">
-        <AllSpaces
-          on:all-spaces-close={()=>pane= "spaces"}
-        ></AllSpaces>
+      <div class="pane spaces">
         {#if $uiProps.amSteward}
-          Create Space:
-          <sl-button on:click={() => {createSpaceDialog.open(undefined) } } circle>
-            <Fa icon={faPlus} />
-          </sl-button>
+          <div class="pill-button" on:click={() => {createSpaceDialog.open(undefined) } }>
+            <span>+</span> Create
+          </div>
         {/if}
+        <AllSpaces
+          on:all-spaces-close={()=>store.setPane("spaces")}
+        ></AllSpaces>
     
           <SpaceCrud
             bind:this={createSpaceDialog}
@@ -187,7 +305,7 @@
       {/if}
 
       {#if pane=="you"}
-      <div class="pane">
+      <div class="pane you">
         <You></You>
       </div>
       {/if}
@@ -195,7 +313,8 @@
       <div class="pane">
         <Admin
           on:open-sitemaps={()=>pane = 'admin.sitemaps'}
-          on:open-slotting={()=>pane="schedule.slotting"}
+          on:open-proxyagents={()=>pane = 'admin.proxyagents'}
+          on:open-slotting={()=>store.setPane("schedule.slotting")}
         ></Admin>
       </div>
       {/if}
@@ -218,58 +337,29 @@
         </sl-button>
       </div>
       {/if}
-      {#if pane=="discover"}
+      {#if pane=="admin.proxyagents"}
+      <div class="pane">
+        {#if creatingProxyAgent}
+          <div class="modal">
+              <ProxyAgentCrud
+              on:proxyagent-created={() => {creatingProxyAgent = false;} }
+              on:edit-canceled={() => { creatingProxyAgent = false; } }
+              ></ProxyAgentCrud>
+          </div>
+        {/if}
+        <AllProxyAgents
+        on:proxyagents-close={()=>pane = 'admin'}
+        ></AllProxyAgents>
+        Create Proxy Agent:
+        <sl-button on:click={() => {creatingProxyAgent = true; } } circle>
+          <Fa icon={faPlus} />
+        </sl-button>
+      </div>
+      {/if}      {#if pane=="discover"}
       <div class="pane">
         <Discover></Discover>
       </div>
       {/if}
-
-      <div class="nav">
-        <div class="nav-button {pane === "discover" ? "selected":""}"
-          title="Discover"
-          on:keypress={()=>{pane='discover'}}
-          on:click={()=>{pane='discover'}}
-        >
-           <Fa icon={faHome} size="2x"/>
-           <span class="button-title">Discover</span>
-        </div>
-        <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
-          title="Sessions"
-          on:keypress={()=>{pane='sessions'}}
-          on:click={()=>{pane='sessions'}}
-        >
-          <Fa icon={faCalendar} size="2x"/>
-           <span class="button-title">Sessions</span>
-        </div>
-
-
-        <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
-          title="Spaces"
-          on:keypress={()=>{pane='spaces'}}
-          on:click={()=>{pane='spaces'}}
-        >
-          <Fa icon={faMap} size="2x"/>
-         <span class="button-title">Spaces</span>
-        </div>
-        <div class="nav-button {pane=="you"?"selected":""}"
-          title="You"
-          on:keypress={()=>{pane='you'}}
-          on:click={()=>{pane='you'}}
-        >
-           <Fa icon={faUser} size="2x"/>
-           <span class="button-title">You</span>
-        </div>
-        {#if store && $uiProps.amSteward}
-          <div class="nav-button {pane.startsWith("admin")?"selected":""}"
-            title="Admin"
-            on:keypress={()=>{pane='admin'}}
-            on:click={()=>{pane='admin'}}
-          >
-            <Fa icon={faGear} size="2x"/>
-           <span class="button-title">Settings</span>
-          </div>
-        {/if}
-      </div>
     </div>
     </file-storage-context>
     </profile-prompt>
@@ -306,52 +396,6 @@
     display: flex; flex-direction: column;
     max-height: 100%;
     overflow: auto;
-  }
-  :global(.pane-contents) {
-    display: flex; flex-direction: column;
-  }
-  :global(.pane){
-    width: 100%;
-  }
-  :global(.pane-header){
-    display: flex; 
-    flex-direction: column;
-    justify-content:space-between; 
-    align-items: left;
-    padding: .5em;
-    margin-bottom: 1em;
-  }
-  :global(.flex-center) {
-        display: flex;
-        justify-content: center;
-    }
-  .nav {
-    display: flex; flex-direction: row; flex: 1;
-    padding-left: 10px;
-    padding-right: 10px;
-    width: 100%;
-    margin: auto;
-    justify-content: center;
-  }
-
-  .nav-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 50px;
-    max-width: 50px;
-    border-radius: 50%;
-    padding: 5px;
-    margin: 5px;
-    background-color: transparent;
-    color: rgba(86, 94, 109, 1);
-    transition: color .25s ease;
-  }
-
-  .nav-button .button-title {
-    font-size: 9px;
-    padding-top: 5px;
   }
 
   .create-session {
@@ -397,6 +441,10 @@
     opacity: .5;
    }
 
+   .button-group {
+    display: flex;
+   }
+
   .info {
     width: 100%;
     flex-stretch: 1;
@@ -440,21 +488,30 @@
     height: 100vh;
   }
 
-  /* @media (min-width: 500px) {
-    main {
-      max-width: 500px;
-    }
-  } */
 
-
+  .spinning {
+  animation: spin-animation 1s infinite;
+}
+@keyframes spin-animation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(359deg);
+  }
+}
   .session-details {
     background-color: white;
     position: absolute;
-
     border: solid 1px;
     display: flex; flex-direction: column;
-    max-height: 100%;
+    height: calc(100vh - 76px);
     overflow: auto;
-    z-index: 1000;
+    z-index: 100;
   }
+@media (min-width: 720px) {
+  .create-session {
+    display: none;
+  }
+}
 </style>

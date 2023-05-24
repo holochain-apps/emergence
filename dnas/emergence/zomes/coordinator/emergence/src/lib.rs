@@ -4,10 +4,14 @@ pub mod note;
 pub mod all_sessions;
 pub mod session;
 pub mod time_window;
+pub mod settings;
 pub mod relation;
 pub mod utils;
 pub mod map;
 pub mod all_maps;
+pub mod proxy_agent;
+pub mod all_proxy_agents;
+pub mod messages;
 
 use all_sessions::SessionInfo;
 use all_spaces::SpaceInfo;
@@ -17,6 +21,8 @@ use note::get_note;
 use relation::{get_relations, RelationInfo};
 use session::get_session;
 use space::get_space;
+use messages::*;
+
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
     Ok(InitCallbackResult::Pass)
@@ -236,4 +242,23 @@ pub fn get_stuff(input: GetStuffInput) -> ExternResult<GetStuffOutput> {
         output.notes = Some(infos);
     }
     Ok(output)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EmergenceSignal {
+    provenance: AgentPubKey,
+    message: EmergenceMessage,
+}
+
+#[hdk_extern]
+pub fn recv_remote_signal(message: EmergenceMessage) -> ExternResult<()> {
+    let info = call_info()?;
+
+    let notice = EmergenceSignal {
+        message,
+        provenance: info.provenance,
+    };
+    debug!("signal recevied: {:?}", notice);
+
+    emit_signal(notice)
 }

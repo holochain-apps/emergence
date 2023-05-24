@@ -2,12 +2,12 @@
 import { onMount, getContext, createEventDispatcher } from 'svelte';
 import type { Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
-import SpaceDetail from './SpaceDetail.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import Fa from 'svelte-fa';
-import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faCircleArrowLeft, faSync } from '@fortawesome/free-solid-svg-icons';
 import SpaceSummary from './SpaceSummary.svelte';
-import type { Info, Space } from './types';
+import Sync from './Sync.svelte';
+import { DetailsType, type Info, type Space } from './types';
 const dispatch = createEventDispatcher();
 
 
@@ -22,33 +22,31 @@ $: error, spaceDetail;
 onMount(async () => {
   store.fetchSpaces();
 });
-let spaceDetailDialog
 
 </script>
-
-<div class="pane-content">
-  <div class="pane-header">
-      <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('all-spaces-close') } } circle>
+<div class="pane-header">
+  <div class="header-content">
+    <h3>Spaces List</h3>
+    <div class="section-controls">
+      <sl-button style="margin-left: 8px; " on:click={() => { dispatch('all-spaces-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
-
-    <h3>Spaces List</h3>
+    </div>
   </div>
+
+</div>
+<div class="pane-content">
+
   {#if error}
     <span class="notice">Error fetching the spaces: {error.data.data}.</span>
   {:else if $spaces.length === 0}
     <span class="notice">No spaces found.</span>
   {:else}
-    
-      <SpaceDetail
-        bind:this={spaceDetailDialog}
-        space={spaceDetail}>
-      </SpaceDetail>
 
     {#each $spaces as space}
       <div class="space">
         <SpaceSummary
-          on:space-selected={()=>{spaceDetail=space;spaceDetailDialog.open(space)}} 
+          on:space-selected={()=>{store.openDetails(DetailsType.Space, space.original_hash)}} 
           space={space}>
         </SpaceSummary>
       </div>
@@ -57,10 +55,6 @@ let spaceDetailDialog
 </div>
 
 <style>
-  :global(.pane-content) {
-    overflow-y: auto;
-    height: 95%;
-  }
   .notice {
     display: block;
     text-align: center;

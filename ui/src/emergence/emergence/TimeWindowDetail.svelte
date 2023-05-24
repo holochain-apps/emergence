@@ -43,7 +43,7 @@ async function deleteTimeWindow() {
 
 <div style="display: flex; flex-direction: column">
   <div style="display: flex; flex-direction: row">
-    <sl-button style="margin-left: 8px;" size=small on:click={() => deleteTimeWindow()} circle>
+    <sl-button style="margin-left: 8px;" on:click={() => deleteTimeWindow()} circle>
       <Fa icon={faTrash} />
     </sl-button>
   </div>

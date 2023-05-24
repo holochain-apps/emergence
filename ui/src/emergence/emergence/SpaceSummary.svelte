@@ -119,12 +119,13 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
   .summary {
     display: flex;
     flex-direction: row;
-    border: solid 1px gray;
+    width: 100%;
   }
   .name-row {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    font-weight: bold;
   }
   .name {
     flex: 1;

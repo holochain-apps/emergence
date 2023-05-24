@@ -6,11 +6,11 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
-import type { ActionHash } from '@holochain/client';
 import NoteDetail from './NoteDetail.svelte';
 import NoteSummary from './NoteSummary.svelte';
 import TimeWindowSummary from './TimeWindowSummary.svelte';
-  import SessionLink from './SessionLink.svelte';
+import SessionLink from './SessionLink.svelte';
+import SpaceLink from './SpaceLink.svelte';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -38,10 +38,10 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     set interest in <SessionLink sessionHash={feedElem.about}></SessionLink> to {sessionInterestToString(feedElem.detail)}
     {/if}
     {#if feedElem.type === FeedType.SpaceNew}
-    created space: {feedElem.detail}
+    created space: <SpaceLink spaceHash={feedElem.about}></SpaceLink>
     {/if}
     {#if feedElem.type === FeedType.SpaceUpdate}
-    updated space {feedElem.detail.name}  changes: {feedElem.detail.changes.join("; ")}
+    updated space <SpaceLink spaceHash={feedElem.about}></SpaceLink>  changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SpaceDelete}
     deleted space {feedElem.detail}
@@ -74,6 +74,15 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     {#if feedElem.type === FeedType.Sense}
       sense added: {sessionInterestToString(JSON.parse(feedElem.detail))} for <SessionLink sessionHash={feedElem.about}></SessionLink>
     {/if}
+    {#if feedElem.type === FeedType.ProxyAgentNew}
+      created proxy agent: {feedElem.detail}
+    {/if}
+    {#if feedElem.type === FeedType.ProxyAgentUpdate}
+      updated proxy agent changes: {feedElem.detail.changes.join("; ")}
+    {/if}
+    {#if feedElem.type === FeedType.ProxyAgentDelete}
+      deleted proxy agent {feedElem.detail}
+    {/if}
   </div>
 </div>
 <style>
@@ -82,7 +91,6 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     flex-direction: column; 
     align-items: left;
     margin: 0 5px 0 10px;
-    border: solid 1px grey;
     padding: 10px;
     border-radius: 5px;
     background-color: white;

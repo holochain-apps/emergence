@@ -9,24 +9,54 @@
     import Feed from './Feed.svelte';
     import TagCloud from './TagCloud.svelte'
     import Sense from './Sense.svelte';
+    import FeedFilter from './FeedFilter.svelte';
+    import { faClose, faFilter, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
+    import Fa from 'svelte-fa';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     $: uiProps = store.uiProps
+    $: settings = store.settings
 
     onMount(async () => {        
-        //await store.fetchMyStuff()
 
     });
- 
+    let showFilter = false
+
 </script>
 
 <div class="pane-header">
-    <h3>Discover</h3>
+    <div class="header-content">
+        <h3>Discover</h3>
+        <div style="display: flex; flex-direction: row; align-self:center">
+            {#if $uiProps.feedFilter.keyword}
+            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"feedFilter")}} >
+              <Fa size="sm" icon={faMagnifyingGlass} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+            {/if}
+      
+            {#if $uiProps.feedFilter.tags.length>0}
+            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"feedFilter")}} >
+              <Fa size="sm" icon={faTag} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+            {/if}
+            {#if $uiProps.feedFilter.space.length>0}
+            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["space"],"feedFilter")}} >
+                <Fa size="sm" icon={faMap} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+            {/if}
+
+            <sl-button style=" " on:click={() => { showFilter = !showFilter } } circle>
+                <Fa icon={faFilter} />
+            </sl-button>
+        </div>
+    </div>
 </div>
-  
+{#if showFilter}
+<FeedFilter
+    on:close-filter={()=>showFilter = false}
+    on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
+    filter={$uiProps.feedFilter}></FeedFilter>
+{/if}
 <div class="pane-content flex-center discover">
     <div class="discover-section">
-        {#if $uiProps.sensing}
+        {#if $settings.game_active}
             <Sense></Sense>
         {/if}
     </div>
@@ -43,9 +73,13 @@
         width: 100%;
         display: block;
         flex-direction: column;
-        background-color: lightgray;
     }
     .discover-section {
         display: flex;
+        width: 100%;
+        max-width: 720px;
+        margin: 0 auto;
+        justify-content: center;
     }
+
 </style>

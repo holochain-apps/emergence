@@ -2,7 +2,7 @@
 import { onMount, getContext, createEventDispatcher } from 'svelte';
 import type { Record  } from '@holochain/client';
 import { storeContext } from '../../contexts';
-import SiteMapDetail from './SiteMapDetail.svelte';
+import ProxyAgentDetail from './ProxyAgentDetail.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
@@ -13,29 +13,29 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 let error: any = undefined;
 
-$: sitemaps = store.maps
+$: proxyAgents = store.proxyAgents
 $: error;
 
 onMount(async () => {
-  store.fetchSiteMaps();
+  store.fetchProxyAgents();
 });
 
 </script>
 <div class="pane-header">
-  <sl-button style="margin-left: 8px; " on:click={() => { dispatch('sitemaps-close') } } circle>
+  <sl-button style="margin-left: 8px; " on:click={() => { dispatch('proxyagents-close') } } circle>
     <Fa icon={faCircleArrowLeft} />
   </sl-button>
-<h3>SiteMaps List</h3>
+<h3>Proxy Agents List</h3>
 </div>
 <div class="pane-content">
   {#if error}
-    <span>Error fetching the sitemaps: {error.data.data}.</span>
-  {:else if $sitemaps.length === 0}
-    <span>No sitemaps found.</span>
+    <span>Error fetching the proxyagents: {error.data.data}.</span>
+  {:else if $proxyAgents.length === 0}
+    <span>No proxyagents found.</span>
   {:else}
-    {#each $sitemaps as sitemap}
+    {#each $proxyAgents as proxyAgent}
       <div style="margin-bottom: 8px; width:500px; background:lightgray">
-        <SiteMapDetail sitemap={sitemap}  on:sitemap-deleted={() => store.fetchSiteMaps()}></SiteMapDetail>
+        <ProxyAgentDetail proxyAgent={proxyAgent}  on:proxyagent-deleted={() => store.fetchProxyAgents()}></ProxyAgentDetail>
       </div>
     {/each}
   {/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { encodeHashToBase64, type EntryHash } from "@holochain/client";
+    import { decodeHashFromBase64, encodeHashToBase64, type EntryHash } from "@holochain/client";
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
@@ -14,7 +14,7 @@
     let exportJSON = ""
     const dispatch = createEventDispatcher();
     let sensing: SlCheckbox
-    $:uiProps = store.uiProps
+    $:settings = store.settings
 
     onMount(() => {
     })
@@ -78,8 +78,10 @@
             sessions.push(info)
         }
         const notes = []
-        for (const s of get(store.notes)) { 
-            notes.push(await serializeInfo(s, true))
+        for (const s of get(store.notes)) {
+            const info = await serializeInfo(s, true)
+            info.entry['session'] = encodeHashToBase64(info.entry['session'])
+            notes.push(info)
         }
         
         const maps = []
@@ -89,6 +91,13 @@
             maps.push(mapEntry)
         }
 
+        const proxyAgents = []
+        for (const s of get(store.proxyAgents)) { 
+            const proxyAgentEntry = await serializeInfo(s, true)
+            proxyAgentEntry.entryHash = encodeHashToBase64(s.record.entryHash)
+            proxyAgents.push(proxyAgentEntry)
+        }
+
         exportJSON= JSON.stringify(
             {
                 spaces,
@@ -96,6 +105,7 @@
                 notes,
                 windows: get(store.timeWindows),
                 maps,
+                proxyAgents
             }
         )
         const fileName = sanitize(`emergence.json`)
@@ -135,6 +145,15 @@
             maps[s.entryHash] = record.entryHash
 
         }
+
+        const proxyAgents = {}
+        for (const s of data.proxyAgents) {
+            const e = s.entry
+            let pic = await uploadImportedFile(e)
+            const record = await store.createProxyAgent(e.nickname, e.bio, e.location, pic)
+            proxyAgents[s.entryHash] = record.entryHash
+        }
+
         for (const s of data.windows) {
             if (! s.tags) {
                 s.tags = []
@@ -165,6 +184,7 @@
             }
 
         }
+        const sessions = {}
         for (const s of data.sessions) {
             const leaders = [] // fixme
             const e = s.entry
@@ -172,6 +192,7 @@
             let record
             try {
              record = await store.createSession(e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, tags)
+             sessions[s.original_hash] = record.actionHash
             } catch(e) {
                 console.log("Import Error",e)
             }
@@ -180,27 +201,41 @@
                 const window = JSON.parse(relation.content.data)
                 await store.slot(record.actionHash, {window, space: spaces[relation.dst]})
             }
- 
+
         }
+        for (const n of data.notes) {
+            const e = n.entry
+            let pic = await uploadImportedFile(e)
+            if (!e.trashed) {
+                const record = await store.createNote(sessions[e.session], e.text, e.tags, pic)
+            }
+
+        }
+        store.sync(undefined)
     }
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
 
-
-<div class="pane-content">
-    <div class="pane-header">
-      <h3>Admin</h3>
-      <div style="display:flex">
-        &nbsp;
-      </div>
+<div class="pane-header">
+    <div class="header-content">
+        <h3>Admin</h3>
+        <div style="display:flex">
+            &nbsp;
+        </div>
     </div>
-    <div>
+  </div>
+<div class="pane-content">
+    <div class="admin-controls">
         <sl-button style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
             Manage Schedule
         </sl-button>
 
         <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
             Site Maps
+        </sl-button>
+
+        <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
+            Proxy Agents
         </sl-button>
 
         <sl-button style="margin: 8px;"  on:click={async () => await doExport()}>
@@ -210,6 +245,15 @@
         <sl-button style="margin: 8px;" on:click={()=>fileinput.click()}>
             Import
         </sl-button>
+        <sl-button style="margin: 8px;" on:click={()=> {
+            const s= $settings
+            s.game_active = ! s.game_active
+            store.setSettings(s)
+        }
+        }>
+            {$settings.game_active ? 'Deactivate Sensing Game' : 'Activate Sensing Game'}
+        </sl-button>
+        
     </div>
     <div>
 
@@ -223,5 +267,17 @@
     sl-checkbox {
         margin-right:15px;
         margin-left:15px;
+    }
+
+    .admin-controls {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+    
+    }
+
+    .header-content h3 {
+        text-align: center;
+        width: 100%;
     }
   </style>

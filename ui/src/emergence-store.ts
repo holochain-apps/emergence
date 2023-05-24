@@ -15,12 +15,24 @@ import en from 'javascript-time-ago/locale/en/index.js';
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type RawInfo, SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter } from './emergence/emergence/types.js';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
+import { Marked, Renderer } from "@ts-stack/markdown";
+import { filterTime } from './emergence/emergence/utils';
+Marked.setOptions
+({
+  renderer: new Renderer,
+  gfm: true,
+  tables: true,
+  breaks: false,
+  pedantic: false,
+  sanitize: true,
+  smartLists: true,
+  smartypants: false
+});
 
 TimeAgo.addDefaultLocale(en)
-const ONE_HOUR = 60*60*60
 
 export const neededStuffStore = (client: EmergenceClient) => {
     const notes = writable(new HoloHashMap<ActionHash, Info<Note>| undefined>())
@@ -81,31 +93,62 @@ export class EmergenceStore {
   spaces: Writable<Array<Info<Space>>> = writable([])
   notes: Writable<Array<Info<Note>>> = writable([])
   maps: Writable<Array<Info<SiteMap>>> = writable([])
+  proxyAgents: Writable<Array<Info<ProxyAgent>>> = writable([])
   noteHashes: Writable<Array<ActionHash>> = writable([])
   feed: Writable<Array<FeedElem>> = writable([])
   allTags: Writable<Array<TagUse>> = writable([])
-  myNotes: Writable<Array<ActionHash>> = writable([])
-  mySessions: Writable<HoloHashMap<ActionHash,SessionInterest>> = writable(new HoloHashMap())
+  agentNotes: Writable<HoloHashMap<AgentPubKey, Array<ActionHash>>> = writable(new HoloHashMap())
+  agentSessions: Writable<HoloHashMap<AgentPubKey,HoloHashMap<ActionHash,SessionInterest>>> = writable(new HoloHashMap())
   neededStuff: GetStuffInput = {}
   myPubKeyBase64: string
   loader = undefined
   neededStuffStore = undefined
   uiProps: Writable<UIProps> = writable({
+    pane: "sessions",
     amSteward: true,
     debuggingEnabled: false,
     youPanel: "sessions",
     discoverPanel: "cloud",
     sessionsFilter: defaultSessionsFilter(),
+    feedFilter: defaultFeedFilter(),
     sensing: false,
-    sessionDetails: undefined,
+    detailsStack: [],
     sessionListMode: true,
+    sessionSort: SessionSortOrder.Ascending
   })
+  settings: Writable<Settings> = writable({game_active: false})
+
+  async setSettings(settings: Settings) {
+    await this.client.setSettings(settings)
+    await this.getSettings()
+  }
+
+  async getSettings() {
+    const settings = await this.client.getSettings()
+    this.settings.update( (_s) => {return settings})
+  }
 
   setUIprops(props:{}) {
     this.uiProps.update((n) => {
         Object.keys(props).forEach(key=>n[key] = props[key])
         return n
     })
+  }
+
+  openDetails = (type: DetailsType, hash: ActionHash) => {
+    const detailsStack = get(this.uiProps).detailsStack
+    detailsStack.unshift({type,hash})
+    this.setUIprops({detailsStack})
+  }
+
+  closeDetails = () => {
+    const detailsStack = get(this.uiProps).detailsStack
+    detailsStack.shift()
+    this.setUIprops({detailsStack})
+  }
+
+  setPane = (pane) => {
+    this.setUIprops({pane, detailsStack:[]})
   }
 
   stuffIsNeeded() {
@@ -116,6 +159,17 @@ export class EmergenceStore {
     this.loader = setInterval(()=>{if(this.stuffIsNeeded()) this.fetchStuff()}, 1000);
     this.neededStuffStore =  neededStuffStore(client)
     this.myPubKeyBase64 = encodeHashToBase64(myPubKey)
+    client.client.on( 'signal', signal => {
+        console.log("SIGNAL",signal)
+        // @ts-ignore
+        if (signal.zome_name == 'emergence' && signal.payload.message && signal.payload.message.type == "UpdateSettings") {
+        // @ts-ignore
+        const settings = signal.payload.message
+        settings.delete("type")
+        // TODO any checking?
+        this.settings.update((_)=> {return settings})
+        }
+      })
   }
   
   getSessionIdx(sessionHash: ActionHash) : number {
@@ -178,6 +232,18 @@ export class EmergenceStore {
     return undefined
   }
 
+  getProxyAgentIdx(proxyAgentHash: ActionHash) : number {
+    const b64 = encodeHashToBase64(proxyAgentHash)
+    const proxyAgents = get(this.proxyAgents)
+    return proxyAgents.findIndex((s)=> encodeHashToBase64(s.original_hash) === b64)
+  }
+
+  getProxyAgent(proxyAgentHash: ActionHash) : Info<ProxyAgent> | undefined {
+    const proxyAgentIdx = this.getProxyAgentIdx(proxyAgentHash)
+    if (proxyAgentIdx == -1) return undefined
+    return get(this.proxyAgents)[proxyAgentIdx]
+  }
+
   getSessionSlot(session: Info<Session>) : Slot|undefined {
     const rels = session.relations.filter(r=>r.relation.content.path == "session.space")
     if (rels.length == 0) return undefined
@@ -204,7 +270,7 @@ export class EmergenceStore {
 
   getSessionReleationData(session: Info<Session>) : SessionRelationData {
     const rel: SessionRelationData = {
-        myInterest: SessionInterest.NoOpinion,
+        myInterest: SessionInterestDefault,
         interest: new HoloHashMap(),
         slot: undefined
     }
@@ -576,9 +642,14 @@ export class EmergenceStore {
         const noteHashes = []
         sessions.forEach(s=> s.record.entry.leaders.forEach(l=> 
             {
-                if (encodeHashToBase64(l) == this.myPubKeyBase64){
-                    this.mySessions.update((n) => {
-                        n.set(s.original_hash,SessionInterest.Interested)
+                if (encodeHashToBase64(l) == this.myPubKeyBase64) {
+                    this.agentSessions.update((n) => {
+                        let si = n.get(this.myPubKey)
+                        if (!si) {
+                            si = new HoloHashMap()
+                            n.set(l,si)
+                        }
+                        si.set(s.original_hash,SessionInterestBit.Interested)
                         return n
                     } )
                 }
@@ -610,35 +681,137 @@ export class EmergenceStore {
     return Array.from(sessions.values()).sort((a,b)=>a.window.start - b.window.start);
   }
 
+  filterFeedElem(elem:FeedElem, filter: FeedFilter) : boolean {
+
+    if (filter.tags.length > 0) {
+        const elemTags: string[] = this.getFeedElementTags(elem)
+        let found = false
+        for (let tag of filter.tags) {
+            tag = tag.toLowerCase()
+            if (elemTags.includes(tag)) {
+                found = true
+                break;
+            }
+        }
+        if (!found) return false
+    }
+    if (filter.author) {
+        if (encodeHashToBase64(filter.author) !== encodeHashToBase64(elem.author)) return false
+    }
+    if (filter.space.length>0) {
+        const space = this.getFeedElementSpace(elem)
+        if (!space) return false
+        const b64 = encodeHashToBase64(space)
+        if (!filter.space.find(s=>encodeHashToBase64(s) === b64)) return false
+    }
+    if (filter.keyword) {
+        const keyword = filter.keyword.toLowerCase() 
+        if (!this.searchInFeedElem(elem, keyword))
+        return false
+    }
+
+    return true
+  }
+  searchInFeedElem(elem:FeedElem, keyword: string) : boolean {
+    let text = ""
+    switch(elem.type) {
+        case FeedType.SpaceNew: 
+        case FeedType.SpaceUpdate: 
+            const space = this.getSpace(elem.about)
+            if (space) {
+                text = space.record.entry.name+space.record.entry.description
+            }
+            break;
+        case FeedType.SessionNew: 
+        case FeedType.SessionUpdate: 
+            const session = this.getSession(elem.about)
+            if (space) {
+                text = session.record.entry.title+space.record.entry.description
+            }
+            break;
+        case FeedType.NoteNew:
+        case FeedType.NoteUpdate:
+            const note = this.getNote(elem.about)
+            if (note) {
+                text = note.record.entry.text
+            }
+        }
+    return text.toLowerCase().search(keyword) >= 0
+  }
+
+  getFeedElementSpace(elem:FeedElem) : ActionHash|undefined {
+    switch(elem.type) {
+        case FeedType.SpaceNew: 
+        case FeedType.SpaceUpdate: 
+            return elem.about
+    }
+    return undefined
+  }
+
+  getFeedElementTags(elem:FeedElem) : string[] {
+    switch(elem.type) {
+        case FeedType.SessionNew: 
+        case FeedType.SessionUpdate: 
+            const session = this.getSession(elem.about)
+            if (session) {
+                return session.relations.filter(ri=>
+                    ri.relation.content.path == "session.tag"
+                    ).map(ri=>ri.relation.content.data.toLowerCase())
+            }
+            break;
+        case FeedType.NoteNew:
+        case FeedType.NoteUpdate:
+            const note = this.getNote(elem.about)
+            if (note) {
+                return note.record.entry.tags
+            }
+      }
+    return []
+  }
+  
+
   filterSession(session:Info<Session>, filter: SessionsFilter) : boolean {
     const slot = this.getSessionSlot(session)
-    if (!slot && (filter.timeNow || filter.timeNext || filter.timePast || filter.timeFuture)) return false
+    if (!slot && (filter.timeNow || filter.timeToday ||  filter.timeNext || filter.timePast || filter.timeFuture)) return false
     if (slot && filter.timeUnscheduled) return false
     const now = (new Date).getTime()
 
-    if ( filter.timeNow && (now < slot.window.start || now > (slot.window.start + slot.window.duration*60))) return false
-    if ( filter.timeNext && (now < (slot.window.start + slot.window.duration*60) || now > (slot.window.start + slot.window.duration*60*60 + ONE_HOUR))) return false
-    if ( filter.timeFuture && (now < (slot.window.start + slot.window.duration*60))) return false
-    if ( filter.timeFuture && (now >= slot.window.start)) return false
+    if (slot && !filterTime(now, filter, slot.window)) return false
 
-    if (filter.involvementLeading && !session.record.entry.leaders.find(l=>encodeHashToBase64(l) === this.myPubKeyBase64))
-        return false
-    if (filter.involvementGoing || filter.involvementInterested || filter.involvementNoOpinion) {
-        const rel: SessionRelationData = this.getSessionReleationData(session)
-        if (filter.involvementGoing  && rel.myInterest != SessionInterest.Going) return false
-        if (filter.involvementInterested  && rel.myInterest != SessionInterest.Interested) return false
-        if (filter.involvementNoOpinion  && rel.myInterest != SessionInterest.NoOpinion) return false
-    }
-    for (const tag of filter.tags) {
-        const foundTag = session.relations.find(ri=>
-            ri.relation.content.path == "session.tag" &&
-            ri.relation.content.data == tag
-            )
-        if (!foundTag) return false
+    const rel: SessionRelationData = this.getSessionReleationData(session)
+    if (filter.involvementLeading || filter.involvementGoing || filter.involvementInterested || filter.involvementNoOpinion  || filter.involvementHidden || filter.involvementLeading) {
+        let found = false
+        if (filter.involvementLeading && session.record.entry.leaders.find(l=>encodeHashToBase64(l) === this.myPubKeyBase64)) found = true
+        else {
+            if (filter.involvementGoing && rel.myInterest & SessionInterestBit.Going) found = true
+            else
+            if (filter.involvementInterested && rel.myInterest & SessionInterestBit.Interested) found = true
+            else
+            if (filter.involvementHidden && rel.myInterest & SessionInterestBit.Hidden) found = true
+            else
+            if (filter.involvementNoOpinion && ((rel.myInterest & SessionInterestBit.NoOpinion) || (rel.myInterest == SessionInterestDefault))) found = true
+        }
+        if (!found) return false
+    } else if (rel.myInterest & SessionInterestBit.Hidden) return false
+
+    if (filter.tags.length > 0) {
+        let found = false
+        for (let tag of filter.tags) {
+            tag = tag.toLowerCase()
+            if (session.relations.find(ri=>
+                ri.relation.content.path == "session.tag" &&
+                ri.relation.content.data.toLowerCase() == tag
+                )) {
+                found = true;
+                break;
+            }
+        }
+        if (!found) return false
     }
     if (filter.keyword) {
-        if (session.record.entry.description.search(filter.keyword) < 0 &&
-            session.record.entry.title.search(filter.keyword) < 0)
+        const word = filter.keyword.toLowerCase() 
+        if (session.record.entry.description.toLowerCase().search(word) < 0 &&
+            session.record.entry.title.toLowerCase().search(word) < 0)
         return false
     }
     if (filter.space.length>0) {
@@ -650,7 +823,28 @@ export class EmergenceStore {
     return true
 
   }
-  
+  filterTag = (tag:string, filterName: string) => {
+    const filter = get(this.uiProps)[filterName]
+    const idx = filter.tags.indexOf(tag)
+    if (idx >= 0) {
+        filter.tags.splice(idx,1)
+    } else
+    filter.tags.push(tag)
+    this.setUIprops({"filterName": filter})
+  }
+  resetFilterAttributes = (attributes:string[], filterName: string) => {
+    const filter = get(this.uiProps)[filterName]
+    switch (filterName) {
+        case "sessionsFilter": attributes.map(a=> filter[a] =  defaultSessionsFilter()[a])
+        break;
+        case "feedFilter": attributes.map(a=> filter[a] =  defaultFeedFilter()[a])
+        break;
+    }
+    const props=[]
+    props[filterName]=filter
+    this.setUIprops(props)
+  }
+
   sessionsInSpace = (window: TimeWindow, space: Info<Space>) : Array<Info<Session>> | undefined => {
     let rel = space.relations.filter(r=>r.relation.content.path == "space.sessions")
     const sessions: HoloHashMap<ActionHash, Info<Session>> = new HoloHashMap
@@ -1056,6 +1250,109 @@ export class EmergenceStore {
     }
   }
 
+
+  async createProxyAgent(nickname: string, bio: string, location: string,  pic: EntryHash | undefined): Promise<EntryRecord<ProxyAgent>> {
+    const record = await this.client.createProxyAgent(nickname, bio, location, pic)
+    const relations = [
+        {   src: record.actionHash, // should be agent key
+            dst: record.actionHash,
+            content:  {
+                path: `feed.${FeedType.ProxyAgentNew}`,
+                data: JSON.stringify("nickname")
+            }
+        },
+    ]
+    await this.client.createRelations(relations)
+    this.fetchProxyAgents()
+    return record
+  }
+
+  async updateProxyAgent(proxyAgentHash: ActionHash, nickname: string, bio: string, location: string,  pic: EntryHash | undefined): Promise<EntryRecord<ProxyAgent>> {
+    const idx = this.getProxyAgentIdx(proxyAgentHash)
+    if (idx >= 0) {
+        const map = get(this.proxyAgents)[idx]
+
+        const updatedProxyAgent: UpdateProxyAgentInput = {
+            original_hash: proxyAgentHash,
+            previous_hash: map.record.actionHash,
+            updated_proxy_agent: {
+                nickname,
+                bio,
+                location,
+                pic,
+            }
+        }
+        const entry = map.record.entry
+        let changes = []
+        if (entry.nickname != nickname) {
+            changes.push(`nickname`)
+        }
+        if (entry.bio != bio) {
+            changes.push(`bio`)
+        }
+        if (entry.location != location) {
+            changes.push(`location`)
+        }
+        if (entry.pic != pic) {
+            changes.push(`pic`)
+        }
+        if (changes.length > 0) {
+            const record = await this.client.updateProxyAgent(updatedProxyAgent)
+            this.client.createRelations([
+                {   src: record.actionHash, // should be agent key
+                    dst: record.actionHash,
+                    content:  {
+                        path: `feed.${FeedType.ProxyAgentUpdate}`,
+                        data: JSON.stringify({changes})
+                    }
+                },
+            ])
+            this.proxyAgents.update((agents) => {
+                agents[idx].record = record
+                return agents
+            })
+            return record
+        }
+        else {
+            console.log("No changes detected ignoring...")
+        }
+    } else {
+        throw new Error(`could not find proxy agent`)
+    }
+  }
+
+  async deleteProxyAgent(mapHash: ActionHash) {
+    const idx = this.getProxyAgentIdx(mapHash)
+    if (idx >= 0) {
+        const agent = get(this.proxyAgents)[idx]
+        await this.client.deleteProxyAgent(agent.record.actionHash)
+        this.maps.update((agents) => {
+            agents.splice(idx, 1);
+            return agents
+        })
+        this.client.createRelations([
+            {   src: agent.original_hash, // should be agent key
+                dst: agent.original_hash,
+                content:  {
+                    path: `feed.${FeedType.ProxyAgentDelete}`,
+                    data: JSON.stringify("")
+                }
+            },
+        ])
+    }
+  }
+
+  async fetchProxyAgents() {
+    try {
+        const proxyAgents = await this.client.getProxyAgents()
+        this.proxyAgents.update((n) => {return proxyAgents} )
+    }
+    catch (e) {
+        console.log("Error fetching sitemaps", e)
+    }
+  }
+
+
   async fetchStuff() {
     let stuff = await this.client.getStuff(this.neededStuff)
     if (stuff.notes) {
@@ -1097,27 +1394,32 @@ export class EmergenceStore {
     }
   }
 
-  async fetchMyStuff() {
+  async fetchAgentStuff(agentPubKey) {
     try {
-        const feed = await this.client.getFeed(this.myPubKey)
-        this.myNotes.update((n) => {
-            return feed.filter(f=>f.type == FeedType.NoteNew ).map(f=>f.about)
+        const feed = await this.client.getFeed(agentPubKey)
+        this.agentNotes.update((n) => {
+            n.set(agentPubKey,feed.filter(f=>f.type == FeedType.NoteNew ).map(f=>f.about))
+            return n
         } )
-        this.mySessions.update((n) => {
-            feed.forEach(f=>{
-                if (f.type == FeedType.SessionSetInterest  && f.detail != SessionInterest.NoOpinion) {
-                    n.set(f.about,f.detail)
-                }
-                if (f.type == FeedType.SessionSetInterest  && f.detail == SessionInterest.NoOpinion) {
-                    n.delete(f.about)
-                }
+        this.agentSessions.update((n) => {
+            let si = n.get(agentPubKey)
+            if (!si) {
+                si = new HoloHashMap()
+                n.set(agentPubKey,si)
             }
-            )
+
+            feed.filter(f=>f.type == FeedType.SessionSetInterest).forEach(f=>{
+                console.log("SessionSetInterest", f.detail)
+                if (f.detail & (SessionInterestBit.NoOpinion + SessionInterestBit.Hidden) || f.detail == 0)
+                    si.delete(f.about)
+                else
+                    si.set(f.about, f.detail)
+            })
             return n
         } )
     }
     catch (e) {
-        console.log("Error fetching my stuff", e)
+        console.log("Error fetching agent stuff", e)
     }
   }
 
@@ -1142,6 +1444,16 @@ export class EmergenceStore {
         console.log("Error fetching tags", e)
     }
   }
-
+  async sync(agent: AgentPubKey | undefined) {
+    await this.getSettings()
+    await this.fetchTags()
+    await this.fetchSessions() // fetches spaces and timewindows
+    await this.fetchAgentStuff(!agent ? this.myPubKey: agent)
+    if (!agent) {
+        await this.fetchFeed()
+    }
+    await this.fetchSiteMaps()
+    await this.fetchProxyAgents()
+  }
 
 }

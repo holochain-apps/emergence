@@ -2,7 +2,7 @@
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { type Slot, type Session, type Info, amenitiesList, sessionTags, SessionInterest, sessionInterestToString } from './types';
+import { type Slot, type Session, type Info, amenitiesList, sessionTags, DetailsType, SessionInterestBit } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -11,7 +11,6 @@ import Avatar from './Avatar.svelte';
 import InterestSelect from './InterestSelect.svelte';
 import { faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
-import SpaceDetail from './SpaceDetail.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -31,7 +30,7 @@ $: relData = store.sessionReleationDataStore(store.sessionStore(session.original
 $: loading, session, slot;
 $: tags = sessionTags(session)
 $: slot = store.getSessionSlot(session)
-$: going = Array.from($relData.interest).filter(([_,i])=> i!=SessionInterest.NoOpinion)
+$: going = Array.from($relData.interest).filter(([_,i])=> i & (SessionInterestBit.Going+SessionInterestBit.Interested))
 
 onMount(async () => {
   loading = false
@@ -39,7 +38,6 @@ onMount(async () => {
     throw new Error(`The session input is required for the SessionSummary element`);
   }
 });
-let spaceDetailDialog
 $:space = slot? store.getSpace(slot.space) : undefined
 </script>
 {#if loading}
@@ -48,14 +46,12 @@ $:space = slot? store.getSpace(slot.space) : undefined
 
 </div>
 {:else}
-<SpaceDetail
-bind:this={spaceDetailDialog}
-space={undefined}>
-</SpaceDetail>
-<div class="summary" on:click={(e)=>{
+
+<div class="summary card" on:click={(e)=>{
+
   // @ts-ignore
     if (e.target.tagName != "SL-SELECT")
-      store.setUIprops({sessionDetails:session.original_hash}); 
+      store.openDetails(DetailsType.Session, session.original_hash); 
   }}>
   {#if showSlot}
     <div class="slot">
@@ -67,7 +63,7 @@ space={undefined}>
         <div class="time">
           {new Date(slot.window.start).toTimeString().slice(0,5)}
         </div>
-        <div class="space clickable" on:click={(e)=>{e.stopPropagation();spaceDetailDialog.open(space)}}>
+        <div class="space clickable" on:click={(e)=>{e.stopPropagation();store.openDetails(DetailsType.Space, space.original_hash)}}>
           {space ? space.record.entry.name : "Unknown"}
         </div>
         {:else}
@@ -80,7 +76,7 @@ space={undefined}>
       </div>
     </div>
   {/if}
-  <div class="info">
+  <div class="info clickable">
     <div class="top-area">
       <div class="left-side">
         <div class="title">
@@ -91,7 +87,9 @@ space={undefined}>
                 <div slot="content">
                   <div style="display:flex">
                     {#each going as [agent,interest]}
-                    <Avatar agentPubKey={agent}></Avatar>:{sessionInterestToString(interest)}
+                    <Avatar agentPubKey={agent}></Avatar>: 
+                      {#if interest & SessionInterestBit.Going} Going {/if}
+                      {#if interest & SessionInterestBit.Interested} Interested {/if}
                     {/each}
                     </div>
                 </div>
@@ -117,7 +115,7 @@ space={undefined}>
       {#if showTags}
         <div class="tags">
           {#each tags as tag}
-          <div class="tag">
+          <div class="tag clickable-tag" on:click={(e)=>{e.stopPropagation(); store.filterTag(tag,"sessionsFilter")}}>
             {tag}
           </div>
           {/each}
@@ -140,6 +138,22 @@ space={undefined}>
 {/if}
 
 <style>
+
+  .tag {
+    border: 1px solid #25bab054;
+    color: #25BAB1;
+    background-color: transparent;
+  }
+
+  .clickable-tag {
+    cursor: pointer;
+  }
+  .clickable-tag:hover {
+    border: 1px solid #25bab054;
+    color: #25BAB1;
+    background-color: rgb(240, 249, 2244);
+  }
+
   .time {
     font-size: 1.7em;
     margin-top: -6px;
@@ -148,21 +162,13 @@ space={undefined}>
   .date, .space {
     font-size: .7em;
   }
-  .summary {
-    display: flex;
-    flex-direction: row;
-    border: solid 1px #EFF0F3;
-    align-items: stretch;
-    max-width: 720px;
-    margin: 0 auto 10px auto;
-
-  }
   .slot {
     display: flex;
     align-items: center;
     width: 105px;
     background-color: rgba(243, 243, 245, 1.0);
     text-align: center;
+    border-radius: 10px 0 0 10px;
   }
   .slot-wrapper {
     padding: 5px;
@@ -173,7 +179,7 @@ space={undefined}>
     border-left: solid 1px rgba(239, 240, 243, 1.0);
     display: flex;
     flex-direction: column;
-    padding: 5px;
+    padding: 10px 15px;
     background-color: #fff;
     width: 100%;
   }
@@ -189,6 +195,8 @@ space={undefined}>
   .right-side {
     display: flex;
     flex: 0;
+    justify-content: center;
+    align-items: center;
     padding: 10px;
   }
 

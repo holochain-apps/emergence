@@ -4,7 +4,7 @@
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import { getContext } from "svelte";
-  import type { ProfilesStore } from "@holochain-open-dev/profiles";
+  import { DetailsType } from "./types";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -19,9 +19,14 @@
   $: nickname = $s.status == "complete" ? $s.value?.nickname : "..."
 </script>
 
-<div class="avatar-{namePosition}">
+<div class="avatar-{namePosition}"
+    on:click={(e)=>{
+        store.openDetails(DetailsType.Folk,agentPubKey)
+        e.stopPropagation()
+    }}
+    >
     {#if showAvatar}
-        <agent-avatar size={size} agent-pub-key="{encodeHashToBase64(agentPubKey)}"></agent-avatar>
+        <agent-avatar disable-tooltip={true} disable-copy={true} size={size} agent-pub-key="{encodeHashToBase64(agentPubKey)}"></agent-avatar>
     {/if}
     {#if showNickname}
         <div class="nickname">{nickname}</div>

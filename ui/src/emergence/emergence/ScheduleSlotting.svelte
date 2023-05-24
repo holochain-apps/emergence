@@ -4,16 +4,18 @@
   import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64} from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, slotEqual } from './types';
-  import {calcDays, dayToStr, sortWindows, windowsInDay} from './utils'
+  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities } from './types';
+  import { calcDays, dayToStr, sortWindows, windowsInDay} from './utils'
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
-  import { faCalendarPlus, faTrash, faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
+  import { faCalendarPlus, faTrash, faCircleArrowLeft, faArrowsUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
   import SessionSummary from './SessionSummary.svelte';
   import { HoloHashMap } from '@holochain-open-dev/utils';
   import '@shoelace-style/shoelace/dist/components/select/select.js';
   import '@shoelace-style/shoelace/dist/components/option/option.js';
+  import SessionFilterCtrls from './SessionFilterCtrls.svelte';
+  import SessionFilter from './SessionFilter.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -23,14 +25,13 @@
   let error: any = undefined;
   let creatingTimeWindow = false
   let slotType: string 
-  $: slotType  
-  let filteredDay: number | undefined
-  $: filteredDay
+  $: slotType
+  $: uiProps = store.uiProps
 
   $: loading, error, creatingTimeWindow;
   $: spaces = store.spaces
   $: windows = store.timeWindows
-  $: days = calcDays($windows, slotType, filteredDay) 
+  $: days = calcDays($windows, slotType, $uiProps.sessionsFilter) 
   $: sessions = store.sessions
 
   let selectedSessions:HoloHashMap<ActionHash,boolean> = new HoloHashMap()
@@ -38,7 +39,6 @@
   let selectedWindow: TimeWindow|undefined = undefined
 
   $: selectedSessions, selectedSpaceIdx, selectedWindow
-  $: uiProps = store.uiProps
 
   onMount(async () => {
     loading = false
@@ -97,6 +97,14 @@
 
   let draggingHandled = true
   let draggedItemId = ""
+  let draggedSession : Info<Session> | undefined
+  $: draggedAmenitiesCount =  draggedItemId ? amenitiesList(draggedSession.record.entry.amenities).length : 0
+  $: draggedSession, draggedItemId
+  $: overlappingAmenities = (space: Info<Space>) => {
+    if (!draggedItemId) return undefined
+    const overlapping =  draggedItemId && draggedSession.record.entry.amenities & space.record.entry.amenities
+    return amenitiesList(overlapping)
+  }
   let dragOn = true
   let dragTarget = ""
   function handleDragStart(e) {
@@ -104,6 +112,7 @@
     //console.log("handleDragStart", e)
     e.dataTransfer.dropEffect = "move";
     draggedItemId = e.target.getAttribute('id')
+    draggedSession = store.getSession(decodeHashFromBase64(draggedItemId))
     e.dataTransfer
       .setData("text", e.target.getAttribute('id'));
   }
@@ -173,6 +182,7 @@
   const clearDrag = () => {
     draggingHandled = true
     draggedItemId = ""
+    draggedSession = undefined
     dragTarget = ""
   }
   let dragDuration = 300
@@ -210,7 +220,7 @@
     await store.deleteTimeWindow(window)
     store.fetchTimeWindows()
   }
-  
+  let showFilter = false
 </script>
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -220,24 +230,24 @@
 <span>Error fetching the wall: {error.data.data}.</span>
 {:else}
 
+{#if showFilter}
+<SessionFilter
+on:close-filter={()=>showFilter = false}
+on:update-filter={(e)=>{store.setUIprops({sessionsFilter: e.detail})}}
+filter={$uiProps.sessionsFilter}></SessionFilter>
+{/if}
+
 <div class="pane-header">
   <div >
-    <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('slotting-close') } } circle>
+    <sl-button style="margin-left: 8px; " on:click={() => { dispatch('slotting-close') } } circle>
       <Fa icon={faCircleArrowLeft} />
     </sl-button>
-    <h3>Schedule</h3>
   </div>
   <div style="display:flex">
-    <sl-select style="margin-right: 5px;width: 150px;"
-    placeholder="Filter by Day"
-    on:sl-change={(e) => filteredDay = parseInt(e.target.value) }
-    pill
-    clearable
-    >
-      {#each days as day}
-        <sl-option value={day.getTime()}> {dayToStr(day)}</sl-option>
-      {/each}
-    </sl-select>
+    <SessionFilterCtrls
+          on:toggle-filter={()=>{showFilter = !showFilter;}}
+        ></SessionFilterCtrls>
+  
     <sl-select style="margin-right: 5px;width: 200px;"
     placeholder="Filter by Slot Type"
     on:sl-change={(e) => slotType = e.target.value }
@@ -253,16 +263,16 @@
         <Fa icon={faCalendarPlus} />
       </sl-button>
     {/if}
-    <!-- <sl-button on:click={() => {bySpace = !bySpace } } circle>
+    <sl-button on:click={() => {bySpace = !bySpace } } circle>
       <Fa icon={faArrowsUpDownLeftRight} />
-    </sl-button> -->
+    </sl-button>
   </div>
 </div>
   <div class="pane-content pane-desktop">
 
 
     {#if creatingTimeWindow}
-    <div class="modal">
+    <div class="modal create-slot">
       <CreateTimeWindow 
         on:timeWindow-created={()=>creatingTimeWindow=false}
         on:close-create-timeWindow={()=>creatingTimeWindow=false}>
@@ -300,6 +310,9 @@
             <th class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
               class:tagged={space.record.entry.tags.length > 0}
+              class:amo-bad={draggedAmenitiesCount > 0 && overlappingAmenities(space).length == 0}
+              class:amo-ok={draggedAmenitiesCount > 0 && overlappingAmenities(space).length == draggedAmenitiesCount}
+              class:amo-warn={draggedAmenitiesCount > 0 && overlappingAmenities(space).length < draggedAmenitiesCount }
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
                 {space.record.entry.name}
@@ -307,6 +320,9 @@
                   <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
                   </div>
+                {/if}
+                {#if overlappingAmenities(space)}
+                  {overlappingAmenities(space).join(", ")}
                 {/if}
             </th>
           {/each}
@@ -325,7 +341,7 @@
                 
                   {new Date(window.start).toTimeString().slice(0,5)}
                   {#if $uiProps.amSteward}
-                    <sl-button style="margin-left: 4px;" size=small on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
+                    <sl-button style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                       <Fa icon={faTrash} />
                     </sl-button>
                   {/if}
@@ -384,7 +400,7 @@
     
                 {new Date(window.start).toTimeString().slice(0,5)}
                 {#if $uiProps.amSteward}
-                  <sl-button style="margin-left: 4px;" size=small on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
+                  <sl-button style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                     <Fa icon={faTrash} />
                   </sl-button>
                 {/if}
@@ -399,6 +415,9 @@
             <td class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
               class:tagged={space.record.entry.tags.length > 0}
+              class:amo-bad={draggedAmenitiesCount > 0 && overlappingAmenities(space).length == 0}
+              class:amo-ok={draggedAmenitiesCount > 0 && overlappingAmenities(space).length == draggedAmenitiesCount}
+              class:amo-warn={draggedAmenitiesCount > 0 && overlappingAmenities(space).length < draggedAmenitiesCount }
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
                 {space.record.entry.name}{#if space.record.entry.key} ({space.record.entry.key}){/if}
@@ -406,6 +425,9 @@
                   <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
                   </div>
+                {/if}
+                {#if overlappingAmenities(space)}
+                  {overlappingAmenities(space).join(", ")}
                 {/if}
             </td>
 
@@ -534,4 +556,18 @@
   background-color: green;
 }
 
+.modal.create-slot {
+  z-index: 100;
+}
+
+
+.amo-warn {
+  background-color: lightgoldenrodyellow;
+}
+.amo-ok {
+  background-color: lightgreen;
+}
+.amo-bad {
+  background-color: lightcoral;
+}
 </style>

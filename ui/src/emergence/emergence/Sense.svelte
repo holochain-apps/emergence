@@ -4,7 +4,7 @@
   import type { Record } from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import { sessionTags, type Info, type Session, SessionInterest } from './types';
+  import { sessionTags, type Info, type Session, SessionInterestBit } from './types';
   import Avatar from './Avatar.svelte';
   import Fa from 'svelte-fa';
   import { faArrowRight, faBookmark, faStar } from '@fortawesome/free-solid-svg-icons';
@@ -26,7 +26,7 @@
    sessions = shuffle($original.filter(s=>!s.record.entry.trashed))
   });
 
-  const swipe = (interest: SessionInterest) => {
+  const swipe = (interest: SessionInterestBit) => {
     store.setSessionInterest(session.record.actionHash, interest)
     senseIdx += 1
   }
@@ -88,7 +88,7 @@
           circle
           size="large"
           label="Next"
-          on:click={() => {swipe(SessionInterest.NoOpinion)}}
+          on:click={() => {swipe(SessionInterestBit.NoOpinion)}}
         ><Fa icon={faArrowRight} /></sl-button>
           Next
         </div>
@@ -97,7 +97,7 @@
           circle
           size="large"
           label="Interested"
-          on:click={() => {swipe(SessionInterest.Interested)}}
+          on:click={() => {swipe(SessionInterestBit.Interested)}}
           ><Fa icon={faBookmark} /></sl-button>
           Interested
         </div>
@@ -106,7 +106,7 @@
           circle
           size="large"
           label="Going"
-          on:click={() => {swipe(SessionInterest.Going)}}
+          on:click={() => {swipe(SessionInterestBit.Going)}}
         ><Fa icon={faStar} /></sl-button>
           Going
         </div>

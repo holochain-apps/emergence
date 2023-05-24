@@ -12,6 +12,7 @@
     import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
     import NoteCrud from './NoteCrud.svelte';
     import Confirm from './Confirm.svelte';
+    import SessionLink from './SessionLink.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -64,12 +65,14 @@
                 {timestampToStr($note.value.record.action.timestamp)}
               </div>
             {/if}
+            <div style="display:flex">
             "{$note.value.record.entry.text.length > 50 ? 
               `${$note.value.record.entry.text.substring(0,50)}...` : 
               $note.value.record.entry.text}"
             {#if showSession}
-              in session {store.getSession($note.value.record.entry.session).record.entry.title}
+              in session <SessionLink sessionHash={$note.value.record.entry.session}></SessionLink>
             {/if}
+            </div>
             {#if $uiProps.debuggingEnabled}
             <div style="display: flex; flex-direction: row; margin-bottom: 16px">
                <span style="margin-right: 4px"><strong>Deleted:</strong></span>
@@ -91,10 +94,10 @@
           }
 
             <div class="crud">
-              <sl-button style="margin-left: 8px;" size=small on:click={()=>confirmDialog.open()} circle>
+              <sl-button style="margin-left: 8px;" on:click={()=>confirmDialog.open()} circle>
                 <Fa icon={faTrash} />
               </sl-button>
-              <sl-button style="margin-left: 8px; " size=small on:click={() => { updateNoteDialog.open($note.value) } } circle>
+              <sl-button style="margin-left: 8px; " on:click={() => { updateNoteDialog.open($note.value) } } circle>
                 <Fa icon={faEdit} />
               </sl-button>        
             </div>

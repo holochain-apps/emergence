@@ -175,7 +175,7 @@ let dialog
     {#each stewards as steward, i}
     <div style="display:flex;">
       <Avatar agentPubKey={steward}></Avatar>
-      <sl-button style="margin-left: 8px;" size=small on:click={() => deleteSteward(i)} circle>
+      <sl-button style="margin-left: 8px;" on:click={() => deleteSteward(i)} circle>
         <Fa icon={faTrash} />
       </sl-button>
 

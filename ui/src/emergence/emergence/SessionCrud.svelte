@@ -11,7 +11,7 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags } from './types';
+import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterestBit } from './types';
 import SlotSelect from './SlotSelect.svelte';
 import { encodeHashToBase64, type AgentPubKey } from '@holochain/client';
 import Avatar from './Avatar.svelte';
@@ -90,6 +90,9 @@ async function createSession() {
   try {
     const record = await store.createSession(title!, description, leaders, smallest, largest, duration, amenities, slot, tags)
 
+    if (leaders.find(l=>encodeHashToBase64(l) === store.myPubKeyBase64))
+      await store.setSessionInterest(record.actionHash, SessionInterestBit.Going )
+
     title = ""
     description = ""
     smallest = 2;
@@ -121,7 +124,12 @@ let dialog
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<sl-dialog label={session ? "Edit Session" : "Create Session"} bind:this={dialog}>
+<sl-dialog
+  on:sl-request-close={(event)=>{
+    if (event.detail.source === 'overlay') {
+      event.preventDefault();    
+  }}}
+  style="--width: 80vw;" label={session ? "Edit Session" : "Create Session"} bind:this={dialog}>
 <div style="display: flex; flex-direction: column">
   {#if session}
     Key: {session.record.entry.key}
@@ -144,7 +152,7 @@ let dialog
     {#each leaders as leader, i}
     <div style="display:flex;">
       <Avatar agentPubKey={leader}></Avatar>
-      <sl-button style="margin-left: 8px;" size=small on:click={() => deleteLeader(i)} circle>
+      <sl-button style="margin-left: 8px;" on:click={() => deleteLeader(i)} circle>
         <Fa icon={faTrash} />
       </sl-button>
 
@@ -162,28 +170,36 @@ let dialog
       allowUserOptions={true}
       />
   </div>
-  <div style="margin-bottom: 16px">
-    <sl-input
-    label="Smallest Group-Size"
-    value={isNaN(smallest)? '' : `${smallest}`}
-    on:input={e => { smallest = parseInt(e.target.value); } }
-  ></sl-input>
+  <div style="display:flex">
+    <div style="margin-bottom: 16px; display:flex; flex-direction:column">
+      <span>Group Size:</span >
+        <div style="display:flex; ">
+            <sl-input
+            style="width:70px;margin-right:10px"
+            maxlength=4
+            label="Smallest"
+            value={isNaN(smallest)? '' : `${smallest}`}
+            on:input={e => { smallest = parseInt(e.target.value); } }
+          ></sl-input>
+            <sl-input
+            style="width:70px"
+            maxlength=4
+            label="Largest"
+            value={isNaN(largest)? '' : `${largest}`}
+            on:input={e => { largest = parseInt(e.target.value); } }
+          ></sl-input>
+          </div>
+    </div>
+    <div style="margin-bottom: 16px; margin-left:50px">
+      <sl-input
+      style="width:70px"
+      maxlength=4
+      label="Duration (min)"
+      value={isNaN(duration)? '' : `${duration}`}
+      on:input={e => { duration = parseInt(e.target.value); } }
+    ></sl-input>
+    </div>
   </div>
-  <div style="margin-bottom: 16px">
-    <sl-input
-    label="Largest Group-Size"
-    value={isNaN(largest)? '' : `${largest}`}
-    on:input={e => { largest = parseInt(e.target.value); } }
-  ></sl-input>
-  </div>
-  <div style="margin-bottom: 16px">
-    <sl-input
-    label="Duration (min)"
-    value={isNaN(duration)? '' : `${duration}`}
-    on:input={e => { duration = parseInt(e.target.value); } }
-  ></sl-input>
-  </div>
-
   <div style="margin-bottom: 16px">
     <div style="font-size: 16px" on:click={()=>amenities = 0}>Required Amenities </div>
     {#each Amenities as amenity, i}
@@ -197,24 +213,24 @@ let dialog
   <SlotSelect bind:slot={slot} bind:valid={slotValid}></SlotSelect>
   {#if !slotValid} *You must select both a time and a space or neither {/if}
   {#if session}
-    <div style="display: flex; flex-direction: row">
+    <div style="display: flex; flex-direction: row; justify-content:flex-end;">
       <sl-button
       label="Cancel"
       on:click={() => dialog.hide()}
-      style="flex: 1; margin-right: 16px"
+      style=" margin-right: 16px"
       >Cancel</sl-button>
       <sl-button 
-      style="flex: 1;"
+      style=""
       on:click={() => updateSession()}
       disabled={!isSessionValid}
       variant=primary>Save</sl-button>
     </div>
   {:else}
-  <div style="display: flex; flex-direction: row">
+  <div style="display: flex; flex-direction: row; justify-content:flex-end;">
     <sl-button
     label="Cancel"
     on:click={() => {dialog.hide()}}
-    style="flex: 1; margin-right: 16px"
+    style="margin-right: 16px"
     >Cancel</sl-button>
 
     <sl-button 

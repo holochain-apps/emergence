@@ -12,6 +12,8 @@
     import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
     import NoteCrud from './NoteCrud.svelte';
     import Confirm from './Confirm.svelte';
+    import SessionLink from './SessionLink.svelte';
+    import { Marked } from "@ts-stack/markdown";
 
     const dispatch = createEventDispatcher();
 
@@ -73,10 +75,10 @@
             !$note.value.record.entry.trashed
           }
             <div class="crud">
-              <sl-button style="margin-left: 8px;" size=small on:click={()=>confirmDialog.open()} circle>
+              <sl-button style="margin-left: 8px;" on:click={()=>confirmDialog.open()} circle>
                 <Fa icon={faTrash} />
               </sl-button>
-              <sl-button style="margin-left: 8px; " size=small on:click={() => { updateNoteDialog.open($note.value) } } circle>
+              <sl-button style="margin-left: 8px; " on:click={() => { updateNoteDialog.open($note.value) } } circle>
                 <Fa icon={faEdit} />
               </sl-button>        
             </div>
@@ -98,12 +100,13 @@
       {/if}     
         {#if showSession}
         <div class="post-session"> 
-          <strong>{ session && session.record.entry.trashed ? "Deleted ":""}Session:</strong> { session ? session.record.entry.title : "unknown"}
+          <strong>{ session && session.record.entry.trashed ? "Deleted ":""}Session:</strong>
+           {#if  session}<SessionLink sessionHash={$note.value.record.entry.session}></SessionLink> {:else}unknown{/if}
         </div>         
         {/if}
 
         <div class="post-content">
-          {$note.value.record.entry.text}
+          {@html Marked.parse($note.value.record.entry.text)}
         </div>
         <div class="tags">
           {#each $note.value.record.entry.tags as tag}
@@ -140,6 +143,9 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: .25em;
+  }
+  .post-session {
+    display: flex;
   }
   .header-left {
     display: flex;

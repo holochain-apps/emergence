@@ -61,7 +61,7 @@ const setLen = (l:number) => {
         disabled={!isTimeWindowValid}
         variant=primary><Fa icon={faSave} />
       </sl-button>
-      <sl-button style="margin-left: 8px; " size=small on:click={() => { dispatch('close-create-timeWindow') } } circle>
+      <sl-button style="margin-left: 8px; " on:click={() => { dispatch('close-create-timeWindow') } } circle>
         <Fa icon={faClose} />
       </sl-button>
     </div>

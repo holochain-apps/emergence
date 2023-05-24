@@ -8,28 +8,28 @@
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
   $: uiProps = store.uiProps
 
-  export let sessionHash: ActionHash;
+  export let spaceHash: ActionHash;
   export let linkText = ""
 
   onMount(() => {
   });
 
   const handleClick = ()=> {
-    store.openDetails(DetailsType.Session, sessionHash)
+    store.openDetails(DetailsType.Space, spaceHash)
   }
-  const sessionTitle = (sessionHash: ActionHash) => {
-    const session = store.getSession(sessionHash)
-    if (session) {
-      return session.record.entry.title
+  const spaceTitle = (spaceHash: ActionHash) => {
+    const space = store.getSpace(spaceHash)
+    if (space) {
+      return space.record.entry.name
     }
-    return "<deleted session>"
+    return "<deleted space>"
   }
 </script>
 
-<div class="session-link" on:click={handleClick}>{linkText ? linkText : sessionTitle(sessionHash)}</div>
+<div class="space-link" on:click={handleClick}>{linkText ? linkText : spaceTitle(spaceHash)}</div>
 
 <style>
-    .session-link {
+    .space-link {
       margin: 0 5px 0 5px;
       cursor: pointer;
       text-decoration: underline;
