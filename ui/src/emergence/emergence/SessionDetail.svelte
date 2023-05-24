@@ -20,6 +20,8 @@ import NoteCrud from './NoteCrud.svelte';
 import NoteDetail from './NoteDetail.svelte';
 import SessionCrud from './SessionCrud.svelte';
 import { slide } from 'svelte/transition';
+import SpaceLink from './SpaceLink.svelte';
+
 
 const dispatch = createEventDispatcher();
 
@@ -129,7 +131,7 @@ bind:this={updateSessionDialog}
     await store.fetchSessions()
   } }
 ></SessionCrud>
-
+npm
 <div transition:slide={{ axis: 'x', duration: 400 }}  class="pane-content">
   <div class="pane-header">
 
@@ -149,7 +151,6 @@ bind:this={updateSessionDialog}
     <span style="flex: 1"></span>
  
   </div>
-  <div class="event-image"></div>
  
   <Confirm bind:this={confirmDialog}
     message="This will remove this session for everyone!" on:confirm-confirmed={deleteSession}></Confirm>
@@ -209,7 +210,7 @@ bind:this={updateSessionDialog}
       </div>
       <div style="display: flex; flex-direction: row; margin-bottom: 16px">
         {#if slot}
-        Scheduled in {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"} on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
+        Scheduled in <SpaceLink spaceHash={slot.space}></SpaceLink> on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
         {/if}
       </div>
     </div>
