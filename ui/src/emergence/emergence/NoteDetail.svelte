@@ -14,7 +14,7 @@
     import Confirm from './Confirm.svelte';
     import SessionLink from './SessionLink.svelte';
     import { Marked } from "@ts-stack/markdown";
-  import { truncateText } from './utils';
+    import { truncateText } from './utils';
 
     const dispatch = createEventDispatcher();
 

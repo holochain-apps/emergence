@@ -21,7 +21,7 @@ import NoteDetail from './NoteDetail.svelte';
 import SessionCrud from './SessionCrud.svelte';
 import { slide } from 'svelte/transition';
 import SpaceLink from './SpaceLink.svelte';
-
+import { Marked } from "@ts-stack/markdown";
 
 const dispatch = createEventDispatcher();
 
@@ -166,7 +166,7 @@ bind:this={updateSessionDialog}
             <AnyAvatar agent={leader}></AnyAvatar>
           {/each}
         </div>
-        <div class="description">{ entry.description }</div>
+        <div class="description"> {@html Marked.parse(entry.description) }</div>
         <div class="tags">
           {#each tags as tag}
             <div class="tag">
