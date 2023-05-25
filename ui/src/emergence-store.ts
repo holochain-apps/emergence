@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
@@ -679,6 +679,37 @@ export class EmergenceStore {
     })
     return Array.from(sessions.values()).sort((a,b)=>a.window.start - b.window.start);
   }
+
+  async mergeSessions(sessionHashA: ActionHash, sessionHashB: ActionHash) {
+    const sessionA = this.getSession(sessionHashA)
+    const sessionB = this.getSession(sessionHashB)
+    
+    const title = `${sessionA.record.entry.title} & ${sessionB.record.entry.title}`
+    const description = `${sessionA.record.entry.description} \n\n--------\n\n ${sessionB.record.entry.description}`
+    const leaders = sessionA.record.entry.leaders
+    sessionB.record.entry.leaders.forEach(lb=> {
+        const lbB64 = encodeHashToBase64(lb.hash)
+        if (!leaders.find(la=> lbB64 == encodeHashToBase64(la.hash))) {
+            leaders.push(lb)
+        }
+    })
+    const smallest = Math.min(sessionA.record.entry.smallest, sessionB.record.entry.smallest)
+    const largest = Math.max(sessionA.record.entry.largest, sessionB.record.entry.largest)
+    const duration = Math.max(sessionA.record.entry.duration, sessionB.record.entry.duration)
+    const amenities = sessionA.record.entry.duration | sessionB.record.entry.duration
+    const slot = this.getSessionSlot(sessionA)
+    const tags = sessionTags(sessionA)
+    sessionTags(sessionB).forEach(t=> {
+        if (!tags.includes(t)) {
+            tags.push(t)
+        }
+    })
+    await this.createSession(title,description,leaders,smallest,largest,duration,amenities,slot,tags)
+    await this.updateSession(sessionHashA, {trashed: true})
+    await this.updateSession(sessionHashB, {trashed: true})
+    await this.fetchSessions()
+  }
+
 
   filterFeedElem(elem:FeedElem, filter: FeedFilter) : boolean {
 

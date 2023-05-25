@@ -108,6 +108,7 @@
   }
   let dragOn = true
   let dragTarget = ""
+  let mergeTarget = ""
   function handleDragStart(e) {
     draggingHandled = false
     //console.log("handleDragStart", e)
@@ -123,9 +124,13 @@
   }
 
   function handleDragEnter(e) {
-    const elem = findDropSlotParentElement(e.target as HTMLElement)
+    const target = e.target as HTMLElement
+    const elem = findDropSlotParentElement(target)
     if (!elem.classList.contains("excluded")) {
       dragTarget = elem ? elem.id : ""
+      if (target.id.startsWith("uhCk") && target.id != draggedItemId) {
+        mergeTarget = target.id
+      }
     }
   }
 
@@ -133,6 +138,9 @@
     const target = e.target as HTMLElement
     if (target.id == dragTarget) {
       dragTarget = ""
+    }
+    if (target.id == mergeTarget) {
+      mergeTarget = ""
     }
   }
 
@@ -149,22 +157,34 @@
 
   async function handleDragDropSession(e:DragEvent) {
     e.preventDefault();
-    const target = findDropSlotParentElement(e.target as HTMLElement)
-    if (target.classList.contains("excluded")) {
+    const target = e.target as HTMLElement
+    const elem = findDropSlotParentElement(target)
+    if (elem.classList.contains("excluded")) {
       clearDrag()
       return
     }
 
+    if (target.id == mergeTarget) {
+      if (confirm("Merge Sessions?")) {
+        await store.mergeSessions(decodeHashFromBase64(mergeTarget), decodeHashFromBase64(draggedItemId))
+        clearDrag()
+        return
+      }
+    }
+
     var srcId = e.dataTransfer.getData("text");
 
-    const [windowJSON,idx] = target.id.split("-")
+    const [windowJSON,idx] = elem.id.split("-")
     const space = $spaces[parseInt(idx)]
     const slot = {window:JSON.parse(windowJSON), space:space.original_hash}
     const sessionHash = decodeHashFromBase64(srcId)
 
     const session = store.getSession(sessionHash)
     const sessionSlot = store.getSessionSlot(session)
-    if (target.id && (!sessionSlot || JSON.stringify(sessionSlot.window) != windowJSON) || encodeHashToBase64(slot.space) != encodeHashToBase64(sessionSlot.space)) {
+
+
+
+    if (elem.id && (!sessionSlot || JSON.stringify(sessionSlot.window) != windowJSON) || encodeHashToBase64(slot.space) != encodeHashToBase64(sessionSlot.space)) {
       await store.slot(sessionHash, slot)
       spaces = store.spaces
     }
@@ -185,6 +205,7 @@
     draggedItemId = ""
     draggedSession = undefined
     dragTarget = ""
+    mergeTarget = ""
   }
   let dragDuration = 300
 
@@ -364,9 +385,13 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
                     <div class="slotted-session"
                     id={encodeHashToBase64(session.original_hash)}
                     class:tilted={draggedItemId == encodeHashToBase64(session.original_hash)}
+                    class:mergable={mergeTarget == encodeHashToBase64(session.original_hash)}
                     draggable={dragOn}
                     on:dragstart={handleDragStart}
-                    on:dragend={handleDragEnd}              
+                    on:dragend={handleDragEnd}
+                    on:dragenter={handleDragEnter} 
+                    on:dragleave={handleDragLeave}  
+                    on:dragover={handleDragOver}  
                     >
                       {session.record.entry.title}
                     </div>
@@ -457,9 +482,13 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
                     <div class="slotted-session"
                     id={encodeHashToBase64(session.original_hash)}
                     class:tilted={draggedItemId == encodeHashToBase64(session.original_hash)}
+                    class:mergable={mergeTarget == encodeHashToBase64(session.original_hash)}
                     draggable={dragOn}
                     on:dragstart={handleDragStart}
-                    on:dragend={handleDragEnd}              
+                    on:dragend={handleDragEnd}
+                    on:dragenter={handleDragEnter} 
+                    on:dragleave={handleDragLeave}  
+                    on:dragover={handleDragOver}  
                     >
                       {session.record.entry.title}
                     </div>
@@ -562,7 +591,9 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   z-index: 100;
 }
 
-
+.mergable {
+  background-color: aqua;
+}
 .amo-warn {
   background-color: lightgoldenrodyellow;
 }

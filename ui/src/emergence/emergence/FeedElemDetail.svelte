@@ -29,7 +29,7 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
       created session: <SessionLink sessionHash={feedElem.about}></SessionLink>
     {/if}
     {#if feedElem.type === FeedType.SessionUpdate}
-    Updated session: <SessionLink sessionHash={feedElem.about} linkText={feedElem.detail.title}></SessionLink>  changes: {feedElem.detail.changes.join("; ")}
+    updated session: <SessionLink sessionHash={feedElem.about} linkText={feedElem.detail.title}></SessionLink>  changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SessionDelete}
     Deleted session: {feedElem.detail}
