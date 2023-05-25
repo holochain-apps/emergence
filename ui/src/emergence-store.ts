@@ -248,6 +248,9 @@ export class EmergenceStore {
     if (rels.length == 0) return undefined
     rels.sort((a,b)=>b.timestamp - a.timestamp)
     const rel = rels[0]
+    if (!rel.relation.content.data) {
+        return undefined
+    }
     const window = JSON.parse(rel.relation.content.data) as TimeWindow
     return {
         space: rel.relation.dst,
@@ -277,11 +280,13 @@ export class EmergenceStore {
     if (spaces.length > 0) {
       let ri = spaces[spaces.length-1]
       const r = ri.relation
-      const window = JSON.parse(r.content.data) as TimeWindow
-              rel.slot = {
-                  space: r.dst,
-                  window
-              }
+      if (r.content.data) {
+        const window = JSON.parse(r.content.data) as TimeWindow
+        rel.slot = {
+            space: r.dst,
+            window
+        }
+      } else rel.slot = undefined
     }
 
     const interest = session.relations.filter(r=>r.relation.content.path === "session.interest")
@@ -341,6 +346,37 @@ export class EmergenceStore {
     return notes
   }
   
+  async unslot(sessionHash: ActionHash) {
+    const session = this.getSession(sessionHash)
+    const sessionSlot = this.getSessionSlot(session)
+
+    // const nullSpace = decodeHashFromBase64("uhCkk______________________")
+    await this.client.createRelations([
+        {   src: sessionHash,
+            dst: sessionSlot.space,
+            content:  {
+                path: "session.space",
+                data: ""
+            }
+        },
+        {   src: sessionSlot.space,
+            dst: sessionHash,
+            content:  {
+                path: "space.sessions",
+                data: ""
+            }
+        },
+        {   src: sessionHash, // should be agent key
+            dst: sessionHash,
+            content:  {
+                path: `feed.${FeedType.SlotSession}`,
+                data: JSON.stringify({space:undefined, window: undefined})
+            }
+        },
+    ]
+    )
+    await this.fetchSessions()
+  }
 
   async slot(session: ActionHash, slot: Slot) {
     const space = this.getSpace(slot.space)
@@ -671,8 +707,10 @@ export class EmergenceStore {
         const session = this.getSession(ri.relation.dst)
         if (session  && !session.record.entry.trashed) {
             const slot = this.getSessionSlot(session)
-            if (encodeHashToBase64(slot.space) == encodeHashToBase64(space.original_hash)) {
-            const s = sessions.set(session.original_hash, {session,window:JSON.parse(ri.relation.content.data)})
+            if (slot) {
+                if (encodeHashToBase64(slot.space) == encodeHashToBase64(space.original_hash)) {
+                const s = sessions.set(session.original_hash, {session,window:JSON.parse(ri.relation.content.data)})
+                }
             }
         }
       }

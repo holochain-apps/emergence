@@ -47,7 +47,11 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     deleted space {feedElem.detail}
     {/if}
     {#if feedElem.type === FeedType.SlotSession}
-    scheduled <SessionLink sessionHash={feedElem.about}></SessionLink> into {feedElem.detail.space} for <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary> 
+      {#if feedElem.detail.space}
+        scheduled <SessionLink sessionHash={feedElem.about}></SessionLink> into {feedElem.detail.space} for <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary> 
+      {:else}
+        unscheduled <SessionLink sessionHash={feedElem.about}></SessionLink>
+      {/if}
     {/if}
     {#if feedElem.type === FeedType.NoteNew}
       <NoteDetail noteHash={feedElem.about}></NoteDetail>

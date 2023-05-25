@@ -44,7 +44,7 @@ const getSlottedSessions = () :Array<SlottedSession>=> {
     if (ri.relation.content.path == "space.sessions") {
       const session = store.getSession(ri.relation.dst)
       const slot = store.getSessionSlot(session)
-      if (encodeHashToBase64(slot.space) == encodeHashToBase64(space.original_hash)) {
+      if (slot && encodeHashToBase64(slot.space) == encodeHashToBase64(space.original_hash)) {
         const s = sessions.set(session.original_hash, {session,window:JSON.parse(ri.relation.content.data)})
       }
     }

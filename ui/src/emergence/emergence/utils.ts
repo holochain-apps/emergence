@@ -1,5 +1,5 @@
 import type { Timestamp } from "@holochain/client"
-import type { Info, Session, SessionsFilter, TimeWindow } from "./types"
+import type { Info, Session, SessionsFilter, Slot, TimeWindow } from "./types"
 
 // @ts-ignore
 export const sortWindows = (a,b) : number => {return new Date(a.start) - new Date(b.start)}
@@ -86,4 +86,10 @@ export const sessionHasTags = (session: Info<Session>, tags: string[]) : boolean
       }
   }
   return found
+}
+
+export const sortSlot = (a:Slot|undefined, b: Slot|undefined) => {
+  const valA = a == undefined ? 0 : a.window.start
+  const valB = b == undefined ? 0 : b.window.start
+  return valA - valB
 }
