@@ -12,17 +12,25 @@
   export let forAgent: AgentPubKey| undefined = undefined
 
   $: agentSessions = store.agentSessions
-  $: sessions = forAgent ? $agentSessions.get(forAgent) : undefined
-  $: agentSessionsb64 = Array.from(sessions ? sessions : []).map(([s,_])=> encodeHashToBase64(s))
+  $: sessions = forAgent ? $agentSessions.get(forAgent).keys() : undefined
+  $: agentSessionsb64 = Array.from(sessions ? sessions : []).map((s)=> encodeHashToBase64(s))
   $: fullFeed = store.feed
   $: uiProps = store.uiProps
   $: agentB64 = forAgent ? encodeHashToBase64(forAgent) : undefined
-  $: feed = !forAgent ? $fullFeed.filter(f=>store.filterFeedElem(f,$uiProps.feedFilter)) : $fullFeed.filter(f=> {
-      encodeHashToBase64(f.author) == agentB64 ||
-      agentSessionsb64.includes(encodeHashToBase64(f.about))
-     }
-    )
+  $: feed = filteredFeed($fullFeed)
   $: error;
+
+
+  const filteredFeed = (fullFeed) => {
+    if (!forAgent) {
+      return fullFeed.filter(f=>store.filterFeedElem(f,$uiProps.feedFilter)) 
+    }
+    // show anything about any of the sessions we are intersted in
+    const feed =  fullFeed.filter(f=> 
+        agentSessionsb64.includes(encodeHashToBase64(f.about))
+      )
+    return feed
+  }
 
   onMount(async () => {
     await store.fetchFeed();
@@ -31,6 +39,7 @@
   });
 
 </script>
+
 {#if error}
 <span>Error fetching the feed: {error.data.data}.</span>
 {:else if feed.length === 0}

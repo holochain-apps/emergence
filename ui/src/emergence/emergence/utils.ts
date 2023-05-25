@@ -67,3 +67,8 @@ export const calcDays = (windows, slotTypeFilter, filter: SessionsFilter): Array
  days.sort((a,b)=> a-b)
  return days
 }
+
+export const truncateText = (text, len) => {
+  if (text.length <= len) return text
+  return `${text.slice(0,len)}...`
+}

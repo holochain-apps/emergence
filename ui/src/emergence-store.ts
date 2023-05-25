@@ -1406,13 +1406,20 @@ export class EmergenceStore {
                 si = new HoloHashMap()
                 n.set(agentPubKey,si)
             }
-
-            feed.filter(f=>f.type == FeedType.SessionSetInterest).forEach(f=>{
-                if (f.detail & (SessionInterestBit.NoOpinion + SessionInterestBit.Hidden) || f.detail == 0)
-                    si.delete(f.about)
-                else
-                    si.set(f.about, f.detail)
+            console.log("FISHx", feed, encodeHashToBase64(agentPubKey))
+            feed.forEach(f=>{
+                if (f.type == FeedType.SessionSetInterest) {
+                    if (f.detail & (SessionInterestBit.NoOpinion + SessionInterestBit.Hidden) || f.detail == 0) {
+                        console.log("Deleting", f)
+                        si.delete(f.about)
+                    }
+                    else {
+                        console.log("Setting", f)
+                        si.set(f.about, f.detail)
+                    }
+                }
             })
+            n.set(agentPubKey,si)
             return n
         } )
     }
