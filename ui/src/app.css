@@ -229,6 +229,12 @@ html{
 .pane-desktop{
   width: 100vw;
 }
+.wrap-row {
+  display: flex; flex-direction: row;flex-wrap: wrap;
+} 
+.center-row {
+  display: flex; flex-direction: row; margin-bottom: 16px; align-items: center;
+}
 
 .filter-modal {
   max-width: 90%;
@@ -237,16 +243,37 @@ html{
   position: absolute;
   top: 0px;
   right: 0px;
-  display: flex; flex-direction: column;
-  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  max-height: 100vh;
   z-index: 10;
   box-shadow: 0px 0px 20px rgba(0, 0, 0, .15);
 }
 
+.discover {
+  width: 100%;
+  display: block;
+  flex-direction: column;
+}
+.discover-section {
+  display: flex;
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+  justify-content: center;
+}
+
+.discover-section.feed {
+  padding-bottom: 100px;
+}
+
+.discover-filter {
+  padding: 20px 0;
+}
 
 @media (min-width: 720px) {
   .filter-modal {
-    height: calc(100% - 56px);
+    height: calc(100vh - 56px);
   }
 }
 
@@ -321,17 +348,12 @@ body {
  }
 
  .slot-wrapper {
-  height: 50px;
-  width: 50px;
   font-size: 24px;
   font-weight: bold;
-  border: 3px solid rgba(116, 116, 122, 1.0);
-  color: rgba(116, 116, 122, 1.0);
   border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: .5;
  }
 
  .button-group {
@@ -340,8 +362,6 @@ body {
 
 .info {
   width: 100%;
-  flex-stretch: 1;
-  background-color: #fff;
 }
 
 .left-side {

@@ -68,42 +68,18 @@
             </sl-button>
         </div>
     </div>
-</div>
-{#if showFilter}
-<FeedFilter
-    on:close-filter={()=>showFilter = false}
-    on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
-    filter={$uiProps.feedFilter}></FeedFilter>
-{/if}
-<div class="pane-content flex-center discover">
-    <div class="discover-section">
-        {#if $settings.game_active}
-            <Sense></Sense>
+    <div class="discover-filter">
+        {#if showFilter}
+        <FeedFilter
+            on:close-filter={()=>showFilter = false}
+            on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
+            filter={$uiProps.feedFilter}></FeedFilter>
         {/if}
-    </div>
-    <div class="discover-section">
-        <TagCloud></TagCloud>
     </div>
     <div class="discover-section feed" style="">
         <Feed></Feed>            
     </div>
 </div>
-
 <style>
-    .discover {
-        width: 100%;
-        display: block;
-        flex-direction: column;
-    }
-    .discover-section {
-        display: flex;
-        width: 100%;
-        max-width: 720px;
-        margin: 0 auto;
-        justify-content: center;
-    }
 
-    .discover-section.feed {
-        padding-bottom: 100px;
-    }
 </style>

@@ -69,7 +69,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 {:else}
 
 
-<div class="SpaceSummary summary"
+<div class="SpaceSummary card summary"
   on:click={() => dispatch('space-selected', space)}
  >
   <div class="pic">
@@ -101,11 +101,6 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
           <span style="margin-right:5px">{slottedSessions.length}</span><Fa icon={faFlag}></Fa>
         </sl-tooltip>
       </div>
-    </div>
-    <div class="stewards">
-      {#each space.record.entry.stewards as steward}
-        <Avatar agentPubKey={steward}></Avatar>
-      {/each}
     </div>
     <div class="amenities">
       {amenitiesList(space.record.entry.amenities).join(", ")}
@@ -139,8 +134,16 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
   }
   .amenities {
     display: flex;
+    font-size: 12px;
+    opacity: .5;
     flex-direction: row;
   }
+
+  .info {
+    justify-content: center;
+    padding: 0 15px;
+  }
+
   .sessions {
     display: flex;
     flex-direction: row;
@@ -150,7 +153,11 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
     flex-direction: row;
   }
   .pic {
-     width: 100px;
-     border-right: solid 1px gray;
+    width: 100px;
+    border-radius: 10px 0 0 10px;
+  }
+
+  .pic img {
+    border: 1px solid red;
   }
 </style> 

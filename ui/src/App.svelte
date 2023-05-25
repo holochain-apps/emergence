@@ -297,11 +297,6 @@
 
       {#if pane=="spaces.list"}
       <div class="pane spaces">
-        {#if $uiProps.amSteward}
-          <div class="pill-button" on:click={() => {createSpaceDialog.open(undefined) } }>
-            <span>+</span> Create
-          </div>
-        {/if}
         <AllSpaces
           on:all-spaces-close={()=>store.setPane("spaces")}
         ></AllSpaces>

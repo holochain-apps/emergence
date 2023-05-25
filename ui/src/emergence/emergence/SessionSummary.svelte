@@ -48,7 +48,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
 </div>
 {:else}
 
-<div class="summary card" on:click={(e)=>{
+<div class="SessionSummary summary card" on:click={(e)=>{
 
   // @ts-ignore
     if (e.target.tagName != "SL-SELECT")
@@ -59,7 +59,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
       <div class="slot-wrapper">
         {#if slot}
         <div class="date">
-          {new Date(slot.window.start).toDateString().slice(0,10)}
+          {new Date(slot.window.start).toLocaleString('en-US', { weekday: 'long' })}
         </div>
         <div class="time">
           {new Date(slot.window.start).toTimeString().slice(0,5)}
@@ -156,22 +156,27 @@ $:space = slot? store.getSpace(slot.space) : undefined
   }
 
   .time {
-    font-size: 1.7em;
-    margin-top: -6px;
-    margin-bottom: -2px;
+    font-size: 24px;
+    margin-top: -3px;
+    margin-bottom: -3px;
   }
   .date, .space {
-    font-size: .7em;
+    font-size: 12px;
+    line-height: 12px;
+    font-weight: normal;
+    margin-bottom: 0;
+    opacity: .5;
   }
   .slot {
     display: flex;
     align-items: center;
+    background: rgba(206, 205, 206, .25);
     width: 105px;
-    background-color: rgba(243, 243, 245, 1.0);
     text-align: center;
     border-radius: 10px 0 0 10px;
   }
   .slot-wrapper {
+    flex-direction: column;
     padding: 5px;
     width: 100%;
     height: 75px;

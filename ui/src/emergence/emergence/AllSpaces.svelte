@@ -18,6 +18,7 @@ let spaceDetail: Info<Space> | undefined
 
 $: spaces = store.spaces
 $: error, spaceDetail;
+$: uiProps = store ? store.uiProps : undefined
 
 onMount(async () => {
   store.fetchSpaces();
@@ -31,6 +32,11 @@ onMount(async () => {
       <sl-button style="margin-left: 8px; " on:click={() => { dispatch('all-spaces-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
+      {#if $uiProps.amSteward}
+        <div class="pill-button" on:click={() => {createSpaceDialog.open(undefined) } }>
+          <span>+</span> Create
+        </div>
+      {/if}
     </div>
   </div>
 
@@ -55,6 +61,10 @@ onMount(async () => {
 </div>
 
 <style>
+  .pill-button {
+    margin-left: 10px;
+  }
+
   .notice {
     display: block;
     text-align: center;

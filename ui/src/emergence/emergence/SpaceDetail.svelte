@@ -91,12 +91,7 @@ let confirmDialog
       </div>
       {/if}
     </div>
-
-    <h3>{ space? space.record.entry.name : "" }</h3>
-
     <span style="flex: 1"></span>
-
- 
   </div>
 
 
@@ -106,6 +101,7 @@ let confirmDialog
     on:confirm-confirmed={deleteSpace}>
   </Confirm>
 <div class="space-detail">
+  <h3>{ space? space.record.entry.name : "" }</h3>
   {#if $uiProps.debuggingEnabled}
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
