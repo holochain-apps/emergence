@@ -81,6 +81,4 @@ onMount(() => {
   </div>
   </div>
 <style>
-
-
 </style>

@@ -61,12 +61,30 @@
             <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["space"],"feedFilter")}} >
                 <Fa size="sm" icon={faMap} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
             {/if}
-
-            <sl-button style=" " on:click={() => { showFilter = !showFilter } } circle>
+        </div>
+        <div class="section-controls">
+            <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } circle>
                 <Fa icon={faFilter} />
             </sl-button>
         </div>
-
+    </div>
+</div>
+{#if showFilter}
+<FeedFilter
+    on:close-filter={()=>showFilter = false}
+    on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
+    filter={$uiProps.feedFilter}></FeedFilter>
+{/if}
+<div class="pane-content flex-center discover">
+    <div class="discover-section">
+        {#if $settings.game_active}
+            <Sense></Sense>
+        {/if}
+    </div>
+    <div class="discover-section">
+        <TagCloud></TagCloud>
+    </div>
+    <div class="discover-section feed" style="">
         <Feed></Feed>            
     </div>
 </div>
@@ -85,4 +103,7 @@
         justify-content: center;
     }
 
+    .discover-section.feed {
+        padding-bottom: 100px;
+    }
 </style>

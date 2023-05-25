@@ -83,6 +83,10 @@ input, button {
   z-index: 3;
 }
 
+upload-files div {
+  border: 1px solid red;
+}
+
 .nav-button {
   flex: 1;
   text-align: center;
@@ -95,16 +99,19 @@ input, button {
   justify-content: center;
   height: 50px;
   max-width: 50px;
-  border-radius: 50%;
   padding: 5px;
   margin: 5px;
   background-color: transparent;
   color: rgba(86, 94, 109, 1);
   transition: color .25s ease;
+  
 }
 
 .nav-button.selected {
-  background-color: var(--secondary-color);
+  background: linear-gradient(228.21deg, #8E2FD8 0%, #2F87D8 94.99%);
+  box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.15);
+  color: rgba(255,255,255,1);
+  padding: 0 20px;
 }
 
 
@@ -176,6 +183,8 @@ input, button {
   align-items: center;
   align-content: center;
   display: flex;
+  position: sticky;
+  top: 0;
 }
 
 .header-content {
@@ -207,7 +216,9 @@ input, button {
 .section-controls {
   display: flex; 
   flex-direction: row;
-  align-self:center
+  align-self: center;
+  position: sticky;
+  top: 30px;
 }
 
 /*color theme*/
@@ -217,6 +228,26 @@ html{
 
 .pane-desktop{
   width: 100vw;
+}
+
+.filter-modal {
+  max-width: 90%;
+  background-color: white;
+  padding: 10px;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  display: flex; flex-direction: column;
+  max-height: 100%;
+  z-index: 10;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, .15);
+}
+
+
+@media (min-width: 720px) {
+  .filter-modal {
+    height: calc(100% - 56px);
+  }
 }
 
 /*debug*/
@@ -230,9 +261,155 @@ html{
   background-color: #ff00ff;
 }
 
+main {
+  padding: 0em;
+  max-width: 100%;
+  margin: 0 auto;
+}
+body {
+  background-color: #fff;
+}
+.pane {
+  position: relative;
+}
 
+:global(sl-dialog) {
+  z-index: 10000000;
+  position: relative;
+  display: block;
+}
+
+:global(.modal) {
+  background-color: white;
+  padding: 10px;
+  position: absolute;
+  top: 5px;
+
+  border: solid 1px;
+  display: flex; flex-direction: column;
+  max-height: 100%;
+  overflow: auto;
+}
+
+.create-session {
+ max-width: 720px;
+ border: 1px solid rgba(239, 240, 243, 1.0);
+ display: flex;
+ background-color: rgba(243, 243, 245, 1.0);
+ width: 100%;
+ opacity: .6;
+  transition: all .25s ease;
+
+}
+
+.create-session:hover {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.summary {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+
+ .slot {
+   width: 95px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+ }
+
+ .slot-wrapper {
+  height: 50px;
+  width: 50px;
+  font-size: 24px;
+  font-weight: bold;
+  border: 3px solid rgba(116, 116, 122, 1.0);
+  color: rgba(116, 116, 122, 1.0);
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: .5;
+ }
+
+ .button-group {
+  display: flex;
+ }
+
+.info {
+  width: 100%;
+  flex-stretch: 1;
+  background-color: #fff;
+}
+
+.left-side {
+  padding: 10px;
+}
+
+.left-side p {
+  opacity: .5;
+  font-size: 12px;
+}
+
+.selected {
+  color: rgba(22, 26, 30, 1);
+  background-color: transparent;
+}
+
+.nav-button.selected .button-title {
+  font-weight: bold;
+}
+
+.nav-button:hover {
+  color: rgba(22, 26, 30, 1);
+  cursor: pointer;
+}
+
+.nav-button:active {
+  background-color: #4f2f39;
+  color: #fceed7;
+  cursor: pointer;
+}
+
+.pane {
+  width: 100vw;
+}
+
+#content {
+  height: 100vh;
+}
+
+.spinning {
+animation: spin-animation 1s infinite;
+}
+
+@keyframes spin-animation {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(359deg);
+  }
+}
+
+.session-details {
+  background-color: white;
+  position: absolute;
+  border: solid 1px;
+  display: flex; flex-direction: column;
+  height: 100vh;
+  top: 0;
+  left: 0;
+  overflow: auto;
+  z-index: 100;
+}
 
 @media (min-width: 720px) {
+  .create-session {
+    display: none;
+  }
   .nav {
     top: 0;
     bottom: auto;
@@ -276,6 +453,7 @@ html{
   .pane-content {
     height: auto;
     padding-top: 10px;
+    padding-bottom: 100px;
   }
 
   .pane {

@@ -201,7 +201,7 @@
 
       <file-storage-context client={fileStorageClient}>
       {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.ProxyAgent }
-      <div class="session-details" style="height:100vh">
+      <div class="session-details">
         <ProxyAgentDetail
           on:proxyagent-deleted={()=>store.closeDetails()}
           on:proxyagent-close={()=>store.closeDetails()}
@@ -210,7 +210,7 @@
       </div>
       {/if}
       {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Space }
-      <div class="session-details" style="height:100vh">
+      <div class="session-details">
         <SpaceDetail
           on:space-deleted={()=>store.closeDetails()}
           on:space-close={()=>store.closeDetails()}
@@ -219,7 +219,7 @@
       </div>
       {/if}
       {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Session }
-      <div class="session-details" style="height:100vh">
+      <div class="session-details">
         <SessionDetail 
         on:session-deleted={()=>store.closeDetails()}
         on:session-close={()=>store.closeDetails()}
@@ -227,7 +227,7 @@
       </div>
     {/if}
     {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Folk }
-    <div class="session-details" style="height:100vh">
+    <div class="session-details">
         <Folk 
         on:folk-close={()=>store.closeDetails()}
         agentPubKey={$uiProps.detailsStack[0].hash}></Folk>
@@ -377,150 +377,5 @@
 </main>
 
 <style>
-  main {
-    padding: 0em;
-    max-width: 100%;
-    margin: 0 auto;
-  }
-  body {
-    background-color: #fff;
-  }
-  .pane {
-    position: relative;
-  }
 
-  :global(sl-dialog) {
-    z-index: 10000000;
-    position: relative;
-    display: block;
-  }
-
-  :global(.modal) {
-    background-color: white;
-    padding: 10px;
-    position: absolute;
-    top: 5px;
-
-    border: solid 1px;
-    display: flex; flex-direction: column;
-    max-height: 100%;
-    overflow: auto;
-  }
-
-  .create-session {
-   max-width: 720px;
-   border: 1px solid rgba(239, 240, 243, 1.0);
-   display: flex;
-   background-color: rgba(243, 243, 245, 1.0);
-   width: 100%;
-   opacity: .6;
-    transition: all .25s ease;
-
-  }
-
-  .create-session:hover {
-    opacity: 1;
-    cursor: pointer;
-  }
-
-  .summary {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-  }
-
-   .slot {
-     width: 95px;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-   }
-
-   .slot-wrapper {
-    height: 50px;
-    width: 50px;
-    font-size: 24px;
-    font-weight: bold;
-    border: 3px solid rgba(116, 116, 122, 1.0);
-    color: rgba(116, 116, 122, 1.0);
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: .5;
-   }
-
-   .button-group {
-    display: flex;
-   }
-
-  .info {
-    width: 100%;
-    flex-stretch: 1;
-    background-color: #fff;
-  }
-
-  .left-side {
-    padding: 10px;
-  }
-
-  .left-side p {
-    opacity: .5;
-    font-size: 12px;
-  }
-
-  .selected {
-    color: rgba(22, 26, 30, 1);
-    background-color: transparent;
-  }
-
-  .nav-button.selected .button-title {
-    font-weight: bold;
-  }
-
-  .nav-button:hover {
-    color: rgba(22, 26, 30, 1);
-    cursor: pointer;
-  }
-
-  .nav-button:active {
-    background-color: #4f2f39;
-    color: #fceed7;
-    cursor: pointer;
-  }
-
-  .pane {
-    width: 100vw;
-  }
-
-  #content {
-    height: 100vh;
-  }
-
-
-  .spinning {
-  animation: spin-animation 1s infinite;
-}
-@keyframes spin-animation {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(359deg);
-  }
-}
-  .session-details {
-    background-color: white;
-    position: absolute;
-    border: solid 1px;
-    display: flex; flex-direction: column;
-    height: calc(100vh - 76px);
-    overflow: auto;
-    z-index: 100;
-  }
-@media (min-width: 720px) {
-  .create-session {
-    display: none;
-  }
-}
 </style>

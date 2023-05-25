@@ -80,57 +80,80 @@
         <sl-spinner></sl-spinner>
     </div>
 {:else}
-
-<div class="pane-header">
-    <div class="header-content">
-        <h3>Spaces</h3>
-        <div style="display: flex; flex-direction: row; align-self:center">
-            <sl-button style="" on:click={() => { dispatch('show-all-spaces') } } circle>
-                <Fa icon={faList} />
-            </sl-button>
+    <div class="SiteMapDisplay">
+        <div class="pane-header">
+            <div class="header-content">
+                <h3>Spaces</h3>
+                <div style="display: flex; flex-direction: row; align-self:center">
+                    <sl-button style="" on:click={() => { dispatch('show-all-spaces') } } >
+                        List View <Fa icon={faList} />
+                    </sl-button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
-<div class="pane-content">
-
-        <div class="pic" use:watchResize={handleResize}>
-            <div class="img-container">
-                {#if spaceDetails}
-                <div class="details">
-                    {spaceDetails.space.record.entry.name}
-                </div>
-            {/if}
-            {#if file && picB64}
-            
-            {#each locations as loc}
-            <sl-tooltip >
-                <div slot="content">
-                    <div style="display:flex; flex-direction:column">
-                        <span>{loc.space.record.entry.name}</span>
-                        {loc.space.record.entry.description}
-                        {#each sessionsInSpace(loc.space) as ses}
-                            <span>{ses.title} -- {timeWindowStartToStr(ses.window)}</span>
-                        {/each}
+        <div class="pane-content">
+            <div class="pic" use:watchResize={handleResize}>
+                <div class="img-container">
+                    {#if spaceDetails}
+                    <div class="details">
+                        {spaceDetails.space.record.entry.name}
                     </div>
+                {/if}
+                {#if file && picB64}
+                
+                {#each locations as loc}
+                <sl-tooltip >
+                    <div slot="content">
+                        <div style="display:flex; flex-direction:column">
+                            <span>{loc.space.record.entry.name}</span>
+                            {loc.space.record.entry.description}
+                            {#each sessionsInSpace(loc.space) as ses}
+                                <span>{ses.title} -- {timeWindowStartToStr(ses.window)}</span>
+                            {/each}
+                        </div>
+                    </div>
+                    <div
+                        on:click={store.openDetails(DetailsType.Space, loc.space.original_hash)}
+                        style={getSpaceStyle(loc.loc)} class="location">
+                        {loc.space.record.entry.key}
+                    </div>
+                </sl-tooltip>
+                {/each}
+                <img  bind:this={img} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit: cover; overflow: hidden">
+                {/if}
                 </div>
-                <div
-                    on:click={store.openDetails(DetailsType.Space, loc.space.original_hash)}
-                    style={getSpaceStyle(loc.loc)} class="location">
-                    {loc.space.record.entry.key}
-                </div>
-            </sl-tooltip>
-            {/each}
-            <img  bind:this={img} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit: cover; overflow: hidden">
-            {/if}
             </div>
         </div>
     </div>
 {/if}
-
 <style>
 img {
     width:100%;
+}
+
+.SiteMapDisplay {
+    width: 100vw;
+    height: 100%;
+    overflow: auto;
+}
+.pane-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.header-content {
+    max-width: 100%;
+}
+
+.pane-content {
+    position: relative;
+    z-index: 0;
+    width: 100%;
+    min-width: 1000px;
+    max-height: 100%;
 }
 .img-container {
     position: relative;

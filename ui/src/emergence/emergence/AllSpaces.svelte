@@ -24,7 +24,7 @@ onMount(async () => {
 });
 
 </script>
-<div class="pane-header">
+<div class="AllSpaces pane-header">
   <div class="header-content">
     <h3>Spaces List</h3>
     <div class="section-controls">

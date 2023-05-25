@@ -69,7 +69,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 {:else}
 
 
-<div class="summary"
+<div class="SpaceSummary summary"
   on:click={() => dispatch('space-selected', space)}
  >
   <div class="pic">
