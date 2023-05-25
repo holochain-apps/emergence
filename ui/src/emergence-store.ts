@@ -15,11 +15,11 @@ import en from 'javascript-time-ago/locale/en/index.js';
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput } from './emergence/emergence/types.js';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
-import { filterTime } from './emergence/emergence/utils';
+import { filterTime } from './emergence/emergence/utils.js';
 Marked.setOptions
 ({
   renderer: new Renderer,
@@ -155,19 +155,17 @@ export class EmergenceStore {
     return this.neededStuff.notes ? true : false
   }
   
-  constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public fileStorageClient:FileStorageClient, public myPubKey: AgentPubKey) {
+  constructor(public client: EmergenceClient, onSignal, public profilesStore: ProfilesStore, public fileStorageClient:FileStorageClient, public myPubKey: AgentPubKey) {
     this.loader = setInterval(()=>{if(this.stuffIsNeeded()) this.fetchStuff()}, 1000);
     this.neededStuffStore =  neededStuffStore(client)
     this.myPubKeyBase64 = encodeHashToBase64(myPubKey)
-    client.client.on( 'signal', signal => {
-        console.log("SIGNAL",signal)
-        // @ts-ignore
+    onSignal(signal => {
+        // console.log("SIGNAL",signal)
         if (signal.zome_name == 'emergence' && signal.payload.message && signal.payload.message.type == "UpdateSettings") {
-        // @ts-ignore
-        const settings = signal.payload.message
-        settings.delete("type")
-        // TODO any checking?
-        this.settings.update((_)=> {return settings})
+            const settings = signal.payload.message
+            settings.delete("type")
+            // TODO any checking?
+            this.settings.update((_)=> {return settings})
         }
       })
   }

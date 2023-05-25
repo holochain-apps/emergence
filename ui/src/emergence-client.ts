@@ -5,6 +5,9 @@ import type {
      AgentPubKey,
      AppAgentCallZomeRequest,
      AppAgentClient,
+     AppWebsocket,
+     CallZomeRequest,
+     CellId,
      EntryHash,
      HoloHash,
 } from '@holochain/client';
@@ -15,8 +18,8 @@ import { EntryRecord } from '@holochain-open-dev/utils';
 
 export class EmergenceClient {
   constructor(
-    public client: AppAgentClient,
-    public roleName: string,
+    public client: AppWebsocket,
+    public cellId: CellId,
     public zomeName = 'emergence'
   ) {}
 
@@ -279,10 +282,11 @@ export class EmergenceClient {
   }
 
   private callZome(fn_name: string, payload: any) {
-    const req: AppAgentCallZomeRequest = {
-      role_name: this.roleName,
+    const req: CallZomeRequest = {
+      cell_id: this.cellId,
       zome_name: this.zomeName,
       fn_name,
+      provenance: this.cellId[1],
       payload,
     };
     return this.client.callZome(req);

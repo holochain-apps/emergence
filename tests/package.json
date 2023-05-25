@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "test": "vitest run time-window.test.ts",
-    "scale": "ts-node-esm scale.ts"
+    "scale": "ts-node-esm scale.ts",
+    "scale:local": "ts-node-esm scale-local.ts"
   },
   "dependencies": {
     "@holochain-open-dev/file-storage": "0.4.1",
