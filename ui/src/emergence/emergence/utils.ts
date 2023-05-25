@@ -1,5 +1,5 @@
 import type { Timestamp } from "@holochain/client"
-import type { SessionsFilter, TimeWindow } from "./types"
+import type { Info, Session, SessionsFilter, TimeWindow } from "./types"
 
 // @ts-ignore
 export const sortWindows = (a,b) : number => {return new Date(a.start) - new Date(b.start)}
@@ -71,4 +71,19 @@ export const calcDays = (windows, slotTypeFilter, filter: SessionsFilter): Array
 export const truncateText = (text, len) => {
   if (text.length <= len) return text
   return `${text.slice(0,len)}...`
+}
+
+export const sessionHasTags = (session: Info<Session>, tags: string[]) : boolean => {
+  let found = false
+  for (let tag of tags) {
+      tag = tag.toLowerCase()
+      if (session.relations.find(ri=>
+          ri.relation.content.path == "session.tag" &&
+          ri.relation.content.data.toLowerCase() == tag
+          )) {
+          found = true;
+          break;
+      }
+  }
+  return found
 }

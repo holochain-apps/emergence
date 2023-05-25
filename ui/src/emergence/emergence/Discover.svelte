@@ -27,7 +27,27 @@
 <div class="pane-header">
     <div class="header-content">
         <h3>Discover</h3>
-        <div style="display: flex; flex-direction: row; align-self:center">
+        
+    </div>
+</div>
+{#if showFilter}
+<FeedFilter
+    on:close-filter={()=>showFilter = false}
+    on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
+    filter={$uiProps.feedFilter}></FeedFilter>
+{/if}
+<div class="pane-content flex-center discover">
+    <div class="discover-section">
+        {#if $settings.game_active}
+            <Sense></Sense>
+        {/if}
+    </div>
+    <div class="discover-section">
+        <TagCloud></TagCloud>
+    </div>
+    <div class="discover-section" style="display: flex; flex-direction: column;">
+
+        <div style="display: flex; flex-direction: row; align-self:flex-end; margin-bottom:10px">
             {#if $uiProps.feedFilter.keyword}
             <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"feedFilter")}} >
               <Fa size="sm" icon={faMagnifyingGlass} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
@@ -46,24 +66,7 @@
                 <Fa icon={faFilter} />
             </sl-button>
         </div>
-    </div>
-</div>
-{#if showFilter}
-<FeedFilter
-    on:close-filter={()=>showFilter = false}
-    on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
-    filter={$uiProps.feedFilter}></FeedFilter>
-{/if}
-<div class="pane-content flex-center discover">
-    <div class="discover-section">
-        {#if $settings.game_active}
-            <Sense></Sense>
-        {/if}
-    </div>
-    <div class="discover-section">
-        <TagCloud></TagCloud>
-    </div>
-    <div class="discover-section" style="">
+
         <Feed></Feed>            
     </div>
 </div>

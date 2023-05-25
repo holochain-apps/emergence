@@ -17,13 +17,13 @@
   $: fullFeed = store.feed
   $: uiProps = store.uiProps
   $: agentB64 = forAgent ? encodeHashToBase64(forAgent) : undefined
-  $: feed = filteredFeed($fullFeed)
+  $: feed = filteredFeed($fullFeed, $uiProps)
   $: error;
 
 
-  const filteredFeed = (fullFeed) => {
+  const filteredFeed = (fullFeed, uiProps) => {
     if (!forAgent) {
-      return fullFeed.filter(f=>store.filterFeedElem(f,$uiProps.feedFilter)) 
+      return fullFeed.filter(f=>store.filterFeedElem(f,uiProps.feedFilter)) 
     }
     // show anything about any of the sessions we are intersted in
     const feed =  fullFeed.filter(f=> 

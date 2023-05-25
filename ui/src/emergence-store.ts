@@ -19,7 +19,7 @@ import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
-import { filterTime } from './emergence/emergence/utils';
+import { filterTime, sessionHasTags } from './emergence/emergence/utils';
 Marked.setOptions
 ({
   renderer: new Renderer,
@@ -794,17 +794,7 @@ export class EmergenceStore {
     } else if (rel.myInterest & SessionInterestBit.Hidden) return false
 
     if (filter.tags.length > 0) {
-        let found = false
-        for (let tag of filter.tags) {
-            tag = tag.toLowerCase()
-            if (session.relations.find(ri=>
-                ri.relation.content.path == "session.tag" &&
-                ri.relation.content.data.toLowerCase() == tag
-                )) {
-                found = true;
-                break;
-            }
-        }
+        let found = sessionHasTags(session, filter.tags)
         if (!found) return false
     }
     if (filter.keyword) {
