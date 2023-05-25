@@ -53,11 +53,13 @@ const sessionSlot = (session: Info<Session>): Slot | undefined => {
         if (spaces.length > 0) {
           const ri = spaces[spaces.length-1]
           const r = ri.relation
-          const window = JSON.parse(r.content.data) as TimeWindow
-                  return {
-                      space: r.dst,
-                      window
-                  }
+          if (r.content.data) {
+            const window = JSON.parse(r.content.data) as TimeWindow
+            return {
+                space: r.dst,
+                window
+            }
+          }
         }
         return undefined
 }

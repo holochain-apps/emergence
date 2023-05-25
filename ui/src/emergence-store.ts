@@ -552,6 +552,8 @@ export class EmergenceStore {
         let doSlot = false
         if (props.hasOwnProperty("slot")) {
             const slot = this.getSessionSlot(session)
+            console.log("SLODSFSDF", slot, props.slot, slotEqual(slot, props.slot))
+
             if (!slotEqual(slot, props.slot)) {
                 changes.push(`slot`)
                 doSlot = true
@@ -610,7 +612,12 @@ export class EmergenceStore {
             }
             if (doSlot) {
                 if (props.slot !== undefined) {
+                    console.log("SLOT")
                     await this.slot(session.original_hash, props.slot)
+                } else {
+                    console.log("UNSOLT")
+
+                   await this.unslot(session.original_hash)
                 }
             }
 
@@ -1465,7 +1472,6 @@ export class EmergenceStore {
                 si = new HoloHashMap()
                 n.set(agentPubKey,si)
             }
-            console.log("FISHx", feed, encodeHashToBase64(agentPubKey))
             feed.forEach(f=>{
                 if (f.type == FeedType.SessionSetInterest) {
                     if (f.detail & (SessionInterestBit.NoOpinion + SessionInterestBit.Hidden) || f.detail == 0) {

@@ -58,7 +58,13 @@
 
 </script>
 
-<div style="margin-bottom: 16px">
+<div style="margin-bottom: 16px; display:flex; flex-direction:column">
+  <div class="pill-button" style="display: flex; width: 75px; align-self: end;" on:click={() => {
+    slot = undefined
+    updateSelects()
+    }} >
+    Reset
+  </div>
   <sl-select bind:this={spaceSelect}
     label="Space"
     value={selectedSpace}

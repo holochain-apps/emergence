@@ -84,6 +84,7 @@ onMount(() => {
 
 async function updateSession() {
   if (session) {
+    console.log("SLOT", slot)
     const updateRecord = await store.updateSession(session.original_hash, {title, amenities, slot, description, leaders, smallest, largest, duration, tags})
     if (updateRecord) {
       dispatch('session-updated', { actionHash: updateRecord.actionHash });
