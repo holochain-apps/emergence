@@ -2,7 +2,7 @@
   "name": "tests",
   "private": true,
   "scripts": {
-    "test": "vitest run time-window.test.ts",
+    "test": "vitest run session.test.ts",
     "scale": "ts-node-esm scale.ts",
     "scale:local": "ts-node-esm scale-local.ts"
   },

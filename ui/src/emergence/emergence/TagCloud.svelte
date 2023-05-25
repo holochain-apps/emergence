@@ -4,12 +4,13 @@
     import type { EmergenceStore } from '../../emergence-store';
     import { getContext, onMount } from 'svelte';
     import { storeContext } from '../../contexts';
-	import WordCloud from "svelte-d3-cloud";
     import TagCloudPeople from './TagCloudPeople.svelte';
-  import { bubble } from 'svelte/internal';
+  import { sessionHasTags } from './utils';
+  import SessionSummary from './SessionSummary.svelte';
   
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     $: tags = store.allTags
+    $: sessions = store.sessions
     $: uiProps = store.uiProps
 	$: words = calcWords($tags)
     $: wordsMax = Math.max(...words.map(w=>w.count))
@@ -29,10 +30,10 @@
     onMount(async () => {
         store.fetchTags()
     });
-    let selectedTag = ""
+    let selectedTags = []
     let innerWidth = 0
     let innerHeight = 0
-
+    $: selectedTags
     const fontSize = (count: number) => {
         return `${Math.round(10*count/wordsMax)*10}px`
     }
@@ -44,24 +45,36 @@
     <div class="cloud">
         {#each words as word}
         <div class="word" style="font-size:{fontSize(word.count)};color:#{Math.floor(Math.random()*16777215).toString(16)};"
-            class:neonText={$uiProps.feedFilter.tags.includes(word.text)}
+            class:neonText={selectedTags.find(t=>t.toLocaleLowerCase() == word.text.toLowerCase())}
             on:click={(e)=> {
                 const tag = word.text
-                store.filterTag(tag, "feedFilter")
-                }}
-
-            on:mouseover={(e)=> selectedTag = word.text}
-            on:mouseout={(e)=> selectedTag = ""}
+                const idx = selectedTags.indexOf(tag)
+                if (idx >= 0) {
+                    selectedTags.splice(idx,1)
+                } else {
+                    selectedTags.push(tag)
+                }
+                selectedTags = selectedTags
+               }}
             >
             {word.text}
         </div>
         {/each}
-        {#if selectedTag}
-        <div class="modal">
-            <TagCloudPeople tag={selectedTag}></TagCloudPeople>
-        </div>
-        {/if}
     </div>
+    {#if selectedTags.length>0}
+        <div style="display:flex;">
+            {#each selectedTags as tag}
+                <div style="display:flex;">
+                    <TagCloudPeople tag={tag}></TagCloudPeople>
+                </div>
+            {/each}
+        </div>
+        <div style="display:flex; flex-direction: row; justify-items: flex-start;">
+            {#each $sessions.filter(s=>sessionHasTags(s,selectedTags)) as session}
+            <SessionSummary session={session}></SessionSummary>
+            {/each}
+        </div>
+    {/if}
 {:else}
   No tags yet!
   {/if}

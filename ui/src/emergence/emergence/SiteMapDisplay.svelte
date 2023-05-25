@@ -5,7 +5,7 @@
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
     import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
-    import { type Info, type SiteLocation, type SiteMap, type Space, timeWindowStartToStr } from './types';
+    import { type Info, type SiteLocation, type SiteMap, type Space, timeWindowStartToStr, DetailsType } from './types';
     import { faList, faSync } from '@fortawesome/free-solid-svg-icons';
     import Fa from 'svelte-fa';
     import { fromUint8Array } from "js-base64";
@@ -66,7 +66,7 @@
             const session = store.getSession(r.relation.dst)
             if (session && !session.record.entry.trashed) {
                 const slot = store.getSessionSlot(session)
-                if (spaceB64 == encodeHashToBase64(slot.space)) {
+                if (slot && spaceB64 == encodeHashToBase64(slot.space)) {
                     sessions.set(session.original_hash, {title: session.record.entry.title, window: slot.window})
                 }
             }
@@ -115,6 +115,7 @@
                     </div>
                 </div>
                 <div
+                    on:click={store.openDetails(DetailsType.Space, loc.space.original_hash)}
                     style={getSpaceStyle(loc.loc)} class="location">
                     {loc.space.record.entry.key}
                 </div>

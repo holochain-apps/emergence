@@ -20,7 +20,9 @@
   const spaceTitle = (spaceHash: ActionHash) => {
     const space = store.getSpace(spaceHash)
     if (space) {
-      return space.record.entry.name
+      let name = space.record.entry.name
+      if (space.record.entry.key) name = `${name} (${space.record.entry.key})`
+      return name
     }
     return "<deleted space>"
   }

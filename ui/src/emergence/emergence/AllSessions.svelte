@@ -11,6 +11,7 @@ import Fa from 'svelte-fa';
 import { calcDays, dayToStr, sortWindows, windowDay, windowDayAsTimestamp, windowsInDay } from './utils';
   import { DetailsType, SessionSortOrder, type Info, type Session, type TimeWindow } from './types';
   import SessionFilterCtrls from './SessionFilterCtrls.svelte';
+  import SpaceLink from './SpaceLink.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -116,7 +117,8 @@ on:session-created={() => {} }
         {#each $spaces as space, idx}
           <th class="space-title top-sticky"
             >
-              {space.record.entry.name}
+              <SpaceLink spaceHash={space.original_hash}></SpaceLink>
+
               {#if space.record.entry.pic}
                 <div class="space-pic">
                   <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
@@ -185,7 +187,8 @@ on:session-created={() => {} }
         <tr>
           <th class="space-title left-sticky"
   >
-              {space.record.entry.name}{#if space.record.entry.key} ({space.record.entry.key}){/if}
+              <SpaceLink spaceHash={space.original_hash}></SpaceLink>
+              
               {#if space.record.entry.pic}
                 <div class="space-pic">
                   <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>

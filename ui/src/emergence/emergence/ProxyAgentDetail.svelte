@@ -8,11 +8,13 @@ import type {Info, ProxyAgent} from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
-import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
+import { faTrash, faEdit, faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import ProxyAgentCrud from './ProxyAgentCrud.svelte'; 
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
+  import { slide } from 'svelte/transition';
+  import SessionSummary from './SessionSummary.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -29,6 +31,8 @@ let editing = false;
 let errorSnackbar: Snackbar;
   
 $: editing,  error, loading, proxyAgent;
+$: allSessions = store.sessions
+$: sessions = $allSessions.filter(s=>s.record.entry.leaders.find(l=>encodeHashToBase64(l.hash) == encodeHashToBase64(proxyAgent.original_hash)))  
 
 onMount(async () => {
   if (proxyAgent === undefined) {
@@ -60,7 +64,8 @@ let confirmDialog
 </div>
 {:else if error}
 <span>Error fetching the proxyAgent: {error.data.data}</span>
-{:else if editing}
+{/if}
+{#if editing}
   <div class="modal">
     <ProxyAgentCrud
     proxyAgent={ proxyAgent }
@@ -71,48 +76,68 @@ let confirmDialog
     on:edit-canceled={() => { editing = false; } }
   ></ProxyAgentCrud>
   </div>
-{:else}
+{/if}
   <Confirm 
     bind:this={confirmDialog}
-    message="This will remove this proxyAgent for everyone!" 
+    message="This will remove this proxy agent for everyone!" 
     on:confirm-confirmed={deleteProxyAgent}></Confirm>
 
-<div style="display: flex; flex-direction: column">
-  <div style="display: flex; flex-direction: row">
-    <span style="flex: 1"></span>
-    <sl-button style="margin-left: 8px; " on:click={() => { editing = true; } } circle>
-      <Fa icon={faEdit} />
-    </sl-button>
-    <sl-button style="margin-left: 8px;" on:click={() => {confirmDialog.open()}} circle>
-      <Fa icon={faTrash} />
-    </sl-button>
-  </div>
 
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Nickname:</strong></span>
-    <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.nickname }</span>
-  </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Bio:</strong></span>
-    <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.bio }</span>
-  </div>
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Location:</strong></span>
-    <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.location }</span>
-  </div>
-
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Picture</strong></span>
-
-    {#if proxyAgent.record.entry.pic}
-    <div class="pic">
-    <show-image image-hash={encodeHashToBase64(proxyAgent.record.entry.pic)}></show-image>
+    <div transition:slide={{ axis: 'x', duration: 400 }}  class="pane-content">
+      <div class="pane-header">
+        <div class="controls">
+          <sl-button on:click={() => { dispatch('proxyagent-close') } } circle>
+            <Fa icon={faCircleArrowLeft} />
+          </sl-button>
+          <div>
+            <sl-button style="margin-left: 8px; " on:click={(e) => { e.stopPropagation(); editing = true; } } circle>
+              <Fa icon={faEdit} />
+            </sl-button>
+            <sl-button style="margin-left: 8px;" on:click={() => {confirmDialog.open()}} circle>
+              <Fa icon={faTrash} />
+            </sl-button>
+          </div>
+        </div>
     </div>
-    {/if}
-  </div>
 
-</div>
-{/if}
+    <div class="details">
+
+      <div style="display: flex; flex-direction: column; margin-left:20px">
+        <div style="display: flex; flex-direction: row">
+          <div class="pic">
+            {#if proxyAgent.record.entry.pic}
+            <show-image image-hash={encodeHashToBase64(proxyAgent.record.entry.pic)}></show-image>
+            {/if}
+          </div>
+          <div style="display: flex; flex-direction: column; margin-left:10px">
+            <h1>{ proxyAgent.record.entry.nickname }</h1>
+            {#if proxyAgent.record.entry.bio}
+              <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+                <span style="margin-right: 4px"><strong>Bio:</strong></span>
+                <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.bio }</span>
+              </div>
+            {/if}
+            {#if proxyAgent.record.entry.location}
+              <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+                <span style="margin-right: 4px"><strong>Location:</strong></span>
+                <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.location }</span>
+              </div>
+            {/if}
+            {#if sessions}
+            <div style="display: flex; flex-direction: column; margin-bottom: 16px">
+              <span style="margin-right: 4px"><strong>Sessions:</strong></span>
+              <div style="display: flex; flex-direction: row;">
+                {#each Array.from(sessions ? sessions : []) as session}
+                  <SessionSummary session={session}></SessionSummary>
+                {/each}
+              </div>
+            </div>
+            {/if}
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
 
 <style>
   .pic {

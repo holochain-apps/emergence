@@ -40,7 +40,7 @@ pub struct UpdateSessionInput {
     pub previous_session_hash: ActionHash,
     pub updated_title: String,
     pub updated_description: String,
-    pub updated_leaders: Vec<AgentPubKey>,
+    pub updated_leaders: Vec<AnyAgent>,
     pub updated_amenities: u32,
     pub updated_smallest: u32,
     pub updated_largest: u32,

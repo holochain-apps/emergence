@@ -40,21 +40,41 @@ export type EmergenceSignal = {
 };
 
 export type EntryTypes =
- | ({ type: 'Space'; } & Space)
- | ({  type: 'Session'; } & Session);
+| ({ type: 'Space'; } & Space)
+| ({ type: 'Map'; } & SiteMap)
+| ({ type: 'Note'; } & Note)
+| ({  type: 'Session'; } & Session);
 
+// export type AnyAgent = 
+// EntryHash | AgentPubKey
+
+export type AnyAgent = 
+{type: 'ProxyAgent', hash: ActionHash} |
+{type: 'Agent', hash: AgentPubKey}
+ 
 
 export interface Session { 
   key: string;
   title: string;
   description: string;
-  leaders: Array<AgentPubKey>,
+  leaders: Array<AnyAgent>,
   smallest: number;
   largest: number;
   duration: number;
   amenities: number;
   trashed: boolean;
 }
+// export interface SessionRust { 
+//   key: string;
+//   title: string;
+//   description: string;
+//   leaders: Array<AnyAgentRust>,
+//   smallest: number;
+//   largest: number;
+//   duration: number;
+//   amenities: number;
+//   trashed: boolean;
+// }
 
 export interface Info<T> {
   original_hash: ActionHash,
@@ -74,7 +94,7 @@ export interface UpdateSessionInput {
   previous_session_hash: ActionHash,
   updated_title: string,
   updated_description: string;
-  updated_leaders: Array<AgentPubKey>,
+  updated_leaders: Array<AnyAgent>,
   updated_smallest: number;
   updated_largest: number;
   updated_duration: number;
@@ -407,7 +427,8 @@ export interface UIProps {
 export enum DetailsType {
   Session = 0,
   Space,
-  Folk
+  Folk,
+  ProxyAgent,
 }
 
 export interface Details {

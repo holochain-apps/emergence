@@ -29,7 +29,7 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
       created session: <SessionLink sessionHash={feedElem.about}></SessionLink>
     {/if}
     {#if feedElem.type === FeedType.SessionUpdate}
-    Updated session: <SessionLink sessionHash={feedElem.about} linkText={feedElem.detail.title}></SessionLink>  changes: {feedElem.detail.changes.join("; ")}
+    updated session: <SessionLink sessionHash={feedElem.about} linkText={feedElem.detail.title}></SessionLink>  changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SessionDelete}
     Deleted session: {feedElem.detail}
@@ -47,7 +47,11 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     deleted space {feedElem.detail}
     {/if}
     {#if feedElem.type === FeedType.SlotSession}
-    scheduled <SessionLink sessionHash={feedElem.about}></SessionLink> into {feedElem.detail.space} for <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary> 
+      {#if feedElem.detail.space}
+        scheduled <SessionLink sessionHash={feedElem.about}></SessionLink> into {feedElem.detail.space} for <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary> 
+      {:else}
+        unscheduled <SessionLink sessionHash={feedElem.about}></SessionLink>
+      {/if}
     {/if}
     {#if feedElem.type === FeedType.NoteNew}
       <NoteDetail noteHash={feedElem.about}></NoteDetail>
