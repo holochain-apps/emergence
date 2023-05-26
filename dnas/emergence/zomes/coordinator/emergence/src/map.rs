@@ -21,7 +21,7 @@ pub fn get_map(original_map_hash: ActionHash) -> ExternResult<Option<Record>> {
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
     let latest_map_hash = match latest_link {
-        Some(link) => ActionHash::from(link.target.clone()),
+        Some(link) => ActionHash::try_from(link.target.clone()).map_err(|err| wasm_error!(err))?,
         None => original_map_hash.clone(),
     };
     get(latest_map_hash, GetOptions::default())

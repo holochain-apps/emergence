@@ -21,7 +21,7 @@ pub fn get_proxy_agent(original_proxy_agent_hash: ActionHash) -> ExternResult<Op
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
     let latest_proxy_agent_hash = match latest_link {
-        Some(link) => ActionHash::from(link.target.clone()),
+        Some(link) => ActionHash::try_from(link.target.clone()).map_err(|err| wasm_error!(err))?,
         None => original_proxy_agent_hash.clone(),
     };
     get(latest_proxy_agent_hash, GetOptions::default())

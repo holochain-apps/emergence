@@ -101,7 +101,7 @@ pub fn get_tags(_input: ()) -> ExternResult<Vec<TagUse>> {
         let content = convert_relation_tag(link.tag)?;
         let tag = content.data;
         let sa = SessionAgent{
-            session: link.target.try_into()?,
+            session: ActionHash::try_from(link.target).map_err(|err| wasm_error!(err))?,
             agent: link.author
         };
         if let Some(session_agent) = tags.get_mut(&tag) {

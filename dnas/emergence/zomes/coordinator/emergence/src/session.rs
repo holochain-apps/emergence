@@ -29,7 +29,7 @@ pub fn get_session(original_session_hash: ActionHash) -> ExternResult<Option<Rec
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
     let latest_session_hash = match latest_link {
-        Some(link) => ActionHash::from(link.target.clone()),
+        Some(link) => ActionHash::try_from(link.target.clone()).map_err(|err| wasm_error!(err))?,
         None => original_session_hash.clone(),
     };
     get(latest_session_hash, GetOptions::default())

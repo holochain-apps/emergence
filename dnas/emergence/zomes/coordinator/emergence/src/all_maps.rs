@@ -18,8 +18,8 @@ pub fn get_all_maps(_: ()) -> ExternResult<Vec<MapInfo>> {
     let mut records: Vec<Record> = Vec::new();
     let mut hashes: HashMap<ActionHash,ActionHash>= HashMap::new();
     for link in links {
-        if let Some(record) = get_map(ActionHash::from(link.target.clone()))? {
-            hashes.insert(record.action_address().clone(), ActionHash::from(link.target));
+        if let Some(record) = get_map(ActionHash::try_from(link.target.clone()).map_err(|err| wasm_error!(err))?)? {
+            hashes.insert(record.action_address().clone(), ActionHash::try_from(link.target).map_err(|err| wasm_error!(err))?);
             records.push(record);
         }
     }
