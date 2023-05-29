@@ -79,7 +79,6 @@ export const open = (spc) => {
     uploadFiles.defaultValue = undefined
   }
   uploadFiles.reset()
-  console.log("RESET")
   dialog.show()
 }
 

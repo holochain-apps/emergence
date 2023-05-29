@@ -4,7 +4,7 @@
   import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64} from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities, DetailsType } from './types';
+  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities, DetailsType, SpaceSortOrder } from './types';
   import { calcDays, dayToStr, sortSlot, sortWindows, windowsInDay} from './utils'
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
@@ -17,6 +17,7 @@
   import SessionFilterCtrls from './SessionFilterCtrls.svelte';
   import SessionFilter from './SessionFilter.svelte';
   import SpaceLink from './SpaceLink.svelte';
+  import SpaceCrud from './SpaceCrud.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -34,6 +35,7 @@
   $: windows = store.timeWindows
   $: days = calcDays($windows, slotType, $uiProps.sessionsFilter) 
   $: sessions = store.sessions
+  $: sortedSpaces = async (spaces)=>spaces.sort(sortSpace)
 
   let selectedSessions:HoloHashMap<ActionHash,boolean> = new HoloHashMap()
   let selectedSpaceIdx: number|undefined = undefined
@@ -44,6 +46,19 @@
   onMount(async () => {
     loading = false
   });
+
+  const sortSpaceKey= (a,b)=> {
+        if (b.record.entry.key > a.record.entry.key) {
+            return -1;
+        }
+        if (a.record.entry.key > b.record.entry.key) {
+            return 1;
+        }
+        return 0;
+      }
+  const sortSpaceCapacity = (a,b) => {
+    return b.record.entry.capacity - a.record.entry.capacity
+  }
 
   const selectSpace = (idx, space) => {
     selectedSessions = new HoloHashMap()
@@ -293,13 +308,26 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   
     <sl-select style="margin-right: 5px;width: 200px;"
     placeholder="Filter by Slot Type"
-    on:sl-change={(e) => slotType = e.target.value }
+    on:sl-change={(e) => {slotType = e.target.value 
+
+    }}
     pill
     clearable
     >
       {#each store.getSlotTypeTags() as type}
         <sl-option value={type}> {type}</sl-option>
       {/each}
+    </sl-select>
+    <sl-select style="margin-right: 5px;width: 200px;"
+    placeholder="Sort Spaces By"
+    value={$uiProps.spaceSort}
+    on:sl-change={(e) => {
+      store.setUIprops({spaceSort:  e.target.value  })
+    } }
+    pill
+    >
+      <sl-option value={SpaceSortOrder.Key}>Key</sl-option>
+      <sl-option value={SpaceSortOrder.Capacity}>Capacity</sl-option>
     </sl-select>
     {#if $uiProps.amSteward}
       <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
@@ -361,7 +389,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
         {#if bySpace}
         <table style="">
           <th class="empty"></th>
-          {#each $spaces as space, idx}
+          {#each $spaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
             <th class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
               class:tagged={space.record.entry.tags.length > 0}
@@ -370,9 +398,9 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
               class:amo-warn={draggedAmenitiesCount > 0 && overlappingAmenities(space).length < draggedAmenitiesCount }
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
-                <SpaceLink spaceHash={space.original_hash}></SpaceLink>
+]                <SpaceLink spaceHash={space.original_hash}></SpaceLink>
                 {#if space.record.entry.pic}
-                  <div class="space-pic">
+                 <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
                   </div>
                 {/if}
@@ -401,7 +429,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
                     </sl-button>
                   {/if}
               </td>
-              {#each $spaces as space, idx}
+              {#each $spaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
                 <td 
                   id={`${JSON.stringify(window)}-${idx}}`}
                   class="schedule-slot"
@@ -468,7 +496,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
             {/each}
           {/each}
           </tr>
-          {#each $spaces as space, idx}
+          {#each $spaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
           <tr>
             <td class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
@@ -479,7 +507,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
                 <SpaceLink spaceHash={space.original_hash}></SpaceLink>
-             
+    
                 {#if space.record.entry.pic}
                   <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
@@ -563,7 +591,8 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   flex-direction: column;
   align-items: self-start;
   flex: 0;
-  margin: 5px;  
+  margin: 5px;
+  padding: 10px;
  }
  .orphaned-session {
   margin-bottom: 8px;

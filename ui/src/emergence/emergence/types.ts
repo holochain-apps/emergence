@@ -411,6 +411,11 @@ export enum SessionSortOrder {
   Descending
 }
 
+export enum SpaceSortOrder {
+  Key = "key",
+  Capacity = "cap"
+}
+
 export interface UIProps {
   amSteward: boolean
   debuggingEnabled: boolean
@@ -421,7 +426,8 @@ export interface UIProps {
   detailsStack: Array<Details>,
   sessionListMode: boolean,
   pane:string,
-  sessionSort: SessionSortOrder
+  sessionSort: SessionSortOrder,
+  spaceSort: SpaceSortOrder
 }
 
 export enum DetailsType {

@@ -14,7 +14,8 @@
   onMount(() => {
   });
 
-  const handleClick = ()=> {
+  const handleClick = (e)=> {
+    e.stopPropagation()
     store.openDetails(DetailsType.Space, spaceHash)
   }
   const spaceTitle = (spaceHash: ActionHash) => {
