@@ -62,9 +62,10 @@
                 <Fa size="sm" icon={faMap} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
             {/if}
         </div>
-        <div class="section-controls">
-            <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } circle>
-                <Fa icon={faFilter} />
+        <div class="discover section-controls">
+            <h3>Latest activity</h3>
+            <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } >
+                <Fa icon={faFilter} /> Filter
             </sl-button>
         </div>
     </div>
@@ -81,5 +82,10 @@
     </div>
 </div>
 <style>
+    .discover.section-controls {
+        justify-content: space-between;
+        display: flex;
+        flex-direction: row;
+    }
 
 </style>
