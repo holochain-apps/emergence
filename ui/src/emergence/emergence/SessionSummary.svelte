@@ -20,6 +20,7 @@ export let allowSetIntention = false;
 export let showTags = false;
 export let showAmenities = false;
 export let showSlot = false;
+export let showLeaders = true;
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -104,12 +105,14 @@ $:space = slot? store.getSpace(slot.space) : undefined
               {/if}
             </span>
         </div>
-        <div class="leaders">
-            <span>Hosted by</span>
-            {#each session.record.entry.leaders as leader}
-              <AnyAvatar showAvatar={false} agent={leader}></AnyAvatar>
-            {/each}
-        </div>
+        {#if showLeaders}
+          <div class="leaders">
+              <span>Hosted by</span>
+              {#each session.record.entry.leaders as leader}
+                <AnyAvatar showAvatar={false} agent={leader}></AnyAvatar>
+              {/each}
+          </div>
+        {/if}
       </div>
     </div>
     <div class="bottom-area">

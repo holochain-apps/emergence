@@ -71,7 +71,7 @@
         </div>
         <div style="display:flex; flex-direction: row; justify-items: flex-start;">
             {#each $sessions.filter(s=>sessionHasTags(s,selectedTags)) as session}
-            <SessionSummary session={session}></SessionSummary>
+            <SessionSummary session={session} showTags={true} showLeaders={false}></SessionSummary>
             {/each}
         </div>
     {/if}

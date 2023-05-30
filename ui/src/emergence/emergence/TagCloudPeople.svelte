@@ -36,7 +36,7 @@
 <div class="card" style="padding:10px">
     <div style="display:flex; flex-direction: column">
 
-        <span>People using "{tag}"</span>
+        <span>{tag}:</span>
         <div style="display:flex;">
         {#each folk as agent}
             <div style="display:flex;">
