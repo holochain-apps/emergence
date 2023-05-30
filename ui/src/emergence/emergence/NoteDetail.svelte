@@ -188,7 +188,7 @@
     /*TODO: figure out best way to control content width 
     higher up the dom like at the pane level 
     so that images can take up 100% width of the post*/
-    width: 300px;
+    max-width: 680px;
     margin: 0 auto;
     margin:auto;
   }

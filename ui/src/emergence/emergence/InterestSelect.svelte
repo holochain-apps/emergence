@@ -38,23 +38,23 @@ async function setSessionInterest(interest: SessionInterest) {
 </mwc-snackbar>
 
 <div class="interest">
-  <div class="interest-button" style="margin-right:5px"
+  <div class="interest-button bookmark" style="margin-right:5px"
     title="I'm Interested"
     class:selected={$relData.myInterest & SessionInterestBit.Interested}
     on:click={() => {setSessionInterest( ($relData.myInterest & ~SessionInterestBit.Hidden) ^ SessionInterestBit.Interested)}} >
     <div ><Fa icon={ faBookmark } /></div>
   </div>
-  <div class="interest-button"  
+  <div class="interest-button attend"  
     title="I'm Going!"
     class:selected={$relData.myInterest & SessionInterestBit.Going}
     on:click={() => {setSessionInterest(($relData.myInterest & ~SessionInterestBit.Hidden) ^ SessionInterestBit.Going)}} >
     <div ><Fa icon={ faCheck } /></div>
   </div>
-  <div class="interest-button"  
+  <div class="interest-button hide"  
     title="Hide!"
     class:selected={$relData.myInterest & SessionInterestBit.Hidden}
     on:click={() => {setSessionInterest(($relData.myInterest & SessionInterestBit.NoOpinion) + ($relData.myInterest ^ SessionInterestBit.Hidden))}} >
-    <div ><Fa icon={ faEyeSlash } /></div>
+    <div ><Fa icon={ faEyeSlash } fill="blue"/></div>
   </div>
 </div>
 
@@ -71,15 +71,8 @@ async function setSessionInterest(interest: SessionInterest) {
     width:30px;
     height:30px;
     border-radius: 50%;
-    border: solid 1px rgb(203, 203, 203);
-
-  }
-  .selected {
-    outline: none;
-    border-color: #9ecaed;
-    box-shadow: 0 0 10px #9ecaed !important;
-    background-color: rgb(240, 249, 2244);
-    border: solid 1px rgb(149, 219, 252);
-
+    border: solid 1px rgba(203, 203, 203, .35);
+    box-shadow: 0 3px 3px rgba(0, 0, 0, .15);
+    margin-right: 5px;
   }
 </style>

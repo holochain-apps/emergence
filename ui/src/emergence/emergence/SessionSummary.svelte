@@ -144,6 +144,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
     border: 1px solid #25bab054;
     color: #25BAB1;
     background-color: transparent;
+    margin-bottom: 0;
   }
 
   .clickable-tag {
@@ -170,10 +171,12 @@ $:space = slot? store.getSpace(slot.space) : undefined
   .slot {
     display: flex;
     align-items: center;
-    background: rgba(206, 205, 206, .25);
+    background: #565E6D;
     width: 105px;
     text-align: center;
     border-radius: 10px 0 0 10px;
+    color: white;
+    box-shadow: inset -20px 0 30px rgba(0, 0, 0, .5);
   }
   .slot-wrapper {
     flex-direction: column;
