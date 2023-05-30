@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, decodeHashFromBase64, type AppAgentClient, encodeHashToBase64 } from '@holochain/client';
+  import { AdminWebsocket, decodeHashFromBase64, type AppAgentClient, setSigningCredentials } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync, faPowerOff } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -37,6 +37,8 @@
   import ProxyAgentCrud from './emergence/emergence/ProxyAgentCrud.svelte';
   import AllProxyAgents from './emergence/emergence/AllProxyAgents.svelte';
   import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
+  import { getCookie, setCookie, deleteCookie } from 'svelte-cookie';
+  import { Base64 } from 'js-base64'
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -53,13 +55,52 @@
   $: prof = profilesStore ? profilesStore.myProfile : undefined
   $: uiProps = store ? store.uiProps : undefined
   $: pane = store ? $uiProps.pane : "sessions"
+
+
+  const base64ToUint8 = (b64:string)=> Base64.toUint8Array(b64);
+
+  const jsonToCreds = (json:string)=> {
+    const creds = JSON.parse(json)
+    return {
+      installed_app_id: creds.installed_app_id,
+      regkey: creds.regkey,
+      creds: {
+        capSecret:base64ToUint8(creds.creds.capSecret),
+        keyPair:{
+          publicKey: base64ToUint8(creds.creds.keyPair.publicKey),
+          secretKey: base64ToUint8(creds.creds.keyPair.secretKey),
+        },
+        signingKey: base64ToUint8(creds.creds.signingKey)
+      }
+    }
+  };
+
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
-    const appPort : string = import.meta.env.VITE_APP_PORT
+    let appPort : string = import.meta.env.VITE_APP_PORT
+    let installed_app_id = "emergence"
+    const credsJson = getCookie("creds")
+    let creds
+    if (credsJson) {
+      appPort = "3030"
+      const x = jsonToCreds(credsJson)
+      console.log("FISH", x)
+      installed_app_id = x.installed_app_id
+      creds = x.creds
+    }
 
     try {
-      client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, 'emergence');
+      client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, installed_app_id);
+      if (creds) {
+        console.log("creds", creds)
+        
+        const appInfo = await client.appInfo()
+        console.log("appInfo", appInfo)
+        const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
+        setSigningCredentials(cell_id, creds)
+        console.log("setting signing creds for ", installed_app_id)
+      } else
       if (adminPort) {
         const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
         //const x = await adminWebsocket.listApps({})
@@ -113,9 +154,14 @@
 </script>
 
 <main>
-
   {#if error}
-    <span class="notice">{error}</span>
+    <span class="notice">
+      {error}
+      {#if getCookie("creds")}
+        <div>Signed in with reg key:  {getCookie("creds").regkey}</div>
+        <a href="/reset">Logout</a>
+      {/if}
+    </span>
   {:else if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
       <sl-spinner
@@ -196,6 +242,17 @@
               icon={faSync} size="2x"/>
             <span class="button-title sync">Sync</span>
           </div>
+          {#if getCookie("creds")}
+            <div class="nav-button"
+              title="Logout"
+              on:click={()=>{
+                window.location.assign("/reset")
+              }}
+            >
+              <Fa class="nav-icon" icon={faPowerOff} size="2x"/>
+            <span class="button-title">Logout</span>
+            </div>
+          {/if}
         </div>
       </div>
 
