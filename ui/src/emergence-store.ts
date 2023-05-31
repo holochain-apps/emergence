@@ -107,7 +107,7 @@ export class EmergenceStore {
     amSteward: true,
     debuggingEnabled: false,
     youPanel: "sessions",
-    discoverPanel: "cloud",
+    discoverPanel: "tags",
     sessionsFilter: defaultSessionsFilter(),
     feedFilter: defaultFeedFilter(),
     sensing: false,

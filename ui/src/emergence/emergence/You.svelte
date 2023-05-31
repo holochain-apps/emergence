@@ -122,7 +122,7 @@
       margin-right:15px;
     }
 
-    sl-tab-group {
+    :global(sl-tab-group) {
         text-align: center;
         max-width: 720px;
         margin: 0 auto;

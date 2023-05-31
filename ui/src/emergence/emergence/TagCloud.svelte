@@ -62,6 +62,11 @@
         {/each}
     </div>
     {#if selectedTags.length>0}
+    <div class="pill-button" style="display: flex; width: 75px; align-self: end;margin-bottom:5px" on:click={() => {
+        selectedTags=[]
+        }} >
+        Reset
+      </div>
         <div style="display:flex;">
             {#each selectedTags as tag}
                 <div style="display:flex;">
