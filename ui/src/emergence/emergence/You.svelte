@@ -10,7 +10,7 @@
     import type SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
     import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
     import Fa from 'svelte-fa'
-    import { faEdit } from '@fortawesome/free-solid-svg-icons';
+    import { faEdit, faPowerOff } from '@fortawesome/free-solid-svg-icons';
 
     import type {  Record } from '@holochain/client';
     import { storeContext } from '../../contexts';
@@ -19,7 +19,7 @@
     import SessionSummary from './SessionSummary.svelte';
     import Avatar from './Avatar.svelte';
     import Feed from './Feed.svelte';
-    import Sync from './Sync.svelte';
+    import { getCookie, setCookie, deleteCookie } from 'svelte-cookie';
 
     const dispatch = createEventDispatcher();
 
@@ -54,6 +54,11 @@
         <div style="display: flex; flex-direction: row; align-self:center">
             <sl-button style="margin-left: 8px;" on:click={() => dialog.show()} circle>
                 <Fa icon={faEdit} />
+            </sl-button>
+        </div>
+        <div style="display: flex; flex-direction: row; align-self:center">
+            <sl-button style="margin-left: 8px;" on:click={() => deleteCookie("creds")} circle>
+                <Fa icon={faPowerOff} />
             </sl-button>
         </div>
         <div style="display: flex; flex-direction: row; align-self:center">

@@ -17,5 +17,6 @@ export let timeWindow: TimeWindow;
 <style>
   .window-summary {
     margin-left:5px;
+    display: inline;
   }
 </style>

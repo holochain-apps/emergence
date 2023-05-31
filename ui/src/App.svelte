@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, decodeHashFromBase64, type AppAgentClient, encodeHashToBase64 } from '@holochain/client';
+  import { AdminWebsocket, decodeHashFromBase64, type AppAgentClient, setSigningCredentials } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync, faPowerOff, faCircleArrowLeft, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -36,6 +36,9 @@
   import { DetailsType } from './emergence/emergence/types';
   import ProxyAgentCrud from './emergence/emergence/ProxyAgentCrud.svelte';
   import AllProxyAgents from './emergence/emergence/AllProxyAgents.svelte';
+  import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
+  import { getCookie, setCookie, deleteCookie } from 'svelte-cookie';
+  import { Base64 } from 'js-base64'
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -46,29 +49,68 @@
   let creatingProxyAgent = false
   let syncing = false
   let error: any = undefined;
+  let creds
 
   $: error
   $: client, fileStorageClient, store, loading;
   $: prof = profilesStore ? profilesStore.myProfile : undefined
   $: uiProps = store ? store.uiProps : undefined
   $: pane = store ? $uiProps.pane : "sessions"
+
+
+  const base64ToUint8 = (b64:string)=> Base64.toUint8Array(b64);
+
+  const jsonToCreds = (json:string)=> {
+    const creds = JSON.parse(json)
+    creds.creds.capSecret = base64ToUint8(creds.creds.capSecret)
+    creds.creds.keyPair.publicKey = base64ToUint8(creds.creds.keyPair.publicKey)
+    creds.creds.keyPair.secretKey = base64ToUint8(creds.creds.keyPair.secretKey)
+    creds.creds.signingKey = base64ToUint8(creds.creds.signingKey)
+    return creds
+  };
+
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
-    const appPort : string = import.meta.env.VITE_APP_PORT
+    let appPort : string = import.meta.env.VITE_APP_PORT
+    let installed_app_id = "emergence"
+    const credsJson = getCookie("creds")
+    if (credsJson) {
+      creds = jsonToCreds(credsJson)
+      installed_app_id = creds.installed_app_id
+    }
+    window.onunhandledrejection = (e) => {
+      if (typeof e.reason == "object") {
+        if (e instanceof TypeError) {
+          error = e.message
+        } else {
+          if (e.reason.message) {
+            error = e.reason.message
+          } else {
+            error = JSON.stringify(e.reason)
+          }
+        }
+      } else {
+        error = e.reason
+      }
+    }
 
-    try {
-      client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, 'emergence');
+    if (creds) {
+      console.log("CREDS", creds)
+      client = await AppAgentWebsocket.connect(creds.appWebsocketUrl, installed_app_id);
+      const appInfo = await client.appInfo()
+      console.log("appInfo", appInfo)
+      const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
+      setSigningCredentials(cell_id, creds.creds)
+    } else {
+      client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, installed_app_id);
       if (adminPort) {
         const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
-        //const x = await adminWebsocket.listApps({})
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
     }
-    catch(e) {
-      error =e
-    }
+  
 
     profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
       avatarMode: "avatar-optional",
@@ -87,7 +129,6 @@
     });
 
     fileStorageClient = new FileStorageClient(client, 'emergence');
-
     store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
     await store.sync(undefined)
     loading = false;
@@ -113,9 +154,26 @@
 </script>
 
 <main>
-
   {#if error}
-    <span class="notice">{error}</span>
+    <span class="notice">
+      <h3>I'm sorry to say it, but there has been an error ☹️</h3>
+      {error}
+      {#if creds}
+        <div>Signed in to the holochain multiplexer with reg key: {creds.regkey}</div>
+        <sl-button style="margin-left: 8px;" on:click={() => {
+          deleteCookie("creds")
+          window.location.assign("/")
+          }}>
+          <Fa icon={faPowerOff} /> Logout
+        </sl-button>
+      {:else}
+        <div>
+          <sl-button style="margin-left: 8px;" on:click={() => window.location.assign("/")}>
+            <Fa icon={faArrowRotateBack} /> Reload
+          </sl-button>
+        </div>
+      {/if}
+    </span>
   {:else if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
       <sl-spinner
@@ -196,12 +254,32 @@
               icon={faSync} size="2x"/>
             <span class="button-title sync">Sync</span>
           </div>
+          {#if getCookie("creds")}
+            <div class="nav-button"
+              title="Logout"
+              on:click={()=>{
+                window.location.assign("/reset")
+              }}
+            >
+              <Fa class="nav-icon" icon={faPowerOff} size="2x"/>
+            <span class="button-title">Logout</span>
+            </div>
+          {/if}
         </div>
       </div>
 
       <file-storage-context client={fileStorageClient}>
+      {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.ProxyAgent }
+      <div class="session-details">
+        <ProxyAgentDetail
+          on:proxyagent-deleted={()=>store.closeDetails()}
+          on:proxyagent-close={()=>store.closeDetails()}
+          proxyAgent={store.getProxyAgent($uiProps.detailsStack[0].hash)}>
+        </ProxyAgentDetail>
+      </div>
+      {/if}
       {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Space }
-      <div class="session-details" style="height:100vh">
+      <div class="session-details">
         <SpaceDetail
           on:space-deleted={()=>store.closeDetails()}
           on:space-close={()=>store.closeDetails()}
@@ -210,7 +288,7 @@
       </div>
       {/if}
       {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Session }
-      <div class="session-details" style="height:100vh">
+      <div class="session-details">
         <SessionDetail 
         on:session-deleted={()=>store.closeDetails()}
         on:session-close={()=>store.closeDetails()}
@@ -218,7 +296,7 @@
       </div>
     {/if}
     {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Folk }
-    <div class="session-details" style="height:100vh">
+    <div class="session-details">
         <Folk 
         on:folk-close={()=>store.closeDetails()}
         agentPubKey={$uiProps.detailsStack[0].hash}></Folk>
@@ -288,11 +366,6 @@
 
       {#if pane=="spaces.list"}
       <div class="pane spaces">
-        {#if $uiProps.amSteward}
-          <div class="pill-button" on:click={() => {createSpaceDialog.open(undefined) } }>
-            <span>+</span> Create
-          </div>
-        {/if}
         <AllSpaces
           on:all-spaces-close={()=>store.setPane("spaces")}
         ></AllSpaces>
@@ -368,150 +441,13 @@
 </main>
 
 <style>
-  main {
-    padding: 0em;
-    max-width: 100%;
-    margin: 0 auto;
-  }
-  body {
-    background-color: #fff;
-  }
-  .pane {
-    position: relative;
-  }
-
-  :global(sl-dialog) {
-    z-index: 10000000;
-    position: relative;
+  .notice {
     display: block;
+    text-align: center;
+    max-width: 1000px;
+    padding: 25px;
+    border: 1px solid;
+    border-radius: 20px;
+    margin: auto;
   }
-
-  :global(.modal) {
-    background-color: white;
-    padding: 10px;
-    position: absolute;
-    top: 5px;
-
-    border: solid 1px;
-    display: flex; flex-direction: column;
-    max-height: 100%;
-    overflow: auto;
-  }
-
-  .create-session {
-   max-width: 720px;
-   border: 1px solid rgba(239, 240, 243, 1.0);
-   display: flex;
-   background-color: rgba(243, 243, 245, 1.0);
-   width: 100%;
-   opacity: .6;
-    transition: all .25s ease;
-
-  }
-
-  .create-session:hover {
-    opacity: 1;
-    cursor: pointer;
-  }
-
-  .summary {
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-  }
-
-   .slot {
-     width: 95px;
-     display: flex;
-     align-items: center;
-     justify-content: center;
-   }
-
-   .slot-wrapper {
-    height: 50px;
-    width: 50px;
-    font-size: 24px;
-    font-weight: bold;
-    border: 3px solid rgba(116, 116, 122, 1.0);
-    color: rgba(116, 116, 122, 1.0);
-    border-radius: 5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: .5;
-   }
-
-   .button-group {
-    display: flex;
-   }
-
-  .info {
-    width: 100%;
-    flex-stretch: 1;
-    background-color: #fff;
-  }
-
-  .left-side {
-    padding: 10px;
-  }
-
-  .left-side p {
-    opacity: .5;
-    font-size: 12px;
-  }
-
-  .selected {
-    color: rgba(22, 26, 30, 1);
-    background-color: transparent;
-  }
-
-  .nav-button.selected .button-title {
-    font-weight: bold;
-  }
-
-  .nav-button:hover {
-    color: rgba(22, 26, 30, 1);
-    cursor: pointer;
-  }
-
-  .nav-button:active {
-    background-color: #4f2f39;
-    color: #fceed7;
-    cursor: pointer;
-  }
-
-  .pane {
-    width: 100vw;
-  }
-
-  #content {
-    height: 100vh;
-  }
-
-
-  .spinning {
-  animation: spin-animation 1s infinite;
-}
-@keyframes spin-animation {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(359deg);
-  }
-}
-  .session-details {
-    background-color: white;
-    position: absolute;
-    border: solid 1px;
-    display: flex; flex-direction: column;
-    height: calc(100vh - 76px);
-    overflow: auto;
-    z-index: 100;
-  }
-@media (min-width: 720px) {
-  .create-session {
-    display: none;
-  }
-}
 </style>

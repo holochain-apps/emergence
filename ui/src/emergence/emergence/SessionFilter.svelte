@@ -34,7 +34,6 @@ const toggleDayInFilter = (day:Date) => {
   } else {
     filter.timeDays.splice(idx,1)
   }
-  console.log("FISH", filter.timeDays)
   dispatch('update-filter', filter)
 }
 </script>
@@ -111,30 +110,4 @@ const toggleDayInFilter = (day:Date) => {
   sl-checkbox {
     margin-right: 10px;
   }
-  :global(.filter-modal) {
-    max-width: 90%;
-    background-color: white;
-    padding: 10px;
-    position: absolute;
-    top: 5px;
-    right: 5px;
-
-    border: solid 1px;
-    max-height: 100%;
-    z-index: 11;
-    box-shadow: 0px 0px 20px rgba(0, 0, 0, .15);
-    overflow: auto;
-  }
-  :global(.wrap-row) {
-    display: flex; flex-direction: row;flex-wrap: wrap;
-  } 
-  :global(.center-row) {
-    display: flex; flex-direction: row; margin-bottom: 16px; align-items: center;
-  }
-
-  /* @media (min-width: 720px) {
-    .filter-modal {
-      height: calc(100% - 56px);
-    }
-  } */
 </style>

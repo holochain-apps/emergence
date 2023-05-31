@@ -2,7 +2,7 @@
 import { onMount, getContext, createEventDispatcher } from 'svelte';
 import type { Record  } from '@holochain/client';
 import { storeContext } from '../../contexts';
-import ProxyAgentDetail from './ProxyAgentDetail.svelte';
+import ProxyAgentSummary from './ProxyAgentSummary.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
@@ -34,8 +34,8 @@ onMount(async () => {
     <span>No proxyagents found.</span>
   {:else}
     {#each $proxyAgents as proxyAgent}
-      <div style="margin-bottom: 8px; width:500px; background:lightgray">
-        <ProxyAgentDetail proxyAgent={proxyAgent}  on:proxyagent-deleted={() => store.fetchProxyAgents()}></ProxyAgentDetail>
+      <div style="margin-left: 30px; margin-bottom: 8px; width:500px;">
+        <ProxyAgentSummary proxyAgent={proxyAgent}  on:proxyagent-deleted={() => store.fetchProxyAgents()}></ProxyAgentSummary>
       </div>
     {/each}
   {/if}

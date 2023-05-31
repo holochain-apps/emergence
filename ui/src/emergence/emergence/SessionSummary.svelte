@@ -8,6 +8,7 @@ import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
 import Avatar from './Avatar.svelte';
+import AnyAvatar from './AnyAvatar.svelte';
 import InterestSelect from './InterestSelect.svelte';
 import { faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
@@ -19,6 +20,7 @@ export let allowSetIntention = false;
 export let showTags = false;
 export let showAmenities = false;
 export let showSlot = false;
+export let showLeaders = true;
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -47,7 +49,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
 </div>
 {:else}
 
-<div class="summary card" on:click={(e)=>{
+<div class="SessionSummary summary card" on:click={(e)=>{
 
   // @ts-ignore
     if (e.target.tagName != "SL-SELECT")
@@ -58,7 +60,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
       <div class="slot-wrapper">
         {#if slot}
         <div class="date">
-          {new Date(slot.window.start).toDateString().slice(0,10)}
+          {new Date(slot.window.start).toLocaleString('en-US', { weekday: 'long' })}
         </div>
         <div class="time">
           {new Date(slot.window.start).toTimeString().slice(0,5)}
@@ -103,12 +105,14 @@ $:space = slot? store.getSpace(slot.space) : undefined
               {/if}
             </span>
         </div>
-        <div class="leaders">
-            <span>Hosted by</span>
-            {#each session.record.entry.leaders as leader}
-              <Avatar showAvatar={false} agentPubKey={leader}></Avatar>
-            {/each}
-        </div>
+        {#if showLeaders}
+          <div class="leaders">
+              <span>Hosted by</span>
+              {#each session.record.entry.leaders as leader}
+                <AnyAvatar showAvatar={false} agent={leader}></AnyAvatar>
+              {/each}
+          </div>
+        {/if}
       </div>
     </div>
     <div class="bottom-area">
@@ -143,6 +147,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
     border: 1px solid #25bab054;
     color: #25BAB1;
     background-color: transparent;
+    margin-bottom: 0;
   }
 
   .clickable-tag {
@@ -155,22 +160,29 @@ $:space = slot? store.getSpace(slot.space) : undefined
   }
 
   .time {
-    font-size: 1.7em;
-    margin-top: -6px;
-    margin-bottom: -2px;
+    font-size: 24px;
+    margin-top: -3px;
+    margin-bottom: -3px;
   }
   .date, .space {
-    font-size: .7em;
+    font-size: 12px;
+    line-height: 12px;
+    font-weight: normal;
+    margin-bottom: 0;
+    opacity: .5;
   }
   .slot {
     display: flex;
     align-items: center;
+    background: #565E6D;
     width: 105px;
-    background-color: rgba(243, 243, 245, 1.0);
     text-align: center;
     border-radius: 10px 0 0 10px;
+    color: white;
+    box-shadow: inset -20px 0 30px rgba(0, 0, 0, .5);
   }
   .slot-wrapper {
+    flex-direction: column;
     padding: 5px;
     width: 100%;
     height: 75px;

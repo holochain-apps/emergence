@@ -73,7 +73,7 @@ let confirmDialog
 <span>Error fetching the space: {error.data.data}</span>
 {:else}
 
-<div transition:slide={{ axis: 'x', duration: 400 }}  class="pane-content">
+<div transition:slide={{ axis: 'x', duration: 400 }}  class="SpaceDetail pane-content">
   <div class="pane-header">
 
     <div class="controls">
@@ -91,12 +91,7 @@ let confirmDialog
       </div>
       {/if}
     </div>
-
-    <h3>{ space? space.record.entry.name : "" }</h3>
-
     <span style="flex: 1"></span>
-
- 
   </div>
 
 
@@ -105,7 +100,8 @@ let confirmDialog
     message="This will remove this space for everyone!" 
     on:confirm-confirmed={deleteSpace}>
   </Confirm>
-<div style="display: flex; flex-direction: column">
+<div class="space-detail">
+  <h3>{ space? space.record.entry.name : "" }</h3>
   {#if $uiProps.debuggingEnabled}
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
@@ -182,5 +178,13 @@ let confirmDialog
 <style>
   .pic {
    max-width: 300px;
+  }
+
+  .space-detail {
+    display: flex;
+    flex-direction: column;
+    max-width: 720px;
+    width: 100%;
+    margin: 0 auto;
   }
 </style> 

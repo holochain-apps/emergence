@@ -34,5 +34,6 @@
       cursor: pointer;
       text-decoration: underline;
       color: blue;
+      display: inline;
     }
 </style>

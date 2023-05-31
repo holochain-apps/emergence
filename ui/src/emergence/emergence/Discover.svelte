@@ -27,25 +27,7 @@
 <div class="pane-header">
     <div class="header-content">
         <h3>Discover</h3>
-        <div style="display: flex; flex-direction: row; align-self:center">
-            {#if $uiProps.feedFilter.keyword}
-            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"feedFilter")}} >
-              <Fa size="sm" icon={faMagnifyingGlass} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-            {/if}
-      
-            {#if $uiProps.feedFilter.tags.length>0}
-            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"feedFilter")}} >
-              <Fa size="sm" icon={faTag} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-            {/if}
-            {#if $uiProps.feedFilter.space.length>0}
-            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["space"],"feedFilter")}} >
-                <Fa size="sm" icon={faMap} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
-            {/if}
-
-            <sl-button style=" " on:click={() => { showFilter = !showFilter } } circle>
-                <Fa icon={faFilter} />
-            </sl-button>
-        </div>
+        
     </div>
 </div>
 {#if showFilter}
@@ -63,23 +45,47 @@
     <div class="discover-section">
         <TagCloud></TagCloud>
     </div>
-    <div class="discover-section" style="">
+    <div class="discover-section" style="display: flex; flex-direction: column;">
+
+        <div style="display: flex; flex-direction: row; align-self:flex-end; margin-bottom:10px">
+            {#if $uiProps.feedFilter.keyword}
+            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"feedFilter")}} >
+              <Fa size="sm" icon={faMagnifyingGlass} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+            {/if}
+      
+            {#if $uiProps.feedFilter.tags.length>0}
+            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"feedFilter")}} >
+              <Fa size="sm" icon={faTag} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+            {/if}
+            {#if $uiProps.feedFilter.space.length>0}
+            <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["space"],"feedFilter")}} >
+                <Fa size="sm" icon={faMap} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+            {/if}
+        </div>
+        <div class="discover section-controls">
+            <h3>Latest activity</h3>
+            <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } >
+                <Fa icon={faFilter} /> Filter
+            </sl-button>
+        </div>
+    </div>
+    <div class="discover-filter">
+        {#if showFilter}
+        <FeedFilter
+            on:close-filter={()=>showFilter = false}
+            on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
+            filter={$uiProps.feedFilter}></FeedFilter>
+        {/if}
+    </div>
+    <div class="discover-section feed" style="">
         <Feed></Feed>            
     </div>
 </div>
-
 <style>
-    .discover {
-        width: 100%;
-        display: block;
-        flex-direction: column;
-    }
-    .discover-section {
+    .discover.section-controls {
+        justify-content: space-between;
         display: flex;
-        width: 100%;
-        max-width: 720px;
-        margin: 0 auto;
-        justify-content: center;
+        flex-direction: row;
     }
 
 </style>

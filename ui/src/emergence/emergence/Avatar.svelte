@@ -39,9 +39,10 @@
         flex-direction: column;
     }
     .avatar-row {
-        display:flex;
+        display:inline-flex;
         flex-direction: row;
         justify-content:center;
+        align-items: center;
     }
     .avatar-row agent-avatar{
         margin-right: 0.5em;       

@@ -4,8 +4,8 @@
   import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64} from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities } from './types';
-  import { calcDays, dayToStr, sortWindows, windowsInDay} from './utils'
+  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities, DetailsType, SpaceSortOrder } from './types';
+  import { calcDays, dayToStr, sortSlot, sortWindows, windowsInDay} from './utils'
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
   import { faCalendarPlus, faTrash, faCircleArrowLeft, faArrowsUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
@@ -16,6 +16,8 @@
   import '@shoelace-style/shoelace/dist/components/option/option.js';
   import SessionFilterCtrls from './SessionFilterCtrls.svelte';
   import SessionFilter from './SessionFilter.svelte';
+  import SpaceLink from './SpaceLink.svelte';
+  import SpaceCrud from './SpaceCrud.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -33,6 +35,7 @@
   $: windows = store.timeWindows
   $: days = calcDays($windows, slotType, $uiProps.sessionsFilter) 
   $: sessions = store.sessions
+  $: sortedSpaces = async (spaces)=>spaces.sort(sortSpace)
 
   let selectedSessions:HoloHashMap<ActionHash,boolean> = new HoloHashMap()
   let selectedSpaceIdx: number|undefined = undefined
@@ -43,6 +46,19 @@
   onMount(async () => {
     loading = false
   });
+
+  const sortSpaceKey= (a,b)=> {
+        if (b.record.entry.key > a.record.entry.key) {
+            return -1;
+        }
+        if (a.record.entry.key > b.record.entry.key) {
+            return 1;
+        }
+        return 0;
+      }
+  const sortSpaceCapacity = (a,b) => {
+    return b.record.entry.capacity - a.record.entry.capacity
+  }
 
   const selectSpace = (idx, space) => {
     selectedSessions = new HoloHashMap()
@@ -107,24 +123,49 @@
   }
   let dragOn = true
   let dragTarget = ""
+  let mergeTarget = ""
+
   function handleDragStart(e) {
     draggingHandled = false
-    //console.log("handleDragStart", e)
-    e.dataTransfer.dropEffect = "move";
+    // console.log("handleDragStart", e)
     draggedItemId = e.target.getAttribute('id')
-    draggedSession = store.getSession(decodeHashFromBase64(draggedItemId))
+    e.dataTransfer.dropEffect = "move";
     e.dataTransfer
       .setData("text", e.target.getAttribute('id'));
+      draggedSession = store.getSession(decodeHashFromBase64(draggedItemId))
   }
+
   function handleDragEnd(e) {
+    // console.log("handleDragEnd", e)
     clearDrag()
-    //console.log("handleDragEnd",e )
+  }
+  let orphanCount = 0
+  function handleDragEnterOrphan(e) {
+    orphanCount+=1
+    dragTarget="orphan"
+  }
+  function handleDragLeaveOrphan(e) {
+    orphanCount-=1
+    if (orphanCount == 0)
+      dragTarget=""
+  }
+
+  async function handleDragDropOrphan(e:DragEvent) {
+    e.preventDefault();
+    const sessionHash = decodeHashFromBase64(draggedItemId)
+    await store.unslot(sessionHash)
+    clearDrag()
+
   }
 
   function handleDragEnter(e) {
-    const elem = findDropSlotParentElement(e.target as HTMLElement)
+    const target = e.target as HTMLElement
+    const elem = findDropSlotParentElement(target)
     if (!elem.classList.contains("excluded")) {
       dragTarget = elem ? elem.id : ""
+      if (target.id.startsWith("uhCk") && target.id != draggedItemId) {
+        mergeTarget = target.id
+      }
     }
   }
 
@@ -132,6 +173,9 @@
     const target = e.target as HTMLElement
     if (target.id == dragTarget) {
       dragTarget = ""
+    }
+    if (target.id == mergeTarget) {
+      mergeTarget = ""
     }
   }
 
@@ -148,22 +192,34 @@
 
   async function handleDragDropSession(e:DragEvent) {
     e.preventDefault();
-    const target = findDropSlotParentElement(e.target as HTMLElement)
-    if (target.classList.contains("excluded")) {
+    const target = e.target as HTMLElement
+    const elem = findDropSlotParentElement(target)
+    if (elem.classList.contains("excluded")) {
       clearDrag()
       return
     }
 
+    if (target.id == mergeTarget) {
+      if (confirm("Merge Sessions?")) {
+        await store.mergeSessions(decodeHashFromBase64(mergeTarget), decodeHashFromBase64(draggedItemId))
+        clearDrag()
+        return
+      }
+    }
+
     var srcId = e.dataTransfer.getData("text");
 
-    const [windowJSON,idx] = target.id.split("-")
+    const [windowJSON,idx] = elem.id.split("-")
     const space = $spaces[parseInt(idx)]
     const slot = {window:JSON.parse(windowJSON), space:space.original_hash}
     const sessionHash = decodeHashFromBase64(srcId)
 
     const session = store.getSession(sessionHash)
     const sessionSlot = store.getSessionSlot(session)
-    if (target.id && (!sessionSlot || JSON.stringify(sessionSlot.window) != windowJSON) || encodeHashToBase64(slot.space) != encodeHashToBase64(sessionSlot.space)) {
+
+
+
+    if (elem.id && (!sessionSlot || JSON.stringify(sessionSlot.window) != windowJSON) || encodeHashToBase64(slot.space) != encodeHashToBase64(sessionSlot.space)) {
       await store.slot(sessionHash, slot)
       spaces = store.spaces
     }
@@ -184,6 +240,8 @@
     draggedItemId = ""
     draggedSession = undefined
     dragTarget = ""
+    mergeTarget = ""
+    orphanCount = 0
   }
   let dragDuration = 300
 
@@ -212,7 +270,7 @@
 
     for (const s of $sessions.filter(s=>!s.record.entry.trashed)) {
       const slot = store.getSessionSlot(s)
-      if ( JSON.stringify(slot.window) == JSON.stringify(window)) {
+      if ( slot && JSON.stringify(slot.window) == JSON.stringify(window)) {
         alert("Time window has scheduled sessions, can't delete! Please move the sessions first.")
         return
       }
@@ -250,13 +308,26 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   
     <sl-select style="margin-right: 5px;width: 200px;"
     placeholder="Filter by Slot Type"
-    on:sl-change={(e) => slotType = e.target.value }
+    on:sl-change={(e) => {slotType = e.target.value 
+
+    }}
     pill
     clearable
     >
       {#each store.getSlotTypeTags() as type}
         <sl-option value={type}> {type}</sl-option>
       {/each}
+    </sl-select>
+    <sl-select style="margin-right: 5px;width: 200px;"
+    placeholder="Sort Spaces By"
+    value={$uiProps.spaceSort}
+    on:sl-change={(e) => {
+      store.setUIprops({spaceSort:  e.target.value  })
+    } }
+    pill
+    >
+      <sl-option value={SpaceSortOrder.Key}>Key</sl-option>
+      <sl-option value={SpaceSortOrder.Capacity}>Capacity</sl-option>
     </sl-select>
     {#if $uiProps.amSteward}
       <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
@@ -282,7 +353,14 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
 
     <div class="sections">
 
-      <div class="orphans">
+      <div class="orphans"
+        class:glowing={dragTarget == "orphan"}
+        on:dragenter={handleDragEnterOrphan} 
+        on:dragleave={handleDragLeaveOrphan}  
+        on:drop={handleDragDropOrphan}  
+        on:dragover={handleDragOver}          
+
+      >
         <div><strong>Orphan Sessions</strong></div>
         {#each $sessions.filter((s)=>!s.record.entry.trashed && !store.getSessionSlot(s)) as session}
           <div
@@ -292,11 +370,16 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
             draggable={dragOn}
             on:dragstart={handleDragStart}
             on:dragend={handleDragEnd}              
-          >
+          > 
+            <div 
+            on:dragenter={handleDragEnterOrphan} 
+            on:dragleave={handleDragLeaveOrphan}  >
             <SessionSummary 
+
               showAmenities={true}
               session={session}>
             </SessionSummary>
+            </div>
           </div>
         {/each}
 
@@ -306,7 +389,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
         {#if bySpace}
         <table style="">
           <th class="empty"></th>
-          {#each $spaces as space, idx}
+          {#each $spaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
             <th class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
               class:tagged={space.record.entry.tags.length > 0}
@@ -315,13 +398,13 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
               class:amo-warn={draggedAmenitiesCount > 0 && overlappingAmenities(space).length < draggedAmenitiesCount }
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
-                {space.record.entry.name}
+]                <SpaceLink spaceHash={space.original_hash}></SpaceLink>
                 {#if space.record.entry.pic}
-                  <div class="space-pic">
+                 <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
                   </div>
                 {/if}
-                {#if overlappingAmenities(space)}
+                {#if overlappingAmenities(space)&&false}
                   {overlappingAmenities(space).join(", ")}
                 {/if}
             </th>
@@ -346,7 +429,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
                     </sl-button>
                   {/if}
               </td>
-              {#each $spaces as space, idx}
+              {#each $spaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
                 <td 
                   id={`${JSON.stringify(window)}-${idx}}`}
                   class="schedule-slot"
@@ -357,15 +440,18 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
                   on:dragleave={handleDragLeave}  
                   on:drop={handleDragDropSession}
                   on:dragover={handleDragOver}          
-                  on:click={(e)=>{selectSlot(window, space); e.stopPropagation()}}
                 >
                   {#each store.sessionsInSpace(window, space) as session}
                     <div class="slotted-session"
                     id={encodeHashToBase64(session.original_hash)}
                     class:tilted={draggedItemId == encodeHashToBase64(session.original_hash)}
+                    class:mergable={mergeTarget == encodeHashToBase64(session.original_hash)}
+                    on:dblclick={(e)=>{e.stopPropagation();store.openDetails(DetailsType.Session, session.original_hash)}}
                     draggable={dragOn}
                     on:dragstart={handleDragStart}
-                    on:dragend={handleDragEnd}              
+                    on:dragend={handleDragEnd}
+                    on:dragenter={handleDragEnter} 
+                    on:dragleave={handleDragLeave}  
                     >
                       {session.record.entry.title}
                     </div>
@@ -410,7 +496,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
             {/each}
           {/each}
           </tr>
-          {#each $spaces as space, idx}
+          {#each $spaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
           <tr>
             <td class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
@@ -420,13 +506,14 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
               class:amo-warn={draggedAmenitiesCount > 0 && overlappingAmenities(space).length < draggedAmenitiesCount }
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
-                {space.record.entry.name}{#if space.record.entry.key} ({space.record.entry.key}){/if}
+                <SpaceLink spaceHash={space.original_hash}></SpaceLink>
+    
                 {#if space.record.entry.pic}
                   <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
                   </div>
                 {/if}
-                {#if overlappingAmenities(space)}
+                {#if overlappingAmenities(space) && false}
                   {overlappingAmenities(space).join(", ")}
                 {/if}
             </td>
@@ -449,15 +536,18 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
                   on:dragleave={handleDragLeave}  
                   on:drop={handleDragDropSession}
                   on:dragover={handleDragOver}          
-                  on:click={(e)=>{selectSlot(window, space); e.stopPropagation()}}
                 >
                   {#each store.sessionsInSpace(window, space) as session}
                     <div class="slotted-session"
                     id={encodeHashToBase64(session.original_hash)}
                     class:tilted={draggedItemId == encodeHashToBase64(session.original_hash)}
+                    class:mergable={mergeTarget == encodeHashToBase64(session.original_hash)}
+                    on:dblclick={(e)=>{e.stopPropagation();store.openDetails(DetailsType.Session, session.original_hash)}}
                     draggable={dragOn}
                     on:dragstart={handleDragStart}
-                    on:dragend={handleDragEnd}              
+                    on:dragend={handleDragEnd}
+                    on:dragenter={handleDragEnter} 
+                    on:dragleave={handleDragLeave}  
                     >
                       {session.record.entry.title}
                     </div>
@@ -474,7 +564,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
       <div class="selected-sessions">
         <div><strong>Selected</strong></div>
         {#each $sessions.filter((s)=>!s.record.entry.trashed && selectedSessions.get(s.record.actionHash))
-          .sort((a,b)=>store.getSessionSlot(a).window.start - store.getSessionSlot(b).window.start) as session}
+          .sort((a,b)=> {return sortSlot(store.getSessionSlot(a), store.getSessionSlot(b))}) as session}
           <div style="margin-bottom: 8px;">
             <SessionSummary 
               showAmenities={true}
@@ -501,7 +591,8 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   flex-direction: column;
   align-items: self-start;
   flex: 0;
-  margin: 5px;  
+  margin: 5px;
+  padding: 10px;
  }
  .orphaned-session {
   margin-bottom: 8px;
@@ -560,7 +651,9 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   z-index: 100;
 }
 
-
+.mergable {
+  background-color: aqua;
+}
 .amo-warn {
   background-color: lightgoldenrodyellow;
 }

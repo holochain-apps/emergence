@@ -1,18 +1,16 @@
 // import {  } from './types';
 
-import type {
-     ActionHash,
-     AgentPubKey,
-     AppAgentCallZomeRequest,
-     AppAgentClient,
-     AppWebsocket,
-     CallZomeRequest,
-     CellId,
-     EntryHash,
-     HoloHash,
-} from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse, Settings, ProxyAgent, UpdateProxyAgentInput } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
+import type {
+  ActionHash,
+  AgentPubKey,
+  AppWebsocket,
+  CallZomeRequest,
+  CellId,
+  EntryHash,
+  HoloHash
+} from '@holochain/client';
+import type { AnyAgent, FeedElem, GetStuffInput, GetStuffOutput, Info, Note, ProxyAgent, Relation, RelationInfo, Session, Settings, SiteMap, Space, TagUse, TimeWindow, UpdateNoteInput, UpdateProxyAgentInput, UpdateSessionInput, UpdateSiteMapInput, UpdateSpaceInput } from './emergence/emergence/types.js';
 // import { UnsubscribeFunction } from 'emittery';
 
 
@@ -90,7 +88,7 @@ export class EmergenceClient {
     return key
   }
   
-  async createSession(title: string, amenities: number, description: string, leaders:Array<AgentPubKey>, smallest: number, largest: number, duration: number) : Promise<EntryRecord<Session>> {
+  async createSession(title: string, amenities: number, description: string, leaders:Array<AnyAgent>, smallest: number, largest: number, duration: number) : Promise<EntryRecord<Session>> {
     const sessionEntry: Session = { 
         key: this.genKey(),
         title,
@@ -117,10 +115,11 @@ export class EmergenceClient {
   async getSessions() : Promise<Array<Info<Session>>> {
     const sessions = await this.callZome('get_all_sessions',null)
     return sessions.map(r => {
-        const info: Info<Session> = {
+        let info: Info<Session> = {
         original_hash: r.original_hash,
         record: new EntryRecord(r.record), 
         relations: r.relations}
+
         return info
     });
   }

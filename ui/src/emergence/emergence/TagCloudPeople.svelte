@@ -33,11 +33,16 @@
 
 </script>
 
-<div>
-    People using tag "{tag}"
-  {#each folk as agent}
-    <div>
-        <Avatar agentPubKey={agent.agentPubKey}></Avatar>
+<div class="card" style="padding:10px">
+    <div style="display:flex; flex-direction: column">
+
+        <span>{tag}:</span>
+        <div style="display:flex;">
+        {#each folk as agent}
+            <div style="display:flex;">
+                <Avatar agentPubKey={agent.agentPubKey}></Avatar>
+            </div>
+        {/each}
+        </div>
     </div>
-  {/each}
 </div>

@@ -13,12 +13,15 @@ import { amenitiesList, durationToStr, timeWindowDurationToStr, timeWindowStartT
 
 import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 import Avatar from './Avatar.svelte';
+import AnyAvatar from './AnyAvatar.svelte';
 import Confirm from './Confirm.svelte';
 import InterestSelect from './InterestSelect.svelte';
 import NoteCrud from './NoteCrud.svelte';
 import NoteDetail from './NoteDetail.svelte';
 import SessionCrud from './SessionCrud.svelte';
 import { slide } from 'svelte/transition';
+import SpaceLink from './SpaceLink.svelte';
+import { Marked } from "@ts-stack/markdown";
 
 const dispatch = createEventDispatcher();
 
@@ -50,11 +53,13 @@ const sessionSlot = (session: Info<Session>): Slot | undefined => {
         if (spaces.length > 0) {
           const ri = spaces[spaces.length-1]
           const r = ri.relation
-          const window = JSON.parse(r.content.data) as TimeWindow
-                  return {
-                      space: r.dst,
-                      window
-                  }
+          if (r.content.data) {
+            const window = JSON.parse(r.content.data) as TimeWindow
+            return {
+                space: r.dst,
+                window
+            }
+          }
         }
         return undefined
 }
@@ -148,7 +153,6 @@ bind:this={updateSessionDialog}
     <span style="flex: 1"></span>
  
   </div>
-  <div class="event-image"></div>
  
   <Confirm bind:this={confirmDialog}
     message="This will remove this session for everyone!" on:confirm-confirmed={deleteSession}></Confirm>
@@ -161,10 +165,10 @@ bind:this={updateSessionDialog}
         <div class="leaders">
           <span style="margin-right: 4px"><strong>Hosted by </strong></span>
           {#each entry.leaders as leader}
-            <Avatar agentPubKey={leader}></Avatar>
+            <AnyAvatar agent={leader}></AnyAvatar>
           {/each}
         </div>
-        <div class="description">{ entry.description }</div>
+        <div class="description"> {@html Marked.parse(entry.description) }</div>
         <div class="tags">
           {#each tags as tag}
             <div class="tag">
@@ -208,7 +212,7 @@ bind:this={updateSessionDialog}
       </div>
       <div style="display: flex; flex-direction: row; margin-bottom: 16px">
         {#if slot}
-        Scheduled in {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"} on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
+        Scheduled in <SpaceLink spaceHash={slot.space}></SpaceLink> on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
         {/if}
       </div>
     </div>

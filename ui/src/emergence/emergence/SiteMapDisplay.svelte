@@ -5,7 +5,7 @@
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
     import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
-    import { type Info, type SiteLocation, type SiteMap, type Space, timeWindowStartToStr } from './types';
+    import { type Info, type SiteLocation, type SiteMap, type Space, timeWindowStartToStr, DetailsType } from './types';
     import { faList, faSync } from '@fortawesome/free-solid-svg-icons';
     import Fa from 'svelte-fa';
     import { fromUint8Array } from "js-base64";
@@ -66,7 +66,7 @@
             const session = store.getSession(r.relation.dst)
             if (session && !session.record.entry.trashed) {
                 const slot = store.getSessionSlot(session)
-                if (spaceB64 == encodeHashToBase64(slot.space)) {
+                if (slot && spaceB64 == encodeHashToBase64(slot.space)) {
                     sessions.set(session.original_hash, {title: session.record.entry.title, window: slot.window})
                 }
             }
@@ -80,56 +80,80 @@
         <sl-spinner></sl-spinner>
     </div>
 {:else}
-
-<div class="pane-header">
-    <div class="header-content">
-        <h3>Spaces</h3>
-        <div style="display: flex; flex-direction: row; align-self:center">
-            <sl-button style="" on:click={() => { dispatch('show-all-spaces') } } circle>
-                <Fa icon={faList} />
-            </sl-button>
+    <div class="SiteMapDisplay">
+        <div class="pane-header">
+            <div class="header-content">
+                <h3>Spaces</h3>
+                <div style="display: flex; flex-direction: row; align-self:center">
+                    <sl-button style="" on:click={() => { dispatch('show-all-spaces') } } >
+                        List View <Fa icon={faList} />
+                    </sl-button>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
 
-<div class="pane-content">
-
-        <div class="pic" use:watchResize={handleResize}>
-            <div class="img-container">
-                {#if spaceDetails}
-                <div class="details">
-                    {spaceDetails.space.record.entry.name}
-                </div>
-            {/if}
-            {#if file && picB64}
-            
-            {#each locations as loc}
-            <sl-tooltip >
-                <div slot="content">
-                    <div style="display:flex; flex-direction:column">
-                        <span>{loc.space.record.entry.name}</span>
-                        {loc.space.record.entry.description}
-                        {#each sessionsInSpace(loc.space) as ses}
-                            <span>{ses.title} -- {timeWindowStartToStr(ses.window)}</span>
-                        {/each}
+        <div class="pane-content">
+            <div class="pic" use:watchResize={handleResize}>
+                <div class="img-container">
+                    {#if spaceDetails}
+                    <div class="details">
+                        {spaceDetails.space.record.entry.name}
                     </div>
+                {/if}
+                {#if file && picB64}
+                
+                {#each locations as loc}
+                <sl-tooltip >
+                    <div slot="content">
+                        <div style="display:flex; flex-direction:column">
+                            <span>{loc.space.record.entry.name}</span>
+                            {loc.space.record.entry.description}
+                            {#each sessionsInSpace(loc.space) as ses}
+                                <span>{ses.title} -- {timeWindowStartToStr(ses.window)}</span>
+                            {/each}
+                        </div>
+                    </div>
+                    <div
+                        on:click={store.openDetails(DetailsType.Space, loc.space.original_hash)}
+                        style={getSpaceStyle(loc.loc)} class="location">
+                        {loc.space.record.entry.key}
+                    </div>
+                </sl-tooltip>
+                {/each}
+                <img  bind:this={img} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit: cover; overflow: hidden">
+                {/if}
                 </div>
-                <div
-                    style={getSpaceStyle(loc.loc)} class="location">
-                    {loc.space.record.entry.key}
-                </div>
-            </sl-tooltip>
-            {/each}
-            <img  bind:this={img} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit: cover; overflow: hidden">
-            {/if}
             </div>
         </div>
     </div>
 {/if}
-
 <style>
 img {
     width:100%;
+}
+
+.SiteMapDisplay {
+    width: 100vw;
+    height: 100%;
+    overflow: auto;
+}
+.pane-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+.header-content {
+    max-width: 100%;
+}
+
+.pane-content {
+    position: relative;
+    z-index: 0;
+    width: 100%;
+    min-width: 1000px;
+    max-height: 100%;
 }
 .img-container {
     position: relative;

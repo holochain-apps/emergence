@@ -9,11 +9,12 @@
     import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
     import { timestampToStr } from './types';
     import Fa from 'svelte-fa';
-    import { faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
+    import { faChevronDown, faChevronUp, faEdit, faTrash } from '@fortawesome/free-solid-svg-icons';
     import NoteCrud from './NoteCrud.svelte';
     import Confirm from './Confirm.svelte';
     import SessionLink from './SessionLink.svelte';
     import { Marked } from "@ts-stack/markdown";
+    import { truncateText } from './utils';
 
     const dispatch = createEventDispatcher();
 
@@ -25,6 +26,8 @@
     export let showTimestamp = true
     export let showFrame = false
     export let showDeleted = true
+
+    let collapsed = true
 
     $: note = store.neededStuffStore.notes.get(noteHash)
     $: uiProps = store.uiProps
@@ -105,8 +108,14 @@
         </div>         
         {/if}
 
-        <div class="post-content">
-          {@html Marked.parse($note.value.record.entry.text)}
+        <div class="post-content"
+        >
+          {@html Marked.parse(collapsed ? truncateText($note.value.record.entry.text, 330) : $note.value.record.entry.text)}
+          {#if $note.value.record.entry.text.length > 330 }
+              <sl-button style="margin-left: 8px;" on:click={()=> collapsed = !collapsed} circle>
+                <Fa icon={collapsed ? faChevronUp : faChevronDown} />
+              </sl-button>
+          {/if}
         </div>
         <div class="tags">
           {#each $note.value.record.entry.tags as tag}
@@ -166,7 +175,9 @@
   .post-content {
     margin-bottom: .25em;
     font-size: 1.1em;
+    overflow: hidden;
   }
+  
   :global(.tags) {
     display: flex;
     margin-bottom: .25em;
@@ -177,7 +188,7 @@
     /*TODO: figure out best way to control content width 
     higher up the dom like at the pane level 
     so that images can take up 100% width of the post*/
-    width: 300px;
+    max-width: 680px;
     margin: 0 auto;
     margin:auto;
   }
