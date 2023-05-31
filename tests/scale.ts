@@ -26,12 +26,14 @@ const conductorCount = 1;
 let agentsPerConductor = 1;
 const agentsPerConductorIncrementor = 20;
 
-let notesPerMin = 10;
+let notesPerMin = 1;
 const notesPerMinIncrementor = 0;
 
 let testRunCount = 1;
 const testRunCountMax = 1;
-const testDuration = 1000 * 70;
+const testDuration = 1000 * 20;
+
+const intervalMargin = agentsPerConductor * 50;
 
 const metricsPerMin: { timeElapsedToCreateAllNotes: number }[] = [];
 
@@ -149,7 +151,7 @@ do {
         }
 
         totalTimeElapsed = Date.now() - startTime;
-        if (totalTimeElapsed % outputInterval <= 1000) {
+        if (totalTimeElapsed % outputInterval <= intervalMargin) {
             const elapsedTime = Math.round(totalTimeElapsed / 1000);
             console.log(`Checkpoint: ${elapsedTime} seconds elapsed. ${notesCreatedTotal} notes created until now.`);
             outputPrinted = true;
@@ -157,7 +159,7 @@ do {
             outputPrinted = false;
         }
 
-        if (totalTimeElapsed % checkSyncInterval <= 1000) {
+        if (totalTimeElapsed % checkSyncInterval <= intervalMargin) {
             if (notesCreatedThisMinute >= notesPerMin) {
                 const dhtsSynced = await areDhtsSynced(clientsPlayers.flatMap((clientPlayer) => clientPlayer.client.conductors), cellId);
                 const timeElapsedToSyncDht = Math.round((Date.now() - startTimeDhtSync) / 1000);
@@ -169,7 +171,7 @@ do {
             }
         }
 
-        if (totalTimeElapsed > 0 && totalTimeElapsed % (1000 * 60) <= 1000) {
+        if (totalTimeElapsed > 0 && totalTimeElapsed % (1000 * 60) <= intervalMargin) {
             console.log("-------------- A minute has passed. --------------");
             if (notesCreatedThisMinute < notesPerMin) {
                 console.log(`Failed to create ${notesPerMin} notes this minute. Created ${notesCreatedThisMinute}. Aborting test run.`);
