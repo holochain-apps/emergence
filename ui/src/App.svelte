@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync, faPowerOff } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync, faPowerOff, faCircleArrowLeft, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -49,6 +49,7 @@
   let creatingProxyAgent = false
   let syncing = false
   let error: any = undefined;
+  let creds
 
   $: error
   $: client, fileStorageClient, store, loading;
@@ -81,26 +82,29 @@
     let appPort : string = import.meta.env.VITE_APP_PORT
     let installed_app_id = "emergence"
     const credsJson = getCookie("creds")
-    let creds
     if (credsJson) {
-      appPort = "3030"
-      const x = jsonToCreds(credsJson)
-      console.log("FISH", x)
-      installed_app_id = x.installed_app_id
-      creds = x.creds
+      creds = jsonToCreds(credsJson)
+      installed_app_id = creds.installed_app_id
     }
+    window.onunhandledrejection = (e:PromiseRejectionEvent) => {
+      if (typeof e.reason == "object") {
+        error = JSON.stringify(e.reason)
+      } else {
+        error = e.reason
+      }
+    }
+    let host = "localhost"
 
-    try {
-      client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, installed_app_id);
-      if (creds) {
-        console.log("creds", creds)
-        
-        const appInfo = await client.appInfo()
-        console.log("appInfo", appInfo)
-        const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
-        setSigningCredentials(cell_id, creds)
-        console.log("setting signing creds for ", installed_app_id)
-      } else
+    if (creds) {
+      host = "dweb1.holochain.org"
+      appPort = "8030"
+      client = await AppAgentWebsocket.connect(`ws://${host}:${appPort}`, installed_app_id);
+      const appInfo = await client.appInfo()
+      console.log("appInfo", appInfo)
+      const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
+      setSigningCredentials(cell_id, creds.creds)
+    } else {
+      client = await AppAgentWebsocket.connect(`ws://${host}:${appPort}`, installed_app_id);
       if (adminPort) {
         const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
         //const x = await adminWebsocket.listApps({})
@@ -108,9 +112,7 @@
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
     }
-    catch(e) {
-      error =e
-    }
+  
 
     profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
       avatarMode: "avatar-optional",
@@ -156,10 +158,22 @@
 <main>
   {#if error}
     <span class="notice">
+      <h3>I'm sorry to say it, but there has been an error ☹️</h3>
       {error}
-      {#if getCookie("creds")}
-        <div>Signed in with reg key:  {getCookie("creds").regkey}</div>
-        <a href="/reset">Logout</a>
+      {#if creds}
+        <div>Signed in to the holochain multiplexer with reg key: {creds.regkey}</div>
+        <sl-button style="margin-left: 8px;" on:click={() => {
+          deleteCookie("creds")
+          window.location.assign("/")
+          }}>
+          <Fa icon={faPowerOff} /> Logout
+        </sl-button>
+      {:else}
+        <div>
+          <sl-button style="margin-left: 8px;" on:click={() => window.location.assign("/")}>
+            <Fa icon={faArrowRotateBack} /> Reload
+          </sl-button>
+        </div>
       {/if}
     </span>
   {:else if loading}
@@ -429,5 +443,13 @@
 </main>
 
 <style>
-
+  .notice {
+    display: block;
+    text-align: center;
+    max-width: 1000px;
+    padding: 25px;
+    border: 1px solid;
+    border-radius: 20px;
+    margin: auto;
+  }
 </style>
