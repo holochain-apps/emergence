@@ -287,7 +287,7 @@ export class EmergenceClient {
       fn_name,
       payload,
     };
-    return this.client.callZome(req);
+    return this.client.callZome(req, 30000);
   }
   /** Scene */
 
