@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync, faPowerOff, faCircleArrowLeft, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync, faArrowRightFromBracket, faCircleArrowLeft, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -157,14 +157,16 @@
   {#if error}
     <span class="notice">
       <h3>I'm sorry to say it, but there has been an error ☹️</h3>
-      {error}
+      <div style="padding:10px; margin:10px; background:lightcoral;border-radius: 10px;">
+        {error}
+      </div>
       {#if creds}
-        <div>Signed in to the holochain multiplexer with reg key: {creds.regkey}</div>
+        <div>You are signed in to the holochain multiplexer with reg key: <strong>{creds.regkey}</strong></div>
         <sl-button style="margin-left: 8px;" on:click={() => {
           deleteCookie("creds")
           window.location.assign("/")
           }}>
-          <Fa icon={faPowerOff} /> Logout
+          <Fa icon={faArrowRightFromBracket} /> Logout
         </sl-button>
       {:else}
         <div>
@@ -261,7 +263,7 @@
                 window.location.assign("/reset")
               }}
             >
-              <Fa class="nav-icon" icon={faPowerOff} size="2x"/>
+              <Fa class="nav-icon" icon={faArrowRightFromBracket} size="2x"/>
             <span class="button-title">Logout</span>
             </div>
           {/if}
