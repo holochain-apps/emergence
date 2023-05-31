@@ -89,7 +89,6 @@ export class EmergenceClient {
   }
   
   async createSession(title: string, amenities: number, description: string, leaders:Array<AnyAgent>, smallest: number, largest: number, duration: number) : Promise<EntryRecord<Session>> {
-    console.log("FISH",leaders.map(l=>encodeHashToBase64(l.hash)))
     const sessionEntry: Session = { 
         key: this.genKey(),
         title,

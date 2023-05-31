@@ -62,18 +62,11 @@
 
   const jsonToCreds = (json:string)=> {
     const creds = JSON.parse(json)
-    return {
-      installed_app_id: creds.installed_app_id,
-      regkey: creds.regkey,
-      creds: {
-        capSecret:base64ToUint8(creds.creds.capSecret),
-        keyPair:{
-          publicKey: base64ToUint8(creds.creds.keyPair.publicKey),
-          secretKey: base64ToUint8(creds.creds.keyPair.secretKey),
-        },
-        signingKey: base64ToUint8(creds.creds.signingKey)
-      }
-    }
+    creds.creds.capSecret = base64ToUint8(creds.creds.capSecret)
+    creds.creds.keyPair.publicKey = base64ToUint8(creds.creds.keyPair.publicKey)
+    creds.creds.keyPair.secretKey = base64ToUint8(creds.creds.keyPair.secretKey)
+    creds.creds.signingKey = base64ToUint8(creds.creds.signingKey)
+    return creds
   };
 
   onMount(async () => {
@@ -86,28 +79,33 @@
       creds = jsonToCreds(credsJson)
       installed_app_id = creds.installed_app_id
     }
-    window.onunhandledrejection = (e:PromiseRejectionEvent) => {
+    window.onunhandledrejection = (e) => {
       if (typeof e.reason == "object") {
-        error = JSON.stringify(e.reason)
+        if (e instanceof TypeError) {
+          error = e.message
+        } else {
+          if (e.reason.message) {
+            error = e.reason.message
+          } else {
+            error = JSON.stringify(e.reason)
+          }
+        }
       } else {
         error = e.reason
       }
     }
-    let host = "localhost"
 
     if (creds) {
-      host = "dweb1.holochain.org"
-      appPort = "8030"
-      client = await AppAgentWebsocket.connect(`ws://${host}:${appPort}`, installed_app_id);
+      console.log("CREDS", creds)
+      client = await AppAgentWebsocket.connect(creds.appWebsocketUrl, installed_app_id);
       const appInfo = await client.appInfo()
       console.log("appInfo", appInfo)
       const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
       setSigningCredentials(cell_id, creds.creds)
     } else {
-      client = await AppAgentWebsocket.connect(`ws://${host}:${appPort}`, installed_app_id);
+      client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, installed_app_id);
       if (adminPort) {
         const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
-        //const x = await adminWebsocket.listApps({})
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
