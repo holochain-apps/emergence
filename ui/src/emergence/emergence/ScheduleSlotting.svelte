@@ -17,7 +17,7 @@
   import SessionFilterCtrls from './SessionFilterCtrls.svelte';
   import SessionFilter from './SessionFilter.svelte';
   import SpaceLink from './SpaceLink.svelte';
-  import SpaceCrud from './SpaceCrud.svelte';
+  import Confirm from './Confirm.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -35,7 +35,6 @@
   $: windows = store.timeWindows
   $: days = calcDays($windows, slotType, $uiProps.sessionsFilter) 
   $: sessions = store.sessions
-  $: sortedSpaces = async (spaces)=>spaces.sort(sortSpace)
 
   let selectedSessions:HoloHashMap<ActionHash,boolean> = new HoloHashMap()
   let selectedSpaceIdx: number|undefined = undefined
@@ -200,11 +199,11 @@
     }
 
     if (target.id == mergeTarget) {
-      if (confirm("Merge Sessions?")) {
-        await store.mergeSessions(decodeHashFromBase64(mergeTarget), decodeHashFromBase64(draggedItemId))
-        clearDrag()
-        return
-      }
+      mergeA = decodeHashFromBase64(mergeTarget)
+      mergeB = decodeHashFromBase64(draggedItemId)
+      confirmDialog.open()
+      clearDrag()
+      return
     }
 
     var srcId = e.dataTransfer.getData("text");
@@ -279,7 +278,20 @@
     store.fetchTimeWindows()
   }
   let showFilter = false
+  let confirmDialog
+  let mergeA: ActionHash
+  let mergeB: ActionHash
+
+  const mergeSession = async () => {
+    await store.mergeSessions(mergeA, mergeB )
+  }
 </script>
+
+<Confirm 
+  bind:this={confirmDialog}
+  message="Please confirm merge." 
+  on:confirm-confirmed={mergeSession}></Confirm>
+
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
   <sl-spinner></sl-spinner>
