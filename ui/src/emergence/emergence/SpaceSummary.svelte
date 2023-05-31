@@ -115,6 +115,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
     display: flex;
     flex-direction: row;
     width: 100%;
+    cursor: pointer;
   }
   .name-row {
     display: flex;

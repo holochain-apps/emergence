@@ -42,7 +42,7 @@ onMount(() => {
     </div>
   </div>
   <div style="display: flex; flex-direction: column; margin-bottom: 16px">
-    <div  class="center-row">
+    <div  class="center-row" style="background-color:white;">
       <span style="margin-right: 10px"><Fa icon={faUser} /></span>
       {#if filter.author}
         <Avatar agentPubKey={filter.author}></Avatar>
@@ -53,14 +53,14 @@ onMount(() => {
     
     </div>
   </div> 
-  <div class="center-row">
+  <div class="center-row" style="background-color:white;">
     <span style="margin-right: 10px"><Fa icon={faTag} /></span>
     <sl-input
       value={filter.tags.join(", ")}
       on:input={e => { filter.tags = e.target.value.split(/,\W*/).filter((w)=>w) ; dispatch('update-filter', filter)} }
     ></sl-input>
   </div> 
-  <div class="center-row">
+  <div class="center-row" style="background-color:white;">
     <span style="margin-right: 4px"><Fa icon={faMagnifyingGlass} /></span>
       <sl-input
       value={filter.keyword}
