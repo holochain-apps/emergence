@@ -12,6 +12,7 @@
     import Feed from './Feed.svelte';
     import TagCloud from './TagCloud.svelte'
     import Sense from './Sense.svelte';
+    import People from './People.svelte';
     import FeedFilter from './FeedFilter.svelte';
     import { faClose, faFilter, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
     import Fa from 'svelte-fa';
@@ -63,6 +64,7 @@
             </div>
         </sl-tab-panel>
         <sl-tab-panel name="people">
+            <People></People>
         </sl-tab-panel>
         <sl-tab-panel name="activity">
 
