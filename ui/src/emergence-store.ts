@@ -1477,11 +1477,9 @@ export class EmergenceStore {
             feed.forEach(f=>{
                 if (f.type == FeedType.SessionSetInterest) {
                     if (f.detail & (SessionInterestBit.NoOpinion + SessionInterestBit.Hidden) || f.detail == 0) {
-                        console.log("Deleting", f)
                         si.delete(f.about)
                     }
                     else {
-                        console.log("Setting", f)
                         si.set(f.about, f.detail)
                     }
                 }

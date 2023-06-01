@@ -9,6 +9,7 @@
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
     import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
+  import SenseResults from "./SenseResults.svelte";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -17,9 +18,7 @@
     $: sessions = store.sessions
 
     $:settings = store.settings
-    $: allProfiles = store.profilesStore.allProfiles
 
-    $: peopleCount = $allProfiles.status=== "complete" ? Array.from($allProfiles.value.keys()).length : 0
 
     onMount(() => {
     })
@@ -220,47 +219,7 @@
         }
         store.sync(undefined)
     }
-const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
-  const slota = store.getSessionSlot(a)
-  const slotb = store.getSessionSlot(b)
-  let vala = a.record.entry.largest
-  let valb =  a.record.entry.largest
-  return  vala - valb 
-}
 
-interface Projections {
-    session:Info<Session>, 
-    estimatedAttendance:number,
-    percentInterest:number,
-    assements:number,
-    passCount:number,
-    goingCount:number,
-    bookmarkedCount:number,
-}
-const LIKELY_TO_ATTEND_PERCENT = .8
-const sessionData = (sessions: Array<Info<Session>>) => {
-    const projections = sessions.filter(s=> (!s.record.entry.trashed)).map(session=>{
-        const relData = store.getSessionReleationData(session)
-        const interests = Array.from(relData.interest)
-        const assements = interests.length
-        const passCount = interests.filter(([_,i])=> i == SessionInterestBit.NoOpinion).length
-        const goingCount = interests.filter(([_,i])=> i == SessionInterestBit.Going).length
-        const bookmarkedCount = interests.filter(([_,i])=> i == SessionInterestBit.Interested).length
-        const percentInterest = assements > 0 ? (goingCount + bookmarkedCount / .2) / assements : 0
-        const estimatedAttendance = 0
-        return {session, estimatedAttendance, percentInterest, assements,  passCount, goingCount, bookmarkedCount}
-    })
-    let sumOfPercentages = 0
-    for (const p of projections) {
-        sumOfPercentages += p.percentInterest
-    }
-    const s = 1/sumOfPercentages
-    const likely = peopleCount*LIKELY_TO_ATTEND_PERCENT
-    return projections.map(p=>{
-        p.estimatedAttendance =  s * likely * peopleCount * p.percentInterest
-        return p
-    })    
-}
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
 
@@ -305,20 +264,7 @@ const sessionData = (sessions: Array<Info<Session>>) => {
     </div>
 
     {#if $settings.game_active}
-        <div>
-            <ul>
-                <li>Total attendees: {peopleCount}</li>
-                <li>Likely portion to attend sessions (80%): {peopleCount*LIKELY_TO_ATTEND_PERCENT}</li>
-            </ul>
-
-            {#each sessionData($sessions) as d}
-            <div class="session">
-                {d.session.record.entry.title}-- estimated attendance {d.estimatedAttendance} percentInterest: {d.percentInterest} assesements:{d.assements} pass:{d.passCount} going:{d.goingCount} interested:{d.bookmarkedCount}
-              
-            </div>
-          {/each}
-    
-        </div>
+        <SenseResults></SenseResults>
     {/if}
 
 
