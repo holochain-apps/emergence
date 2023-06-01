@@ -15,17 +15,12 @@
   $: uiProps = store.uiProps
   $: peopleCount = $allProfiles.status=== "complete" ? Array.from($allProfiles.value.keys()).length : 0
   $: totalAssesments = 0
+  $: maxAttendance = 0
+  $: minAttendance = 0
+  $: sessionData = calcSessionData($sessions)
 
   onMount(async () => {
   });
-
-  const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
-  const slota = store.getSessionSlot(a)
-  const slotb = store.getSessionSlot(b)
-  let vala = a.record.entry.largest
-  let valb =  a.record.entry.largest
-  return  vala - valb 
-}
 
 interface Projections {
     session:Info<Session>, 
@@ -37,9 +32,9 @@ interface Projections {
     bookmarkedCount:number,
 }
 const LIKELY_TO_ATTEND_PERCENT = .8
-const sessionData = (sessions: Array<Info<Session>>): Array<Projections> => {
+const calcSessionData = (sessions: Array<Info<Session>>): Array<Projections> => {
     let assementCount = 0
-    const projections = sessions.filter(s=> (!s.record.entry.trashed)).map(session=>{
+    let projections = sessions.filter(s=> (!s.record.entry.trashed)).map(session=>{
         const relData = store.getSessionReleationData(session)
         const interests = Array.from(relData.interest)
         const assements = interests.length
@@ -58,12 +53,20 @@ const sessionData = (sessions: Array<Info<Session>>): Array<Projections> => {
     }
     const s = 1/sumOfPercentages
     const likely = peopleCount*LIKELY_TO_ATTEND_PERCENT
-    return projections.map(p=>{
+    projections = projections.map(p=>{
         p.estimatedAttendance =  s * likely * peopleCount * p.percentInterest
         return p
-    })    
+    }).sort((a,b)=>b.estimatedAttendance- a.estimatedAttendance)
+    const est = projections.map(p=>p.estimatedAttendance)
+    maxAttendance = Math.max(...est)
+    minAttendance = Math.min(...est)
+    return projections
 }
-
+const attendanceColor = (attendance: number) : string => {
+  let rankColor = Math.round(( (attendance - minAttendance) / (maxAttendance - minAttendance) ) * 10)
+  const gradient = [145,155,166,175,185,195,205,215,225,235,245,255].reverse()
+  return `rgb(160,${gradient[rankColor]},160)`
+}
 </script>
 {#if error}
 <span>Error: {error.data.data}.</span>
@@ -74,11 +77,11 @@ const sessionData = (sessions: Array<Info<Session>>): Array<Projections> => {
     <tr>    
       <th>Session</th><th>Estimated Attendance</th><th>Interest %</th><th>No Opinion</th><th>Going</th><th>Interested</th>
     </tr>
-    {#each sessionData($sessions) as d}
+    {#each sessionData as d}
       <tr>
-          <td align="right" width="200px">{d.session.record.entry.title}</td>
+          <td style={`color:black;background-color:${attendanceColor(d.estimatedAttendance)}`} align="right" width="200px">{attendanceColor(d.estimatedAttendance)}{d.session.record.entry.title}</td>
           <td align="center" width="100px">{d.estimatedAttendance.toFixed(0)}</td>
-          <td align="center" >{d.percentInterest}</td>
+          <td align="center" >{d.percentInterest.toFixed(1)}</td>
           <td align="center" >{d.passCount} </td>
           <td align="center" >{d.goingCount} </td>
           <td align="center" >{d.bookmarkedCount}</td>

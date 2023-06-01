@@ -100,10 +100,10 @@
           <sl-button
           circle
           size="large"
-          label="Next"
-          on:click={() => {swipe(SessionInterestBit.NoOpinion)}}
-        ><Fa icon={faArrowRight} /></sl-button>
-          Next
+          label="Going"
+          on:click={() => {swipe(SessionInterestBit.Going)}}
+        ><Fa icon={faStar} /></sl-button>
+          Going
         </div>
         <div class="button">
           <sl-button
@@ -118,10 +118,10 @@
           <sl-button
           circle
           size="large"
-          label="Going"
-          on:click={() => {swipe(SessionInterestBit.Going)}}
-        ><Fa icon={faStar} /></sl-button>
-          Going
+          label="Skip"
+          on:click={() => {swipe(SessionInterestBit.NoOpinion)}}
+        ><Fa icon={faArrowRight} /></sl-button>
+          Skip
         </div>
 
       </div>
