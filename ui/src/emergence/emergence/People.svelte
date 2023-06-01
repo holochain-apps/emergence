@@ -5,7 +5,7 @@
   import type { EmergenceStore } from '../../emergence-store';
   import { encodeHashToBase64 } from '@holochain/client';
   import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
-  import { sessionInterestToString } from './types';
+  import { DetailsType, sessionInterestToString } from './types';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -36,7 +36,11 @@
 {:else}
 <div class="people">
   {#each people as [agentPubKey, profile]}
-    <div class="person card">
+    <div class="person card"
+    on:click={(e)=>{
+      store.openDetails(DetailsType.Folk,agentPubKey)
+      e.stopPropagation()
+  }}    >
       <div style="display:flex;flex-direction:column;align-items:center;width:75px;">
         <agent-avatar disable-tooltip={true} disable-copy={true} size={50} agent-pub-key="{encodeHashToBase64(agentPubKey)}"></agent-avatar>
         {profile.nickname}

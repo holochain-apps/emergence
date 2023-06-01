@@ -37,14 +37,18 @@
     const fontSize = (count: number) => {
         return `${Math.round(10*count/wordsMax)*10}px`
     }
+    const getColor = (count:number) => {
+        //Math.floor(Math.random()*16777215).toString(16)
+        return `rgb(${count/wordsMax*255},0,0)`
+    }
 </script>
 <svelte:window bind:innerWidth bind:innerHeight />
 
 <div class="cloud-container">
   {#if $tags.length > 0}
     <div class="cloud">
-        {#each words as word}
-        <div class="word" style="font-size:{fontSize(word.count)};color:#{Math.floor(Math.random()*16777215).toString(16)};"
+        {#each words.sort((a,b)=>b.count-a.count) as word}
+        <div class="word" style="font-size:{"20px"};color:{getColor(word.count)};"
             class:neonText={selectedTags.find(t=>t.toLocaleLowerCase() == word.text.toLowerCase())}
             on:click={(e)=> {
                 const tag = word.text
@@ -57,7 +61,7 @@
                 selectedTags = selectedTags
                }}
             >
-            {word.text}
+            {word.text}:{word.count}
         </div>
         {/each}
     </div>

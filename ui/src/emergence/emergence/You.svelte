@@ -57,11 +57,6 @@
             </sl-button>
         </div>
         <div style="display: flex; flex-direction: row; align-self:center">
-            <sl-button style="margin-left: 8px;" on:click={() => deleteCookie("creds")} circle>
-                <Fa icon={faPowerOff} />
-            </sl-button>
-        </div>
-        <div style="display: flex; flex-direction: row; align-self:center">
             <sl-checkbox
                 bind:this={steward}
                 checked={$uiProps.amSteward}
@@ -83,11 +78,9 @@
         bind:this={tabs}
         on:sl-tab-show={(e)=>store.setUIprops({youPanel:e.detail.name})}
     >
-            <sl-tab slot="nav" panel="sessions">Sessions
-            </sl-tab>
-            <sl-tab slot="nav" panel="notes">Notes
-            </sl-tab>
-            <sl-tab slot="nav" panel="updates">Updates</sl-tab>
+        <sl-tab slot="nav" panel="updates">Updates</sl-tab>
+        <sl-tab slot="nav" panel="notes">Notes</sl-tab>
+        <sl-tab slot="nav" panel="sessions">Sessions</sl-tab>
         <sl-tab-panel name="sessions">
             {#if $agentSessions.get(store.myPubKey).size == 0}
                 You haven't created or marked interest in any sessions yet.. 

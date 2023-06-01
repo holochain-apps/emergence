@@ -1,13 +1,12 @@
 // import {  } from './types';
 
-import {
-  encodeHashToBase64,
-     type ActionHash,
-     type AgentPubKey,
-     type AppAgentCallZomeRequest,
-     type AppAgentClient,
-     type EntryHash,
-     type HoloHash,
+import type {
+     ActionHash,
+     AgentPubKey,
+     AppAgentCallZomeRequest,
+     AppAgentClient,
+     EntryHash,
+     HoloHash,
 } from '@holochain/client';
 import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse, Settings, ProxyAgent, UpdateProxyAgentInput, AnyAgent } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';

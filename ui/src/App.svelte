@@ -114,6 +114,7 @@
 
     profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
       avatarMode: "avatar-optional",
+      minNicknameLength: 3,
       additionalFields: [
         {
           name: "location",

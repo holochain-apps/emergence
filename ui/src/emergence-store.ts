@@ -106,7 +106,7 @@ export class EmergenceStore {
     pane: "sessions",
     amSteward: true,
     debuggingEnabled: false,
-    youPanel: "sessions",
+    youPanel: "updates",
     discoverPanel: "tags",
     sessionsFilter: defaultSessionsFilter(),
     feedFilter: defaultFeedFilter(),
@@ -300,6 +300,7 @@ export class EmergenceStore {
         if (whoB64 === this.myPubKeyBase64) {
             rel.myInterest = i
         }
+        console.log("setting intrest to",whoB64,i )
         rel.interest.set(who, i)
     })
 

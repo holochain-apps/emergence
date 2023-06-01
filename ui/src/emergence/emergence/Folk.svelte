@@ -60,11 +60,9 @@
         bind:this={tabs}
         on:sl-tab-show={(e)=>store.setUIprops({youPanel:e.detail.name})}
     >
-            <sl-tab slot="nav" panel="sessions">Sessions
-            </sl-tab>
-            <sl-tab slot="nav" panel="notes">Notes
-            </sl-tab>
-            <sl-tab slot="nav" panel="updates">Updates</sl-tab>
+        <sl-tab slot="nav" panel="updates">Updates</sl-tab>
+        <sl-tab slot="nav" panel="notes">Notes</sl-tab>
+        <sl-tab slot="nav" panel="sessions">Sessions</sl-tab>
         <sl-tab-panel name="sessions">
             {#if $agentSessions.get(agentPubKey).size == 0}
                 No sessions created or going/interested 
