@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, decodeHashFromBase64, type AppAgentClient, setSigningCredentials } from '@holochain/client';
+  import { AdminWebsocket, type AppAgentClient, setSigningCredentials } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync, faArrowRightFromBracket, faCircleArrowLeft, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync, faArrowRightFromBracket, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -37,7 +37,7 @@
   import ProxyAgentCrud from './emergence/emergence/ProxyAgentCrud.svelte';
   import AllProxyAgents from './emergence/emergence/AllProxyAgents.svelte';
   import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
-  import { getCookie, setCookie, deleteCookie } from 'svelte-cookie';
+  import { getCookie, deleteCookie } from 'svelte-cookie';
   import { Base64 } from 'js-base64'
 
   let client: AppAgentClient | undefined;
@@ -97,7 +97,8 @@
 
     if (creds) {
       console.log("CREDS", creds)
-      client = await AppAgentWebsocket.connect(creds.appWebsocketUrl, installed_app_id);
+      const url = `${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.hostname}:${creds.appPort}`
+      client = await AppAgentWebsocket.connect(url, installed_app_id);
       const appInfo = await client.appInfo()
       console.log("appInfo", appInfo)
       const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
