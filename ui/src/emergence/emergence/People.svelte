@@ -5,6 +5,7 @@
   import type { EmergenceStore } from '../../emergence-store';
   import { encodeHashToBase64 } from '@holochain/client';
   import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
+  import { sessionInterestToString } from './types';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -44,12 +45,10 @@
         {#if profile.fields.location}<span>Location: {profile.fields.location}</span>{/if}
         {#if profile.fields.bio}<span>Bio: {profile.fields.bio}</span>{/if}
       </div>
-      <div style="display:flex;flex-direction:column;align-items: left;margin-left:20px">
+      <div style="display:flex;flex-direction:row;align-items: left;margin-left:20px">
         {#each $agentSessions.get(agentPubKey) ? Array.from($agentSessions.get(agentPubKey)):  [] as [session, interest] }
-          {store.getSession(session).record.entry.title}
+          <div style="margin-left:5px">{store.getSession(session).record.entry.title}, </div>
         {/each}
-
-        what else goes here?
       </div>
       </div>
   {/each}
