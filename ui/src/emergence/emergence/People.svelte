@@ -8,7 +8,6 @@
   import { encodeHashToBase64 } from '@holochain/client';
   import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
-  import "@holochain-open-dev/elements/dist/elements/holo-identicon.js";
   import { DetailsType, type Info, type ProxyAgent } from './types';
   import { faInfoCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
@@ -62,7 +61,7 @@
 {#if error}
 <span>Error fetching the people: {error.data.data}.</span>
 {:else}
-  <div class="center-row" style="background-color:white;">
+  <div class="center-row" style="background-color:white;justify-content:flex-end; margin-right: 5px">
     <span style="margin-right: 10px"><Fa icon={faSearch} /></span>
     <sl-input
       value={$uiProps.peopleFilter.keyword}

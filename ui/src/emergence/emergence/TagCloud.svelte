@@ -38,6 +38,10 @@
         return `${Math.round(10*count/wordsMax)*10}px`
     }
     const getColor = (count:number) => {
+        // let rankColor = Math.round(( (count - 1) / (wordsMax - 1) ) * 10)
+        // const gradient = [35,55,75,95,115,135,155,175,195,215,235,255]
+        // return `rgb(${gradient[rankColor]},0,0)`
+
         //Math.floor(Math.random()*16777215).toString(16)
         return `rgb(${count/wordsMax*255},0,0)`
     }
