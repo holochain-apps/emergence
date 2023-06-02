@@ -17,11 +17,13 @@
   let sessions
 
   $: original = store.sessions
-  $: count = 0
   $: sessions = []
   $: error, senseIdx;
   $: session = sessions ? sessions[senseIdx] : undefined
   $: slot = session ? store.getSessionSlot(session) : undefined
+
+  const SESSIONS_TO_ASSESS = 20
+  $: count = 0
 
   onMount(async () => {
     const filteredSessions = $original.filter(s=>{
@@ -32,7 +34,7 @@
         !s.record.entry.leaders.find(l=>encodeHashToBase64(l.hash) == store.myPubKeyBase64)
     })
     const shuffled = shuffle(filteredSessions)
-    count = shuffled.length < 10 ? shuffled.length : 10
+    count = shuffled.length < SESSIONS_TO_ASSESS ? shuffled.length : SESSIONS_TO_ASSESS
     sessions = shuffled.splice(0,count)
   });
 
