@@ -107,9 +107,9 @@ $:space = slot? store.getSpace(slot.space) : undefined
         </div>
         {#if showLeaders}
           <div class="leaders">
-              <span>Hosted by</span>
+              <span style="padding-top: 2px">Hosted by:</span>
               {#each session.record.entry.leaders as leader}
-                <AnyAvatar showAvatar={false} agent={leader}></AnyAvatar>
+              <span  style="margin-top: -2px;"><AnyAvatar showAvatar={false} agent={leader}></AnyAvatar></span>
               {/each}
           </div>
         {/if}
