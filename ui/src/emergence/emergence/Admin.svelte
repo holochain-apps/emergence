@@ -1,23 +1,24 @@
 <script lang="ts">
-    import { encodeHashToBase64, type EntryHash } from "@holochain/client";
+    import { decodeHashFromBase64, encodeHashToBase64, type EntryHash } from "@holochain/client";
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
-    import { sessionSelfTags, type Info, type Session, SessionInterestBit } from "./types";
+    import { sessionSelfTags, type Info } from "./types";
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
     import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
-  import SenseResults from "./SenseResults.svelte";
+    import '@shoelace-style/shoelace/dist/components/select/select.js';
+    import '@shoelace-style/shoelace/dist/components/option/option.js';
+    import SenseResults from "./SenseResults.svelte";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
     const dispatch = createEventDispatcher();
     let sensing: SlCheckbox
-    $: sessions = store.sessions
-
-    $:settings = store.settings
+    $: sitemaps = store.maps
+    $: settings = store.settings
 
 
     onMount(() => {
@@ -260,7 +261,25 @@
         }>
             {$settings.game_active ? 'Deactivate Sensing Game' : 'Activate Sensing Game'}
         </sl-button>
-        
+        {#if $sitemaps.length > 0}
+        <sl-select
+          value={$settings.current_sitemap ? encodeHashToBase64($settings.current_sitemap) : undefined}
+          style="margin: 8px;"
+          label="Current Site Map"
+          on:sl-change={(e) => {
+            const s= $settings
+            const hash = decodeHashFromBase64(e.target.value)
+            s.current_sitemap = hash
+            store.setSettings(s)
+           } }
+        >
+        {#each $sitemaps as map}
+            <sl-option value={encodeHashToBase64(map.original_hash)}>{map.record.entry.text}</sl-option>
+        {/each}
+        </sl-select>
+
+    {/if}
+
     </div>
 
     {#if $settings.game_active}

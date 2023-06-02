@@ -6,13 +6,12 @@
     import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
     import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
     import { type Info, type SiteLocation, type SiteMap, type Space, timeWindowStartToStr, DetailsType } from './types';
-    import { faList, faSync } from '@fortawesome/free-solid-svg-icons';
+    import { faList } from '@fortawesome/free-solid-svg-icons';
     import Fa from 'svelte-fa';
     import { fromUint8Array } from "js-base64";
     import { watchResize } from "svelte-watch-resize";
     import  { HoloHashMap } from '@holochain-open-dev/utils';
     import { encodeHashToBase64, type ActionHash } from '@holochain/client';
-  import Sync from './Sync.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -30,7 +29,7 @@
 
     $: picB64, img, r, spaceDetails
     $: spaces = store.spaces
-    $: locations = $spaces && picB64 && img && (r>-1)? $spaces.map(s=>{return {loc: store.getSpaceSiteLocation(s), space:s}}) : []
+    $: locations = $spaces && picB64 && img && (r>-1)? $spaces.map(s=>{return {loc: store.getSpaceSiteLocation(s, sitemap.original_hash), space:s}}) : []
 
     onMount(async () => {
         file = await store.fileStorageClient.downloadFile(sitemap.record.entry.pic);

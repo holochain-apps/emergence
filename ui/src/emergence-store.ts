@@ -232,7 +232,11 @@ export class EmergenceStore {
   getCurrentSiteMap() : Info<SiteMap> | undefined {
     const maps = get(this.maps)
     if (maps.length>0) {
-      return maps[0]
+        const settings = get(this.settings)
+        if (settings && settings.current_sitemap) {
+            return this.getSiteMap(settings.current_sitemap)
+        }
+        return maps[0]
     }
     return undefined
   }
@@ -264,8 +268,10 @@ export class EmergenceStore {
     }
   }
 
-  getSpaceSiteLocation(space: Info<Space>) : SiteLocation|undefined {
-    const rels = space.relations.filter(r=>r.relation.content.path == "space.location")
+  getSpaceSiteLocation(space: Info<Space>, sitemap: ActionHash) : SiteLocation|undefined {
+    const siteMap = this.getSiteMap(sitemap)
+    const siteB64 = encodeHashToBase64(siteMap.record.entryHash)
+    const rels = space.relations.filter(r=>r.relation.content.path == "space.location" && siteB64== encodeHashToBase64(r.relation.dst))
     if (rels.length == 0) return undefined
     rels.sort((a,b)=>b.timestamp - a.timestamp)
     const rel = rels[0]
@@ -1048,7 +1054,8 @@ export class EmergenceStore {
         }
         let location :SiteLocation | undefined;
         if (props.hasOwnProperty("location")) {
-            const currentSiteLocation = this.getSpaceSiteLocation(space)
+
+            const currentSiteLocation = this.getSpaceSiteLocation(space, this.getCurrentSiteMap().original_hash)
 
             if (JSON.stringify(currentSiteLocation) !== JSON.stringify(props.location)) {
                 changes.push(`site`)

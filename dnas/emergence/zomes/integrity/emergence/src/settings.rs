@@ -2,7 +2,8 @@ use hdi::prelude::*;
 
 #[derive(Serialize, Deserialize, Debug, SerializedBytes, Clone, PartialEq)]
 pub struct Settings {
-    pub game_active: bool, 
+    pub game_active: bool,
+    pub current_sitemap: Option<ActionHash>,
 }
 
 pub fn validate_create_link_settings(

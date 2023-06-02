@@ -5,7 +5,6 @@
   import { getContext } from "svelte";
   import { DetailsType, type AnyAgent } from "./types";
   import Avatar from './Avatar.svelte';
-  import { encodeHashToBase64 } from "@holochain/client";
   import ProxyAgentAvatar from "./ProxyAgentAvatar.svelte";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();

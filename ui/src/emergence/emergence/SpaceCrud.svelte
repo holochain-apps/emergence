@@ -64,7 +64,7 @@ export const open = (spc) => {
     capacity = space.record.entry.capacity
     pic = space.record.entry.pic
     tags = space.record.entry.tags
-    location = store.getSpaceSiteLocation(space)
+    location = store.getSpaceSiteLocation(space, store.getCurrentSiteMap().original_hash)
     uploadFiles.defaultValue = pic ? pic : undefined
   } else {
     key = ""

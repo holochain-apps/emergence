@@ -516,4 +516,5 @@ export const defaultSessionsFilter = () : SessionsFilter => {
 
 export interface Settings {
   game_active: boolean,
+  current_sitemap?: ActionHash,
 }
