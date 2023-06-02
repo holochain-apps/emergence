@@ -76,7 +76,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
     {#if space.record.entry.pic}
     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
     {:else}
-     No Pic
+      <img class="no-pic" src="/images/no-pic.svg">
     {/if}
     
   </div>
@@ -113,6 +113,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 <style>
   .summary {
     display: flex;
+    padding: 10px;
     flex-direction: row;
     width: 100%;
     cursor: pointer;
@@ -155,10 +156,26 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
   }
   .pic {
     width: 100px;
-    border-radius: 10px 0 0 10px;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(86, 94, 109, .5);
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 3px 3px rgba(0,0,0,.15);
+    position: relative;
+    min-height: 32px;
   }
 
   .pic img {
-    border: 1px solid red;
+    border-radius: 10px;
+  }
+
+  img.no-pic {
+    fill: rgba(86, 94, 109, 1.0);
+    opacity: .3;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    left: 50%;
   }
 </style> 

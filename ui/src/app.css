@@ -13,14 +13,18 @@ html, body {
   font-family: "Roboto", sans-serif;
   font-size: 16px;
   line-height: 1.5;
-  color: #333;
+  color: rgba(86, 94, 109, 1.0);
   padding: 0px;
   padding-bottom: 76px; /* Adjust this value based on the height of your bottom navigation */
   height: 100%; overflow: hidden; /* In general, it's a good idea to have the body take up the full viewport height and have a fixed layout with no scrollbar. Then, you can have a scrollable inner container like .pane-content to handle the overflow of the content. This approach helps keep the page structure clean and allows you to control the scrolling behavior more effectively. */
 }
 
 body {
-  background: linear-gradient(360deg, #f5f5f5 1.94%, #fafafa 90.23%);
+  background: linear-gradient(360deg, rgba(86, 94, 109, .10) 1.94%, rgba(86, 94, 109, 0) 90.23%);
+}
+
+p, div, span, h1, h2, h3 {
+  color: rgba(86, 94, 109, 1.0);
 }
 
 #content {
@@ -103,8 +107,7 @@ upload-files div {
   margin: 5px;
   background-color: transparent;
   color: rgba(86, 94, 109, 1);
-  transition: color .25s ease;
-  
+  transition: all .25s ease;
 }
 
 .nav-button.selected {
@@ -118,6 +121,10 @@ upload-files div {
 .nav-button .button-title {
   font-size: 9px;
   padding-top: 5px;
+}
+
+.nav-button.selected .button-title {
+  color: rgba(255,255,255,1);
 }
 
 /*Here are some basic styles for the pane and modal:*/
@@ -385,6 +392,10 @@ body {
 .nav-button:hover {
   color: rgba(22, 26, 30, 1);
   cursor: pointer;
+}
+
+.nav-button.selected:hover {
+  color: rgba(255,255,255,1);
 }
 
 .nav-button:active {

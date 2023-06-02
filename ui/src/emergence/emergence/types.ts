@@ -245,10 +245,10 @@ export const setInterestBit = (interest:SessionInterest, i:SessionInterestBit, v
 }
 
 export const Amenities = [
-  "Electricty",
+  "Electricity",
   "Whiteboard",
   "Table",
-  "Screen/Proj",
+  "Screen",
   "Seating",
   "Wifi",
   "Indoor",
