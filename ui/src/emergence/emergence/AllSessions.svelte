@@ -231,7 +231,7 @@ on:session-created={() => {} }
   background-color: white;
   outline: solid 1px lightgray;
 }
-.notice {
+:global(.notice) {
   display: block;
   text-align: center;
   padding: 25px;

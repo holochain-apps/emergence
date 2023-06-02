@@ -16,7 +16,6 @@ import { encodeHashToBase64,  } from '@holochain/client';
 
 const dispatch = createEventDispatcher();
 
-
 export let sitemap: Info<SiteMap>;
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -24,11 +23,9 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let loading = true;
 let error: any = undefined;
 
-let editing = false;
-
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, sitemap;
+$: error, loading, sitemap;
 
 onMount(async () => {
   if (sitemap === undefined) {

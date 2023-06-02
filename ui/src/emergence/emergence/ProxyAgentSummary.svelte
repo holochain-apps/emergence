@@ -78,6 +78,9 @@ onMount(async () => {
 {/if}
 
 <style>
+  .summary {
+    padding: 10px;
+  }
   .pic {
    max-width: 50px;
    margin-right: 10px;

@@ -404,21 +404,13 @@
       {/if}
       {#if pane=="admin.proxyagents"}
       <div class="pane">
-        {#if creatingProxyAgent}
-          <div class="modal">
               <ProxyAgentCrud
-              on:proxyagent-created={() => {creatingProxyAgent = false;} }
-              on:edit-canceled={() => { creatingProxyAgent = false; } }
+              on:proxyagent-created={() => {} }
               ></ProxyAgentCrud>
-          </div>
-        {/if}
-        <AllProxyAgents
+
+              <AllProxyAgents
         on:proxyagents-close={()=>pane = 'admin'}
         ></AllProxyAgents>
-        Create Proxy Agent:
-        <sl-button on:click={() => {creatingProxyAgent = true; } } circle>
-          <Fa icon={faPlus} />
-        </sl-button>
       </div>
       {/if}      {#if pane=="discover"}
       <div class="pane">

@@ -8,13 +8,13 @@ import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
+import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import { encodeHashToBase64, type EntryHash } from '@holochain/client';
-import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -33,6 +33,7 @@ $: isSiteMapValid = text !== ""
 onMount(() => {
   store.fetchTags()
 });
+
 export const open = (smap) => {
   sitemap = smap
   if (sitemap) {
@@ -47,8 +48,8 @@ export const open = (smap) => {
   }
   uploadFiles.reset()
   dialog.show()
-
 }
+
 async function updateSiteMap() {
   if (sitemap) {
     const updateRecord = await store.updateSiteMap(sitemap.original_hash, text, pic)
@@ -56,7 +57,6 @@ async function updateSiteMap() {
       dispatch('sitemap-updated', { actionHash: updateRecord.actionHash });
     }
     dialog.hide()
-
   }
 }
 
@@ -71,8 +71,8 @@ async function createSiteMap() {
     errorSnackbar.show();
   }
   dialog.hide()
-
 }
+
 let dialog
 
 </script>
@@ -81,12 +81,6 @@ let dialog
 <sl-dialog label={sitemap?"Edit Sitemap":"Create Sitemap"}
   bind:this={dialog}
   >
-
-  {#if sitemap}
-    <span style="font-size: 18px">Edit SiteMap</span>
-  {:else}
-    <span style="font-size: 18px">Create SiteMap</span>
-  {/if}
               
   <div style="margin-bottom: 16px">
     <sl-textarea 

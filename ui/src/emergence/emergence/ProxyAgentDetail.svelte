@@ -26,11 +26,9 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let loading = true;
 let error: any = undefined;
 
-let editing = false;
-
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, proxyAgent;
+$: error, loading, proxyAgent;
 $: allSessions = store.sessions
 $: sessions = $allSessions.filter(s=>s.record.entry.leaders.find(l=>encodeHashToBase64(l.hash) == encodeHashToBase64(proxyAgent.original_hash)))  
 
@@ -52,6 +50,8 @@ async function deleteProxyAgent() {
   }
 }
 let confirmDialog
+let updateProxyAgentDialog
+
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -65,18 +65,15 @@ let confirmDialog
 {:else if error}
 <span>Error fetching the proxyAgent: {error.data.data}</span>
 {/if}
-{#if editing}
-  <div class="modal">
-    <ProxyAgentCrud
+
+  <ProxyAgentCrud
+    bind:this={updateProxyAgentDialog}
     proxyAgent={ proxyAgent }
     on:proxyagent-updated={async () => {
-      editing = false;
-  //    await fetchProxyAgent()
+      await store.fetchProxyAgents()
     } }
-    on:edit-canceled={() => { editing = false; } }
   ></ProxyAgentCrud>
-  </div>
-{/if}
+
   <Confirm 
     bind:this={confirmDialog}
     message="This will remove this proxy agent for everyone!" 
@@ -90,7 +87,7 @@ let confirmDialog
             <Fa icon={faCircleArrowLeft} />
           </sl-button>
           <div>
-            <sl-button style="margin-left: 8px; " on:click={(e) => { e.stopPropagation(); editing = true; } } circle>
+            <sl-button style="margin-left: 8px; " on:click={(e) => { e.stopPropagation(); updateProxyAgentDialog.open(proxyAgent) } } circle>
               <Fa icon={faEdit} />
             </sl-button>
             <sl-button style="margin-left: 8px;" on:click={() => {confirmDialog.open()}} circle>

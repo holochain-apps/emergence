@@ -11,7 +11,6 @@ import Fa from 'svelte-fa';
 const dispatch = createEventDispatcher();
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
-
 let error: any = undefined;
 let createSiteMapDialog: SiteMapCrud
 
@@ -26,8 +25,8 @@ onMount(async () => {
 </script>
 
 <SiteMapCrud
-bind:this={createSiteMapDialog}
-on:space-created={() => {} }
+  bind:this={createSiteMapDialog}
+  on:space-created={() => {} }
 ></SiteMapCrud>
 
 <div class="pane-header">
