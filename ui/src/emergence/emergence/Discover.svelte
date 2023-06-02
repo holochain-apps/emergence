@@ -20,6 +20,7 @@
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     $: uiProps = store.uiProps
     $: settings = store.settings
+    let tabs : SlTabGroup
 
     onMount(async () => {        
         await store.fetchAgentStuff(store.myPubKey)
@@ -27,7 +28,6 @@
         tabs.show($uiProps.discoverPanel)
     });
     let showFilter = false
-    let tabs : SlTabGroup
 
 </script>
 

@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
@@ -110,6 +110,7 @@ export class EmergenceStore {
     discoverPanel: "tags",
     sessionsFilter: defaultSessionsFilter(),
     feedFilter: defaultFeedFilter(),
+    peopleFilter: defaultPeopleFilter(),
     sensing: false,
     detailsStack: [],
     sessionListMode: true,
@@ -757,6 +758,18 @@ export class EmergenceStore {
     await this.fetchSessions()
   }
 
+  filterPeople( person: AnyAgentDetailed, filter: PeopleFilter) : boolean {
+    if (filter.keyword) {
+        const keyword = filter.keyword.toLowerCase()
+
+        if (person.bio.toLowerCase().search(keyword) < 0 &&
+        person.location.toLowerCase().search(keyword) < 0 &&
+        person.nickname.toLowerCase().search(keyword) < 0
+        )
+        return false
+    }
+    return true
+  }
 
   filterFeedElem(elem:FeedElem, filter: FeedFilter) : boolean {
 
@@ -879,7 +892,7 @@ export class EmergenceStore {
         const word = filter.keyword.toLowerCase() 
         if (session.record.entry.description.toLowerCase().search(word) < 0 &&
             session.record.entry.title.toLowerCase().search(word) < 0)
-        return false
+            return false
     }
     if (filter.space.length>0) {
         if (!slot) return false
@@ -905,6 +918,8 @@ export class EmergenceStore {
         case "sessionsFilter": attributes.map(a=> filter[a] =  defaultSessionsFilter()[a])
         break;
         case "feedFilter": attributes.map(a=> filter[a] =  defaultFeedFilter()[a])
+        break;
+        case "peopleFilter": attributes.map(a=> filter[a] =  defaultPeopleFilter()[a])
         break;
     }
     const props=[]

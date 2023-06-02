@@ -167,7 +167,7 @@ bind:this={updateSessionDialog}
         <div class="leaders">
           <span style="margin-right: 4px"><strong>Hosted by </strong></span>
           {#each entry.leaders as leader}
-            <AnyAvatar agent={leader}></AnyAvatar>
+            <div style="margin-right:10px"><AnyAvatar agent={leader}></AnyAvatar></div>
           {/each}
         </div>
         <div class="description"> {@html Marked.parse(entry.description) }</div>

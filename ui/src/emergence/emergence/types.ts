@@ -51,7 +51,10 @@ export type EntryTypes =
 export type AnyAgent = 
 {type: 'ProxyAgent', hash: ActionHash} |
 {type: 'Agent', hash: AgentPubKey}
- 
+
+export type AnyAgentDetailed = 
+{type: 'ProxyAgent', hash: ActionHash, bio:string, location: string, nickname: string, avatarImage: EntryHash} |
+{type: 'Agent', hash: AgentPubKey, bio:string, location: string, nickname: string}
 
 export interface Session { 
   key: string;
@@ -423,6 +426,7 @@ export interface UIProps {
   discoverPanel: string
   sessionsFilter: SessionsFilter
   feedFilter: FeedFilter
+  peopleFilter: PeopleFilter
   detailsStack: Array<Details>,
   sessionListMode: boolean,
   pane:string,
@@ -441,6 +445,17 @@ export interface Details {
   type: DetailsType
   hash: ActionHash
 }
+
+export interface PeopleFilter {
+  keyword: string,
+}
+
+export const defaultPeopleFilter = () : PeopleFilter => {
+  return {
+    keyword: "",
+  }
+}
+
 
 export interface FeedFilter {
   tags: Array<string>,
