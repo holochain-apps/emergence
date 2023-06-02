@@ -6,6 +6,7 @@
   import { DetailsType, type AnyAgent } from "./types";
   import Avatar from './Avatar.svelte';
   import { encodeHashToBase64 } from "@holochain/client";
+  import ProxyAgentAvatar from "./ProxyAgentAvatar.svelte";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -28,11 +29,7 @@
         >
         {#if showAvatar}
             {#if proxyAgent}
-                {#if proxyAgent.record.entry.pic}
-                    <show-image style={`width:${size}px`} image-hash={encodeHashToBase64(proxyAgent.record.entry.pic)}></show-image>
-                {:else}
-                    <holo-identicon disable-tooltip={true} disable-copy={true} size={size} hash={proxyAgent.original_hash}></holo-identicon>
-                {/if}
+                <ProxyAgentAvatar size={size} proxyAgentHash={proxyAgent.original_hash}></ProxyAgentAvatar>
             {:else}
                 No Agent!
             {/if}

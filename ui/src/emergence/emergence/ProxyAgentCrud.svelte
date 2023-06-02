@@ -129,7 +129,6 @@ bind:this={dialog}
         style="margin-right: 16px"
       >Cancel</sl-button>
       <sl-button 
-        style="flex: 1;"
         on:click={() => updateProxyAgent()}
         disabled={!isProxyAgentValid}
         variant=primary>Save</sl-button>
@@ -144,7 +143,7 @@ bind:this={dialog}
     <sl-button 
     on:click={() => createProxyAgent()}
     disabled={!isProxyAgentValid}
-    variant=primary>Create ProxyAgent</sl-button>
+    variant=primary>Create Proxy Agent</sl-button>
     </div>
   {/if}
 

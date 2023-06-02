@@ -278,7 +278,7 @@
         <ProxyAgentDetail
           on:proxyagent-deleted={()=>store.closeDetails()}
           on:proxyagent-close={()=>store.closeDetails()}
-          proxyAgent={store.getProxyAgent($uiProps.detailsStack[0].hash)}>
+          proxyAgentHash={$uiProps.detailsStack[0].hash}>
         </ProxyAgentDetail>
       </div>
       {/if}

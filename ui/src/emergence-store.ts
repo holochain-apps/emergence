@@ -189,6 +189,10 @@ export class EmergenceStore {
     return derived(this.sessions, $sessions => $sessions.find(s=>encodeHashToBase64(sessionHash) == encodeHashToBase64(s.original_hash)))
   }
 
+  proxyAgentStore(proxyAgentHash) : Readable<Info<ProxyAgent>|undefined>{
+    return derived(this.proxyAgents, $proxyAgents => $proxyAgents.find(s=>encodeHashToBase64(proxyAgentHash) == encodeHashToBase64(s.original_hash)))
+  }
+
   getSpaceIdx(spaceHash: ActionHash) : number {
     const b64 = encodeHashToBase64(spaceHash)
     const spaces = get(this.spaces)
@@ -301,7 +305,6 @@ export class EmergenceStore {
         if (whoB64 === this.myPubKeyBase64) {
             rel.myInterest = i
         }
-        console.log("setting intrest to",whoB64,i )
         rel.interest.set(who, i)
     })
 

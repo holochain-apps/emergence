@@ -54,7 +54,7 @@ async function setSessionInterest(interest: SessionInterest) {
     title="Hide!"
     class:selected={$relData.myInterest & SessionInterestBit.Hidden}
     on:click={() => {setSessionInterest(($relData.myInterest & SessionInterestBit.NoOpinion) + ($relData.myInterest ^ SessionInterestBit.Hidden))}} >
-    <div ><Fa icon={ faEyeSlash } fill="blue"/></div>
+    <div ><Fa icon={ faEyeSlash }/></div>
   </div>
 </div>
 
