@@ -141,14 +141,16 @@ bind:this={updateSessionDialog}
       <sl-button on:click={() => { dispatch('session-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
-      <div>
-        <sl-button on:click={() => { updateSessionDialog.open($session) } } circle>
-          <Fa icon={faEdit} />
-        </sl-button>
-        <sl-button on:click={()=>confirmDialog.open()} circle>
-          <Fa icon={faTrash} />
-        </sl-button>
-      </div>
+      {#if $uiProps.amSteward || $session.record.entry.leaders.find(l=>encodeHashToBase64(l.hash)==store.myPubKeyBase64)}
+        <div>
+          <sl-button on:click={() => { updateSessionDialog.open($session) } } circle>
+            <Fa icon={faEdit} />
+          </sl-button>
+          <sl-button on:click={()=>confirmDialog.open()} circle>
+            <Fa icon={faTrash} />
+          </sl-button>
+        </div>
+      {/if}
     </div>
     <span style="flex: 1"></span>
  
