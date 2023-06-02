@@ -190,7 +190,7 @@
 
     {#if $prof && ($prof.status!=="complete" || $prof.value===undefined)}
     <div style="text-align:center">
-      <h1>Hello.</h1>
+      <div style="display:flex; justify-content:center; align-items:center;"><img style="margin-right:20px" width="100" src="android-chrome-192x192.png" /><h1>Hello!</h1></div>
       <p><b>Emergence</b> is a decentralized hApp for discovery, scheduling, connecting and remembering </p>
       <p>Harness the power of the decentralized web technology for local, ofline collaboration.</p>
       <p>Continue with a nickname and optional avatar, both of which can be changed later.</p>

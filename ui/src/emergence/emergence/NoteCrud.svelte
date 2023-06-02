@@ -111,11 +111,11 @@ let dialog
       />
   </div>
   
-  <div style="margin-bottom: 16px">
+  <div style="margin-bottom: 16px; height: 100px">
     <span>Add a pic (optional):</span >
     <upload-files
     one-file
-    accepted-files="image/jpeg,image/png,image/gif"
+    accepted-files="image/jpeg,image/png,image/gif,image/svg"
     defaultValue={pic ? encodeHashToBase64(pic) : undefined}
     on:file-uploaded={(e) => {
       pic = e.detail.file.hash;
@@ -200,7 +200,7 @@ let dialog
       <span>Add a pic (optional):</span >
       <upload-files
       one-file
-      accepted-files="image/jpeg,image/png,image/gif"
+      accepted-files="image/jpeg,image/png,image/gif,image/svg"
       defaultValue={pic ? encodeHashToBase64(pic) : undefined}
       on:file-uploaded={(e) => {
         pic = e.detail.file.hash;

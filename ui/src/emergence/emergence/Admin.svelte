@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { decodeHashFromBase64, encodeHashToBase64, type EntryHash } from "@holochain/client";
+    import { encodeHashToBase64, type EntryHash } from "@holochain/client";
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
@@ -234,7 +234,7 @@
 <div class="pane-content">
     <div class="admin-controls">
         <sl-button style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
-            Manage Schedule
+            Schedule
         </sl-button>
 
         <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>

@@ -101,7 +101,7 @@ async function createProxyAgent() {
   
       <upload-files
         one-file
-        accepted-files="image/jpeg,image/png,image/gif"
+        accepted-files="image/jpeg,image/png,image/gif,image/svg"
         defaultValue={pic ? encodeHashToBase64(pic) : undefined}
         on:file-uploaded={(e) => {
           pic = e.detail.file.hash;
