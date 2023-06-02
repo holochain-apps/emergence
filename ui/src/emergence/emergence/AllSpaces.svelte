@@ -31,7 +31,7 @@ onMount(async () => {
 bind:this={createSpaceDialog}
 on:space-created={() => {} }
 ></SpaceCrud>
-<div class="AllSpaces pane-header">
+<div class=" pane-header">
   <div class="header-content">
     <h3>Spaces List</h3>
     <div class="section-controls">
@@ -47,7 +47,7 @@ on:space-created={() => {} }
   </div>
 
 </div>
-<div class="pane-content">
+<div class="">
 
   {#if error}
     <span class="notice">Error fetching the spaces: {error.data.data}.</span>

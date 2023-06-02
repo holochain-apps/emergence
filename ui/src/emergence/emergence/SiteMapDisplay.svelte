@@ -12,7 +12,7 @@
     import { watchResize } from "svelte-watch-resize";
     import  { HoloHashMap } from '@holochain-open-dev/utils';
     import { encodeHashToBase64, type ActionHash } from '@holochain/client';
-  import Sync from './Sync.svelte';
+    import AllSpaces from './AllSpaces.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -27,6 +27,7 @@
     let r = 0
     let markerSize = 30
     let spaceDetails
+    let spacesDrawer = false
 
     $: picB64, img, r, spaceDetails
     $: spaces = store.spaces
@@ -75,6 +76,14 @@
     }
 </script>
 
+{#if spacesDrawer}
+    <div class="spaces-drawer modal">
+        <AllSpaces
+        on:all-spaces-close={()=>spacesDrawer=false}
+        ></AllSpaces>
+    </div>
+{/if}
+
 {#if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
         <sl-spinner></sl-spinner>
@@ -85,7 +94,7 @@
             <div class="header-content">
                 <h3>Spaces</h3>
                 <div style="display: flex; flex-direction: row; align-self:center">
-                    <sl-button style="" on:click={() => { dispatch('show-all-spaces') } } >
+                    <sl-button style="" on:click={() => { /*dispatch('show-all-spaces')*/ spacesDrawer=true } } >
                         List View <Fa icon={faList} />
                     </sl-button>
                 </div>
@@ -180,5 +189,9 @@ img {
     border: solid 1px;
     border-radius: 10px;
     padding: 10px;
+}
+
+.spaces-drawer {
+    width:50%;
 }
 </style>
