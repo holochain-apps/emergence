@@ -397,21 +397,9 @@
       {/if}
       {#if pane=="admin.sitemaps"}
       <div class="pane">
-        {#if creatingMap}
-          <div class="modal">
-              <SiteMapCrud
-              on:sitemap-created={() => {creatingMap = false;} }
-              on:edit-canceled={() => { creatingMap = false; } }
-              ></SiteMapCrud>
-          </div>
-        {/if}
         <AllSiteMaps
         on:sitemaps-close={()=>pane = 'admin'}
         ></AllSiteMaps>
-        Create Sitemap:
-        <sl-button on:click={() => {creatingMap = true; } } circle>
-          <Fa icon={faPlus} />
-        </sl-button>
       </div>
       {/if}
       {#if pane=="admin.proxyagents"}
