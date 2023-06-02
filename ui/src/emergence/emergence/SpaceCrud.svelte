@@ -65,8 +65,7 @@ export const open = (spc) => {
     pic = space.record.entry.pic
     tags = space.record.entry.tags
     location = store.getSpaceSiteLocation(space)
-    uploadFiles.defaultValue = pic
-
+    uploadFiles.defaultValue = pic ? pic : undefined
   } else {
     key = ""
     name = ""
@@ -119,7 +118,7 @@ let dialog
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<sl-dialog label={space?"Edit Space":"Create Space"}
+<sl-dialog style="--width:100vw;" label={space?"Edit Space":"Create Space"}
   bind:this={dialog}
   >
   {#if space}
@@ -146,31 +145,26 @@ let dialog
 
 
 </div>
+<div style="display:flex; flex-direction:row; justify-content:space-between">
+  <div style="display:flex; flex-direction:column; margin-right: 10px">
+    <div style="margin-bottom: 16px; width: 100px">
+      <sl-input
+      label="Map Symbol"
+      value={key}
+      on:input={e => { key = e.target.value; } }
+    ></sl-input>
+    </div>
 
-  <div style="margin-bottom: 16px; width: 100px">
-    <sl-input
-    label="Map Symbol"
-    value={key}
-    on:input={e => { key = e.target.value; } }
-  ></sl-input>
-  </div>
-
-  <div style="margin-bottom: 16px">
-    <sl-input
-    label=Name
-    value={name}
-    on:input={e => { name = e.target.value; } }
-  ></sl-input>
-  </div>
-
-  <div style="margin-bottom: 16px">
-    <sl-textarea 
-      label=Description 
-      value={ description } on:input={e => { description = e.target.value;} }
-    ></sl-textarea>
+    <div style="margin-bottom: 16px">
+      <sl-input
+      label=Name
+      value={name}
+      on:input={e => { name = e.target.value; } }
+    ></sl-input>
+    </div>
   </div>
   <div style="margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Stewards:</strong></span>
+    <span style="margin-right: 4px">Stewards:</span>
     {#each stewards as steward, i}
     <div style="display:flex;">
       <Avatar agentPubKey={steward}></Avatar>
@@ -184,51 +178,63 @@ let dialog
 
     <search-agent field-label="Add Steward" include-myself={true} clear-on-select={true} on:agent-selected={(e)=>addSteward(e.detail.agentPubKey)}></search-agent>
   </div>
+</div>
 
   <div style="margin-bottom: 16px">
-    <sl-input
-    label="Capacity"
-    value={isNaN(capacity)? '' : `${capacity}`}
-    on:input={e => { capacity = parseInt(e.target.value); } }
-    ></sl-input>
+    <sl-textarea 
+      label=Description 
+      value={ description } on:input={e => { description = e.target.value;} }
+    ></sl-textarea>
   </div>
 
-  <div style="margin-bottom: 16px">
-    <div style="font-size: 16px">Amenities Available </div>
-    {#each Amenities as amenity, i}
-      <sl-checkbox 
-        bind:this={amenityElems[i]}
-        checked={(amenities >> i)&1}
-        on:sl-change={e => { amenities = setAmenity(amenities, i, e.target.checked)} }
-      >{amenity}</sl-checkbox>
-    {/each}
-  </div>
-
-  <div style="margin-bottom: 16px">
-    <span>Slot type:</span >
-    <MultiSelect 
-      bind:selected={tags} 
-      options={store.getSlotTypeTags()}
-      allowUserOptions={true}
-      />
-  </div>
-
-  <div style="margin-bottom: 16px">
-    <span>Add a pic (optional):</span >
-      <div class="pic-upload">
-          <upload-files
-          bind:this={uploadFiles}
-          one-file
-          accepted-files="image/jpeg,image/png,image/gif"
-          defaultValue={pic ? encodeHashToBase64(pic) : undefined}
-          on:file-uploaded={(e) => {
-            pic = e.detail.file.hash;
-          }}
-        ></upload-files>
+  <div style="display:flex; flex-direction:row; justify-content:space-between">
+    <div style="display:flex; flex-direction:column; margin-right: 10px">
+      <div style="margin-bottom: 16px">
+        <sl-input
+        label="Capacity"
+        value={isNaN(capacity)? '' : `${capacity}`}
+        on:input={e => { capacity = parseInt(e.target.value); } }
+        ></sl-input>
       </div>
+
+      <div style="margin-bottom: 16px">
+        <div style="font-size: 16px">Amenities Available </div>
+        {#each Amenities as amenity, i}
+          <sl-checkbox 
+            bind:this={amenityElems[i]}
+            checked={(amenities >> i)&1}
+            on:sl-change={e => { amenities = setAmenity(amenities, i, e.target.checked)} }
+          >{amenity}</sl-checkbox>
+        {/each}
+      </div>
+
+      <div style="margin-bottom: 16px">
+        <span>Slot type:</span >
+        <MultiSelect 
+          bind:selected={tags} 
+          options={store.getSlotTypeTags()}
+          allowUserOptions={true}
+          />
+      </div>
+    </div>
+
+    <div style="margin-bottom: 16px">
+      <span>Image (optional):</span >
+        <div class="pic-upload">
+            <upload-files
+            bind:this={uploadFiles}
+            one-file
+            accepted-files="image/jpeg,image/png,image/gif"
+            defaultValue={pic ? encodeHashToBase64(pic) : undefined}
+            on:file-uploaded={(e) => {
+              pic = e.detail.file.hash;
+            }}
+          ></upload-files>
+        </div>
+    </div>
   </div>
   {#if sitemap}
-    <div style="margin-bottom: 16px">
+    <div style="margin-bottom: 16px; width:100%">
       Map Location: {location ? JSON.stringify(location.location) : "none"}
       <SiteMapLocation
         sitemap={sitemap}
@@ -247,5 +253,17 @@ let dialog
   }
   sl-checkbox {
     margin-right:15px;
+  }
+
+  upload-files {
+    --placeholder-font-size: 14px;
+    --icon-font-size: 50px;
+    --message-margin: 0px;
+    --message-margin-top: 0px;
+  }
+  upload-files::part(dropzone) {
+    height: 200px;
+    width: 100px;
+    min-height: 0px;
   }
 </style> 

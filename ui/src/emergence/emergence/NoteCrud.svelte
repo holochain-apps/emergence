@@ -172,44 +172,61 @@ let dialog
           allowUserOptions={true}
           />
       </div>
-      {#if note}
-      <div style="display: flex; flex-direction: row">
-        <sl-button
-        label="Cancel"
-        on:click={() =>  dialog.hide()}
-        style="flex: 1; margin-right: 16px"
-        >Cancel</sl-button>
-        <sl-button 
-        style="flex: 1;"
-        on:click={() => updateNote()}
-        disabled={!isNoteValid}
-        variant=primary>Save</sl-button>
-      </div>
-    {:else}
-    <div style="display: flex; flex-direction: row">
-      <sl-button 
-      on:click={() => createNote()}
-      disabled={!isNoteValid}
-      variant=primary>Create Note</sl-button>
-      </div>
-    {/if}
-  
-
-    </div>    
-    <div style="margin-bottom: 16px;">
-      <span>Add a pic (optional):</span >
-      <upload-files
-      one-file
-      accepted-files="image/jpeg,image/png,image/gif,image/svg"
-      defaultValue={pic ? encodeHashToBase64(pic) : undefined}
-      on:file-uploaded={(e) => {
-        pic = e.detail.file.hash;
-      }}
-    ></upload-files>
     </div>
+    <div style="margin-bottom: 16px;">
+      <span>Image (optional):</span >
+      <upload-files
+        one-file
+        accepted-files="image/jpeg,image/png,image/gif,image/svg"
+        defaultValue={pic ? encodeHashToBase64(pic) : undefined}
+        on:file-uploaded={(e) => {
+          pic = e.detail.file.hash;
+        }}
+      ></upload-files>
+      <div style="margin-top:10px;">
+      {#if note}
+          <div style="display: flex; flex-direction: row">
+            <sl-button
+            label="Cancel"
+            on:click={() =>  dialog.hide()}
+            style="flex: 1; margin-right: 16px"
+            >Cancel</sl-button>
+            <sl-button 
+            style="flex: 1;"
+            on:click={() => updateNote()}
+            disabled={!isNoteValid}
+            variant=primary>Save</sl-button>
+          </div>
+        {:else}
+          <div style="display: flex; flex-direction: row; justify-content: flex-end">
+            <sl-button 
+            style="flex: 1;"
+
+            on:click={() => createNote()}
+            disabled={!isNoteValid}
+            variant=primary>Create Note</sl-button>
+          </div>
+        {/if}
+      </div>
+
+    </div>
+
   </div>
   
 
 
 </div>
 {/if}
+<style>
+  upload-files {
+    --placeholder-font-size: 14px;
+    --icon-font-size: 50px;
+    --message-margin: 0px;
+    --message-margin-top: 0px;
+  }
+  upload-files::part(dropzone) {
+    height: 128px;
+    width: 100px;
+    min-height: 0px;
+  }
+</style>
