@@ -305,6 +305,12 @@ on:space-created={() => {} }
     margin-right: 20px;
 }
 
+.map-image {
+    min-width: 100vw;
+    min-height: 100vh;
+    max-width: 100%;
+}
+
 .true .map-controls {
     left: 340px;
 }
