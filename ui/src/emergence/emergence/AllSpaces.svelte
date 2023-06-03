@@ -6,7 +6,6 @@ import type { EmergenceStore } from '../../emergence-store';
 import Fa from 'svelte-fa';
 import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import SpaceSummary from './SpaceSummary.svelte';
-import SpaceCrud from './SpaceCrud.svelte';
 import { DetailsType, type Info, type Space } from './types';
 
 const dispatch = createEventDispatcher();
@@ -16,38 +15,24 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 let error: any = undefined;
 let spaceDetail: Info<Space> | undefined
-let createSpaceDialog: SpaceCrud
 
 $: spaces = store.spaces
 $: error, spaceDetail;
-$: uiProps = store ? store.uiProps : undefined
 
 onMount(async () => {
   store.fetchSpaces();
 });
 
 </script>
-<SpaceCrud
-bind:this={createSpaceDialog}
-on:space-created={() => {} }
-></SpaceCrud>
-<div class="AllSpaces pane-header">
-  <div class="header-content">
-    <h3>Spaces List</h3>
+<div class=" pane-header">
     <div class="section-controls">
-      <sl-button style="margin-left: 8px; " on:click={() => { dispatch('all-spaces-close') } } circle>
+      <sl-button class="close-all-spaces" on:click={() => { dispatch('all-spaces-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
-      {#if $uiProps.amSteward}
-        <div class="pill-button" on:click={() => {createSpaceDialog.open(undefined) } }>
-          <span>+</span> Create
-        </div>
-      {/if}
-    </div>
   </div>
 
 </div>
-<div class="pane-content">
+<div class="">
 
   {#if error}
     <span class="notice">Error fetching the spaces: {error.data.data}.</span>
@@ -67,6 +52,10 @@ on:space-created={() => {} }
 </div>
 
 <style>
+  .close-all-spaces {
+    display: none;
+  }
+
   .pill-button {
     margin-left: 10px;
   }
