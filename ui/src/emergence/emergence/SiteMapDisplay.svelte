@@ -94,7 +94,7 @@
         spaceDetails = loc
     }
 
-    const getSpaceStyle = (location: SiteLocation | undefined) => {
+    const getLocationMarkerStyle = (location: SiteLocation | undefined) => {
         if (!location) return "display:none"
         const x = location.location.x / (img.naturalWidth/img.width) 
         const y = location.location.y / (img.naturalHeight/img.height) 
@@ -102,6 +102,7 @@
     }
 
     const handleResize = async () => {
+        console.log(r)
         r+=1
     }
 
@@ -180,7 +181,7 @@ on:space-created={() => {} }
                     </div>
                     <div
                         on:click={()=> store.openDetails(DetailsType.Space, loc.space.original_hash)}
-                        style={getSpaceStyle(loc.loc)} class="location">
+                        style={getLocationMarkerStyle(loc.loc)} class="location">
                         {loc.space.record.entry.key}
                     </div>
                 </sl-tooltip>
