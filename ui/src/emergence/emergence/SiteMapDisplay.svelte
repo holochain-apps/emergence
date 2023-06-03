@@ -143,7 +143,7 @@ on:space-created={() => {} }
 {:else}
     <div id="map" class="SiteMapDisplay {spacesDrawer}">
         <div class="map-controls">
-            <div class="toggle-drawer map-control" on:click={() => { if(spacesDrawer === false) { spacesDrawer=true } else { spacesDrawer=false }} } >
+            <div class="toggle-drawer map-control" on:click={() => { spacesDrawer = ! spacesDrawer } } >
                 {#if spacesDrawer}
                 <img src="/images/x.svg" height="18">
                 {:else}
@@ -179,7 +179,7 @@ on:space-created={() => {} }
                         </div>
                     </div>
                     <div
-                        on:click={store.openDetails(DetailsType.Space, loc.space.original_hash)}
+                        on:click={()=> store.openDetails(DetailsType.Space, loc.space.original_hash)}
                         style={getSpaceStyle(loc.loc)} class="location">
                         {loc.space.record.entry.key}
                     </div>
@@ -303,6 +303,7 @@ on:space-created={() => {} }
     border-radius: 5px;
     padding: 0 20px;
     margin-right: 20px;
+    cursor: pointer;
 }
 
 .map-image {
