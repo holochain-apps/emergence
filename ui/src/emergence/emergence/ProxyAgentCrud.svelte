@@ -8,6 +8,8 @@ import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
+import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
+import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
@@ -23,6 +25,7 @@ let nickname: string = '';
 let bio: string = '';
 let location: string = '';
 let pic: EntryHash | undefined = undefined;
+let uploadFiles: UploadFiles
 
 let errorSnackbar: Snackbar;
 
@@ -31,33 +34,42 @@ $: isProxyAgentValid = nickname !== ""
 
 onMount(() => {
   store.fetchTags()
+});
+
+export const open = (pagent) => {
+  proxyAgent = pagent
+
   if (proxyAgent) {
     nickname = proxyAgent.record.entry.nickname
     bio = proxyAgent.record.entry.bio
     location = proxyAgent.record.entry.location
     pic = proxyAgent.record.entry.pic
+    uploadFiles.defaultValue = pic
+
+  } else {
+    nickname = ""
+    bio = ""
+    location = ""
+    pic = undefined
+    uploadFiles.defaultValue = undefined
   }
-});
+  uploadFiles.reset()
+  dialog.show()
+}
 
 async function updateProxyAgent() {
   if (proxyAgent) {
     const updateRecord = await store.updateProxyAgent(proxyAgent.original_hash, nickname, bio, location, pic)
     if (updateRecord) {
       dispatch('proxyagent-updated', { actionHash: updateRecord.actionHash });
-    } else {
-      dispatch('edit-canceled')
     }
+    dialog.hide()
   }
 }
 
 async function createProxyAgent() {  
   try {
     const record = await store.createProxyAgent(nickname, bio, location, pic)
-    console.log("DOG", record)
-    nickname = ""
-    bio = ""
-    location = ""
-    pic = undefined
 
     dispatch('proxyagent-created', { proxyAgent: record });
   } catch (e) {
@@ -65,17 +77,16 @@ async function createProxyAgent() {
     errorSnackbar.labelText = `Error creating the proxyAgent: ${e.data.data}`;
     errorSnackbar.show();
   }
+  dialog.hide()
 }
+let dialog
 
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<div style="display: flex; flex-direction: column; z-index:2;">
-  {#if proxyAgent}
-    <span style="font-size: 18px">Edit ProxyAgent</span>
-  {:else}
-    <span style="font-size: 18px">Create ProxyAgent</span>
-  {/if}
+<sl-dialog label={proxyAgent?"Edit Proxy Agent":"Create Proxy Agent"}
+bind:this={dialog}
+>
               
   <div style="margin-bottom: 16px">
     <sl-input
@@ -100,8 +111,9 @@ async function createProxyAgent() {
     <span>Add a pic (optional):</span >
   
       <upload-files
+        bind:this={uploadFiles}
         one-file
-        accepted-files="image/jpeg,image/png,image/gif"
+        accepted-files="image/jpeg,image/png,image/gif,image/svg"
         defaultValue={pic ? encodeHashToBase64(pic) : undefined}
         on:file-uploaded={(e) => {
           pic = e.detail.file.hash;
@@ -110,30 +122,29 @@ async function createProxyAgent() {
   </div>
 
   {#if proxyAgent}
-    <div style="display: flex; flex-direction: row">
+    <div style="display: flex; flex-direction: row; justify-content:flex-end;">
       <sl-button
         label="Cancel"
-        on:click={() => dispatch('edit-canceled')}
-        style="flex: 1; margin-right: 16px"
+        on:click={() => dialog.hide()}
+        style="margin-right: 16px"
       >Cancel</sl-button>
       <sl-button 
-        style="flex: 1;"
         on:click={() => updateProxyAgent()}
         disabled={!isProxyAgentValid}
         variant=primary>Save</sl-button>
     </div>
   {:else}
-  <div style="display: flex; flex-direction: row">
+  <div style="display: flex; flex-direction: row; justify-content:flex-end;">
     <sl-button
     label="Cancel"
-    on:click={() => dispatch('edit-canceled')}
-    style="flex: 1; margin-right: 16px"
+    on:click={() => dialog.hide()}
+    style="margin-right: 16px"
     >Cancel</sl-button>
     <sl-button 
     on:click={() => createProxyAgent()}
     disabled={!isProxyAgentValid}
-    variant=primary>Create ProxyAgent</sl-button>
+    variant=primary>Create Proxy Agent</sl-button>
     </div>
   {/if}
 
-</div>
+</sl-dialog>

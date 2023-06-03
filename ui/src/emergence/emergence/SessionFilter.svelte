@@ -38,7 +38,7 @@ const toggleDayInFilter = (day:Date) => {
 }
 </script>
 <div transition:fly={{ x: 300, duration: 500 }} class="filter-modal" style="display: flex; flex-direction: column">
-  <div class="center-row" style=" justify-content: space-between;border-bottom: 1px solid;">
+  <div class="center-row" style="background-color:white;justify-content: space-between;border-bottom: 1px solid;">
     <h3>Filters</h3>
     <div style="display: flex; flex-direction: row; margin-bottom: 16px; ">
       <sl-button style="align-self:flex-end; margin-left: 8px; " on:click={() => { filter = defaultSessionsFilter(); dispatch('update-filter', filter) } } circle>
@@ -49,7 +49,7 @@ const toggleDayInFilter = (day:Date) => {
       </sl-button>
     </div>
   </div>
-  <div class="center-row">
+  <div class="center-row" style="background-color:white;">
     <span style="margin-right: 10px"><Fa icon={faClock} /></span>
     <div style="display: flex; flex-direction: column;">
       <div class="wrap-row">
@@ -60,14 +60,14 @@ const toggleDayInFilter = (day:Date) => {
         <sl-checkbox checked={filter.timeFuture} on:sl-change={e => { filter.timeFuture = e.target.checked; dispatch('update-filter', filter)} }>Future</sl-checkbox>
         <sl-checkbox checked={filter.timeUnscheduled} on:sl-change={e => { filter.timeUnscheduled = e.target.checked; dispatch('update-filter', filter)} }>Unscheduled</sl-checkbox>
       </div>
-      <div class="wrap-row">
+      <div class="wrap-row" style="background-color:white;">
         {#each days as day}
           <sl-checkbox checked={filter.timeDays.includes(day.getTime())} on:sl-change={e => { toggleDayInFilter(day)} }>{dayToStr(day)}</sl-checkbox>
         {/each}
       </div>
     </div>
   </div>
-  <div class="center-row">
+  <div class="center-row" style="background-color:white;">
     <span style="margin-right: 10px"><Fa icon={faCheck} /></span>
     <div class="wrap-row">
       <sl-checkbox checked={filter.involvementLeading} on:sl-change={e => { filter.involvementLeading = e.target.checked; dispatch('update-filter', filter)} }>Leading</sl-checkbox>

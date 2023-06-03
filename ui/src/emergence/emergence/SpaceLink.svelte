@@ -36,6 +36,10 @@
       margin: 0 5px 0 5px;
       cursor: pointer;
       text-decoration: underline;
-      color: blue;
+      color: rgba(51, 131, 216, 1.0);
+      background: -webkit-linear-gradient(rgba(51, 131, 216, 1.0), rgba(93, 52, 201, 1.0));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline;
     }
 </style>

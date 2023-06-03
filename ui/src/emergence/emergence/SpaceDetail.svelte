@@ -100,26 +100,28 @@ let confirmDialog
     message="This will remove this space for everyone!" 
     on:confirm-confirmed={deleteSpace}>
   </Confirm>
-<div class="space-detail">
-  <h3>{ space? space.record.entry.name : "" }</h3>
+<div class="space-details">
+  {#if space.record.entry.pic}
+  <div class="pic">
+    <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
+    <div class="pic-card">
+      <div class="space-symbol">{ space.record.entry.key }</div>
+      <div class="space-name">{ space.record.entry.name }</div>
+    </div>
+  </div>
+  {:else}
+  <div class="space-card">
+    <div class="space-symbol">{ space.record.entry.key }</div>
+    <div class="space-name">{ space.record.entry.name }</div>
+  </div>
+  {/if}
   {#if $uiProps.debuggingEnabled}
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
     <span style="white-space: pre-line">{ encodeHashToBase64(space.record.actionHash) }</span>
   </div>
-{/if}
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Map Symbol:</strong></span>
-    <span style="white-space: pre-line">{ space.record.entry.key }</span>
-  </div>
-
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Name:</strong></span>
-    <span style="white-space: pre-line">{ space.record.entry.name }</span>
-  </div>
-
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Description:</strong></span>
+  {/if}
+  <div class="space-description">
     <span style="white-space: pre-line">{ space.record.entry.description }</span>
   </div>
 
@@ -130,16 +132,11 @@ let confirmDialog
     {/each}
   </div>
 
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Capacity:</strong></span>
-    <span style="white-space: pre-line">{ space.record.entry.capacity }</span>
-  </div>
-
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Available Amenities:</strong></span>
-    <span style="white-space: pre-line">
-      {amenitiesList(space.record.entry.amenities).join(", ")}
-    </span>
+  <div class="space-detail">
+    <div class="amenity"><img src="/images/Capacity.svg"> Up to { space.record.entry.capacity }</div>
+    {#each amenitiesList(space.record.entry.amenities) as amenity}
+      <div class="amenity"><img src="/images/{amenity}.svg"> {amenity}</div>
+    {/each}
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
@@ -148,43 +145,101 @@ let confirmDialog
       {space.record.entry.tags.join(", ")}
     </span>
   </div>
-
-
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Picture</strong></span>
-
-    {#if space.record.entry.pic}
-    <div class="pic">
-    <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
+    <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+      <span style="margin-right: 4px"><strong>Scheduled Sessions:</strong></span>
+  
+      <ul>
+        {#each store.getSlottedSessions(space) as session}
+          <li>{slottedSessionSummary(session)}</li>
+        {/each}
+      </ul>
     </div>
-    {/if}
+  
   </div>
-
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Scheduled Sessions:</strong></span>
-
-    <ul>
-      {#each store.getSlottedSessions(space) as session}
-        <li>{slottedSessionSummary(session)}</li>
-      {/each}
-    </ul>
-  </div>
-
 </div>
-</div>
-
 {/if}
 
 <style>
   .pic {
-   max-width: 300px;
+   max-width: 100%;
+   overflow: hidden;
+   border-radius: 10px;
+   box-shadow: 0px 15px 15px rgba(0,0,0,.2);
+   position: relative;
   }
 
-  .space-detail {
+  .space-details {
     display: flex;
     flex-direction: column;
     max-width: 720px;
     width: 100%;
     margin: 0 auto;
+  }
+
+  .space-detail {
+    display: flex;
+    flex-direction: row; margin-bottom: 16px;
+  }
+
+  .pic-card {
+    border-radius: 10px;
+    box-shadow: 0px 10px 10px rgba(0,0,0,.25);
+    background-color: white;
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    display: flex;
+    padding: 15px;
+  }
+
+  .space-card {
+    border-radius: 10px;
+    box-shadow: 0px 10px 10px rgba(0,0,0,.25);
+    background-color: white;
+    display: flex;
+    padding: 15px;
+  }
+
+
+  .space-symbol {
+    width: 30px;
+    height: 30px;
+    border-radius: 20px;
+    box-shadow: 0 3px 3px rgba(0,0,0,.15);
+    text-align: center;
+    line-height: 30px;
+  }
+
+  .space-name {
+    padding: 0 20px 0 10px;
+    font-size: 24px;
+    font-weight: bold;
+  }
+
+  .space-description {
+    width: 100%;
+    max-width: 720px;
+    margin: 20px auto;
+  }
+
+  .amenity {
+    border: 1px solid rgba(123, 66, 217, .5);
+    color: rgba(123, 66, 217, 1.0);
+    border-radius: 7px;
+    padding: 5px;
+    margin-right: 5px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    font-size: 12px;
+    display: flex;
+    padding: 3px 8px;
+    justify-content: center;
+    align-items: center;
+    line-height: 24px;
+  }
+
+  .amenity img {
+    height: 16px;
+    margin-right: 3px;
   }
 </style> 

@@ -288,7 +288,7 @@ export class EmergenceClient {
       provenance: this.cellId[1],
       payload,
     };
-    return this.client.callZome(req);
+    return this.client.callZome(req, 30000);
   }
   /** Scene */
 

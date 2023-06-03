@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, decodeHashFromBase64, type AppAgentClient, setSigningCredentials } from '@holochain/client';
+  import { AdminWebsocket, type AppAgentClient, setSigningCredentials } from '@holochain/client';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
@@ -11,7 +11,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync, faPowerOff, faCircleArrowLeft, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync, faArrowRightFromBracket, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
@@ -37,7 +37,7 @@
   import ProxyAgentCrud from './emergence/emergence/ProxyAgentCrud.svelte';
   import AllProxyAgents from './emergence/emergence/AllProxyAgents.svelte';
   import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
-  import { getCookie, setCookie, deleteCookie } from 'svelte-cookie';
+  import { getCookie, deleteCookie } from 'svelte-cookie';
   import { Base64 } from 'js-base64'
 
   let client: AppAgentClient | undefined;
@@ -97,7 +97,8 @@
 
     if (creds) {
       console.log("CREDS", creds)
-      client = await AppAgentWebsocket.connect(creds.appWebsocketUrl, installed_app_id);
+      const url = `${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.hostname}:${creds.appPort}`
+      client = await AppAgentWebsocket.connect(url, installed_app_id);
       const appInfo = await client.appInfo()
       console.log("appInfo", appInfo)
       const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
@@ -114,6 +115,7 @@
 
     profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
       avatarMode: "avatar-optional",
+      minNicknameLength: 3,
       additionalFields: [
         {
           name: "location",
@@ -157,14 +159,16 @@
   {#if error}
     <span class="notice">
       <h3>I'm sorry to say it, but there has been an error ☹️</h3>
-      {error}
+      <div style="padding:10px; margin:10px; background:lightcoral;border-radius: 10px;">
+        {error}
+      </div>
       {#if creds}
-        <div>Signed in to the holochain multiplexer with reg key: {creds.regkey}</div>
+        <div>You are signed in to the holochain multiplexer with reg key: <strong>{creds.regkey}</strong></div>
         <sl-button style="margin-left: 8px;" on:click={() => {
           deleteCookie("creds")
           window.location.assign("/")
           }}>
-          <Fa icon={faPowerOff} /> Logout
+          <Fa icon={faArrowRightFromBracket} /> Logout
         </sl-button>
       {:else}
         <div>
@@ -186,7 +190,7 @@
 
     {#if $prof && ($prof.status!=="complete" || $prof.value===undefined)}
     <div style="text-align:center">
-      <h1>Hello.</h1>
+      <div style="display:flex; justify-content:center; align-items:center;"><img style="margin-right:20px" width="100" src="android-chrome-192x192.png" /><h1>Hello!</h1></div>
       <p><b>Emergence</b> is a decentralized hApp for discovery, scheduling, connecting and remembering </p>
       <p>Harness the power of the decentralized web technology for local, ofline collaboration.</p>
       <p>Continue with a nickname and optional avatar, both of which can be changed later.</p>
@@ -261,7 +265,7 @@
                 window.location.assign("/reset")
               }}
             >
-              <Fa class="nav-icon" icon={faPowerOff} size="2x"/>
+              <Fa class="nav-icon" icon={faArrowRightFromBracket} size="2x"/>
             <span class="button-title">Logout</span>
             </div>
           {/if}
@@ -274,7 +278,7 @@
         <ProxyAgentDetail
           on:proxyagent-deleted={()=>store.closeDetails()}
           on:proxyagent-close={()=>store.closeDetails()}
-          proxyAgent={store.getProxyAgent($uiProps.detailsStack[0].hash)}>
+          proxyAgentHash={$uiProps.detailsStack[0].hash}>
         </ProxyAgentDetail>
       </div>
       {/if}
@@ -393,40 +397,20 @@
       {/if}
       {#if pane=="admin.sitemaps"}
       <div class="pane">
-        {#if creatingMap}
-          <div class="modal">
-              <SiteMapCrud
-              on:sitemap-created={() => {creatingMap = false;} }
-              on:edit-canceled={() => { creatingMap = false; } }
-              ></SiteMapCrud>
-          </div>
-        {/if}
         <AllSiteMaps
         on:sitemaps-close={()=>pane = 'admin'}
         ></AllSiteMaps>
-        Create Sitemap:
-        <sl-button on:click={() => {creatingMap = true; } } circle>
-          <Fa icon={faPlus} />
-        </sl-button>
       </div>
       {/if}
       {#if pane=="admin.proxyagents"}
       <div class="pane">
-        {#if creatingProxyAgent}
-          <div class="modal">
               <ProxyAgentCrud
-              on:proxyagent-created={() => {creatingProxyAgent = false;} }
-              on:edit-canceled={() => { creatingProxyAgent = false; } }
+              on:proxyagent-created={() => {} }
               ></ProxyAgentCrud>
-          </div>
-        {/if}
-        <AllProxyAgents
+
+              <AllProxyAgents
         on:proxyagents-close={()=>pane = 'admin'}
         ></AllProxyAgents>
-        Create Proxy Agent:
-        <sl-button on:click={() => {creatingProxyAgent = true; } } circle>
-          <Fa icon={faPlus} />
-        </sl-button>
       </div>
       {/if}      {#if pane=="discover"}
       <div class="pane">

@@ -29,7 +29,7 @@ pub fn get_settings(_: ()) -> ExternResult<Settings> {
     let path = Path::from("all_settings");
     let mut links = get_links(path.path_entry_hash()?, LinkTypes::Settings, None)?;
     if links.len() == 0 {
-        return Ok(Settings {game_active: false});
+        return Ok(Settings {game_active: false, current_sitemap:None});
     }
     links.sort_by(|a,b| b.timestamp.cmp(&a.timestamp));
     Ok(convert_settings_tag(links[0].tag.clone())?)

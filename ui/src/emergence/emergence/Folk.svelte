@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { onMount, getContext, createEventDispatcher } from 'svelte';
+    import { onMount, getContext, createEventDispatcher, } from 'svelte';
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
     import type SlTabGroup from  '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js';
@@ -16,10 +16,8 @@
     import type { EmergenceStore } from '../../emergence-store';
     import NoteDetail from './NoteDetail.svelte';
     import SessionSummary from './SessionSummary.svelte';
-    import Avatar from './Avatar.svelte';
     import Feed from './Feed.svelte';
     import Profile from './Profile.svelte';
-    import Sync from './Sync.svelte';
     import { slide } from 'svelte/transition';
 
     const dispatch = createEventDispatcher();
@@ -62,11 +60,9 @@
         bind:this={tabs}
         on:sl-tab-show={(e)=>store.setUIprops({youPanel:e.detail.name})}
     >
-            <sl-tab slot="nav" panel="sessions">Sessions
-            </sl-tab>
-            <sl-tab slot="nav" panel="notes">Notes
-            </sl-tab>
-            <sl-tab slot="nav" panel="updates">Updates</sl-tab>
+        <sl-tab slot="nav" panel="updates">Updates</sl-tab>
+        <sl-tab slot="nav" panel="notes">Notes</sl-tab>
+        <sl-tab slot="nav" panel="sessions">Sessions</sl-tab>
         <sl-tab-panel name="sessions">
             {#if $agentSessions.get(agentPubKey).size == 0}
                 No sessions created or going/interested 
@@ -83,7 +79,7 @@
         </sl-tab-panel>
         <sl-tab-panel name="notes">
             {#if $agentNotes.get(agentPubKey).length == 0}
-                You haven't created any notes yet.. 
+                No notes created
             {/if}
             {#each $agentNotes.get(agentPubKey) as note}
                 <NoteDetail showDeleted={false} showFrame={true} noteHash={note}></NoteDetail>

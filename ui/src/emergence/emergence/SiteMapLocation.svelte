@@ -67,7 +67,7 @@ x{x} y{y}
 
 <style>
     img {
-        width: 900px;
+        width: 100%;
     }
 .pic {
     cursor: crosshair;

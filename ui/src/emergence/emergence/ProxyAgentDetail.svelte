@@ -12,27 +12,27 @@ import { faTrash, faEdit, faCircleArrowLeft } from '@fortawesome/free-solid-svg-
 import ProxyAgentCrud from './ProxyAgentCrud.svelte'; 
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
-import { encodeHashToBase64,  } from '@holochain/client';
+import { encodeHashToBase64, type ActionHash,  } from '@holochain/client';
   import { slide } from 'svelte/transition';
   import SessionSummary from './SessionSummary.svelte';
+  import ProxyAgentAvatar from './ProxyAgentAvatar.svelte';
 
 const dispatch = createEventDispatcher();
 
 
-export let proxyAgent: Info<ProxyAgent>;
+export let proxyAgentHash: ActionHash;
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 let loading = true;
 let error: any = undefined;
 
-let editing = false;
-
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, proxyAgent;
+$: error, loading;
+$: proxyAgent = store.proxyAgentStore(proxyAgentHash)
 $: allSessions = store.sessions
-$: sessions = $allSessions.filter(s=>s.record.entry.leaders.find(l=>encodeHashToBase64(l.hash) == encodeHashToBase64(proxyAgent.original_hash)))  
+$: sessions = $allSessions.filter(s=>s.record.entry.leaders.find(l=>encodeHashToBase64(l.hash) == encodeHashToBase64($proxyAgent.original_hash)))  
 
 onMount(async () => {
   if (proxyAgent === undefined) {
@@ -43,15 +43,17 @@ onMount(async () => {
 
 async function deleteProxyAgent() {
   try {
-    await store.deleteProxyAgent(proxyAgent.original_hash)
+    await store.deleteProxyAgent($proxyAgent.original_hash)
     //await store.updateProxyAgent(proxyAgent.original_hash, {trashed:true})
-    dispatch('proxyagent-deleted', { proxyAgentHash: proxyAgent.original_hash });
+    dispatch('proxyagent-deleted', { proxyAgentHash: $proxyAgent.original_hash });
   } catch (e: any) {
     errorSnackbar.labelText = `Error deleting the proxyAgent: ${e.data.data}`;
     errorSnackbar.show();
   }
 }
 let confirmDialog
+let updateProxyAgentDialog
+
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -65,18 +67,15 @@ let confirmDialog
 {:else if error}
 <span>Error fetching the proxyAgent: {error.data.data}</span>
 {/if}
-{#if editing}
-  <div class="modal">
-    <ProxyAgentCrud
-    proxyAgent={ proxyAgent }
+
+  <ProxyAgentCrud
+    bind:this={updateProxyAgentDialog}
+    proxyAgent={ $proxyAgent }
     on:proxyagent-updated={async () => {
-      editing = false;
-  //    await fetchProxyAgent()
+      await store.fetchProxyAgents()
     } }
-    on:edit-canceled={() => { editing = false; } }
   ></ProxyAgentCrud>
-  </div>
-{/if}
+
   <Confirm 
     bind:this={confirmDialog}
     message="This will remove this proxy agent for everyone!" 
@@ -90,7 +89,7 @@ let confirmDialog
             <Fa icon={faCircleArrowLeft} />
           </sl-button>
           <div>
-            <sl-button style="margin-left: 8px; " on:click={(e) => { e.stopPropagation(); editing = true; } } circle>
+            <sl-button style="margin-left: 8px; " on:click={(e) => { e.stopPropagation(); updateProxyAgentDialog.open($proxyAgent) } } circle>
               <Fa icon={faEdit} />
             </sl-button>
             <sl-button style="margin-left: 8px;" on:click={() => {confirmDialog.open()}} circle>
@@ -105,22 +104,20 @@ let confirmDialog
       <div style="display: flex; flex-direction: column; margin-left:20px">
         <div style="display: flex; flex-direction: row">
           <div class="pic">
-            {#if proxyAgent.record.entry.pic}
-            <show-image image-hash={encodeHashToBase64(proxyAgent.record.entry.pic)}></show-image>
-            {/if}
+            <ProxyAgentAvatar size={170} proxyAgentHash={proxyAgentHash}></ProxyAgentAvatar>
           </div>
           <div style="display: flex; flex-direction: column; margin-left:10px">
-            <h1>{ proxyAgent.record.entry.nickname }</h1>
-            {#if proxyAgent.record.entry.bio}
+            <h1>{ $proxyAgent.record.entry.nickname }</h1>
+            {#if $proxyAgent.record.entry.bio}
               <div style="display: flex; flex-direction: row; margin-bottom: 16px">
                 <span style="margin-right: 4px"><strong>Bio:</strong></span>
-                <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.bio }</span>
+                <span style="white-proxyAgent: pre-line">{ $proxyAgent.record.entry.bio }</span>
               </div>
             {/if}
-            {#if proxyAgent.record.entry.location}
+            {#if $proxyAgent.record.entry.location}
               <div style="display: flex; flex-direction: row; margin-bottom: 16px">
                 <span style="margin-right: 4px"><strong>Location:</strong></span>
-                <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.location }</span>
+                <span style="white-proxyAgent: pre-line">{ $proxyAgent.record.entry.location }</span>
               </div>
             {/if}
             {#if sessions}

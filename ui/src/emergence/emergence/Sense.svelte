@@ -1,13 +1,14 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import type { Record } from '@holochain/client';
+  import { type Record, encodeHashToBase64 } from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import { sessionTags, type Info, type Session, SessionInterestBit } from './types';
   import Avatar from './Avatar.svelte';
   import Fa from 'svelte-fa';
   import { faArrowRight, faBookmark, faStar } from '@fortawesome/free-solid-svg-icons';
+  import SenseResults from './SenseResults.svelte';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -16,14 +17,25 @@
   let sessions
 
   $: original = store.sessions
-  $: count = $original.length < 10 ? sessions.length : 10
   $: sessions = []
   $: error, senseIdx;
   $: session = sessions ? sessions[senseIdx] : undefined
   $: slot = session ? store.getSessionSlot(session) : undefined
 
+  const SESSIONS_TO_ASSESS = 20
+  $: count = 0
+
   onMount(async () => {
-   sessions = shuffle($original.filter(s=>!s.record.entry.trashed))
+    const filteredSessions = $original.filter(s=>{
+      const relData = store.getSessionReleationData(s)
+      const myRecordedInterest = relData.interest.get(store.myPubKey)
+      return !s.record.entry.trashed && 
+        myRecordedInterest==undefined &&
+        !s.record.entry.leaders.find(l=>encodeHashToBase64(l.hash) == store.myPubKeyBase64)
+    })
+    const shuffled = shuffle(filteredSessions)
+    count = shuffled.length < SESSIONS_TO_ASSESS ? shuffled.length : SESSIONS_TO_ASSESS
+    sessions = shuffled.splice(0,count)
   });
 
   const swipe = (interest: SessionInterestBit) => {
@@ -35,14 +47,17 @@
     const shuffled = sessions.map(value => ({ value, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value)
-    return shuffled.splice(0,count)
+    return shuffled
   }
 
 </script>
 {#if error}
 <span>Error fetching the sense: {error.data.data}.</span>
 {:else if !session}
-<span>All Done, thanks!</span>
+<div style="display:flex;flex-direction:column;">
+  <h2>All Done, thanks!</h2>
+  <SenseResults></SenseResults>
+</div>
 {:else}
 <div class="sense">
     <div class="remaining">Remaining: {count - senseIdx}</div>
@@ -87,10 +102,10 @@
           <sl-button
           circle
           size="large"
-          label="Next"
-          on:click={() => {swipe(SessionInterestBit.NoOpinion)}}
-        ><Fa icon={faArrowRight} /></sl-button>
-          Next
+          label="Going"
+          on:click={() => {swipe(SessionInterestBit.Going)}}
+        ><Fa icon={faStar} /></sl-button>
+          Going
         </div>
         <div class="button">
           <sl-button
@@ -105,10 +120,10 @@
           <sl-button
           circle
           size="large"
-          label="Going"
-          on:click={() => {swipe(SessionInterestBit.Going)}}
-        ><Fa icon={faStar} /></sl-button>
-          Going
+          label="Skip"
+          on:click={() => {swipe(SessionInterestBit.NoOpinion)}}
+        ><Fa icon={faArrowRight} /></sl-button>
+          Skip
         </div>
 
       </div>

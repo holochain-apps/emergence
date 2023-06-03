@@ -107,9 +107,9 @@ $:space = slot? store.getSpace(slot.space) : undefined
         </div>
         {#if showLeaders}
           <div class="leaders">
-              <span>Hosted by</span>
+              <span style="padding-top: 2px">Hosted by:</span>
               {#each session.record.entry.leaders as leader}
-                <AnyAvatar showAvatar={false} agent={leader}></AnyAvatar>
+              <span  style="margin-top: -2px;"><AnyAvatar showAvatar={false} agent={leader}></AnyAvatar></span>
               {/each}
           </div>
         {/if}
@@ -161,6 +161,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
 
   .time {
     font-size: 24px;
+    color: white;
     margin-top: -3px;
     margin-bottom: -3px;
   }
@@ -169,7 +170,12 @@ $:space = slot? store.getSpace(slot.space) : undefined
     line-height: 12px;
     font-weight: normal;
     margin-bottom: 0;
+    color: white;
     opacity: .5;
+  }
+  .space {
+    overflow: hidden;
+    max-height: 24px;
   }
   .slot {
     display: flex;
@@ -192,6 +198,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
     display: flex;
     flex-direction: column;
     padding: 10px 15px;
+    justify-content: center;
     background-color: #fff;
     width: 100%;
   }

@@ -4,10 +4,11 @@ import type { Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
 import Fa from 'svelte-fa';
-import { faCircleArrowLeft, faSync } from '@fortawesome/free-solid-svg-icons';
+import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import SpaceSummary from './SpaceSummary.svelte';
-import Sync from './Sync.svelte';
+import SpaceCrud from './SpaceCrud.svelte';
 import { DetailsType, type Info, type Space } from './types';
+
 const dispatch = createEventDispatcher();
 
 
@@ -15,6 +16,7 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
 let error: any = undefined;
 let spaceDetail: Info<Space> | undefined
+let createSpaceDialog: SpaceCrud
 
 $: spaces = store.spaces
 $: error, spaceDetail;
@@ -25,6 +27,10 @@ onMount(async () => {
 });
 
 </script>
+<SpaceCrud
+bind:this={createSpaceDialog}
+on:space-created={() => {} }
+></SpaceCrud>
 <div class="AllSpaces pane-header">
   <div class="header-content">
     <h3>Spaces List</h3>

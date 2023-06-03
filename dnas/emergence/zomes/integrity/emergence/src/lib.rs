@@ -180,6 +180,17 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 original_session,
                             )
                         }
+                        (
+                            EntryTypes::ProxyAgent(session),
+                            EntryTypes::ProxyAgent(original_session),
+                        ) => {
+                            validate_update_proxy_agent(
+                                action,
+                                session,
+                                original_action,
+                                original_session,
+                            )
+                        }
                         _ => {
                             Ok(
                                 ValidateCallbackResult::Invalid(

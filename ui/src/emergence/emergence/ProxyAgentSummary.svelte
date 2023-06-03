@@ -8,7 +8,7 @@ import {DetailsType, type Info, type ProxyAgent} from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import { encodeHashToBase64,  } from '@holochain/client';
+import ProxyAgentAvatar from "./ProxyAgentAvatar.svelte";
 
 const dispatch = createEventDispatcher();
 
@@ -55,20 +55,18 @@ onMount(async () => {
   >
 
   <div class="pic">
-    {#if proxyAgent.record.entry.pic}
-      <show-image image-hash={encodeHashToBase64(proxyAgent.record.entry.pic)}></show-image>
-    {/if}
+    <ProxyAgentAvatar size={64} proxyAgentHash={proxyAgent.original_hash}></ProxyAgentAvatar>
   </div>
   <div style="display: flex; flex-direction: column;">
     <h2>{proxyAgent.record.entry.nickname}</h2>
     {#if proxyAgent.record.entry.location}
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+      <div style="display: flex; flex-direction: row; ">
         <span style="margin-right: 4px"><strong>Location:</strong></span>
         <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.location }</span>
       </div>
     {/if}
     {#if proxyAgent.record.entry.bio}
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+      <div style="display: flex; flex-direction: row; ">
         <span style="margin-right: 4px"><strong>Bio:</strong></span>
         <span style="white-proxyAgent: pre-line">{ proxyAgent.record.entry.bio }</span>
       </div>
@@ -78,8 +76,10 @@ onMount(async () => {
 {/if}
 
 <style>
+  .summary {
+    padding: 10px;
+  }
   .pic {
-   max-width: 50px;
    margin-right: 10px;
   }
 </style> 

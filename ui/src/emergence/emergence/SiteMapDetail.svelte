@@ -16,7 +16,6 @@ import { encodeHashToBase64,  } from '@holochain/client';
 
 const dispatch = createEventDispatcher();
 
-
 export let sitemap: Info<SiteMap>;
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -24,11 +23,9 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let loading = true;
 let error: any = undefined;
 
-let editing = false;
-
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, sitemap;
+$: error, loading, sitemap;
 
 onMount(async () => {
   if (sitemap === undefined) {
@@ -48,39 +45,34 @@ async function deleteSiteMap() {
   }
 }
 let confirmDialog
+let updateSitemapDialog
+
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
+  <SiteMapCrud
+  bind:this={updateSitemapDialog}
+  sitemap={ sitemap }
+  on:sitemap-updated={async () => {} }
+></SiteMapCrud>
 
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
   <sl-spinner></sl-spinner>
-
 </div>
 {:else if error}
 <span>Error fetching the sitemap: {error.data.data}</span>
-{:else if editing}
-  <div class="modal">
-    <SiteMapCrud
-    sitemap={ sitemap }
-    on:sitemap-updated={async () => {
-      editing = false;
-  //    await fetchSiteMap()
-    } }
-    on:edit-canceled={() => { editing = false; } }
-  ></SiteMapCrud>
-  </div>
 {:else}
   <Confirm 
     bind:this={confirmDialog}
     message="This will remove this sitemap for everyone!" 
     on:confirm-confirmed={deleteSiteMap}></Confirm>
 
-<div style="display: flex; flex-direction: column">
+<div class="detail">
   <div style="display: flex; flex-direction: row">
     <span style="flex: 1"></span>
-    <sl-button style="margin-left: 8px; " on:click={() => { editing = true; } } circle>
+    <sl-button style="margin-left: 8px; " on:click={() => { updateSitemapDialog.open(sitemap) } } circle>
       <Fa icon={faEdit} />
     </sl-button>
     <sl-button style="margin-left: 8px;" on:click={() => {confirmDialog.open()}} circle>
@@ -107,6 +99,11 @@ let confirmDialog
 {/if}
 
 <style>
+  .detail {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+  }
   .pic {
    max-width: 300px;
   }

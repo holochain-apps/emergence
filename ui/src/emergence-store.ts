@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en/index.js';
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder } from './emergence/emergence/types.js';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed } from './emergence/emergence/types.js';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
@@ -107,10 +107,11 @@ export class EmergenceStore {
     pane: "sessions",
     amSteward: true,
     debuggingEnabled: false,
-    youPanel: "sessions",
-    discoverPanel: "cloud",
+    youPanel: "updates",
+    discoverPanel: "tags",
     sessionsFilter: defaultSessionsFilter(),
     feedFilter: defaultFeedFilter(),
+    peopleFilter: defaultPeopleFilter(),
     sensing: false,
     detailsStack: [],
     sessionListMode: true,
@@ -187,6 +188,10 @@ export class EmergenceStore {
     return derived(this.sessions, $sessions => $sessions.find(s=>encodeHashToBase64(sessionHash) == encodeHashToBase64(s.original_hash)))
   }
 
+  proxyAgentStore(proxyAgentHash) : Readable<Info<ProxyAgent>|undefined>{
+    return derived(this.proxyAgents, $proxyAgents => $proxyAgents.find(s=>encodeHashToBase64(proxyAgentHash) == encodeHashToBase64(s.original_hash)))
+  }
+
   getSpaceIdx(spaceHash: ActionHash) : number {
     const b64 = encodeHashToBase64(spaceHash)
     const spaces = get(this.spaces)
@@ -226,7 +231,11 @@ export class EmergenceStore {
   getCurrentSiteMap() : Info<SiteMap> | undefined {
     const maps = get(this.maps)
     if (maps.length>0) {
-      return maps[0]
+        const settings = get(this.settings)
+        if (settings && settings.current_sitemap) {
+            return this.getSiteMap(settings.current_sitemap)
+        }
+        return maps[0]
     }
     return undefined
   }
@@ -258,8 +267,10 @@ export class EmergenceStore {
     }
   }
 
-  getSpaceSiteLocation(space: Info<Space>) : SiteLocation|undefined {
-    const rels = space.relations.filter(r=>r.relation.content.path == "space.location")
+  getSpaceSiteLocation(space: Info<Space>, sitemap: ActionHash) : SiteLocation|undefined {
+    const siteMap = this.getSiteMap(sitemap)
+    const siteB64 = encodeHashToBase64(siteMap.record.entryHash)
+    const rels = space.relations.filter(r=>r.relation.content.path == "space.location" && siteB64== encodeHashToBase64(r.relation.dst))
     if (rels.length == 0) return undefined
     rels.sort((a,b)=>b.timestamp - a.timestamp)
     const rel = rels[0]
@@ -755,6 +766,18 @@ export class EmergenceStore {
     await this.fetchSessions()
   }
 
+  filterPeople( person: AnyAgentDetailed, filter: PeopleFilter) : boolean {
+    if (filter.keyword) {
+        const keyword = filter.keyword.toLowerCase()
+
+        if (person.bio.toLowerCase().search(keyword) < 0 &&
+        person.location.toLowerCase().search(keyword) < 0 &&
+        person.nickname.toLowerCase().search(keyword) < 0
+        )
+        return false
+    }
+    return true
+  }
 
   filterFeedElem(elem:FeedElem, filter: FeedFilter) : boolean {
 
@@ -877,7 +900,7 @@ export class EmergenceStore {
         const word = filter.keyword.toLowerCase() 
         if (session.record.entry.description.toLowerCase().search(word) < 0 &&
             session.record.entry.title.toLowerCase().search(word) < 0)
-        return false
+            return false
     }
     if (filter.space.length>0) {
         if (!slot) return false
@@ -903,6 +926,8 @@ export class EmergenceStore {
         case "sessionsFilter": attributes.map(a=> filter[a] =  defaultSessionsFilter()[a])
         break;
         case "feedFilter": attributes.map(a=> filter[a] =  defaultFeedFilter()[a])
+        break;
+        case "peopleFilter": attributes.map(a=> filter[a] =  defaultPeopleFilter()[a])
         break;
     }
     const props=[]
@@ -1028,7 +1053,8 @@ export class EmergenceStore {
         }
         let location :SiteLocation | undefined;
         if (props.hasOwnProperty("location")) {
-            const currentSiteLocation = this.getSpaceSiteLocation(space)
+
+            const currentSiteLocation = this.getSpaceSiteLocation(space, this.getCurrentSiteMap().original_hash)
 
             if (JSON.stringify(currentSiteLocation) !== JSON.stringify(props.location)) {
                 changes.push(`site`)
@@ -1475,11 +1501,9 @@ export class EmergenceStore {
             feed.forEach(f=>{
                 if (f.type == FeedType.SessionSetInterest) {
                     if (f.detail & (SessionInterestBit.NoOpinion + SessionInterestBit.Hidden) || f.detail == 0) {
-                        console.log("Deleting", f)
                         si.delete(f.about)
                     }
                     else {
-                        console.log("Setting", f)
                         si.set(f.about, f.detail)
                     }
                 }

@@ -9,12 +9,17 @@
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
     import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
+    import '@shoelace-style/shoelace/dist/components/select/select.js';
+    import '@shoelace-style/shoelace/dist/components/option/option.js';
+    import SenseResults from "./SenseResults.svelte";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
     const dispatch = createEventDispatcher();
     let sensing: SlCheckbox
-    $:settings = store.settings
+    $: sitemaps = store.maps
+    $: settings = store.settings
+
 
     onMount(() => {
     })
@@ -215,6 +220,7 @@
         }
         store.sync(undefined)
     }
+
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
 
@@ -229,7 +235,7 @@
 <div class="pane-content">
     <div class="admin-controls">
         <sl-button style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
-            Manage Schedule
+            Schedule
         </sl-button>
 
         <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
@@ -255,12 +261,30 @@
         }>
             {$settings.game_active ? 'Deactivate Sensing Game' : 'Activate Sensing Game'}
         </sl-button>
-        
-    </div>
-    <div>
+        {#if $sitemaps.length > 0}
+        <sl-select
+          value={$settings.current_sitemap ? encodeHashToBase64($settings.current_sitemap) : undefined}
+          style="margin: 8px;"
+          label="Current Site Map"
+          on:sl-change={(e) => {
+            const s= $settings
+            const hash = decodeHashFromBase64(e.target.value)
+            s.current_sitemap = hash
+            store.setSettings(s)
+           } }
+        >
+        {#each $sitemaps as map}
+            <sl-option value={encodeHashToBase64(map.original_hash)}>{map.record.entry.text}</sl-option>
+        {/each}
+        </sl-select>
+
+    {/if}
 
     </div>
 
+    {#if $settings.game_active}
+        <SenseResults></SenseResults>
+    {/if}
 
 
    
@@ -273,9 +297,8 @@
 
     .admin-controls {
         display: flex;
-        justify-content: center;
         width: 100%;
-    
+        flex-wrap: wrap;
     }
 
     .header-content h3 {

@@ -5,7 +5,7 @@
   import { getContext } from "svelte";
   import { DetailsType, type AnyAgent } from "./types";
   import Avatar from './Avatar.svelte';
-  import { encodeHashToBase64 } from "@holochain/client";
+  import ProxyAgentAvatar from "./ProxyAgentAvatar.svelte";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -20,27 +20,23 @@
 {#if agent.type=="Agent"}
     <Avatar size={size} namePosition={namePosition} showAvatar={showAvatar} showNickname={showNickname} agentPubKey={agent.hash}></Avatar>
 {:else}
-<div class="avatar-{namePosition}"
-    on:click={(e)=>{
-        store.openDetails(DetailsType.ProxyAgent, agent.hash)
-        e.stopPropagation()
-    }}
-    >
-    {#if showAvatar}
-        {#if proxyAgent}
-            {#if proxyAgent.record.entry.pic}
-                <show-image style={`width:${size}px`} image-hash={encodeHashToBase64(proxyAgent.record.entry.pic)}></show-image>
+    <div class="avatar-{namePosition}"
+        on:click={(e)=>{
+            store.openDetails(DetailsType.ProxyAgent, agent.hash)
+            e.stopPropagation()
+        }}
+        >
+        {#if showAvatar}
+            {#if proxyAgent}
+                <ProxyAgentAvatar size={size} proxyAgentHash={proxyAgent.original_hash}></ProxyAgentAvatar>
             {:else}
-                No pic
+                No Agent!
             {/if}
-        {:else}
-            No Agent!
         {/if}
-    {/if}
-    {#if showNickname}
-        <div class="nickname">{proxyAgent ? proxyAgent.record.entry.nickname : "unknown"}</div>
-    {/if}
-</div>
+        {#if showNickname}
+            <div class="nickname">{proxyAgent ? proxyAgent.record.entry.nickname : "unknown"}</div>
+        {/if}
+    </div>
 {/if}
 
 <style>
@@ -49,11 +45,18 @@
         flex-direction: column;
     }
     .avatar-row {
-        display:flex;
+        display:inline-flex;
         flex-direction: row;
         justify-content:center;
+        position: relative;
+        top: 4px;
+        align-items: center;
     }
     .avatar-row show-image {
+        margin-right: 0.5em;  
+        border-radius: 50%;     
+    }
+    .avatar-row holo-identicon {
         margin-right: 0.5em;  
         border-radius: 50%;     
     }

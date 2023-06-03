@@ -7,10 +7,12 @@
     "scale:local": "ts-node-esm scale-local.ts"
   },
   "dependencies": {
-    "@holochain-open-dev/file-storage": "0.4.1",
+    "@holochain-open-dev/file-storage": "0.4.2",
     "@holochain/client": "^0.12.2",
     "@holochain/tryorama": "^0.11.2",
     "@msgpack/msgpack": "^2.7.0",
+    "@types/lodash": "^4.14.195",
+    "lodash": "^4.17.21",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.4",
     "vitest": "^0.31.0"

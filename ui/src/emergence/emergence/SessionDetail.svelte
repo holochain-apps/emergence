@@ -33,7 +33,6 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let loading = false;
 let error: any = undefined;
 
-let editing = false;
 let creatingNote = false;
 
 let errorSnackbar: Snackbar;
@@ -64,29 +63,7 @@ const sessionSlot = (session: Info<Session>): Slot | undefined => {
         return undefined
 }
 
-// $: sessions = store.sessions
-// $: session = derived(sessions, $sessions => $sessions.find(s=>encodeHashToBase64(sessionHash) == encodeHashToBase64(s.original_hash)))
-// $: entry = derived(session, $session => $session.record.entry)
-// $: relations = derived(session, $session => $session.relations)
-// $: slot = derived(relations, $relations=> {
-//   const r = $relations.find(r=>r.content.path == "session.space")
-//   if (r) {
-//     const window = JSON.parse(r.content.data) as TimeWindow
-//             return {
-//                 space: r.dst,
-//                 window
-//             }
-//   }
-//   return undefined
-// })
-// $: notes = derived(relations, $relations=> 
-//   $relations.filter(r=>r.content.path == "session.note").map(r=> {
-//     const note = store.getNote(r.dst)
-//     if (note) return note
-//     return undefined
-//   }))
-
-$: editing,  error, loading, slot, notes, session;
+$: error, loading, slot, notes, session;
 $: relData = store.sessionReleationDataStore(session)
 
 onMount(async () => {
@@ -141,14 +118,16 @@ bind:this={updateSessionDialog}
       <sl-button on:click={() => { dispatch('session-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
-      <div>
-        <sl-button on:click={() => { updateSessionDialog.open($session) } } circle>
-          <Fa icon={faEdit} />
-        </sl-button>
-        <sl-button on:click={()=>confirmDialog.open()} circle>
-          <Fa icon={faTrash} />
-        </sl-button>
-      </div>
+      {#if $uiProps.amSteward || $session.record.entry.leaders.find(l=>encodeHashToBase64(l.hash)==store.myPubKeyBase64)}
+        <div>
+          <sl-button on:click={() => { updateSessionDialog.open($session) } } circle>
+            <Fa icon={faEdit} />
+          </sl-button>
+          <sl-button on:click={()=>confirmDialog.open()} circle>
+            <Fa icon={faTrash} />
+          </sl-button>
+        </div>
+      {/if}
     </div>
     <span style="flex: 1"></span>
  
@@ -165,7 +144,7 @@ bind:this={updateSessionDialog}
         <div class="leaders">
           <span style="margin-right: 4px"><strong>Hosted by </strong></span>
           {#each entry.leaders as leader}
-            <AnyAvatar agent={leader}></AnyAvatar>
+            <div style="margin-right:10px"><AnyAvatar agent={leader}></AnyAvatar></div>
           {/each}
         </div>
         <div class="description"> {@html Marked.parse(entry.description) }</div>
