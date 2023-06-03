@@ -1,11 +1,11 @@
-import { AppWebsocket, Record } from "@holochain/client";
+import { AppBundle, AppWebsocket, Record } from "@holochain/client";
 import { TryCpClient, TryCpScenario, pause } from "@holochain/tryorama";
 import assert from "node:assert";
 import { EmergenceClient } from "../ui/src/emergence-client.js";
 import { EmergenceStore } from "../ui/src/emergence-store.js";
 import { Note } from "../ui/src/emergence/emergence/types.js";
 import { createNote } from "./src/emergence/emergence/common.js";
-import { areDhtsSynced, getRandomNumber } from "./util.js";
+import { areDhtsSynced, getRandomNumber, partialConfig } from "./util.js";
 
 // const testAppPath = process.cwd() + '/../workdir/emergence.happ';
 
@@ -23,24 +23,24 @@ console.log();
 // **** TEST PARAMETERS ****
 
 const conductorCount = 1;
-let agentsPerConductor = 1;
+let agentsPerConductor = 100;
 const agentsPerConductorIncrementor = 20;
 
-let notesPerMin = 1;
-const notesPerMinIncrementor = 0;
+let notesPerMin = 600;
+const notesPerMinIncrementor = 200;
 
 let testRunCount = 1;
-const testRunCountMax = 1;
-const testDuration = 1000 * 20;
+const testRunCountMax = 2;
+const testDuration = 1000 * 110;
 
-const intervalMargin = agentsPerConductor * 50;
+const intervalMargin = agentsPerConductor * 10;
 
 const metricsPerMin: { timeElapsedToCreateAllNotes: number }[] = [];
 
 do {
     console.group(`Test run # ${testRunCount}`);
 
-    console.table({ conductorCount, agentsPerConductor, notesPerMin });
+    console.table({ holoPortCount: holoportIps.length, agentsPerConductor, notesPerMin });
     console.log();
 
     console.log("Resetting all HoloPorts...");
@@ -55,14 +55,19 @@ do {
     console.log("Setting up conductors and installing agent apps...");
     console.log();
 
-    const app = {
+    const app: { bundle: AppBundle } = {
         bundle: {
             manifest: {
                 manifest_version: "1",
-                name: "some",
+                name: "emergence",
                 roles: [{
-                    dna: { url: 'https://github.com/holochain-apps/emergence/releases/download/pre-alpha-test-2/emergence.dna' },
-                    name: "role",
+                    dna: {
+                        url: 'https://github.com/holochain-apps/emergence/releases/download/pre-alpha-test-2/emergence.dna',
+                        modifiers: {
+                            network_seed: Date.now().toString()
+                        }
+                    },
+                    name: "role"
                 }],
             },
             resources: {}
@@ -76,7 +81,9 @@ do {
             numberOfConductorsPerClient: conductorCount,
             numberOfAgentsPerConductor: agentsPerConductor,
             app,
+            partialConfig
         });
+
 
     // console.log("Exchanging all peer infos...");
     // await scenario.shareAllAgents();
@@ -86,10 +93,15 @@ do {
     const onSignal = clientsPlayers[0].players[0].conductor.on.bind(clientsPlayers[0].players[0].conductor);
     const cellId = clientsPlayers[0].players[0].cells[0].cell_id;
     clientsPlayers.forEach((client) =>
-        client.players.forEach((player) =>
-            player.conductor.on((_signal) => { }) // add empty signal handler to prevent logs
+        client.players.forEach((player) => {
+            // console.log('player', player.agentPubKey);
+            player.conductor.on((_signal) => { }); // add empty signal handler to prevent logs
+        }
         )
     );
+
+    const a = await areDhtsSynced(clientsPlayers.flatMap((client) => client.client.conductors), cellId);
+
     console.log("Starting test run...");
 
     // *** CREATE SESSIONS ***
@@ -109,10 +121,11 @@ do {
 
     let startTime = Date.now();
     let totalTimeElapsed: number;
-    const checkSyncInterval = 1000 * 5;
+    const checkDhtSyncInterval = 1000 * 5;
     const outputInterval = 1000 * 5;
     let outputPrinted = false;
     let startTimeDhtSync: number;
+    let dhtsSynced = false;
     let testRunFailed = false;
     let minuteResetHappened = false;
     let notesCreatedThisMinute = 0;
@@ -159,9 +172,9 @@ do {
             outputPrinted = false;
         }
 
-        if (totalTimeElapsed % checkSyncInterval <= intervalMargin) {
+        if (!dhtsSynced && totalTimeElapsed % checkDhtSyncInterval <= intervalMargin) {
             if (notesCreatedThisMinute >= notesPerMin) {
-                const dhtsSynced = await areDhtsSynced(clientsPlayers.flatMap((clientPlayer) => clientPlayer.client.conductors), cellId);
+                dhtsSynced = await areDhtsSynced(clientsPlayers.flatMap((clientPlayer) => clientPlayer.client.conductors), cellId);
                 const timeElapsedToSyncDht = Math.round((Date.now() - startTimeDhtSync) / 1000);
                 if (dhtsSynced) {
                     console.log(`DHTs synced; it took ${timeElapsedToSyncDht} seconds.`);
@@ -185,6 +198,7 @@ do {
                 thisMinuteStartTime = Date.now();
                 thisMinuteMetricsSaved = false;
                 minuteResetHappened = true;
+                dhtsSynced = false;
             }
         } else {
             minuteResetHappened = false;
@@ -215,23 +229,8 @@ do {
     await scenario.cleanUp();
 
     testRunCount++;
-    // agentsPerConductor+= agentsPerConductorIncrementor;
+    agentsPerConductor+= agentsPerConductorIncrementor;
     notesPerMin += notesPerMinIncrementor;
 
     console.groupEnd();
 } while (testRunCount <= testRunCountMax);
-
-
-    // Test involves creating the expected number of spaces and sessions and then simulating 
-    // user behavior. Then the test is run multiple times while recording performance metrics
-    // where each run the intensity of user behavior increased by upping the following parameters:
-    // 1. number of agents per conductor
-    // 1. percentage of notes that include images
-    // 1. number of requests per agent per minute to load all the data: store.fetchSessions()
-    // 1. number of conductors
-
-    // The metrics measured should be:
-
-    // 1. conductor load avarege
-    // 2. zome-call time delays (if any)
-    // 3. time-taken for a random agent on a different conductor to "see" changes (i.e. gossip delays)

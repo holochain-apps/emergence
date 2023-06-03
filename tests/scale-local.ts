@@ -9,9 +9,9 @@ import { areDhtsSynced, getRandomNumber } from "./util.js";
 
 const scenario = new Scenario();
 
-const conductorCount = 3;
-const agentsPerConductor = 10;
-let notesPerMin = 3;
+const conductorCount = 1;
+const agentsPerConductor = 1;
+let notesPerMin = 1;
 
 let testRunCount = 1;
 const testRunCountMax = 1;
@@ -19,6 +19,7 @@ const testRunCountMax = 1;
 const metricsPerMin: { timeElapsedToCreateAllNotes: number }[] = [];
 const testDuration = 1000 * 5;
 const outputInterval = 1000; // each second
+const intervalMargin = agentsPerConductor * 50;
 
 do {
     console.group(`Test run # ${testRunCount}`);
@@ -117,7 +118,7 @@ do {
                     // }
                 }
                 const notes: Record[] = await Promise.all(notesForConductor);
-                // notes.forEach((note) => store.needNote(note.signed_action.hashed.hash));
+                notes.forEach((note) => store.needNote(note.signed_action.hashed.hash));
                 notesCreatedThisMinute += notes.length;
                 notesCreatedTotal += notes.length;
             }
@@ -127,7 +128,7 @@ do {
             thisMinuteMetricsSaved = true;
         }
 
-        if (totalTimeElapsed % outputInterval <= 100) {
+        if (totalTimeElapsed % outputInterval <= intervalMargin) {
             if (!outputPrinted) {
                 const secondsElapsed = Math.floor(totalTimeElapsed / 1000);
                 console.log(`Checkpoint at ${secondsElapsed} s: ${notesCreatedThisMinute} notes have been created this minute and ${notesCreatedTotal} in total.`);
@@ -143,7 +144,7 @@ do {
             outputPrinted = false;
         }
 
-        if (totalTimeElapsed > 0 && totalTimeElapsed % (1000 * 60) <= 100) {
+        if (totalTimeElapsed > 0 && totalTimeElapsed % (1000 * 60) <= intervalMargin) {
             console.log("-------------- A minute has passed. --------------");
             if (notesCreatedThisMinute < notesPerMin) {
                 console.log(`Failed to create ${notesPerMin} notes this minute. Created ${notesCreatedThisMinute}. Aborting test run.`);
@@ -162,7 +163,7 @@ do {
         }
     } while (totalTimeElapsed < testDuration);
 
-    await pause(1000);  // wait because creating notes calls fetchSessions and doesn't await
+    await pause(1000); // wait because creating notes calls fetchSessions and doesn't await
 
     console.log();
 
@@ -174,6 +175,8 @@ do {
     avgToCreateNotes /= metricsPerMin.length;
     console.log(`On average it took ${avgToCreateNotes} ms to create ${notesPerMin} notes.`);
 
+    const session = await emergenceClient.getSessions();
+    console.log('sessions', session);
     // const feed = await store.fetchFeed();
     // console.log('feed', feed);
     // console.log();

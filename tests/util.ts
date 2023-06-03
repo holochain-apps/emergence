@@ -3,6 +3,19 @@ import { IConductor } from "@holochain/tryorama";
 import isEqual from "lodash/isEqual.js";
 import sortBy from "lodash/sortBy.js";
 
+export const partialConfig = `dpki: ~
+network:
+  bootstrap_service: "https://devnet-bootstrap.holo.host"
+  network_type: "quic_bootstrap" 
+  transport_pool:
+    - proxy_config:
+        proxy_url: "kitsune-proxy://f3gH2VMkJ4qvZJOXx0ccL_Zo5n-s_CnBjSzAsEHHDCA/kitsune-quic/h/165.22.32.11/p/5779/--"
+        type: "remote_proxy_client"
+      type: proxy
+      sub_transport:
+        type: quic`;
+        // proxy_url: "kitsune-proxy://f3gH2VMkJ4qvZJOXx0ccL_Zo5n-s_CnBjSzAsEHHDCA/kitsune-quic/h/137.184.142.208/p/5788/--"
+        
 export const getRandomNumber = (items: Array<any>) => Math.floor(Math.random() * items.length);
 
 export const areDhtsSynced = async (
@@ -18,6 +31,8 @@ export const areDhtsSynced = async (
             })
         )
     );
+
+    // conductorStates.forEach((cs, index) => console.log('index', index, 'ops_cursor', cs.integration_dump.dht_ops_cursor, 'peers', cs.peer_dump.peers.length));
 
     // Compare conductors' integrated DhtOps
     const playersDhtOpsIntegrated = conductorStates.map((conductor) =>
