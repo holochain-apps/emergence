@@ -12,6 +12,7 @@
     import '@shoelace-style/shoelace/dist/components/select/select.js';
     import '@shoelace-style/shoelace/dist/components/option/option.js';
     import SenseResults from "./SenseResults.svelte";
+  import People from "./People.svelte";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -92,14 +93,12 @@
         const maps = []
         for (const s of get(store.maps)) { 
             const mapEntry = await serializeInfo(s, true)
-            mapEntry.entryHash = encodeHashToBase64(s.record.entryHash)
             maps.push(mapEntry)
         }
 
         const proxyAgents = []
         for (const s of get(store.proxyAgents)) { 
             const proxyAgentEntry = await serializeInfo(s, true)
-            proxyAgentEntry.entryHash = encodeHashToBase64(s.record.entryHash)
             proxyAgents.push(proxyAgentEntry)
         }
 
@@ -129,6 +128,8 @@
         reader.readAsText(file);
     };
 
+    let uploadedPics = []
+
     const uploadImportedFile = async (e) : Promise<EntryHash> => {
         let pic = undefined
         if (e.pic_data) {
@@ -136,7 +137,8 @@
                     lastModified: e.pic_data.last_modifed,
                     type: e.pic_data.file_type,
                      });
-        pic = await store.fileStorageClient.uploadFile(file);
+            pic = await store.fileStorageClient.uploadFile(file);
+            uploadedPics[e.pic_hash] = pic
         }
         return pic
     }
@@ -145,9 +147,18 @@
         const maps = {}
         for (const s of data.maps) {
             const e = s.entry
-            let pic = await uploadImportedFile(e)
-            const record = await store.createSiteMap(e.text, pic)
-            maps[s.entryHash] = record.entryHash
+            let pic
+            console.log("MAP", e, uploadedPics)
+            if (e.pic_data) {
+                pic = await uploadImportedFile(e)
+            } else {
+                pic = uploadedPics[e.pic_hash]
+            }
+            if (!e.tags) {
+                e.tags = []
+            }
+            const record = await store.createSiteMap(e.text, pic, e.tags)
+            maps[s.original_hash] = record.actionHash
 
         }
 
@@ -157,7 +168,7 @@
                 const e = s.entry
                 let pic = await uploadImportedFile(e)
                 const record = await store.createProxyAgent(e.nickname, e.bio, e.location, pic)
-                proxyAgents[s.entryHash] = record.entryHash
+                proxyAgents[s.original_hash] = record.actionHash
             }
         }
 

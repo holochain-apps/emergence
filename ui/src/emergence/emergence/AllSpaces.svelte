@@ -16,7 +16,7 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let error: any = undefined;
 let spaceDetail: Info<Space> | undefined
 
-$: spaces = store.spaces
+$: spaces = store.sitemapFilteredSpaces()
 $: error, spaceDetail;
 
 onMount(async () => {

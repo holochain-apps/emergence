@@ -102,7 +102,6 @@
     }
 
     const handleResize = async () => {
-        console.log(r)
         r+=1
     }
 
@@ -186,7 +185,7 @@ on:space-created={() => {} }
                     </div>
                 </sl-tooltip>
                 {/each}
-                <img class="map-image" bind:this={img} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit: cover;">
+                <img class="map-image" bind:this={img} src="data:{file.type};base64,{picB64}" style="flex: 1; ">
                 {/if}
                 </div>
             </div>

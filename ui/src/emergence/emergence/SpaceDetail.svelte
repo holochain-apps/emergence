@@ -139,12 +139,14 @@ let confirmDialog
     {/each}
   </div>
 
+  {#if store && $uiProps.amSteward}
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Tags:</strong></span>
+    <span style="margin-right: 4px"><strong>Slot Type:</strong></span>
     <span style="white-space: pre-line">
       {space.record.entry.tags.join(", ")}
     </span>
   </div>
+  {/if}
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <span style="margin-right: 4px"><strong>Scheduled Sessions:</strong></span>
   

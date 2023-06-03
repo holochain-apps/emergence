@@ -141,6 +141,7 @@ export interface UpdateNoteInput {
 export interface SiteMap {
   text: string,
   pic: EntryHash,
+  tags: Array<string>,
 }
 
 export interface ProxyAgent {
@@ -360,7 +361,7 @@ export interface Coordinates {
 }
 
 export interface SiteLocation {
-  imageHash: EntryHash,
+  imageHash: ActionHash,
   location: Coordinates
 }
 

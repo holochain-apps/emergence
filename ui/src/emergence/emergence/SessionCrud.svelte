@@ -234,7 +234,7 @@ let dialog
       >{amenity}</sl-checkbox>
     {/each}
   </div>
-  <SlotSelect bind:slot={slot} bind:valid={slotValid}></SlotSelect>
+  <SlotSelect bind:slot={slot} bind:valid={slotValid} sitemap={store.getCurrentSiteMap()}></SlotSelect>
   {#if !slotValid} *You must select both a time and a space or neither {/if}
   {#if session}
     <div style="display: flex; flex-direction: row; justify-content:flex-end;">

@@ -185,6 +185,16 @@ export class EmergenceStore {
     return get(this.sessions)[sessionIdx]
   }
 
+  sitemapFilteredSpaces() : Readable<Array<Info<Space>>>{
+    const sitemap = this.getCurrentSiteMap()
+    return derived(this.spaces, $spaces => $spaces.filter(s=>!sitemap || s.record.entry.tags.includes(sitemap.record.entry.tags[0])))
+  }
+
+  sitemapFilteredWindows() : Readable<Array<TimeWindow>>{
+    const sitemap = this.getCurrentSiteMap()
+    return derived(this.timeWindows, $timeWindows => $timeWindows.filter(w=>!sitemap || w.tags.includes(sitemap.record.entry.tags[0])))
+  }
+
   sessionStore(sessionHash) : Readable<Info<Session>|undefined>{
     return derived(this.sessions, $sessions => $sessions.find(s=>encodeHashToBase64(sessionHash) == encodeHashToBase64(s.original_hash)))
   }
@@ -269,15 +279,14 @@ export class EmergenceStore {
   }
 
   getSpaceSiteLocation(space: Info<Space>, sitemap: ActionHash) : SiteLocation|undefined {
-    const siteMap = this.getSiteMap(sitemap)
-    const siteB64 = encodeHashToBase64(siteMap.record.entryHash)
+    const siteB64 = encodeHashToBase64(sitemap)
     const rels = space.relations.filter(r=>r.relation.content.path == "space.location" && siteB64== encodeHashToBase64(r.relation.dst))
     if (rels.length == 0) return undefined
     rels.sort((a,b)=>b.timestamp - a.timestamp)
     const rel = rels[0]
     const location = JSON.parse(rel.relation.content.data) as Coordinates
     return {
-        imageHash: rel.relation.dst,
+        imageHash: sitemap,
         location
     }
   }
@@ -457,6 +466,7 @@ export class EmergenceStore {
     const tags = new Set()
     get(this.timeWindows).forEach(w=> w.tags.forEach(t=>tags.add(t)))
     get(this.spaces).forEach(s=> s.record.entry.tags.forEach(t=>tags.add(t)))
+    get(this.maps).forEach(s=> s.record.entry.tags.forEach(t=>tags.add(t)))
     return Array.from(tags) as Array<string>
   }
 
@@ -1249,8 +1259,8 @@ export class EmergenceStore {
     }
   }
 
-  async createSiteMap(text: string, pic: EntryHash): Promise<EntryRecord<SiteMap>> {
-    const record = await this.client.createSiteMap(text, pic)
+  async createSiteMap(text: string, pic: EntryHash, tags: Array<string>): Promise<EntryRecord<SiteMap>> {
+    const record = await this.client.createSiteMap(text, pic, tags)
     const relations = [
         {   src: record.actionHash, // should be agent key
             dst: record.actionHash,
@@ -1265,7 +1275,7 @@ export class EmergenceStore {
     return record
   }
 
-  async updateSiteMap(mapHash: ActionHash, text: string, pic: EntryHash): Promise<EntryRecord<SiteMap>> {
+  async updateSiteMap(mapHash: ActionHash, text: string, pic: EntryHash, tags: Array<string>): Promise<EntryRecord<SiteMap>> {
     const idx = this.getSiteMapIdx(mapHash)
     if (idx >= 0) {
         const map = get(this.maps)[idx]
@@ -1276,6 +1286,7 @@ export class EmergenceStore {
             updated_map: {
                 text,
                 pic,
+                tags,
             }
         }
         const mapEntry = map.record.entry

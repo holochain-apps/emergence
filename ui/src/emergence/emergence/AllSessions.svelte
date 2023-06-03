@@ -21,8 +21,8 @@ let error: any = undefined;
 let showDeletedSessions = false
 
 $: sessions = store.sessions
-$: spaces = store.spaces
-$: windows = store.timeWindows
+$: spaces = store.sitemapFilteredSpaces()
+$: windows = store.sitemapFilteredWindows()
 $: error;
 $: uiProps = store.uiProps
 let slotType: string 

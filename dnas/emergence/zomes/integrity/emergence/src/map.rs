@@ -4,6 +4,7 @@ use hdi::prelude::*;
 pub struct Map {
     pub text: String,
     pub pic: EntryHash,
+    pub tags: Vec<String>,
 }
 pub fn validate_create_map(
     _action: EntryCreationAction,

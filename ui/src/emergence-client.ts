@@ -170,10 +170,11 @@ export class EmergenceClient {
     return this.callZome('delete_note', actionHash)
   }
 
-  async createSiteMap(text: string, pic: EntryHash | undefined) : Promise<EntryRecord<SiteMap>> {
+  async createSiteMap(text: string, pic: EntryHash | undefined, tags: Array<string>) : Promise<EntryRecord<SiteMap>> {
     const mapEntry: SiteMap = { 
         text,
         pic,
+        tags,
       };
     
     return new EntryRecord(await this.callZome('create_map', mapEntry))

@@ -86,6 +86,12 @@ let updateSitemapDialog
   </div>
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Slot Type:</strong></span>
+    <span style="white-sitemap: pre-line">{ sitemap.record.entry.tags.join(",") }</span>
+  </div>
+
+
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Picture</strong></span>
 
     {#if sitemap.record.entry.pic}

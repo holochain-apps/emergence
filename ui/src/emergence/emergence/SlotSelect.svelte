@@ -2,7 +2,7 @@
   import '@shoelace-style/shoelace/dist/components/select/select.js';
   import '@shoelace-style/shoelace/dist/components/option/option.js';
   import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
-  import { timeWindowStartToStr, type Slot, timeWindowDurationToStr } from './types';
+  import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, type Info, type Space, type TimeWindow, type SiteMap } from './types';
   import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
   import type { EmergenceStore } from '../../emergence-store';
   import { getContext, onMount } from 'svelte';
@@ -12,6 +12,7 @@
 
   export let slot: Slot| undefined;
   export let valid: boolean = true
+  export let sitemap: Info<SiteMap>| undefined
 
   let spaceSelect: SlSelect;
   let windowSelect: SlSelect;
@@ -19,8 +20,8 @@
   let selectedSpace: string = ""
   let selectedWindow: string = ""
 
-  $: spaces = store.spaces
-  $: windows = store.timeWindows
+  $: spaces = store.sitemapFilteredSpaces()
+  $: windows = store.sitemapFilteredWindows()
   $: selectedSpace, selectedWindow, slot
   $: slot && updateSelects()
 
