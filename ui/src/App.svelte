@@ -196,9 +196,16 @@
 
     <profile-prompt>
       {#if (!sitemaps || $sitemaps.length==0) && !pane.startsWith("admin")}
-      <div class="awaiting-setup">
-        Awaiting setup! {pane}
-        <div on:click={()=>store.setPane('admin')}>secret</div>
+      <div class="app-info">
+        <img style="margin-right:20px" width="100" src="/images/emergence-vertical.svg" />
+
+        <h3>Please be patient, stewards are configuring the conference.</h3>
+        <sl-button style="margin-left: 8px;" on:click={() => store.sync(undefined)}>
+          <Fa icon={faArrowRotateBack} /> Reload
+        </sl-button>
+        <div class="nav-button" on:click={()=>{ 
+          store.setUIprops({amSteward:true}) 
+          store.setPane('admin')}}>I'm a Steward!</div>
       </div>
       {:else}
       <div class="nav">
@@ -453,6 +460,13 @@
     padding: 25px;
     border: 1px solid;
     border-radius: 20px;
+    margin: auto;
+  }
+
+  .awaiting-setup {
+    display:flex;
+    flex-direction: column;
+    align-items: center;
     margin: auto;
   }
 </style>
