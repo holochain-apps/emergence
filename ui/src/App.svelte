@@ -152,6 +152,15 @@
         console.log("end sync", new Date);
         syncing=false 
     }
+  let clickCount = 0
+  const adminCheck = () => { 
+    clickCount += 1
+    if (clickCount == 5) {
+      clickCount = 0
+      const amSteward = $uiProps.amSteward
+      store.setUIprops({amSteward:!amSteward}) 
+    }
+  }
 </script>
 
 <main>
@@ -189,23 +198,21 @@
 
     {#if $prof && ($prof.status!=="complete" || $prof.value===undefined)}
       <div class="app-info">
-        <img style="margin-right:20px" width="100" src="/images/emergence-vertical.svg" />
-        <p>Decentralized & local scheduling, collaboration & connection</p>
+        <img style="margin-right:20px" width="100" src="/images/emergence-vertical.svg" 
+        on:click={()=>adminCheck()}/>
+        <p>Decentralized & local scheduling, collaboration & connection{#if $uiProps.amSteward}!{/if}</p>
       </div>
     {/if}
 
     <profile-prompt>
-      {#if (!sitemaps || $sitemaps.length==0) && !pane.startsWith("admin")}
+      {#if (!sitemaps || $sitemaps.length==0) && !$uiProps.amSteward}
       <div class="app-info">
-        <img style="margin-right:20px" width="100" src="/images/emergence-vertical.svg" />
-
+        <img style="margin-right:20px" width="100" src="/images/emergence-vertical.svg" 
+        on:click={()=>adminCheck()}/>
         <h3>Please be patient, stewards are configuring the conference.</h3>
         <sl-button style="margin-left: 8px;" on:click={() => store.sync(undefined)}>
           <Fa icon={faArrowRotateBack} /> Reload
         </sl-button>
-        <div class="nav-button" on:click={()=>{ 
-          store.setUIprops({amSteward:true}) 
-          store.setPane('admin')}}>I'm a Steward!</div>
       </div>
       {:else}
       <div class="nav">
@@ -238,14 +245,6 @@
           </div>
         </div>
         <div class="button-group settings">
-          <div class="nav-button {pane=="you"?"selected":""}"
-            title="You"
-            on:keypress={()=>{store.setPane('you')}}
-            on:click={()=>{store.setPane('you')}}
-          >
-            <Fa class="nav-icon" icon={faUser} size="2x"/>
-            <span class="button-title you">You</span>
-          </div>
           {#if store && $uiProps.amSteward}
             <div class="nav-button {pane.startsWith("admin")?"selected":""}"
               title="Admin"
@@ -256,6 +255,19 @@
             <span class="button-title settings">Settings</span>
             </div>
           {/if}
+          <div class="nav-button {pane=="you"?"selected":""}"
+            title="You"
+            on:keypress={()=>{store.setPane('you')}}
+            on:click={(e)=>{
+              e.stopPropagation()
+              if (pane=="you") adminCheck()
+              else store.setPane('you')
+              }}
+          >
+            <Fa class="nav-icon" icon={faUser} size="2x"/>
+            <span class="button-title you">You</span>
+          </div>
+
           <div class="nav-button"
             class:spinning={syncing}
             title="Sync"
@@ -463,10 +475,4 @@
     margin: auto;
   }
 
-  .awaiting-setup {
-    display:flex;
-    flex-direction: column;
-    align-items: center;
-    margin: auto;
-  }
 </style>

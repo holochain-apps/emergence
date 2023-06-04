@@ -56,7 +56,7 @@
                 <Fa icon={faEdit} />
             </sl-button>
         </div>
-        <div style="display: flex; flex-direction: row; align-self:center">
+        <!-- <div style="display: flex; flex-direction: row; align-self:center">
             <sl-checkbox
                 bind:this={steward}
                 checked={$uiProps.amSteward}
@@ -69,7 +69,7 @@
                 on:sl-change={e => { store.setUIprops({debuggingEnabled:debuging.checked})} }
                 >Enable Debugging
             </sl-checkbox>
-        </div>
+        </div> -->
     </div>
 
 <div class="pane-content flex-center">
