@@ -20,7 +20,7 @@
 {#if agent.type=="Agent"}
     <Avatar size={size} namePosition={namePosition} showAvatar={showAvatar} showNickname={showNickname} agentPubKey={agent.hash}></Avatar>
 {:else}
-    <div class="avatar-{namePosition}"
+    <div class="avatar-{namePosition} clickable"
         on:click={(e)=>{
             store.openDetails(DetailsType.ProxyAgent, agent.hash)
             e.stopPropagation()
