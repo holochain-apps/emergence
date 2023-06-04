@@ -79,7 +79,7 @@ const attendanceColor = (attendance: number) : string => {
     </tr>
     {#each sessionData as d}
       <tr>
-          <td style={`color:black;background-color:${attendanceColor(d.estimatedAttendance)}`} align="right" width="200px">{attendanceColor(d.estimatedAttendance)}{d.session.record.entry.title}</td>
+          <td style={`color:black;background-color:${attendanceColor(d.estimatedAttendance)}`} align="right" width="200px">{d.session.record.entry.title}</td>
           <td align="center" width="100px">{d.estimatedAttendance.toFixed(0)}</td>
           <td align="center" >{d.percentInterest.toFixed(1)}</td>
           <td align="center" >{d.passCount} </td>
