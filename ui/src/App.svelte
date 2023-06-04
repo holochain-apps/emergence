@@ -6,7 +6,6 @@
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
   import SessionCrud from './emergence/emergence/SessionCrud.svelte';
-  import SiteMapCrud from './emergence/emergence/SiteMapCrud.svelte';
   import SpaceCrud from './emergence/emergence/SpaceCrud.svelte';
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
@@ -132,8 +131,16 @@
     fileStorageClient = new FileStorageClient(client, 'emergence');
     store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
     await store.sync(undefined)
+    initialSync = setInterval(async ()=>{
+      if ($uiProps.amSteward || ($sitemaps && $sitemaps.length > 0)) {clearInterval(initialSync)}
+      else {
+        await doSync()
+      }
+    }, 10000);
+
     loading = false;
   });
+  let initialSync
 
   setContext(storeContext, {
     getStore: () => store,
@@ -194,8 +201,6 @@
   {:else}
   <profiles-context store="{profilesStore}">
 
-   
-
     {#if $prof && ($prof.status!=="complete" || $prof.value===undefined)}
       <div class="app-info">
         <img style="margin-right:20px" width="100" src="/images/emergence-vertical.svg" 
@@ -207,12 +212,13 @@
     <profile-prompt>
       {#if (!sitemaps || $sitemaps.length==0) && !$uiProps.amSteward}
       <div class="app-info">
-        <img style="margin-right:20px" width="100" src="/images/emergence-vertical.svg" 
+        <img width="100" src="/images/emergence-vertical.svg" 
         on:click={()=>adminCheck()}/>
         <h3>Please be patient, stewards are configuring the conference.</h3>
-        <sl-button style="margin-left: 8px;" on:click={() => store.sync(undefined)}>
-          <Fa icon={faArrowRotateBack} /> Reload
+        <sl-button on:click={() => doSync()}>
+          <span class:spinning={true}> <Fa  icon={faArrowRotateBack} /> </span>Reload
         </sl-button>
+        {#if syncing}<span class:spinning={true}> <Fa  icon={faSync} /></span>{/if}
       </div>
       {:else}
       <div class="nav">

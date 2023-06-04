@@ -40,6 +40,7 @@ export const neededStuffStore = (client: EmergenceClient) => {
 
     setInterval(async ()=>{
         if(neededStuff.notes ? true : false) {
+
             const stuff = await client.getStuff(neededStuff)
             if (stuff.notes) {
                 notes.update(oldNotes=>{
@@ -157,7 +158,7 @@ export class EmergenceStore {
   }
   
   constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public fileStorageClient:FileStorageClient, public myPubKey: AgentPubKey) {
-    this.loader = setInterval(()=>{if(this.stuffIsNeeded()) this.fetchStuff()}, 1000);
+    //this.loader = setInterval(()=>{if(this.stuffIsNeeded()) this.fetchStuff()}, 1000);
     this.neededStuffStore =  neededStuffStore(client)
     this.myPubKeyBase64 = encodeHashToBase64(myPubKey)
     client.client.on( 'signal', signal => {
