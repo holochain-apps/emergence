@@ -58,8 +58,9 @@ on:session-created={() => {} }
 <div class="pane-header">
   <div class="header-content">
     <h3>Sessions</h3>
+    {#if $uiProps.amSteward || (store.getCurrentSiteMap() && store.getCurrentSiteMap().record.entry.tags.includes("emergent"))}
     <div class="pill-button"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
-
+    {/if}
       <div class="section-controls">
         
         <SessionFilterCtrls

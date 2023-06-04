@@ -45,8 +45,6 @@
   let fileStorageClient: FileStorageClient | undefined;
   let loading = true;
   let profilesStore: ProfilesStore | undefined
-  let creatingMap = false
-  let creatingProxyAgent = false
   let syncing = false
   let error: any = undefined;
   let creds
@@ -56,6 +54,7 @@
   $: prof = profilesStore ? profilesStore.myProfile : undefined
   $: uiProps = store ? store.uiProps : undefined
   $: pane = store ? $uiProps.pane : "sessions"
+  $: sitemaps = store ? store.maps : undefined
 
 
   const base64ToUint8 = (b64:string)=> Base64.toUint8Array(b64);
@@ -196,7 +195,12 @@
     {/if}
 
     <profile-prompt>
-
+      {#if (!sitemaps || $sitemaps.length==0) && !pane.startsWith("admin")}
+      <div class="awaiting-setup">
+        Awaiting setup! {pane}
+        <div on:click={()=>store.setPane('admin')}>secret</div>
+      </div>
+      {:else}
       <div class="nav">
         <div class="button-group">
           <div class="nav-button {pane === "discover" ? "selected":""}"
@@ -417,6 +421,7 @@
       {/if}
     </div>
     </file-storage-context>
+    {/if}
     </profile-prompt>
   </profiles-context>
   {/if}
