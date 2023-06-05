@@ -45,6 +45,9 @@
         //Math.floor(Math.random()*16777215).toString(16)
         return `rgb(${count/wordsMax*255},0,0)`
     }
+    export const setTag = (tag: string) => {
+        selectedTags = [tag]
+    }
 </script>
 <svelte:window bind:innerWidth bind:innerHeight />
 

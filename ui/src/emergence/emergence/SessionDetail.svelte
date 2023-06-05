@@ -150,7 +150,12 @@ bind:this={updateSessionDialog}
         <div class="description"> {@html Marked.parse(entry.description) }</div>
         <div class="tags">
           {#each tags as tag}
-            <div class="tag">
+            <div class="tag clickable-tag"
+              on:click={()=>{
+                store.setUIprops({discoverPanel:`tags#${tag}`})
+                store.setPane("discover")
+              }}
+            >
               {tag}
             </div>
           {/each}
@@ -337,4 +342,14 @@ bind:this={updateSessionDialog}
     margin: 10px;
     background-color: aqua;
   }
+
+  .clickable-tag {
+    cursor: pointer;
+  }
+  .clickable-tag:hover {
+    border: 1px solid #25bab054;
+    color: #25BAB1;
+    background-color: rgb(240, 249, 2244);
+  }
+
 </style>

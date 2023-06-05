@@ -21,11 +21,15 @@
     $: uiProps = store.uiProps
     $: settings = store.settings
     let tabs : SlTabGroup
+    let tagCloud: TagCloud
 
     onMount(async () => {        
         await store.fetchAgentStuff(store.myPubKey)
-
-        tabs.show($uiProps.discoverPanel)
+        const [panel, sub] = $uiProps.discoverPanel.split('#')
+        tabs.show(panel)
+        if (panel == "tags" && sub) {
+            tagCloud.setTag(sub)
+        } 
     });
     let showFilter = false
 
@@ -60,7 +64,7 @@
 
         <sl-tab-panel name="tags">
             <div class="discover-section">
-                <TagCloud></TagCloud>
+                <TagCloud bind:this={tagCloud}></TagCloud>
             </div>
         </sl-tab-panel>
         <sl-tab-panel name="people">
