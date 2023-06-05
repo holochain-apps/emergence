@@ -151,6 +151,7 @@ export class EmergenceStore {
 
   setPane = (pane) => {
     this.setUIprops({pane, detailsStack:[]})
+    this.sync(undefined)
   }
 
   stuffIsNeeded() {

@@ -229,7 +229,7 @@
             }
 
         }
-        store.sync(undefined)
+        await store.sync(undefined)
     }
 
 </script>
