@@ -16,6 +16,7 @@ import type { EmergenceStore } from '../../emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import { encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client';
 import MultiSelect from 'svelte-multiselect'
+import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -30,6 +31,7 @@ let pic: EntryHash | undefined = undefined;
 let tags = []
 
 let errorSnackbar: Snackbar;
+let uploadFiles: UploadFiles
 
 $: text, tags
 $: isNoteValid = text !== ""
@@ -62,6 +64,8 @@ export const clear = () =>{
 
 async function updateNote() {
   if (note) {
+    const pic = uploadFiles.value
+
     const updateRecord = await store.updateNote(note.original_hash, text, tags, pic)
     if (updateRecord) {
       dispatch('note-updated', { actionHash: updateRecord.actionHash });
@@ -73,6 +77,8 @@ async function updateNote() {
 
 async function createNote() {  
   try {
+    const pic = uploadFiles.value
+
     const record = await store.createNote(sessionHash, text, tags, pic)
     dispatch('note-created', { note: record });
   } catch (e) {
@@ -114,6 +120,7 @@ let dialog
   <div style="margin-bottom: 16px; height: 100px">
     <span>Add a pic (optional):</span >
     <upload-files
+    bind:this={uploadFiles}
     one-file
     accepted-files="image/jpeg,image/png,image/gif,image/svg"
     defaultValue={pic ? encodeHashToBase64(pic) : undefined}
@@ -176,6 +183,7 @@ let dialog
     <div style="margin-bottom: 16px;">
       <span>Image (optional):</span >
       <upload-files
+        bind:this={uploadFiles}
         one-file
         accepted-files="image/jpeg,image/png,image/gif,image/svg"
         defaultValue={pic ? encodeHashToBase64(pic) : undefined}
@@ -223,6 +231,9 @@ let dialog
     --icon-font-size: 50px;
     --message-margin: 0px;
     --message-margin-top: 0px;
+    --preview-height: 80px;
+    --preview-width: 80px;
+    --details-padding: 5px;
   }
   upload-files::part(dropzone) {
     height: 128px;

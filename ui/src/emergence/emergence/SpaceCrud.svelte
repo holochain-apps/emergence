@@ -91,6 +91,7 @@ export const open = (spc) => {
 
 async function updateSpace() {
   if (space) {
+    const pic = uploadFiles.value
     const updateRecord = await store.updateSpace(space.original_hash, {key, name, description, stewards, capacity, amenities, tags, pic, location})
     if (updateRecord) {
       dispatch('space-updated', { actionHash: updateRecord.actionHash });
@@ -101,6 +102,7 @@ async function updateSpace() {
 
 async function createSpace() {  
   try {
+    const pic = uploadFiles.value
     const record = await store.createSpace(key, name, description, stewards, capacity, amenities, tags, pic, location)
 
     dispatch('space-created', { space: record });

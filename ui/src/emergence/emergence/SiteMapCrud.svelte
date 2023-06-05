@@ -56,6 +56,7 @@ export const open = (smap) => {
 
 async function updateSiteMap() {
   if (sitemap) {
+    const pic = uploadFiles.value
     const updateRecord = await store.updateSiteMap(sitemap.original_hash, text, pic, tags)
     if (updateRecord) {
       dispatch('sitemap-updated', { actionHash: updateRecord.actionHash });
@@ -66,6 +67,7 @@ async function updateSiteMap() {
 
 async function createSiteMap() {  
   try {
+    const pic = uploadFiles.value
     const record = await store.createSiteMap(text, pic, tags)
 
     dispatch('sitemap-created', { sitemap: record });
