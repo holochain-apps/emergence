@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import { type FeedElem, FeedType, sessionInterestToString, timestampToStr } from './types';
+import { type FeedElem, FeedType, sessionInterestToString, timestampToStr, SessionInterestBit } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
@@ -40,8 +40,16 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     {/if}
     {#if feedElem.type === FeedType.SessionSetInterest}
 
-      <Avatar agentPubKey={feedElem.author} size={18}></Avatar> is
-      {sessionInterestToString(feedElem.detail)} to
+      <Avatar agentPubKey={feedElem.author} size={18}></Avatar>
+      {#if feedElem.detail == SessionInterestBit.Interested}
+        is interested in
+      {:else if feedElem.detail == SessionInterestBit.Going}
+        is going to
+      {:else if feedElem.detail == SessionInterestBit.Hidden}
+        has hidden 
+      {:else}
+        has set their interest to {sessionInterestToString(feedElem.detail)} for
+      {/if}
       <SessionLink sessionHash={feedElem.about}></SessionLink>
     {/if}
     {#if feedElem.type === FeedType.SpaceNew}
@@ -50,7 +58,7 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     {/if}
     {#if feedElem.type === FeedType.SpaceUpdate}
       <div class="type">Space updated</div>
-      <SpaceLink spaceHash={feedElem.about}></SpaceLink>  changes: {feedElem.detail.changes.join("; ")}
+      <SpaceLink spaceHash={feedElem.about}></SpaceLink> changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SpaceDelete}
     <div class="type">Space deleted</div>{feedElem.detail}

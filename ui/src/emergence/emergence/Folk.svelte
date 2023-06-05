@@ -27,6 +27,9 @@
     let showDeletedSession = false
 
     onMount(async () => {
+        if (agentPubKey === undefined) {
+            throw new Error(`The agentPubKey is required for the Folk element`);
+        }
         await store.fetchAgentStuff(agentPubKey)
         tabs.show($uiProps.youPanel)
     });

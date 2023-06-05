@@ -107,7 +107,10 @@
         </div>
         <div style="display:flex;flex-direction:row;align-items: left;margin-left:20px">
           {#each $agentSessions.get(hash) ? Array.from($agentSessions.get(hash)):  [] as [session, interest] }
-            <div style="margin-left:5px">{store.getSession(session).record.entry.title}, </div>
+          {#if !store.getSession(session)} &lt;unknown Session&gt;
+          {:else}
+            <div style="margin-left:5px">{ store.getSession(session).record.entry.title}, </div>
+            {/if}
           {/each}
         </div>
         </div>

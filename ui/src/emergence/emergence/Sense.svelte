@@ -5,10 +5,10 @@
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import { sessionTags, type Info, type Session, SessionInterestBit } from './types';
-  import Avatar from './Avatar.svelte';
   import Fa from 'svelte-fa';
   import { faArrowRight, faBookmark, faStar } from '@fortawesome/free-solid-svg-icons';
   import SenseResults from './SenseResults.svelte';
+  import AnyAvatar from './AnyAvatar.svelte';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -65,7 +65,7 @@
       <h2>{session.record.entry.title}</h2>
       <div class="leaders">
         {#each session.record.entry.leaders as leader}
-          <div><Avatar agentPubKey={leader}></Avatar></div>
+          <div><AnyAvatar agent={leader}></AnyAvatar></div>
         {/each}
       </div>
       <div class="description">
@@ -141,6 +141,7 @@
     border-radius: 20px;
     padding: 10px;
     margin: 10px;
+    min-width: 400px;
   }
   .sense-item {
     padding: 10px;

@@ -264,6 +264,7 @@
           <div class="nav-button {pane=="you"?"selected":""}"
             title="You"
             on:keypress={()=>{store.setPane('you')}}
+            on:dblclick={(e)=>e.stopPropagation()}
             on:click={(e)=>{
               e.stopPropagation()
               if (pane=="you") adminCheck()
