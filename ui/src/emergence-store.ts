@@ -168,7 +168,8 @@ export class EmergenceStore {
         if (signal.zome_name == 'emergence' && signal.payload.message && signal.payload.message.type == "UpdateSettings") {
         // @ts-ignore
         const settings = signal.payload.message
-        settings.delete("type")
+
+        delete settings.type
         // TODO any checking?
         this.settings.update((_)=> {return settings})
         }

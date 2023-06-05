@@ -16,8 +16,8 @@ pub fn set_settings(input: Settings) -> ExternResult<ActionHash> {
     )?;
     if let ZomeCallResponse::Ok(response) = call(CallTargetCell::Local,"profiles",FunctionName::new("get_agents_with_profile"), None, ())? {
         let agents : Vec<AgentPubKey> = response.decode().map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not decode profiles agent list"))))?;
-        let me = agent_info()?.agent_latest_pubkey;
-        let agents = agents.into_iter().filter(|a| a != &me).collect();
+        // let me = agent_info()?.agent_latest_pubkey;
+        //let agents = agents.into_iter().filter(|a| a != &me).collect();
         debug!("agents: {:?}", agents);
         remote_signal(EmergenceMessage::UpdateSettings(input), agents)?;
     }
