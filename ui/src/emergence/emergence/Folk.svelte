@@ -19,6 +19,7 @@
     import Feed from './Feed.svelte';
     import Profile from './Profile.svelte';
     import { slide } from 'svelte/transition';
+  import Avatar from './Avatar.svelte';
 
     const dispatch = createEventDispatcher();
     export let agentPubKey: AgentPubKey
@@ -49,13 +50,13 @@
             </sl-button>
         </div>
       
-        
-        <Profile agentPubKey={agentPubKey}></Profile>
-
-     
-        <div style="display: flex; flex-direction: row; align-self:center">
-
-        </div>
+        <div class="folk-profile">
+            <Avatar agentPubKey={agentPubKey} ></Avatar>
+            <div style="display:flex;flex-direction:column;margin-left:20px; align-items:flex-start; text-align:left">
+            {#if $profile.value.fields.location}<span><strong>Location:</strong> {$profile.value.fields.location}</span>{/if}
+            {#if $profile.value.fields.bio}<span ><strong>Bio:</strong> {$profile.value.fields.bio}</span>{/if}
+            </div>
+          </div>
     </div>
 
 <div  class="pane-content flex-center">
@@ -99,6 +100,10 @@
 {:else}<sl-spinner></sl-spinner>
 {/if}
 <style>
-  
-  </style>
+.folk-profile {
+    display: flex;
+    flex-direction: row;
+    min-width: 200px;
+}  
+</style>
   
