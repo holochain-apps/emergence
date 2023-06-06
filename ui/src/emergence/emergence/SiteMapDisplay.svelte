@@ -170,7 +170,7 @@ on:space-created={() => {} }
                 {#each locations as loc}
                 <sl-tooltip >
                     <div slot="content">
-                        <div style="display:flex; flex-direction:column">
+                        <div class="tooltip-text">
                             <span>{loc.space.record.entry.name}</span>
                             {loc.space.record.entry.description}
                             {#each sessionsInSpace(loc.space) as ses}
@@ -310,6 +310,23 @@ on:space-created={() => {} }
     min-width: 100vw;
     min-height: 100vh;
     max-width: 100%;
+}
+
+.tooltip-text, .tooltip-text span {
+    display: flex; 
+    flex-direction: column;
+    color: white;
+    font-size: 12px;
+}
+
+sl-tooltip {
+    background-color: rgba(131, 58, 217, 1.0);
+}
+
+.tooltip-text span {
+    font-size: 14px;
+    opacity: 1;
+    font-weight: bold;
 }
 
 .true .map-controls {
