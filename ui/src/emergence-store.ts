@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
@@ -33,6 +33,7 @@ Marked.setOptions
 });
 
 TimeAgo.addDefaultLocale(en)
+const LIKELY_TO_ATTEND_PERCENT = .8
 
 export const neededStuffStore = (client: EmergenceClient) => {
     const notes = writable(new HoloHashMap<ActionHash, Info<Note>| undefined>())
@@ -697,6 +698,44 @@ export class EmergenceStore {
         },
     ])
     this.fetchSessions()
+  }
+
+  sessionInterestProjection(sessions: Array<Info<Session>>) : Projection  {
+    const allProfiles = get(this.profilesStore.allProfiles)
+    const peopleCount = allProfiles.status=== "complete" ? Array.from(allProfiles.value.keys()).length : 0
+
+    let totalAssesments = 0
+    let interestData = sessions.filter(s=> (!s.record.entry.trashed)).map(session=>{
+        const relData = this.getSessionReleationData(session)
+        const interests = Array.from(relData.interest)
+        const assesments = interests.length
+        const passCount = interests.filter(([_,i])=> i == SessionInterestBit.NoOpinion).length
+        const goingCount = interests.filter(([_,i])=> i == SessionInterestBit.Going).length
+        const bookmarkedCount = interests.filter(([_,i])=> i == SessionInterestBit.Interested).length
+        const percentInterest = assesments > 0 ? (goingCount + bookmarkedCount * .2) / assesments : 0
+        const estimatedAttendance = 0
+        totalAssesments += assesments
+        return {session, estimatedAttendance, percentInterest, assesments,  passCount, goingCount, bookmarkedCount}
+    })
+    let sumOfPercentages = 0
+    for (const p of interestData) {
+        sumOfPercentages += p.percentInterest
+    }
+    const s = 1/sumOfPercentages
+    const likeyCount = peopleCount
+    interestData = interestData.map(p=>{
+        p.estimatedAttendance =  s * likeyCount * peopleCount * p.percentInterest
+        return p
+    }).sort((a,b)=>b.estimatedAttendance- a.estimatedAttendance)
+    const est = interestData.map(p=>p.estimatedAttendance)
+    return {
+        totalAssesments,
+        peopleCount,
+        likeyCount,
+        maxAttendance: Math.max(...est),
+        minAttendance: Math.min(...est),
+        interestData
+      }
   }
 
   async fetchSessions() {

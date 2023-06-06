@@ -519,3 +519,22 @@ export interface Settings {
   game_active: boolean,
   current_sitemap?: ActionHash,
 }
+
+export interface InterestData {
+  session:Info<Session>, 
+  estimatedAttendance:number,
+  percentInterest:number,
+  assesments:number,
+  passCount:number,
+  goingCount:number,
+  bookmarkedCount:number,
+}
+
+export interface Projection {
+  totalAssesments: number,
+  peopleCount: number,
+  likeyCount: number,
+  maxAttendance: number,
+  minAttendance: number,
+  interestData: Array<InterestData>
+}

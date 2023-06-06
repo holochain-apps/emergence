@@ -6,7 +6,7 @@
     "tests"
   ],
   "scripts": {
-    "start": "AGENTS=2 npm run network",
+    "start": "AGENTS=4 npm run network",
     "dev": "VITE_ADMIN_PORT=$(port) VITE_APP_PORT=$(port) UI_PORT=8888 npm run x",
     "x": "hc s clean &&  npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run start:happ\"",
     "network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:happ\" \"holochain-playground\"",
