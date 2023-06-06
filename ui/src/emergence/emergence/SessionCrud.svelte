@@ -50,8 +50,11 @@ export const open = (ses) => {
     tags = []
     slot = undefined
   }
+  console.log("SLOT", slot)
+  slotSelect.setSlot(slot)
   dialog.show()
 }
+let slotSelect
 const MAX_GROUP_SIZE = 600
 
 let title: string = '';
@@ -84,7 +87,6 @@ onMount(() => {
 
 async function updateSession() {
   if (session) {
-    console.log("SLOT", slot)
     const updateRecord = await store.updateSession(session.original_hash, {title, amenities, slot, description, leaders, smallest, largest, duration, tags})
     if (updateRecord) {
       dispatch('session-updated', { actionHash: updateRecord.actionHash });
@@ -234,7 +236,7 @@ let dialog
       >{amenity}</sl-checkbox>
     {/each}
   </div>
-  <SlotSelect bind:slot={slot} bind:valid={slotValid} sitemap={store.getCurrentSiteMap()}></SlotSelect>
+  <SlotSelect bind:this={slotSelect} bind:slot={slot} bind:valid={slotValid} sitemap={store.getCurrentSiteMap()}></SlotSelect>
   {#if !slotValid} *You must select both a time and a space or neither {/if}
   {#if session}
     <div style="display: flex; flex-direction: row; justify-content:flex-end;">

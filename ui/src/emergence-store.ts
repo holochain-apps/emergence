@@ -577,8 +577,6 @@ export class EmergenceStore {
         let doSlot = false
         if (props.hasOwnProperty("slot")) {
             const slot = this.getSessionSlot(session)
-            console.log("SLODSFSDF", slot, props.slot, slotEqual(slot, props.slot))
-
             if (!slotEqual(slot, props.slot)) {
                 changes.push(`slot`)
                 doSlot = true

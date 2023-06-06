@@ -40,14 +40,19 @@
 
   const doSelectSpace = (s: string)=> {
     selectedSpace = s
-    setSlot()
+    _setSlot()
   }
   const doSelectWindow = (w: string)=> {
     selectedWindow = w
-    setSlot()
+    _setSlot()
   }
 
-  const setSlot = () => {
+  export const setSlot = (s: Slot| undefined) => {
+    slot = s
+    updateSelects()
+  }
+
+  const _setSlot = () => {
     valid = true
     if (selectedSpace && selectedWindow) {
       slot = {window: JSON.parse(selectedWindow), space: decodeHashFromBase64(selectedSpace)}
