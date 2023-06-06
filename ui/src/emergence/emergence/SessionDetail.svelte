@@ -179,10 +179,10 @@ bind:this={updateSessionDialog}
         <span style="white-space: pre-line">{ entry.key }</span>
       </div>
 
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+      <!-- <div style="display: flex; flex-direction: row; margin-bottom: 16px">
         <span style="margin-right: 4px"><strong>Smallest Group Size:</strong></span>
         <span style="white-space: pre-line">{ entry.smallest }</span>
-      </div>
+      </div> -->
       <div style="display: flex; flex-direction: row; margin-bottom: 16px">
         <span style="margin-right: 4px"><strong>Duration:</strong></span>
         <span style="white-space: pre-line">{ durationToStr(entry.duration) }</span>
@@ -207,7 +207,8 @@ bind:this={updateSessionDialog}
       </div>
   
       <div class="interest">
-          <Fa icon={faUserGroup} /> {$relData.interest.size} <span class="interest-max">/ { entry.largest }</span>
+          <Fa icon={faUserGroup} /> {$relData.interest.size} 
+          <!-- <span class="interest-max">/ { entry.largest }</span> -->
       </div>
       <div class="attenders">
           {#each Array.from($relData.interest.entries()).filter(([key,value])=>value & SessionInterestBit.Going) as [key,value]}

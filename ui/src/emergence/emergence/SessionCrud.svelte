@@ -61,7 +61,7 @@ let title: string = '';
 let description: string = '';
 let smallest: number = 2;
 let largest: number = 100;
-let duration: number = 30
+let duration: number = 60
 let amenities: number = 0;
 let leaders:Array<AnyAgent> = []
 let tags:Array<string> = []
@@ -105,7 +105,7 @@ async function createSession() {
     description = ""
     smallest = 2;
     largest = 100;
-    duration = 30
+    duration = 60
     amenities = 0
     slot = undefined
     dispatch('session-created', { session: record });
@@ -198,28 +198,28 @@ let dialog
       />
   </div>
   <div style="display:flex">
-    <div style="margin-bottom: 16px; display:flex; flex-direction:column">
+    <!-- <div style="margin-bottom: 16px; display:flex; flex-direction:column">
       <span>Group Size:</span >
-        <div style="display:flex; ">
-            <sl-input
-            style="width:70px;margin-right:10px"
-            maxlength=4
-            label="Smallest"
-            value={isNaN(smallest)? '' : `${smallest}`}
-            on:input={e => { smallest = parseInt(e.target.value); } }
-          ></sl-input>
-            <sl-input
-            style="width:70px"
-            maxlength=4
-            label="Largest"
-            value={isNaN(largest)? '' : `${largest}`}
-            on:input={e => { largest = parseInt(e.target.value); } }
-          ></sl-input>
-          </div>
-    </div>
-    <div style="margin-bottom: 16px; margin-left:50px">
+      <div style="display:flex; ">
+          <sl-input
+          style="width:70px;margin-right:10px"
+          maxlength=4
+          label="Smallest"
+          value={isNaN(smallest)? '' : `${smallest}`}
+          on:input={e => { smallest = parseInt(e.target.value); } }
+        ></sl-input>
+          <sl-input
+          style="width:70px"
+          maxlength=4
+          label="Largest"
+          value={isNaN(largest)? '' : `${largest}`}
+          on:input={e => { largest = parseInt(e.target.value); } }
+        ></sl-input>
+      </div>
+    </div> -->
+    <div style="margin-bottom: 16px;">
       <sl-input
-      style="width:70px"
+      style="width:120px"
       maxlength=4
       label="Duration (min)"
       value={isNaN(duration)? '' : `${duration}`}
