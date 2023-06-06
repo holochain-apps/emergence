@@ -445,7 +445,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
           {/each}
           {#each days as day}
             <tr>
-              <td colspan="{filteredSpaces.length+1}" >{day.toDateString()}</td>
+              <td class="day" colspan="{filteredSpaces.length+1}" >{day.toDateString()}</td>
             </tr>
             {#each windowsInDay(filteredWindows, day, slotType).sort(sortWindows) as window}
             <tr>
@@ -458,7 +458,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
                 
                   {new Date(window.start).toTimeString().slice(0,5)}
                   {#if $uiProps.amSteward}
-                    <sl-button style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
+                    <sl-button class="trash" style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                       <Fa icon={faTrash} />
                     </sl-button>
                   {/if}
@@ -520,7 +520,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
     
                 {new Date(window.start).toTimeString().slice(0,5)}
                 {#if $uiProps.amSteward}
-                  <sl-button style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
+                  <sl-button class="trash" style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                     <Fa icon={faTrash} />
                   </sl-button>
                 {/if}
@@ -636,15 +636,32 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   margin: 5px;
  }
  .space-title {
-  outline: solid 1px;
+  padding: 10px;
+  line-height: 18px;
   cursor: pointer;
+  border-bottom: 1px solid rgba(0,0,0,.3);
  }
  .time-title {
-  outline: solid 1px;
   cursor: pointer;
  }
+
+ .day {
+  font-size: 18px;
+ }
+
+ .time-title .trash {
+  display: none;
+ }
+
+ .time-title:hover .trash {
+  display: block;
+ }
+
  .schedule-slot {
-  outline: solid 1px;
+  border-left: 1px dashed rgba(0,0,0,.2);
+  border-bottom: 1px solid rgba(0,0,0,.3);
+  border-right:none;
+  outline: none;
   cursor: pointer;
  }
  .slotted-session {
@@ -664,10 +681,10 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
  .excluded {
   background: repeating-linear-gradient(
     45deg,
-  rgba(0, 0, 0, 0.2),
-  rgba(0, 0, 0, 0.2) 10px,
-  rgba(0, 0, 0, 0.3) 10px,
-  rgba(0, 0, 0, 0.3) 20px
+  rgba(0, 0, 0, 0.05),
+  rgba(0, 0, 0, 0.05) 10px,
+  rgba(0, 0, 0, 0.1) 10px,
+  rgba(0, 0, 0, 0.1) 20px
     );
  }
  .tilted {

@@ -51,9 +51,17 @@ async function deleteSpace() {
   store.fetchSpaces()
 }
 
-const slottedSessionSummary = (ss: SlottedSession) : string => {
-  return `${ss.session.record.entry.title} ${timeWindowStartToStr(ss.window)} for ${timeWindowDurationToStr(ss.window)}`
+const slottedSessionTitle = (ss: SlottedSession) : string => {
+  return `${ss.session.record.entry.title}`
 }
+const slottedSessionTime = (ss: SlottedSession) : string => {
+  return `${timeWindowStartToStr(ss.window)}`
+}
+const slottedSessionDuration = (ss: SlottedSession) : string => {
+  return `${timeWindowDurationToStr(ss.window)}`
+}
+
+
 let dialog
 let editDialog
 let confirmDialog
@@ -101,6 +109,7 @@ let confirmDialog
     on:confirm-confirmed={deleteSpace}>
   </Confirm>
 <div class="space-details">
+
   {#if space.record.entry.pic}
   <div class="pic">
     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
@@ -115,22 +124,24 @@ let confirmDialog
     <div class="space-name">{ space.record.entry.name }</div>
   </div>
   {/if}
+
   {#if $uiProps.debuggingEnabled}
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
     <span style="white-space: pre-line">{ encodeHashToBase64(space.record.actionHash) }</span>
   </div>
   {/if}
+
   <div class="space-description">
     <span style="white-space: pre-line">{ space.record.entry.description }</span>
   </div>
 
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+  {#if space.record.entry.stewards.length > 0}
     <span style="margin-right: 4px"><strong>Stewards:</strong></span>
     {#each space.record.entry.stewards as steward}
       <Avatar agentPubKey={steward}></Avatar>
     {/each}
-  </div>
+  {/if}
 
   <div class="space-detail">
     <div class="amenity"><img src="/images/Capacity.svg"> Up to { space.record.entry.capacity }</div>
@@ -140,28 +151,79 @@ let confirmDialog
   </div>
 
   {#if store && $uiProps.amSteward}
-  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Slot Type:</strong></span>
-    <span style="white-space: pre-line">
-      {space.record.entry.tags.join(", ")}
-    </span>
-  </div>
-  {/if}
+
+
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-      <span style="margin-right: 4px"><strong>Scheduled Sessions:</strong></span>
+      <span style="margin-right: 4px"><strong>Slot Type:</strong></span>
+      <span style="white-space: pre-line">
+        {space.record.entry.tags.join(", ")}
+      </span>
+    </div>
+    {/if}
+  {#if store.getSlottedSessions(space).length > 0}
+    <div class="upcoming-sessions">
+      <h3><span>Upcoming sessions</span></h3>
   
       <ul>
         {#each store.getSlottedSessions(space) as session}
-          <li>{slottedSessionSummary(session)}</li>
+        <li class="upcoming-session">
+          <span class="session-time">{slottedSessionTime(session)}</span>
+
+          <p>
+            <span class="session-title">{slottedSessionTitle(session)}</span>
+            <span> - {slottedSessionDuration(session)}</span>
+          </p>
+        </li>
         {/each}
       </ul>
     </div>
-  
+  {/if}
   </div>
-</div>
-{/if}
+  </div>
+  {/if}
 
 <style>
+
+  .upcoming-sessions h3 {
+    text-align: left;
+    padding-bottom: 10px;
+    font-size: 12px;
+    text-transform: uppercase;
+    border-top: 1px dashed rgba(0,0,0,.2);
+    margin-top: 20px;
+  } 
+
+  .upcoming-sessions h3 span {
+    display: inline-block;
+    padding: 5px;
+    position: relative;
+    top: -15px;
+    background-color: white;
+  }
+
+  .session-time {
+    display: block;
+    font-size: 14px;
+    opacity: .5;
+  }
+
+  .session-title {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .upcoming-session {
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.15);
+    align-items: stretch;
+    max-width: 720px;
+    margin: 0 auto 10px auto;
+  }
+
   .pic {
    max-width: 100%;
    overflow: hidden;

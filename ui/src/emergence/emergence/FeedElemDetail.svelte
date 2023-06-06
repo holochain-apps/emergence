@@ -146,6 +146,8 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
   }
   
   .elem-body {
+    width: 100%;
+    text-align: left;
   }
 
   a {

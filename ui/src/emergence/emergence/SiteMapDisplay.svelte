@@ -275,7 +275,8 @@ on:space-created={() => {} }
     width: 100%;
     max-width: 320px;
     max-height: 100%;
-    overflow: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
 }
 
 .spaces-list {
