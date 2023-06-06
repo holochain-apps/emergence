@@ -146,6 +146,7 @@ let dialog
   <div style="margin-bottom: 16px">
     <sl-input
     label=Title
+    autocomplete="off"
     value={title}
     on:input={e => { title = e.target.value; } }
   ></sl-input>
@@ -153,6 +154,7 @@ let dialog
   <div style="margin-bottom: 16px">
     <sl-textarea 
       label=Description 
+      autocomplete="off"
       value={ description } on:input={e => { description = e.target.value;} }
     ></sl-textarea>
   </div>

@@ -57,6 +57,7 @@ onMount(() => {
     <span style="margin-right: 10px"><Fa icon={faTag} /></span>
     <sl-input
       value={filter.tags.join(", ")}
+      autocomplete="off"
       on:input={e => { filter.tags = e.target.value.split(/,\W*/).filter((w)=>w) ; dispatch('update-filter', filter)} }
     ></sl-input>
   </div> 
@@ -64,6 +65,7 @@ onMount(() => {
     <span style="margin-right: 4px"><Fa icon={faMagnifyingGlass} /></span>
       <sl-input
       value={filter.keyword}
+      autocomplete="off"
       on:input={e => { filter.keyword = e.target.value; ; dispatch('update-filter', filter)} }
     ></sl-input>
   </div>
