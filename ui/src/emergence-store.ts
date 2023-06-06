@@ -373,7 +373,7 @@ export class EmergenceStore {
   async unslot(sessionHash: ActionHash) {
     const session = this.getSession(sessionHash)
     const sessionSlot = this.getSessionSlot(session)
-
+    if (!sessionSlot) return;
     // const nullSpace = decodeHashFromBase64("uhCkk______________________")
     await this.client.createRelations([
         {   src: sessionHash,

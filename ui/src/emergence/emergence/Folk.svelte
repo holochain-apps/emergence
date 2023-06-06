@@ -17,7 +17,6 @@
     import NoteDetail from './NoteDetail.svelte';
     import SessionSummary from './SessionSummary.svelte';
     import Feed from './Feed.svelte';
-    import Profile from './Profile.svelte';
     import { slide } from 'svelte/transition';
   import Avatar from './Avatar.svelte';
 
@@ -32,7 +31,8 @@
             throw new Error(`The agentPubKey is required for the Folk element`);
         }
         await store.fetchAgentStuff(agentPubKey)
-        tabs.show($uiProps.youPanel)
+        if (tabs)
+            tabs.show($uiProps.youPanel)
     });
 
     $: profile = store.profilesStore.profiles.get(agentPubKey)

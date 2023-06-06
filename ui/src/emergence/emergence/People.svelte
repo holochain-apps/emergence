@@ -77,7 +77,7 @@
     {#each people as {type, hash, bio, location, nickname, avatarImage}}
       <div class="person card"
       on:click={(e)=>{
-        store.openDetails(DetailsType.Folk, hash)
+        store.openDetails(type == "ProxyAgent" ? DetailsType.ProxyAgent : DetailsType.Folk, hash)
         e.stopPropagation()
     }}    >
         <div style="display:flex;flex-direction:column;align-items:center;width:75px;">
