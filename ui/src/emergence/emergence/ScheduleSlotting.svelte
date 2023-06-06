@@ -18,8 +18,6 @@
   import SessionFilter from './SessionFilter.svelte';
   import SpaceLink from './SpaceLink.svelte';
   import Confirm from './Confirm.svelte';
-  import InterestSelect from './InterestSelect.svelte';
-  import TimeWindows from './TimeWindows.svelte';
 
   const dispatch = createEventDispatcher();
 
@@ -40,6 +38,7 @@
 
   $: days = calcDays(filteredWindows, slotType, $uiProps.sessionsFilter) 
   $: sessions = store.sessions
+  $: projection = store.sessionInterestProjection($sessions)
 
   let selectedSessions:HoloHashMap<ActionHash,boolean> = new HoloHashMap()
   let selectedSpaceIdx: number|undefined = undefined
@@ -396,11 +395,11 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
 
       >
         <div><strong>Orphan Sessions</strong></div>
-        {#each $sessions.filter((s)=>!s.record.entry.trashed && !store.getSessionSlot(s)) as session}
+        {#each projection.interestData.filter((d)=>!store.getSessionSlot(d.session)) as d}
           <div
-            id={encodeHashToBase64(session.original_hash)}
+            id={encodeHashToBase64(d.session.original_hash)}
             class="orphaned-session"
-            class:tilted={draggedItemId == encodeHashToBase64(session.original_hash)}
+            class:tilted={draggedItemId == encodeHashToBase64(d.session.original_hash)}
             draggable={dragOn}
             on:dragstart={handleDragStart}
             on:dragend={handleDragEnd}              
@@ -409,9 +408,10 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
             on:dragenter={handleDragEnterOrphan} 
             on:dragleave={handleDragLeaveOrphan}  >
             <SessionSummary 
-
               showAmenities={true}
-              session={session}>
+              session={d.session}
+              extra={`Est. Att.: ${d.estimatedAttendance.toFixed(0)}`}
+              >
             </SessionSummary>
             </div>
           </div>

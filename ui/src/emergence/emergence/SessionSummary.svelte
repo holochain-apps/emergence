@@ -21,6 +21,7 @@ export let showTags = false;
 export let showAmenities = false;
 export let showSlot = false;
 export let showLeaders = true;
+export let extra = ""
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -100,6 +101,12 @@ $:space = slot? store.getSpace(slot.space) : undefined
                   {going.length}
                 </div>
               </sl-tooltip>
+              {#if extra}
+                <div>
+                  {extra}
+                </div>
+              {/if}
+        
               {:else}
                <Fa icon={faUserGroup} /> 0
               {/if}
