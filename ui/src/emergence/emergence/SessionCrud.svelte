@@ -68,8 +68,7 @@ let tags:Array<string> = []
 
 $: proxyAgents = store.proxyAgents
 $: proxyAgentOptions = $proxyAgents.map(a=>{return {label: a.record.entry.nickname, value: encodeHashToBase64(a.original_hash)}})
-let selectedProxyAgents = []
-
+let proxyAgentSelect
 
 let errorSnackbar: Snackbar;
 
@@ -173,11 +172,13 @@ let dialog
       <search-agent field-label="Add Leader" include-myself={true} clear-on-select={true} on:agent-selected={(e)=>addleader({type:"Agent", hash:e.detail.agentPubKey})}></search-agent>
 
       {#if $uiProps.amSteward}
-          <sl-select 
+          <sl-select
+            bind:this={proxyAgentSelect}
             label="Add Proxy Agent"
             on:sl-change={(e) => {
               const hash = decodeHashFromBase64(e.target.value)
               addleader({type:"ProxyAgent", hash})
+              proxyAgentSelect.value=""
              } }
           >
           {#each proxyAgentOptions as option}

@@ -293,9 +293,9 @@
 
     </div>
 
-    {#if $settings.game_active}
-        <SenseResults></SenseResults>
-    {/if}
+    
+    <h3> Sensemaking game is {#if $settings.game_active}Active{:else}Inactive{/if}</h3>
+    <SenseResults></SenseResults>
 
 
    
