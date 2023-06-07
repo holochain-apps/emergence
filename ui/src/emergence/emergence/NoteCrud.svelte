@@ -49,6 +49,7 @@ export const open = (n) => {
     pic = note.record.entry.pic
     tags = note.record.entry.tags
     sessionHash = note.record.entry.session
+    uploadFiles.defaultValue = pic ? pic : undefined
   } else {
     clear()
   }
@@ -58,8 +59,10 @@ export const open = (n) => {
 
 export const clear = () =>{
   text = ""
-    pic = undefined
-    tags = []
+  pic = undefined
+  tags = []
+  uploadFiles.defaultValue = undefined
+  uploadFiles.reset()
 }
 
 async function updateNote() {
