@@ -33,7 +33,7 @@
 
 </script>
 
-<div class="card" style="padding:10px">
+<div class="card" style="padding:10px; width: 100%;">
     <div style="display:flex; flex-direction: row; align-items: center;">
 
         <span class="tag">#{tag}</span>
