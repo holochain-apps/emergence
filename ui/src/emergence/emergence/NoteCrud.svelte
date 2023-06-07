@@ -171,7 +171,6 @@ let dialog
       <div class="new-note">
         <h4>Add a note</h4>
         <sl-textarea 
-          label=Note 
           resize=auto
           autocomplete={"off"}
           value={ text } on:input={e => { text = e.target.value;} }
