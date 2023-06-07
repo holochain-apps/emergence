@@ -79,7 +79,7 @@
         const sessions = []
         for (const s of get(store.sessions)) {
             const info = await serializeInfo(s, false)
-            info.entry['leaders'] = info.entry['leaders'].map(l => encodeHashToBase64(l))
+            info.entry['leaders'] = info.entry['leaders'].map(l => {return {type:l.type, hash:encodeHashToBase64(l.hash)}})
             info.entry['tags'] = sessionSelfTags(s)
             sessions.push(info)
         }
@@ -168,7 +168,7 @@
                 const e = s.entry
                 let pic = await uploadImportedFile(e)
                 const record = await store.createProxyAgent(e.nickname, e.bio, e.location, pic)
-                proxyAgents[s.original_hash] = record.actionHash
+                proxyAgents[s.original_hash] = {type: 'ProxyAgent', hash: record.actionHash}
             }
         }
 
@@ -197,15 +197,17 @@
                             path: `space.location`,
                             data: relation.content.data
                         }
-                    }                    
+                    }
                 ])
             }
 
         }
         const sessions = {}
         for (const s of data.sessions) {
-            const leaders = [] // fixme
             const e = s.entry
+            console.log("LLLL", e.leaders)
+            const leaders = e.leaders.filter(l=> l.type == "ProxyAgent").map(l=>proxyAgents[l.hash])
+
             const tags = e.tags  ? e.tags : []
             let record
             try {
