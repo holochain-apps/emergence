@@ -721,7 +721,7 @@ export class EmergenceStore {
     for (const p of interestData) {
         sumOfPercentages += p.percentInterest
     }
-    const s = 1/sumOfPercentages
+    const s = 5/sumOfPercentages
     const likelyCount = peopleCount * LIKELY_TO_ATTEND_PERCENT
     interestData = interestData.map(p=>{
         p.estimatedAttendance =  s * likelyCount * p.percentInterest
