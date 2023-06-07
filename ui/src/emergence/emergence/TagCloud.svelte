@@ -55,7 +55,7 @@
   {#if $tags.length > 0}
     <div class="cloud">
         {#each words.sort((a,b)=>b.count-a.count) as word}
-        <div class="word" style="font-size:{"20px"};color:{getColor(word.count)};"
+        <div class="word"
             class:neonText={selectedTags.find(t=>t.toLocaleLowerCase() == word.text.toLowerCase())}
             on:click={(e)=> {
                 const tag = word.text
@@ -68,37 +68,48 @@
                 selectedTags = selectedTags
                }}
             >
-            {word.text}:{word.count}
+            #{word.text} <span class="count">{word.count}</span>
         </div>
         {/each}
     </div>
     {#if selectedTags.length>0}
-    <div class="pill-button" style="display: flex; width: 75px; align-self: end;margin-bottom:5px" on:click={() => {
-        selectedTags=[]
-        }} >
-        Reset
-      </div>
-        <div style="display:flex;">
+    <div class="results">
+        <div style="display: flex; justify-content: space-between; width: 100%; border-top: 1px solid rgba(228, 228, 231, 1.0); margin-top: 30px; padding-top: 15px; margin-bottom: 15px">
+            <span>Results</span>
+
+            <div class="pill-button" style="display: flex; width: 75px; align-self: end;margin-bottom:5px" on:click={() => {
+                selectedTags=[]
+                }} >
+                Clear
+            </div>
+        </div>
+        <div>
             {#each selectedTags as tag}
-                <div style="display:flex;">
+                <div style="display:flex; flex-direction:column; justify-content: left;">
                     <TagCloudPeople tag={tag}></TagCloudPeople>
                 </div>
             {/each}
         </div>
-        <div style="display:flex; flex-direction: row; justify-items: flex-start;">
+        <div style="display:flex; flex-direction: column; justify-items: flex-start;">
             {#each $sessions.filter(s=>sessionHasTags(s,selectedTags)) as session}
             <SessionSummary session={session} showTags={true} showLeaders={false}></SessionSummary>
             {/each}
         </div>
+    </div>
     {/if}
 {:else}
   No tags yet!
   {/if}
 </div>
 <style>
+    .results {
+        width: 100%;
+    }
+
     .cloud {
         display: flex;
         flex-wrap: wrap;
+        justify-content: center;
         width: 100%;
         margin: 0 auto;
     }
@@ -109,19 +120,46 @@
         padding-bottom: 30px;
     }
     .word {
-        margin: 5px;
+        font-size: 18px;
+        padding: 5px 9px;
+        border-radius: 25px;
+        display: inline-block;
+        margin: 13px 13px 0 0;
+        border: 1px solid #25bab030;
+        color: #25BAB1;
+        background-color: transparent;
+        transition: all .25s ease;
+        margin-bottom: 0;
+        display: inline;
+    }
+
+    .word:hover {
         cursor: pointer;
     }
+
     .neonText {
         color: #fff;
-  text-shadow:
-    0 0 5px #fff,
-    0 0 10px #fff,
-    0 0 20px #fff,
-    0 0 40px #0ff,
-    0 0 80px #0ff,
-    0 0 90px #0ff,
-    0 0 100px #0ff,
-    0 0 150px #0ff;
-}
+        background-color: #25BAB1;
+        padding: 10px 12px;
+        margin: 7px 10px -4px -3px;
+        box-shadow: 0 10px 15px rgba(0,0,0,.25);
+    }
+
+
+    .neonText .count {
+        background-color: white;
+        color: #25BAB1;
+    }
+    .count {
+        display: inline-block;
+        font-size: 12px;
+        background-color: #25bab090;;
+        color: white;
+        width: 18px;
+        height: 18px;
+        border-radius: 18px;
+        line-height: 18px;
+        top: -3px;
+        position: relative;
+    }
 </style>

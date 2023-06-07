@@ -301,6 +301,7 @@ on:space-created={() => {} }
     align-items: center;
     justify-content: center;
     color: white;
+    box-shadow: 0 10px 15px rgba(0,0,0,.35);
     border-radius: 5px;
     padding: 0 20px;
     margin-right: 20px;

@@ -23,7 +23,8 @@ onMount(async () => {
   store.fetchSpaces();
 });
 
-</script>
+ </script>
+<!--
 <div class=" pane-header">
     <div class="section-controls">
       <sl-button class="close-all-spaces" on:click={() => { dispatch('all-spaces-close') } } circle>
@@ -31,8 +32,8 @@ onMount(async () => {
       </sl-button>
   </div>
 
-</div>
-<div class="">
+</div> -->
+<div>
 
   {#if error}
     <span class="notice">Error fetching the spaces: {error.data.data}.</span>

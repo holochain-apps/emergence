@@ -90,13 +90,14 @@
 
         </sl-tab-panel>
         <sl-tab-panel name="notes">
+            <div class="wrapper">
             {#if $agentNotes.get(store.myPubKey).length == 0}
                 You haven't created any notes yet.. 
             {/if}
             {#each $agentNotes.get(store.myPubKey) as note}
                 <NoteDetail showDeleted={false} showFrame={true} noteHash={note}></NoteDetail>
             {/each}
-            
+            </div>
         </sl-tab-panel>
         <sl-tab-panel name="activity">
             <Feed forAgent={store.myPubKey}></Feed>
@@ -127,6 +128,15 @@
     
     .pane-content {
         padding-top: 0;
+    }
+
+    .activity {
+        padding: 0 10px;
+    }
+    .wrapper {
+        width: 100%;
+        max-width: 720px;
+        margin: 0 auto;
     }
   </style>
   

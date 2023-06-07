@@ -152,10 +152,11 @@ $:space = slot? store.getSpace(slot.space) : undefined
 
   .tags {
     display: block;
+    text-align: left;
   }
 
   .tag {
-    border: 1px solid #25bab054;
+    border: 1px solid #25bab030;
     color: #25BAB1;
     background-color: transparent;
     margin-bottom: 0;
@@ -211,7 +212,6 @@ $:space = slot? store.getSpace(slot.space) : undefined
     flex-direction: column;
     padding: 10px 15px;
     justify-content: center;
-    background-color: #fff;
     width: 100%;
   }
   .top-area, .bottom-area {

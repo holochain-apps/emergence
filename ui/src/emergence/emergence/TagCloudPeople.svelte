@@ -34,15 +34,30 @@
 </script>
 
 <div class="card" style="padding:10px">
-    <div style="display:flex; flex-direction: column">
+    <div style="display:flex; flex-direction: row; align-items: center;">
 
-        <span>{tag}:</span>
+        <span class="tag">#{tag}</span>
         <div style="display:flex;">
         {#each folk as agent}
-            <div style="display:flex;">
+            <div style="display:flex; position: relative; top: -4px; margin-left: 10px;">
                 <Avatar agentPubKey={agent.agentPubKey}></Avatar>
             </div>
         {/each}
         </div>
     </div>
 </div>
+
+<style>
+
+  .tag {
+    display: inline;
+    border: 1px solid #25bab030;
+    color: #25BAB1;
+    background-color: transparent;
+    margin-bottom: 0;
+    display: inline;
+    font-size: 12px;
+    height: 30px;
+    line-height: 30px;
+  }
+</style>

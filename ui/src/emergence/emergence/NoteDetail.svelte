@@ -141,9 +141,9 @@
     display: none;
   }
   .note-frame {
-    border: 1px solid #e9e9e9;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    border-radius: 3px;
+    border-top: 1px solid #e9e9e9;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    border-radius: 10px;
     margin: .5em;
     padding: .5em;
   }
@@ -202,7 +202,6 @@
     padding-bottom: 0px;
     font-size: 12px;
     margin-bottom: .25em;
-    border: 1px solid rgba(243, 243, 245, 1.0);
     background-color: rgba(243, 243, 245, 1.0);
     color: rgba(0, 0, 0, .5);
   }

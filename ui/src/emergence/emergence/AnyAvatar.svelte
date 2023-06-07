@@ -49,7 +49,6 @@
         flex-direction: row;
         justify-content:center;
         position: relative;
-        top: 4px;
         align-items: center;
     }
     .avatar-row show-image {

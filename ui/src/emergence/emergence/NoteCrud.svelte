@@ -105,8 +105,8 @@ let dialog
 <div style="display: flex; flex-direction: column">
               
   <div style="margin-bottom: 16px">
-    <sl-textarea 
-      label=Text 
+    test
+    <sl-textarea
       value={ text } on:input={e => { text = e.target.value;} }
     ></sl-textarea>
   </div>
@@ -166,9 +166,10 @@ let dialog
 {:else}
 <div style="display: flex; flex-direction: column; width: 100%; max-width: 720px; ">
   <div style="display:flex;flex-direction: row">
-    <div style="display: flex; flex-direction: column; width: 80%; margin-right: 10px;">
+    <div style="display: flex; flex-direction: column; width: 100%; margin-right: 10px;">
 
-      <div style="margin-bottom: 16px; ">
+      <div class="new-note">
+        <h4>Add a note</h4>
         <sl-textarea 
           label=Note 
           resize=auto
@@ -176,18 +177,17 @@ let dialog
           value={ text } on:input={e => { text = e.target.value;} }
         ></sl-textarea>
       </div>
-      <div style="margin-bottom: 16px">
-        <span>Tags:</span >
+      <div style="margin: 16px 0">
         <MultiSelect 
           --sms-bg="white"
           bind:selected={tags} 
           options={allTags} 
           allowUserOptions={true}
+          placeholder="Add tags"
           />
       </div>
-    </div>
-    <div style="margin-bottom: 16px;">
-      <span>Image (optional):</span >
+
+    <div style="margin-bottom: 16px; display: flex; flex-direction: row; justify-content: space-between;">
       <upload-files
         bind:this={uploadFiles}
         one-file
@@ -197,7 +197,7 @@ let dialog
           pic = e.detail.file.hash;
         }}
       ></upload-files>
-      <div style="margin-top:10px;">
+      <div>
       {#if note}
           <div style="display: flex; flex-direction: row">
             <sl-button
@@ -224,6 +224,7 @@ let dialog
       </div>
 
     </div>
+    </div>
 
   </div>
   
@@ -233,17 +234,28 @@ let dialog
 {/if}
 <style>
   upload-files {
-    --placeholder-font-size: 14px;
+    min-width: 200px;
+    --placeholder-font-size: 12px;
     --icon-font-size: 50px;
     --message-margin: 0px;
     --message-margin-top: 0px;
-    --preview-height: 80px;
-    --preview-width: 80px;
+    --preview-height: 40px;
+    --preview-width: 40px;
     --details-padding: 5px;
   }
   upload-files::part(dropzone) {
-    height: 128px;
+    height: 28px;
+    display: flex;
+    flex-direction: row;
     width: 100px;
     min-height: 0px;
+  }
+
+  upload-files::part(dropzone) button {
+    min-width: 124px;
+  }
+
+  .new-note h4 {
+    opacity: .5;
   }
 </style>

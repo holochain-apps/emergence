@@ -49,17 +49,16 @@
               <Fa icon={faCircleArrowLeft} />
             </sl-button>
         </div>
-      
-        <div class="folk-profile">
-            <Avatar agentPubKey={agentPubKey} ></Avatar>
-            <div style="display:flex;flex-direction:column;margin-left:20px; align-items:flex-start; text-align:left">
-            {#if $profile.value.fields.location}<span><strong>Location:</strong> {$profile.value.fields.location}</span>{/if}
-            {#if $profile.value.fields.bio}<span ><strong>Bio:</strong> {$profile.value.fields.bio}</span>{/if}
-            </div>
-          </div>
+
     </div>
 
 <div  class="pane-content flex-center">
+          
+    <div class="folk-profile">
+        <Avatar agentPubKey={agentPubKey} ></Avatar>
+        {#if $profile.value.fields.location}<div class="location">{$profile.value.fields.location}</div>{/if}
+        {#if $profile.value.fields.bio}<div class="bio">{$profile.value.fields.bio}</div>{/if}
+    </div>
     <sl-tab-group
         bind:this={tabs}
         on:sl-tab-show={(e)=>store.setUIprops({youPanel:e.detail.name})}
@@ -100,10 +99,18 @@
 {:else}<sl-spinner></sl-spinner>
 {/if}
 <style>
+
 .folk-profile {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
     min-width: 200px;
 }  
+
+.location {
+    opacity: .6;
+    font-size: 12px;
+}
 </style>
   
