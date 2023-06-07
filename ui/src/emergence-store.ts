@@ -722,16 +722,16 @@ export class EmergenceStore {
         sumOfPercentages += p.percentInterest
     }
     const s = 1/sumOfPercentages
-    const likeyCount = peopleCount
+    const likelyCount = peopleCount * LIKELY_TO_ATTEND_PERCENT
     interestData = interestData.map(p=>{
-        p.estimatedAttendance =  s * likeyCount * peopleCount * p.percentInterest
+        p.estimatedAttendance =  s * likelyCount * p.percentInterest
         return p
     }).sort((a,b)=>b.estimatedAttendance- a.estimatedAttendance)
     const est = interestData.map(p=>p.estimatedAttendance)
     return {
         totalAssesments,
         peopleCount,
-        likeyCount,
+        likelyCount,
         maxAttendance: Math.max(...est),
         minAttendance: Math.min(...est),
         interestData

@@ -533,7 +533,7 @@ export interface InterestData {
 export interface Projection {
   totalAssesments: number,
   peopleCount: number,
-  likeyCount: number,
+  likelyCount: number,
   maxAttendance: number,
   minAttendance: number,
   interestData: Array<InterestData>
