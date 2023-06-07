@@ -26,14 +26,14 @@ use messages::*;
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 
-    // let mut fns = BTreeSet::new();
-    // fns.insert((zome_info()?.name, "recv_remote_signal".into()));
-    // let functions = GrantedFunctions::Listed(fns);
-    // create_cap_grant(CapGrantEntry {
-    //     tag: "".into(),
-    //     access: CapAccess::Unrestricted,
-    //     functions,
-    // })?;
+    let mut fns = BTreeSet::new();
+    fns.insert((zome_info()?.name, "recv_remote_signal".into()));
+    let functions = GrantedFunctions::Listed(fns);
+    create_cap_grant(CapGrantEntry {
+        tag: "".into(),
+        access: CapAccess::Unrestricted,
+        functions,
+    })?;
 
     Ok(InitCallbackResult::Pass)
 }
