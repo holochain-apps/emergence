@@ -196,7 +196,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
     background: #565E6D;
     width: 105px;
     text-align: center;
-    border-radius: 10px 0 0 10px;
+    border-radius: 0;
     color: white;
     box-shadow: inset -20px 0 30px rgba(0, 0, 0, .5);
   }
@@ -250,4 +250,11 @@ $:space = slot? store.getSpace(slot.space) : undefined
   :global(.clickable) {
     cursor: pointer;
   }
+
+  @media (min-width: 720px) {
+
+  .slot {
+    border-radius: 10px 0 0 10px;
+  }
+}
 </style>

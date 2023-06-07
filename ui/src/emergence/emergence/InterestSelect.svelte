@@ -62,7 +62,7 @@ async function setSessionInterest(interest: SessionInterest) {
 <style>
   .interest {
     display:flex;
-    flex-direction: row;
+    flex-direction: column;
   }
   .interest-button {
     display:flex;
@@ -76,4 +76,9 @@ async function setSessionInterest(interest: SessionInterest) {
     margin-right: 5px;
     cursor: pointer;
   }
+@media (min-width: 720px) { 
+  .interest {
+    flex-direction: row;
+  }
+}
 </style>
