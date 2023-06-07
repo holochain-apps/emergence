@@ -18,7 +18,7 @@
     import SessionSummary from './SessionSummary.svelte';
     import Feed from './Feed.svelte';
     import { slide } from 'svelte/transition';
-  import Avatar from './Avatar.svelte';
+    import Avatar from './Avatar.svelte';
 
     const dispatch = createEventDispatcher();
     export let agentPubKey: AgentPubKey

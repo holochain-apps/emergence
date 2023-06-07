@@ -166,7 +166,9 @@ let dialog
 
       <div style="margin-bottom: 16px; ">
         <sl-textarea 
-          label=Text 
+          label=Note 
+          resize=auto
+          autocomplete={"off"}
           value={ text } on:input={e => { text = e.target.value;} }
         ></sl-textarea>
       </div>
@@ -185,7 +187,7 @@ let dialog
       <upload-files
         bind:this={uploadFiles}
         one-file
-        accepted-files="image/jpeg,image/png,image/gif,image/svg"
+        accepted-files="image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,application/pdf"
         defaultValue={pic ? encodeHashToBase64(pic) : undefined}
         on:file-uploaded={(e) => {
           pic = e.detail.file.hash;
