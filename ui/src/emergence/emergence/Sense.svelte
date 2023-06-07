@@ -60,8 +60,8 @@
 </div>
 {:else}
 <div class="instructions">
-  <h3>Sensemake: Decide what gets scheduled</h3>
-  <p>Here are some proposed sessions! Events with most interest will get scheduling priority</p>
+  <h3>Sensemake: Help us estimate attendance!</h3>
+  <p>Here are some sessions, please indicate your interest by clicking the buttons below.</p>
 </div>
 <div class="sense">
     <div class="remaining">Remaining: {count - senseIdx}</div>
