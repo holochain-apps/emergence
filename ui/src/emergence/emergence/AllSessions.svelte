@@ -57,6 +57,12 @@ const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
 bind:this={createSessionDialog}
 on:session-created={() => {} }
 ></SessionCrud>
+
+{#if $settings.game_active}
+  <div class="sensemaking-game">
+    <Sense></Sense>
+  </div>
+{/if}
 <div class="pane-header">
   <div class="header-content">
     <h3>Sessions</h3>
@@ -101,9 +107,6 @@ on:session-created={() => {} }
   {:else if $sessions.length === 0}
     <span class="notice">No sessions found.</span>
   {:else}
-        {#if $settings.game_active}
-            <Sense></Sense>
-        {/if}
     {#if $uiProps.sessionListMode}
       {#each $sessions.filter(s=> (!s.record.entry.trashed || showDeletedSessions) && store.filterSession(s, $uiProps.sessionsFilter)).sort(sortSessions) as session}
         <div class="session">
@@ -233,6 +236,17 @@ on:session-created={() => {} }
 </div>
 
 <style>
+
+  .sensemaking-game {
+    max-width: 720px;
+    margin: 0 auto;
+    background-color: rgba(73, 80, 93, 1.0);
+    padding: 15px;
+    border-radius: 10px;
+    margin-top: 30px;
+    width: 100%;
+  }
+
 .empty {
   background-color: white;
   outline: solid 1px lightgray;

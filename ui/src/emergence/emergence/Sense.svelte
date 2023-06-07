@@ -55,27 +55,17 @@
 <span>Error fetching the sense: {error.data.data}.</span>
 {:else if !session}
 <div style="display:flex;flex-direction:column;">
-  <h2>All Done, thanks!</h2>
+  <h2 class="complete">All Done, thanks!</h2>
   <SenseResults></SenseResults>
 </div>
 {:else}
+<div class="instructions">
+  <h3>Sensemake: Decide what gets scheduled</h3>
+  <p>Here are some proposed sessions! Events with most interest will get scheduling priority</p>
+</div>
 <div class="sense">
     <div class="remaining">Remaining: {count - senseIdx}</div>
     <div class="sense-item">
-      <h2>{session.record.entry.title}</h2>
-      <div class="leaders">
-        {#each session.record.entry.leaders as leader}
-          <div><AnyAvatar agent={leader}></AnyAvatar></div>
-        {/each}
-      </div>
-      <div class="description">
-        {session.record.entry.description}
-      </div>
-      <div class="tags">
-        {#each sessionTags(session) as tag}
-          <div class="tag">{tag}</div>
-        {/each}
-      </div>
       <div class="slot">
         <div class="slot-wrapper">
           {#if slot}
@@ -97,58 +87,86 @@
           {/if}
         </div>
       </div>
-      <div class="buttons">
-        <div class="button">
-          <sl-button
-          circle
-          size="large"
-          label="Going"
-          on:click={() => {swipe(SessionInterestBit.Going)}}
-        ><Fa icon={faStar} /></sl-button>
-          Going
+      <div class="slot-details">
+        <h2>{session.record.entry.title}</h2>
+        <div class="leaders">
+          {#each session.record.entry.leaders as leader}
+            <div><AnyAvatar agent={leader}></AnyAvatar></div>
+          {/each}
         </div>
-        <div class="button">
-          <sl-button
-          circle
-          size="large"
-          label="Interested"
-          on:click={() => {swipe(SessionInterestBit.Interested)}}
-          ><Fa icon={faBookmark} /></sl-button>
-          Interested
+        <div class="description">
+          {session.record.entry.description}
         </div>
-        <div class="button">
-          <sl-button
-          circle
-          size="large"
-          label="Skip"
-          on:click={() => {swipe(SessionInterestBit.NoOpinion)}}
-        ><Fa icon={faArrowRight} /></sl-button>
-          Skip
+        <div class="tags">
+          {#each sessionTags(session) as tag}
+            <div class="tag">{tag}</div>
+          {/each}
         </div>
-
       </div>
+    </div>
+
+    <div class="buttons">
+      <div class="button">
+        <sl-button
+        circle
+        size="large"
+        label="Going"
+        on:click={() => {swipe(SessionInterestBit.Going)}}
+      ><Fa icon={faStar} /></sl-button>
+        Going
+      </div>
+      <div class="button">
+        <sl-button
+        circle
+        size="large"
+        label="Interested"
+        on:click={() => {swipe(SessionInterestBit.Interested)}}
+        ><Fa icon={faBookmark} /></sl-button>
+        Interested
+      </div>
+      <div class="button">
+        <sl-button
+        circle
+        size="large"
+        label="Skip"
+        on:click={() => {swipe(SessionInterestBit.NoOpinion)}}
+      ><Fa icon={faArrowRight} /></sl-button>
+        Skip
+      </div>
+
     </div>
   </div>
 
 {/if}
 
 <style>
+  .instructions h3, .instructions p {
+    color: white;
+  }
+
+  .instructions p {
+    font-size: 14px;
+  }
   .sense {
     display: flex;
     flex-direction: column;
-    border: solid 1px gray;
-    background-color: white;
-    border-radius: 20px;
     padding: 10px;
     margin: 10px;
     min-width: 400px;
   }
+
+  .slot-details {
+    padding-left: 15px;
+  }
   .sense-item {
     padding: 10px;
+    background-color: rgba(255,255,255,1);
+    border-radius: 10px;
     width:100%; 
     height: 100%;
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    box-shadow: 0px 10px 15px rgba(0,0,0,.2);
     align-items: center;
   }
   .leaders {
@@ -158,27 +176,54 @@
   .slot {
     display: flex;
     align-items: center;
-    width: 90px;
+    width: auto;
     background-color: rgba(243, 243, 245, 1.0);
     text-align: center;
+    border-radius: 5px;
   }
   .slot-wrapper {
     padding: 5px;
+    flex-direction: column;
     width: 100%;
-    height: 75px;
+    height: auto;
   }
+
+  .remaining {
+    display: block;
+    color: rgba(255,255,255,.5);
+    font-size: 14px;
+    padding-bottom: 5px;
+    text-align: center;
+  }
+
+  h2.complete {
+    color: rgba(77, 200, 194, 1.0);
+    display: block;
+    text-align: center;
+  }
+
   .time {
     font-size: 1.7em;
     margin-top: -6px;
     margin-bottom: -2px;
   }
   .date, .space {
-    font-size: .7em;
+    font-size: 12px;
+    font-weight: normal;
   }
   .buttons {
     margin-top: 20px;
     display: flex;
     flex-direction: row;
+    justify-content: center;
+  }
+  .buttons div {
+    font-size: 12px;
+    color: rgba(255,255,255,.5);
+  }
+
+  .button svg {
+    box-shadow: 0px 10px 15px rgba(0,0,0,.2);
   }
   .button {
     display: flex;
