@@ -34,13 +34,6 @@
     let showFilter = false
 
 </script>
-
-<div class="pane-header">
-    <div class="header-content">
-        <h3>Discover</h3>
-        
-    </div>
-</div>
 {#if showFilter}
 <FeedFilter
     on:close-filter={()=>showFilter = false}
@@ -115,6 +108,15 @@
 
 </div>
 <style>
+
+    .pane-content {
+        padding-top: 0;
+    }
+
+    sl-tab-group {
+        max-width: 100%;
+    }
+    
     .discover.section-controls {
         justify-content: space-between;
         display: flex;

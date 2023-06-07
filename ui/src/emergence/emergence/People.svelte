@@ -61,10 +61,11 @@
 {#if error}
 <span>Error fetching the people: {error.data.data}.</span>
 {:else}
-  <div class="center-row" style="background-color:white;justify-content:flex-end; margin-right: 5px">
-    <span style="margin-right: 10px"><Fa icon={faSearch} /></span>
+  <div class="center-row search-bar">
+    <span class="search-icon"><Fa icon={faSearch} /></span>
     <sl-input
       value={$uiProps.peopleFilter.keyword}
+      placeholder="Search by name, attribute, interest, description"
       on:input={e => { store.setUIprops({peopleFilter: {keyword:e.target.value}})}}
     ></sl-input>
   </div> 
@@ -80,7 +81,7 @@
         store.openDetails(type == "ProxyAgent" ? DetailsType.ProxyAgent : DetailsType.Folk, hash)
         e.stopPropagation()
     }}    >
-        <div style="display:flex;flex-direction:column;align-items:center;width:75px;">
+        <div class="details">
           {#if type == "ProxyAgent"}
             {#if avatarImage}
               <show-image style={`width:50px`} image-hash={encodeHashToBase64(avatarImage)}></show-image>
@@ -88,7 +89,12 @@
               <holo-identicon disable-tooltip={true} disable-copy={true} size={50} hash={hash}></holo-identicon>
             {/if}
           {:else}
-            <agent-avatar disable-tooltip={true} disable-copy={true} size={50} agent-pub-key="{encodeHashToBase64(hash)}"></agent-avatar>
+              <agent-avatar disable-tooltip={true} disable-copy={true} size={50} agent-pub-key="{encodeHashToBase64(hash)}"></agent-avatar>
+              
+            <div class="info">
+              <div class="nuame">{nickname}</div>
+              <div class="location">{#if location}<span>{location}</span>{/if}</div>
+            </div>
           {/if}
           {#if type == "ProxyAgent"}
             <sl-tooltip >
@@ -97,13 +103,7 @@
               </div>
               <span style="display:flex; align-items:center">{nickname} <Fa style="margin-left:3px" icon={faInfoCircle} title="Proxy agent"/></span>
             </sl-tooltip>
-          {:else}
-            {nickname}
           {/if}
-        </div>
-        <div style="display:flex;flex-direction:column;align-items: left;">
-          {#if location}<span>Location: {location}</span>{/if}
-          {#if bio}<span>Bio: {bio}</span>{/if}
         </div>
         <div style="display:flex;flex-direction:row;align-items: left;margin-left:20px">
           {#each $agentSessions.get(hash) ? Array.from($agentSessions.get(hash)):  [] as [session, interest] }
@@ -128,7 +128,47 @@
     justify-content: left;
   }
 
+  .details {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+  }
+
   .people {
     width: 100%;
+  }
+
+  .name {
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  .location {
+    font-size: 12px;
+    font-weight: normal;
+    opacity: .5;
+  }
+
+  .info {
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+    justify-content: left;
+    text-align: left;
+  }
+
+  .search-bar {
+    width: 100%;
+    max-width: 720px;
+    margin: 10px auto 20px auto;
+    position: relative;
+  }
+
+  .search-bar sl-input {
+    width: 100%;
+  }
+
+  sl-input {
+    margin-left: 15px;
   }
 </style>

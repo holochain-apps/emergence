@@ -156,7 +156,7 @@ bind:this={updateSessionDialog}
                 store.setPane("discover")
               }}
             >
-              {tag}
+              #{tag}
             </div>
           {/each}
         </div>
@@ -212,7 +212,6 @@ bind:this={updateSessionDialog}
       </div>
       <div class="attenders">
           {#each Array.from($relData.interest.entries()).filter(([key,value])=>value & SessionInterestBit.Going) as [key,value]}
-          <Avatar agentPubKey={key}></Avatar>
         {/each}
       </div>
     </div>
@@ -270,7 +269,12 @@ bind:this={updateSessionDialog}
     padding-bottom: 8px;
   }
   .tags {
+    display: block;
     padding-top: 8px;
+  }
+
+  .tag {
+    display: inline;
   }
   .notes {
     display:flex;

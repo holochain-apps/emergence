@@ -127,7 +127,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
         <div class="tags">
           {#each tags as tag}
           <div class="tag clickable-tag" on:click={(e)=>{e.stopPropagation(); store.filterTag(tag,"sessionsFilter")}}>
-            {tag}
+            #{tag}
           </div>
           {/each}
         </div>
@@ -150,11 +150,16 @@ $:space = slot? store.getSpace(slot.space) : undefined
 
 <style>
 
+  .tags {
+    display: block;
+  }
+
   .tag {
     border: 1px solid #25bab054;
     color: #25BAB1;
     background-color: transparent;
     margin-bottom: 0;
+    display: inline;
   }
 
   .clickable-tag {

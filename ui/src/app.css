@@ -147,8 +147,11 @@ upload-files div {
 
 .pane.you .pane-header {
   text-align: center;
-  justify-content: center;
+  justify-content: left;
   display: flex;
+  max-width: 720px;
+  margin: 0 auto;
+  padding-top: 50px;
 }
 
 .card {
