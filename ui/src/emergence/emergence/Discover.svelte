@@ -11,7 +11,6 @@
     import type { EmergenceStore } from '../../emergence-store';
     import Feed from './Feed.svelte';
     import TagCloud from './TagCloud.svelte'
-    import Sense from './Sense.svelte';
     import People from './People.svelte';
     import FeedFilter from './FeedFilter.svelte';
     import { faClose, faFilter, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
@@ -19,7 +18,6 @@
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     $: uiProps = store.uiProps
-    $: settings = store.settings
     let tabs : SlTabGroup
     let tagCloud: TagCloud
 
