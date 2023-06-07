@@ -41,11 +41,6 @@
     filter={$uiProps.feedFilter}></FeedFilter>
 {/if}
 <div class="pane-content flex-center discover">
-    <div class="discover-section">
-        {#if $settings.game_active}
-            <Sense></Sense>
-        {/if}
-    </div>
 
     <sl-tab-group
         bind:this={tabs}

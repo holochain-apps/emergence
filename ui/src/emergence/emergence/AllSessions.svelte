@@ -3,15 +3,16 @@ import { onMount, getContext, createEventDispatcher } from 'svelte';
 import { encodeHashToBase64, type Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SessionSummary from './SessionSummary.svelte';
-  import SessionCrud from './SessionCrud.svelte';
+import SessionCrud from './SessionCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
 import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck, faMap, faArrowsUpDownLeftRight, faArrowUpShortWide, faArrowDownWideShort } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { calcDays, dayToStr, sortWindows, windowDay, windowDayAsTimestamp, windowsInDay } from './utils';
-  import { DetailsType, SessionSortOrder, type Info, type Session, type TimeWindow } from './types';
-  import SessionFilterCtrls from './SessionFilterCtrls.svelte';
-  import SpaceLink from './SpaceLink.svelte';
+import { DetailsType, SessionSortOrder, type Info, type Session, type TimeWindow } from './types';
+import SessionFilterCtrls from './SessionFilterCtrls.svelte';
+import SpaceLink from './SpaceLink.svelte';
+import Sense from './Sense.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -20,6 +21,7 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let error: any = undefined;
 let showDeletedSessions = false
 
+$: settings = store.settings
 $: sessions = store.sessions
 $: spaces = store.sitemapFilteredSpaces()
 $: windows = store.sitemapFilteredWindows()
@@ -99,6 +101,9 @@ on:session-created={() => {} }
   {:else if $sessions.length === 0}
     <span class="notice">No sessions found.</span>
   {:else}
+        {#if $settings.game_active}
+            <Sense></Sense>
+        {/if}
     {#if $uiProps.sessionListMode}
       {#each $sessions.filter(s=> (!s.record.entry.trashed || showDeletedSessions) && store.filterSession(s, $uiProps.sessionsFilter)).sort(sortSessions) as session}
         <div class="session">
