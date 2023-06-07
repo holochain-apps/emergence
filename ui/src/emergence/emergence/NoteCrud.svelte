@@ -53,6 +53,7 @@ export const open = (n) => {
   } else {
     clear()
   }
+  uploadFiles.reset()
   if (modal)
     dialog.show()
 }
@@ -120,12 +121,12 @@ let dialog
       />
   </div>
   
-  <div style="margin-bottom: 16px; height: 100px">
+  <div style="margin-bottom: 16px;">
     <span>Add a pic (optional):</span >
     <upload-files
     bind:this={uploadFiles}
     one-file
-    accepted-files="image/jpeg,image/png,image/gif,image/svg"
+    accepted-files="image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,application/pdf"
     defaultValue={pic ? encodeHashToBase64(pic) : undefined}
     on:file-uploaded={(e) => {
       pic = e.detail.file.hash;
