@@ -101,7 +101,7 @@
               <div slot="content" style="color:white">
                 This person is a proxy agent, i.e. they don't have an account on the system and were added by administrators, likely because they are a session leader.
               </div>
-              <span style="display:flex; align-items:center">{nickname} <Fa style="margin-left:3px" icon={faInfoCircle} title="Proxy agent"/></span>
+              <span style="display:flex; align-items:center" title="Proxy agent">{nickname} <Fa style="margin-left:3px" icon={faInfoCircle}/></span>
             </sl-tooltip>
           {/if}
         </div>

@@ -205,7 +205,6 @@
         const sessions = {}
         for (const s of data.sessions) {
             const e = s.entry
-            console.log("LLLL", e.leaders)
             const leaders = e.leaders.filter(l=> l.type == "ProxyAgent").map(l=>proxyAgents[l.hash])
 
             const tags = e.tags  ? e.tags : []

@@ -185,10 +185,10 @@
           }}>
           <Fa icon={faArrowRightFromBracket} /> Logout
         </sl-button>
+        {/if}
         <sl-button style="margin-left: 8px;" on:click={() => window.location.assign("/")}>
           <Fa icon={faArrowRotateBack} /> Reload
         </sl-button>
-      {/if}
     </span>
   {:else if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
