@@ -210,7 +210,7 @@
       <div class="app-info">
         <img width="100" src="/images/emergence-vertical.svg" 
         on:click={()=>adminCheck()}/>
-        <p>Either your node hasn't synchronized yet with the network, or the confernce data hasn't yet been set up. Please be patient! </p>
+        <p>Either your node hasn't synchronized yet with the network, or the conference data hasn't yet been set up. Please be patient! </p>
         <sl-button on:click={() => doSync()}>
           <span class:spinning={true}> <Fa  icon={faArrowRotateBack} /> </span>Reload
         </sl-button>
