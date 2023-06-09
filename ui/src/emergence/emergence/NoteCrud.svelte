@@ -21,6 +21,7 @@ import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
 
+const FILE_TYPES = "image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,audio/mp3,audio/m4a,audio/ogg,application/pdf,text/plain"
 const dispatch = createEventDispatcher();
 export let note: Info<Note>|undefined = undefined;  // set this if update
 export let sessionHash: ActionHash;
@@ -126,7 +127,7 @@ let dialog
     <upload-files
     bind:this={uploadFiles}
     one-file
-    accepted-files="image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,application/pdf,text/plain"
+    accepted-files={FILE_TYPES}
     defaultValue={pic ? encodeHashToBase64(pic) : undefined}
     on:file-uploaded={(e) => {
       pic = e.detail.file.hash;
@@ -190,7 +191,7 @@ let dialog
       <upload-files
         bind:this={uploadFiles}
         one-file
-        accepted-files="image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,application/pdf,text/plain"
+        accepted-files={FILE_TYPES}
         defaultValue={pic ? encodeHashToBase64(pic) : undefined}
         on:file-uploaded={(e) => {
           pic = e.detail.file.hash;
@@ -238,12 +239,12 @@ let dialog
     --icon-font-size: 50px;
     --message-margin: 0px;
     --message-margin-top: 0px;
-    --preview-height: 40px;
-    --preview-width: 40px;
+    --preview-height: 60px;
+    --preview-width: 60px;
     --details-padding: 5px;
   }
   upload-files::part(dropzone) {
-    height: 28px;
+    height: 40px;
     display: flex;
     flex-direction: row;
     width: 100px;

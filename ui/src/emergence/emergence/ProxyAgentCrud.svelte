@@ -44,7 +44,7 @@ export const open = (pagent) => {
     bio = proxyAgent.record.entry.bio
     location = proxyAgent.record.entry.location
     pic = proxyAgent.record.entry.pic
-    uploadFiles.defaultValue = pic
+    uploadFiles.defaultValue = pic ? pic : undefined
 
   } else {
     nickname = ""
@@ -53,6 +53,7 @@ export const open = (pagent) => {
     pic = undefined
     uploadFiles.defaultValue = undefined
   }
+  console.log("SDF", uploadFiles.defaultValue)
   uploadFiles.reset()
   dialog.show()
 }

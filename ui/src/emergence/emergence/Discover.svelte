@@ -24,10 +24,12 @@
     onMount(async () => {        
         await store.fetchAgentStuff(store.myPubKey)
         const [panel, sub] = $uiProps.discoverPanel.split('#')
-        tabs.show(panel)
-        if (panel == "tags" && sub) {
-            tagCloud.setTag(sub)
-        } 
+        if (tabs) {
+            tabs.show(panel)
+            if (panel == "tags" && sub) {
+                tagCloud.setTag(sub)
+            }
+        }
     });
     let showFilter = false
 

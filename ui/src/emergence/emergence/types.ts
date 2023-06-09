@@ -538,3 +538,9 @@ export interface Projection {
   minAttendance: number,
   interestData: Array<InterestData>
 }
+
+
+export interface DownloadedFile {
+  file: File,
+  data?: string,
+}

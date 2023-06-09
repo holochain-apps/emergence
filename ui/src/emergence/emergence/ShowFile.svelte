@@ -4,48 +4,24 @@
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import type { EntryHash } from '@holochain/client';
-    import { fromUint8Array } from "js-base64";
+    import type { DownloadedFile } from './types';
+
+
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     export let fileHash: EntryHash
     let loading = true;
-    let file: File | undefined
-    let picB64: string | undefined
-    let videoB64: string | undefined
-    let audioB64: string | undefined
-    let plainText: string | undefined
+    let file: DownloadedFile | undefined
     let img: HTMLImageElement | undefined;
 
     onMount(async () => {
         file = await store.downloadFile(fileHash);
-        const data = await file.arrayBuffer();
-        switch (file.type) {
-            case "image/jpeg":
-            case "image/png":
-            case "image/gif":
-            case "image/bmp":
-            case "image/svg":
-                picB64 = fromUint8Array(new Uint8Array(data))
-                break;
-            case "video/mp4":
-            case "video/mp4":
-                videoB64 = fromUint8Array(new Uint8Array(data))
-                break;
-            case "audio/mpeg":
-            case "audio/x-aiff":
-                audioB64 = fromUint8Array(new Uint8Array(data))
 
-                break
-            case "text/plain":
-                var enc = new TextDecoder("utf-8");
-                plainText = enc.decode(data)
-                break;
-        }
 
         loading = false
     });
     const showFile = () => {
-        return `fileType:${file.type}, fileName:${file.name}`
+        return `fileType:${file.file.type}, fileName:${file.file.name}`
     }
 </script>
 
@@ -57,14 +33,16 @@
     <div>
         {#if file}
         <div >
-            {#if picB64}
-                <img style="width:100%" bind:this={img} src="data:{file.type};base64,{picB64}">
-            {:else if videoB64}
-                <video style="width:100%" src="data:{file.type};base64,{videoB64}" controls></video>
-            {:else if audioB64}
-                <audio style="width:100%" src="data:{file.type};base64,{audioB64}" controls></audio>
-            {:else if plainText}
-                <div>{plainText}</div>
+            {#if file.file.type.startsWith("image/")}
+                <img style="width:100%" bind:this={img} src="data:{file.file.type};base64,{file.data}">
+            {:else if file.file.type.startsWith("video/")}
+                <video style="width:100%" src="data:{file.file.type};base64,{file.data}" controls></video>
+            {:else if file.file.type.startsWith("audio/")}
+                <audio style="width:100%" src="data:{file.file.type};base64,{file.data}" controls></audio>
+            {:else if file.file.type.startsWith("text/")}
+                <div>{file.data}</div>
+            {:else}
+                <div>No preview for file-type</div>
             {/if}
         </div>
         {/if}

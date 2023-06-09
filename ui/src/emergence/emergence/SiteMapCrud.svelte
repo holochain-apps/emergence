@@ -41,9 +41,8 @@ export const open = (smap) => {
   if (sitemap) {
     text = sitemap.record.entry.text
     pic = sitemap.record.entry.pic
-    uploadFiles.defaultValue = pic
+    uploadFiles.defaultValue = pic ? pic : undefined
     tags = sitemap.record.entry.tags
-
   } else {
     text = ""
     pic = undefined

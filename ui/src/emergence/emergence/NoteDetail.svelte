@@ -125,9 +125,10 @@
         </div>
         {#if $note.value.record.entry.pic}
           <div class="post-pic">
-          <show-image image-hash={encodeHashToBase64($note.value.record.entry.pic)}></show-image>
+            <ShowFile fileHash={$note.value.record.entry.pic}></ShowFile>
+<!-- 
+          <show-image image-hash={encodeHashToBase64($note.value.record.entry.pic)}></show-image> -->
           </div>
-          <ShowFile fileHash={$note.value.record.entry.pic}></ShowFile>
         {/if}
       {:else}
         Not found on DHT

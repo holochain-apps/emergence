@@ -73,7 +73,7 @@ export const open = (spc) => {
     pic = space.record.entry.pic
     tags = space.record.entry.tags
     location = sitemap ? store.getSpaceSiteLocation(space, sitemap.original_hash) : undefined
-    uploadFiles.defaultValue = pic ? pic : undefined
+    uploadFiles.defaultValue = pic ? pic : undefined  // can't be null, must be undefined
   } else {
     key = ""
     name = ""

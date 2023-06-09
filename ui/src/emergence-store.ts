@@ -15,11 +15,12 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
 import { filterTime, sessionHasTags } from './emergence/emergence/utils';
+import { fromUint8Array } from 'js-base64';
 Marked.setOptions
 ({
   renderer: new Renderer,
@@ -100,7 +101,7 @@ export class EmergenceStore {
   allTags: Writable<Array<TagUse>> = writable([])
   agentNotes: Writable<HoloHashMap<AgentPubKey, Array<ActionHash>>> = writable(new HoloHashMap())
   agentSessions: Writable<HoloHashMap<AgentPubKey,HoloHashMap<ActionHash,SessionInterest>>> = writable(new HoloHashMap())
-  files: HoloHashMap<AgentPubKey,File> = new HoloHashMap()
+  files: HoloHashMap<AgentPubKey,DownloadedFile> = new HoloHashMap()
   neededStuff: GetStuffInput = {}
   myPubKeyBase64: string
   loader = undefined
@@ -122,13 +123,24 @@ export class EmergenceStore {
   })
   settings: Writable<Settings> = writable({game_active: false})
 
-  async downloadFile(fileHash: EntryHash) {
-    let file = this.files.get(fileHash)
-    if (!file) {
-        file = await this.fileStorageClient.downloadFile(fileHash);
-
+  async downloadFile(fileHash: EntryHash) : Promise< DownloadedFile | undefined> {
+    let downloadedFile = this.files.get(fileHash)
+    if (!downloadedFile) {
+        const file = await this.fileStorageClient.downloadFile(fileHash);
+        if (file) {
+            const rawData = await file.arrayBuffer();
+            let data: string | undefined = undefined
+            if (file.type.startsWith("audio/")||file.type.startsWith("video/")||file.type.startsWith("image/"))
+                data = fromUint8Array(new Uint8Array(rawData))
+            else if (file.type.startsWith("text/")) {
+                var enc = new TextDecoder("utf-8");
+                data = enc.decode(rawData)
+            }
+            downloadedFile = {file, data}
+            this.files.set(fileHash, downloadedFile)
+        }
     }
-    return file
+    return downloadedFile
 
   }
 
