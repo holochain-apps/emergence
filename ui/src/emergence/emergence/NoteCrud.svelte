@@ -126,7 +126,7 @@ let dialog
     <upload-files
     bind:this={uploadFiles}
     one-file
-    accepted-files="image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,application/pdf"
+    accepted-files="image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,application/pdf,text/plain"
     defaultValue={pic ? encodeHashToBase64(pic) : undefined}
     on:file-uploaded={(e) => {
       pic = e.detail.file.hash;
@@ -190,7 +190,7 @@ let dialog
       <upload-files
         bind:this={uploadFiles}
         one-file
-        accepted-files="image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,application/pdf"
+        accepted-files="image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,application/pdf,text/plain"
         defaultValue={pic ? encodeHashToBase64(pic) : undefined}
         on:file-uploaded={(e) => {
           pic = e.detail.file.hash;

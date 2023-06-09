@@ -13,6 +13,7 @@
     import NoteCrud from './NoteCrud.svelte';
     import Confirm from './Confirm.svelte';
     import SessionLink from './SessionLink.svelte';
+    import ShowFile from './ShowFile.svelte';
     import { Marked } from "@ts-stack/markdown";
     import { truncateText } from './utils';
 
@@ -126,6 +127,7 @@
           <div class="post-pic">
           <show-image image-hash={encodeHashToBase64($note.value.record.entry.pic)}></show-image>
           </div>
+          <ShowFile fileHash={$note.value.record.entry.pic}></ShowFile>
         {/if}
       {:else}
         Not found on DHT

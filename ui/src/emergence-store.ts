@@ -100,6 +100,7 @@ export class EmergenceStore {
   allTags: Writable<Array<TagUse>> = writable([])
   agentNotes: Writable<HoloHashMap<AgentPubKey, Array<ActionHash>>> = writable(new HoloHashMap())
   agentSessions: Writable<HoloHashMap<AgentPubKey,HoloHashMap<ActionHash,SessionInterest>>> = writable(new HoloHashMap())
+  files: HoloHashMap<AgentPubKey,File> = new HoloHashMap()
   neededStuff: GetStuffInput = {}
   myPubKeyBase64: string
   loader = undefined
@@ -120,6 +121,16 @@ export class EmergenceStore {
     spaceSort: SpaceSortOrder.Capacity,
   })
   settings: Writable<Settings> = writable({game_active: false})
+
+  async downloadFile(fileHash: EntryHash) {
+    let file = this.files.get(fileHash)
+    if (!file) {
+        file = await this.fileStorageClient.downloadFile(fileHash);
+
+    }
+    return file
+
+  }
 
   async setSettings(settings: Settings) {
     await this.client.setSettings(settings)
