@@ -114,7 +114,7 @@ on:session-created={() => {} }
           <SessionSummary 
             showTags={true}
             showSlot={true}
-            allowSetIntention={true} 
+            allowSetIntention={$settings.session_types[session.record.entry.session_type].can_rsvp} 
             session={session}>
           </SessionSummary>
         </div>

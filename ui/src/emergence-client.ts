@@ -87,9 +87,10 @@ export class EmergenceClient {
     return key
   }
   
-  async createSession(title: string, amenities: number, description: string, leaders:Array<AnyAgent>, smallest: number, largest: number, duration: number) : Promise<EntryRecord<Session>> {
+  async createSession(sessionType: SessionTypeID, title: string, amenities: number, description: string, leaders:Array<AnyAgent>, smallest: number, largest: number, duration: number) : Promise<EntryRecord<Session>> {
     const sessionEntry: Session = { 
         key: this.genKey(),
+        session_type: sessionType,
         title,
         description,
         leaders,

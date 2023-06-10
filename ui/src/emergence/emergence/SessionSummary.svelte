@@ -34,6 +34,7 @@ $: loading, session, slot;
 $: tags = sessionTags(session)
 $: slot = store.getSessionSlot(session)
 $: going = Array.from($relData.interest).filter(([_,i])=> i & (SessionInterestBit.Going+SessionInterestBit.Interested))
+$: settings = store.settings
 
 onMount(async () => {
   loading = false
@@ -79,6 +80,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
       </div>
     </div>
   {/if}
+  <div class="session-type" style={`width:20px;background:${$settings.session_types[session.record.entry.session_type].color}`}> </div>
   <div class="info clickable">
     <div class="top-area">
       <div class="left-side">

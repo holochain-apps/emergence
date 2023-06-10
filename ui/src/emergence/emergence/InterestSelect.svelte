@@ -38,17 +38,17 @@ async function setSessionInterest(interest: SessionInterest) {
 </mwc-snackbar>
 
 <div class="interest">
-  <div class="interest-button bookmark" style="margin-right:5px"
-    title="I'm Interested"
-    class:selected={$relData.myInterest & SessionInterestBit.Interested}
-    on:click={() => {setSessionInterest( ($relData.myInterest & ~SessionInterestBit.Hidden) ^ SessionInterestBit.Interested)}} >
-    <div ><Fa icon={ faBookmark } /></div>
-  </div>
   <div class="interest-button attend"  
     title="I'm Going!"
     class:selected={$relData.myInterest & SessionInterestBit.Going}
     on:click={() => {setSessionInterest(($relData.myInterest & ~SessionInterestBit.Hidden) ^ SessionInterestBit.Going)}} >
     <div ><Fa icon={ faCheck } /></div>
+  </div>
+  <div class="interest-button bookmark" style="margin-right:5px"
+    title="I'm Interested"
+    class:selected={$relData.myInterest & SessionInterestBit.Interested}
+    on:click={() => {setSessionInterest( ($relData.myInterest & ~SessionInterestBit.Hidden) ^ SessionInterestBit.Interested)}} >
+    <div ><Fa icon={ faBookmark } /></div>
   </div>
   <div class="interest-button hide"  
     title="Hide!"

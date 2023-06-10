@@ -29,7 +29,18 @@ pub fn get_settings(_: ()) -> ExternResult<Settings> {
     let path = Path::from("all_settings");
     let mut links = get_links(path.path_entry_hash()?, LinkTypes::Settings, None)?;
     if links.len() == 0 {
-        return Ok(Settings {game_active: false, current_sitemap:None});
+        return Ok(Settings {
+            game_active: false,
+            current_sitemap:None, 
+            session_types:vec![
+                SessionType {name:"Session".into(), color:"white".into(), can_rsvp: true, can_slot: true},
+                SessionType {name:"Dining".into(), color:"#f3827f".into(), can_rsvp: false, can_slot: false},
+                SessionType {name:"Chill & Relax".into(), color:"#b7cdff".into(), can_rsvp: false, can_slot: false},
+                SessionType {name:"Community Time".into(), color:"#ffbc57".into(), can_rsvp: false, can_slot: false},
+                SessionType {name:"Crativity Time".into(), color:"#9edf7d".into(), can_rsvp: false, can_slot: false},
+                SessionType {name:"Mind-Body-Nature".into(), color:"#efc8fe".into(), can_rsvp: false, can_slot: false},
+                SessionType {name:"Prep".into(), color:"#efc8fe".into(), can_rsvp: false, can_slot: false},
+                ]});
     }
     links.sort_by(|a,b| b.timestamp.cmp(&a.timestamp));
     Ok(convert_settings_tag(links[0].tag.clone())?)

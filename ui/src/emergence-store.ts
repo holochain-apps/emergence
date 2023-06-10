@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile, type SessionType, type SessionTypeID } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
@@ -121,7 +121,7 @@ export class EmergenceStore {
     sessionSort: SessionSortOrder.Ascending,
     spaceSort: SpaceSortOrder.Capacity,
   })
-  settings: Writable<Settings> = writable({game_active: false})
+  settings: Writable<Settings> = writable({game_active: false, session_types:[]})
 
   async downloadFile(fileHash: EntryHash) : Promise< DownloadedFile | undefined> {
     let downloadedFile = this.files.get(fileHash)
@@ -497,8 +497,8 @@ export class EmergenceStore {
     return Array.from(tags) as Array<string>
   }
 
-  async createSession(title: string, description: string, leaders:Array<AnyAgent>,  smallest: number, largest: number, duration: number, amenities: number, slot: Slot|undefined, tags: Array<string>): Promise<EntryRecord<Session>> {
-    const record = await this.client.createSession(title, amenities, description, leaders, smallest, largest, duration)
+  async createSession(sessionTypeID: SessionTypeID, title: string, description: string, leaders:Array<AnyAgent>,  smallest: number, largest: number, duration: number, amenities: number, slot: Slot|undefined, tags: Array<string>): Promise<EntryRecord<Session>> {
+    const record = await this.client.createSession(sessionTypeID, title, amenities, description, leaders, smallest, largest, duration)
     const sessionHash = record.actionHash
     if (slot) {
         await this.slot(sessionHash, slot)
@@ -539,6 +539,7 @@ export class EmergenceStore {
         const update: UpdateSessionInput = { 
             original_session_hash: session.original_hash,
             previous_session_hash: session.record.record.signed_action.hashed.hash,
+            updated_type: sessionEntry.session_type,
             updated_title: sessionEntry.title,
             updated_description: sessionEntry.description,
             updated_leaders: sessionEntry.leaders,
@@ -548,6 +549,14 @@ export class EmergenceStore {
             updated_amenities: sessionEntry.amenities,
             updated_trashed: sessionEntry.trashed,
         };
+
+        if (props.hasOwnProperty("sessionType")) {
+            if (sessionEntry.session_type != props.sessionType
+                ) {
+                update.updated_type = props.sessionType
+                changes.push(`type -> ${props.sessionType}`)
+            }
+        }
 
         if (props.hasOwnProperty("title")) {
             if (sessionEntry.title != props.title) {
@@ -813,7 +822,10 @@ export class EmergenceStore {
   async mergeSessions(sessionHashA: ActionHash, sessionHashB: ActionHash) {
     const sessionA = this.getSession(sessionHashA)
     const sessionB = this.getSession(sessionHashB)
-    
+    if (sessionA.record.entry.session_type != sessionB.record.entry.session_type) {
+        console.log("Can't merge sessions of different types")
+        return
+    }
     const title = `${sessionA.record.entry.title} & ${sessionB.record.entry.title}`
     const description = `${sessionA.record.entry.description} \n\n--------\n\n ${sessionB.record.entry.description}`
     const leaders = sessionA.record.entry.leaders
@@ -834,7 +846,7 @@ export class EmergenceStore {
             tags.push(t)
         }
     })
-    await this.createSession(title,description,leaders,smallest,largest,duration,amenities,slot,tags)
+    await this.createSession(sessionA.record.entry.session_type, title,description,leaders,smallest,largest,duration,amenities,slot,tags)
     await this.updateSession(sessionHashA, {trashed: true})
     await this.updateSession(sessionHashB, {trashed: true})
     await this.fetchSessions()

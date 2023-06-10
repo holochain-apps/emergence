@@ -8,13 +8,14 @@ import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/c
 import "@holochain-open-dev/profiles/dist/elements/search-agent.js";
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
+import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent } from './types';
+import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent, type SessionType } from './types';
 import SlotSelect from './SlotSelect.svelte';
-import { encodeHashToBase64, type AgentPubKey, decodeHashFromBase64 } from '@holochain/client';
+import { encodeHashToBase64,  decodeHashFromBase64 } from '@holochain/client';
 import AnyAvatar from './AnyAvatar.svelte';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
@@ -29,6 +30,7 @@ export let session: Info<Session>|undefined = undefined;  // set this if update
 export const open = (ses) => {
   if (ses) {
     session = ses
+    sesType = `${session.record.entry.session_type}`
     title = session.record.entry.title
     amenities = session.record.entry.amenities
     description = session.record.entry.description
@@ -39,6 +41,7 @@ export const open = (ses) => {
     tags = sessionSelfTags(session)
     slot = store.getSessionSlot(session)
   } else {
+    sesType = "0"
     title = ""
     amenities = 0
     description = ""
@@ -50,6 +53,7 @@ export const open = (ses) => {
     tags = []
     slot = undefined
   }
+  sesTypeSelect.value = sesType
   console.log("SLOT", slot)
   slotSelect.setSlot(slot)
   dialog.show()
@@ -79,6 +83,10 @@ $: title, description, leaders, smallest, largest, duration, amenities, slot, sl
 $: isSessionValid = leaders.length > 0 && title !== '' && description !== '' && slotValid && smallest > 0 && largest < MAX_GROUP_SIZE && duration > 0;
 $: tagUses = store.allTags
 $: allTags = $tagUses.map(t=>t.tag)
+$: settings = store.settings
+
+let sesType = "0"
+let sesTypeSelect: SlSelect;
 
 onMount(() => {
 });
@@ -86,7 +94,8 @@ onMount(() => {
 
 async function updateSession() {
   if (session) {
-    const updateRecord = await store.updateSession(session.original_hash, {title, amenities, slot, description, leaders, smallest, largest, duration, tags})
+    const sessionType = parseInt(sesType)
+    const updateRecord = await store.updateSession(session.original_hash, {sessionType, title, amenities, slot, description, leaders, smallest, largest, duration, tags})
     if (updateRecord) {
       dispatch('session-updated', { actionHash: updateRecord.actionHash });
     }
@@ -96,7 +105,7 @@ async function updateSession() {
 
 async function createSession() {    
   try {
-    const record = await store.createSession(title!, description, leaders, smallest, largest, duration, amenities, slot, tags)
+    const record = await store.createSession(parseInt(sesType), title!, description, leaders, smallest, largest, duration, amenities, slot, tags)
 
     if (leaders.find(l=>encodeHashToBase64(l.hash) === store.myPubKeyBase64))
       await store.setSessionInterest(record.actionHash, SessionInterestBit.Going )
@@ -130,6 +139,7 @@ function deleteLeader(index: number) {
   leaders = leaders
 }
 let dialog
+
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
@@ -142,6 +152,24 @@ let dialog
 <div style="display: flex; flex-direction: column">
   {#if session}
     Key: {session.record.entry.key}
+  {/if}
+  {#if $uiProps.amSteward}
+    <div style="margin-bottom: 16px; display:flex; align-items:flex-end">
+      <div>
+
+        <sl-select
+          bind:this={sesTypeSelect}
+          label="Session Type"
+          on:sl-change={(e) => {
+            sesType = e.target.value
+          } }
+        >
+          {#each $settings.session_types as type, idx}
+            <sl-option value={idx}>{type.name}</sl-option>
+          {/each}
+        </sl-select>
+      </div>
+    </div>
   {/if}
   <div style="margin-bottom: 16px">
     <sl-input
@@ -187,7 +215,6 @@ let dialog
           <sl-option value={option.value}>{option.label}</sl-option>
           {/each}
           </sl-select>
-
       {/if}
       </div>  
   </div>
@@ -275,5 +302,9 @@ let dialog
 <style>
   sl-checkbox {
     margin-right:15px;
+  }
+  .type-color {
+    margin-left:5px; width:45px; height:45px; border: solid 1px; 
+    background-color: var(--type-bg-color, white);
   }
 </style>

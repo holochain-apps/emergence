@@ -56,8 +56,17 @@ export type AnyAgentDetailed =
 {type: 'ProxyAgent', hash: ActionHash, bio:string, location: string, nickname: string, avatarImage: EntryHash} |
 {type: 'Agent', hash: AgentPubKey, bio:string, location: string, nickname: string}
 
+export type SessionTypeID = number
+export type SessionType  = {
+  name: string,
+  color: string,
+  canRsvp: boolean,
+  canSlot: boolean
+}
+
 export interface Session { 
   key: string;
+  session_type: SessionTypeID,
   title: string;
   description: string;
   leaders: Array<AnyAgent>,
@@ -95,6 +104,7 @@ export interface RawInfo {
 export interface UpdateSessionInput {
   original_session_hash: ActionHash,
   previous_session_hash: ActionHash,
+  updated_type: SessionTypeID,
   updated_title: string,
   updated_description: string;
   updated_leaders: Array<AnyAgent>,
@@ -518,6 +528,7 @@ export const defaultSessionsFilter = () : SessionsFilter => {
 export interface Settings {
   game_active: boolean,
   current_sitemap?: ActionHash,
+  session_types: Array<SessionType>,
 }
 
 export interface InterestData {

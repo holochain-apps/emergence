@@ -210,7 +210,7 @@
             const tags = e.tags  ? e.tags : []
             let record
             try {
-             record = await store.createSession(e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, tags)
+             record = await store.createSession(e.session_type, e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, tags)
              sessions[s.original_hash] = record.actionHash
             } catch(e) {
                 console.log("Import Error",e)

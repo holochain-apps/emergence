@@ -50,7 +50,7 @@ export const open = (n) => {
     pic = note.record.entry.pic
     tags = note.record.entry.tags
     sessionHash = note.record.entry.session
-    uploadFiles.defaultValue = pic ? pic : undefined
+    uploadFiles.defaultValue = pic ? pic : undefined  // can't be null, must be undefined
   } else {
     clear()
   }
