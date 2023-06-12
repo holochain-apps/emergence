@@ -60,8 +60,9 @@ export type SessionTypeID = number
 export type SessionType  = {
   name: string,
   color: string,
-  canRsvp: boolean,
-  canSlot: boolean
+  can_rsvp: boolean,
+  can_slot: boolean,
+  can_leaderless: boolean
 }
 
 export interface Session { 

@@ -12,7 +12,6 @@
     import '@shoelace-style/shoelace/dist/components/select/select.js';
     import '@shoelace-style/shoelace/dist/components/option/option.js';
     import SenseResults from "./SenseResults.svelte";
-  import People from "./People.svelte";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -210,7 +209,7 @@
             const tags = e.tags  ? e.tags : []
             let record
             try {
-             record = await store.createSession(e.session_type, e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, tags)
+             record = await store.createSession(e.session_type? e.session_type : 0, e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, tags)
              sessions[s.original_hash] = record.actionHash
             } catch(e) {
                 console.log("Import Error",e)

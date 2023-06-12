@@ -6,6 +6,7 @@ pub struct SessionType {
     pub color: String,
     pub can_rsvp: bool,
     pub can_slot: bool,  
+    pub can_leaderless: bool,  
 }
 
 #[derive(Serialize, Deserialize, Debug, SerializedBytes, Clone, PartialEq)]

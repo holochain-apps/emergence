@@ -78,15 +78,15 @@ let errorSnackbar: Snackbar;
 
 let slot: Slot | undefined
 let slotValid: boolean = true
+let sesType = "0"
+let sesTypeSelect: SlSelect;
 
 $: title, description, leaders, smallest, largest, duration, amenities, slot, slotValid, tags;
-$: isSessionValid = leaders.length > 0 && title !== '' && description !== '' && slotValid && smallest > 0 && largest < MAX_GROUP_SIZE && duration > 0;
+$: isSessionValid = (leaders.length > 0 || $settings.session_types[parseInt(sesType)].can_leaderless) && title !== '' && description !== '' && slotValid && smallest > 0 && largest < MAX_GROUP_SIZE && duration > 0;
 $: tagUses = store.allTags
 $: allTags = $tagUses.map(t=>t.tag)
 $: settings = store.settings
 
-let sesType = "0"
-let sesTypeSelect: SlSelect;
 
 onMount(() => {
 });
@@ -177,6 +177,7 @@ let dialog
     autocomplete="off"
     value={title}
     on:input={e => { title = e.target.value; } }
+    required
   ></sl-input>
   </div>
   <div style="margin-bottom: 16px">
@@ -184,10 +185,15 @@ let dialog
       label=Description 
       autocomplete="off"
       value={ description } on:input={e => { description = e.target.value;} }
+      required
     ></sl-textarea>
   </div>
   <div style="margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Leaders:</strong></span>
+    <span style="margin-right: 4px"><strong>Leaders:</strong>
+      {#if leaders.length == 0 &&!$settings.session_types[parseInt(sesType)].can_leaderless}
+        <span class="required">*</span>
+      {/if}
+    </span>
     <div style="display:flex;">
       {#each leaders as leader, i}
         <div style="display:flex;margin-right:10px">
@@ -253,6 +259,7 @@ let dialog
       label="Duration (min)"
       value={isNaN(duration)? '' : `${duration}`}
       on:input={e => { duration = parseInt(e.target.value); } }
+      required
     ></sl-input>
     </div>
   </div>
@@ -306,5 +313,8 @@ let dialog
   .type-color {
     margin-left:5px; width:45px; height:45px; border: solid 1px; 
     background-color: var(--type-bg-color, white);
+  }
+  .required {
+    color: inherit;
   }
 </style>
