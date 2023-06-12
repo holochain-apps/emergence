@@ -10,10 +10,10 @@ import SessionSummary from './SessionSummary.svelte';
 import SessionCrud from './SessionCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
-import { faList, faTable, faArrowsUpDownLeftRight, faArrowUpShortWide, faArrowDownWideShort, faClock, faMap } from '@fortawesome/free-solid-svg-icons';
+import { faArrowUpShortWide, faArrowDownWideShort } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { calcDays, dayToStr, sortWindows, windowDay, windowDayAsTimestamp, windowsInDay } from './utils';
-import { DetailsType, SessionSortOrder, type Info, type Session, type TimeWindow } from './types';
+import { DetailsType, SessionSortOrder, type Info, type Session, type TimeWindow, SessionListMode } from './types';
 import SessionFilterCtrls from './SessionFilterCtrls.svelte';
 import SpaceLink from './SpaceLink.svelte';
 import Sense from './Sense.svelte';
@@ -48,6 +48,7 @@ let createSessionDialog: SessionCrud
 
 onMount(async () => {
   listModeSelect.value = $uiProps.sessionListMode
+  console.log("UI LISTMOD", $uiProps.sessionListMode)
 });
 const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
   const slota = store.getSessionSlot(a)
@@ -114,7 +115,7 @@ on:session-created={() => {} }
   {:else if $sessions.length === 0}
     <span class="notice">No sessions found.</span>
   {:else}
-    {#if $uiProps.sessionListMode == "" || $uiProps.sessionListMode == "detail"}
+    {#if $uiProps.sessionListMode == SessionListMode.List || $uiProps.sessionListMode == SessionListMode.ListDetail}
       {#each $sessions.filter(s=> (!s.record.entry.trashed || showDeletedSessions) && store.filterSession(s, $uiProps.sessionsFilter)).sort(sortSessions) as session}
         <div class="session">
           <SessionSummary 
@@ -127,7 +128,7 @@ on:session-created={() => {} }
         </div>
       {/each}
     {:else}
-      {#if $uiProps.sessionListMode=="grid-time"}
+      {#if $uiProps.sessionListMode==SessionListMode.GridSpace}
       <div class="fix-table-head">
       <table style="max-width:100%">
         <th class="empty top-sticky"></th>

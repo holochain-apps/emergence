@@ -444,11 +444,19 @@ export interface UIProps {
   feedFilter: FeedFilter
   peopleFilter: PeopleFilter
   detailsStack: Array<Details>,
-  sessionListMode: boolean,
+  sessionListMode: string,
   pane:string,
   sessionSort: SessionSortOrder,
   spaceSort: SpaceSortOrder
 }
+
+export enum SessionListMode {
+  List = "",
+  ListDetail = "detail",
+  GridTime = "grid-time",
+  GridSpace = "grid-space",
+}
+
 
 export enum DetailsType {
   Session = 0,

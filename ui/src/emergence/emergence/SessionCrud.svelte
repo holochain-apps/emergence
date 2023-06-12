@@ -13,7 +13,7 @@ import type SlSelect from '@shoelace-style/shoelace/dist/components/select/selec
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent, type SessionType } from './types';
+import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent, type SessionType, timeWindowDurationToStr } from './types';
 import SlotSelect from './SlotSelect.svelte';
 import { encodeHashToBase64,  decodeHashFromBase64 } from '@holochain/client';
 import AnyAvatar from './AnyAvatar.svelte';
@@ -282,9 +282,15 @@ let dialog
     bind:this={slotSelect} 
     bind:slot={slot} 
     bind:valid={slotValid}
-    bind:anyTime={anyTime}
+    bind:sessionType={sessionType}
     sitemap={store.getCurrentSiteMap()}></SlotSelect>
-  {#if !slotValid} *You can't select a space without time! {/if}
+  {#if !slotValid}
+    {#if sessionType.can_any_time}
+      *You can't select a space without time!
+    {:else}
+      *You must select both a space and time, or niether.
+    {/if}
+  {/if}
   {#if session}
     <div style="display: flex; flex-direction: row; justify-content:flex-end;">
       <sl-button

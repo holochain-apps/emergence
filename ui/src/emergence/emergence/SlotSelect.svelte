@@ -2,7 +2,7 @@
   import '@shoelace-style/shoelace/dist/components/select/select.js';
   import '@shoelace-style/shoelace/dist/components/option/option.js';
   import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
-  import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, type Info, type Space, type TimeWindow, type SiteMap } from './types';
+  import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, type Info, type Space, type TimeWindow, type SiteMap, type SessionType } from './types';
   import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
   import type { EmergenceStore } from '../../emergence-store';
   import { getContext, onMount } from 'svelte';
@@ -14,8 +14,7 @@
   export let slot: Slot| undefined;
   export let valid: boolean = true
   export let sitemap: Info<SiteMap>| undefined
-  export let anyTime: boolean = true
-  export let noSpaceOk: boolean = true
+  export let sessionType: SessionType 
   export let duration: number = 1
   export let tags:Array<string> = []
 
@@ -83,7 +82,7 @@
     }
     valid = false
     if (!slot ||
-      slot.window && (slot.space || noSpaceOk)) {
+      slot.window && (slot.space || sessionType.can_any_time)) {
       valid = true
     }
   }
@@ -93,37 +92,40 @@
 </script>
 <div style="display:flex; flex-direction:row">
   <div style="margin-bottom: 16px; display:flex; flex-direction:column">
-    <div class="pill-button" style="display: flex; width: 75px; align-self: end;" on:click={() => {
-      slot = undefined
-      updateSelects()
-      }} >
-      Reset
-    </div>
-    <div style="display:flex; flex-direction:row; align-items:center">
-      <sl-select bind:this={windowSelect}
+    
+    <div style="display:flex; flex-direction:row; align-items:center;">
+      <sl-select  
+        style="width:320px;"
+        bind:this={windowSelect}
         label="Time Slot"
         on:sl-change={(e) => doSelectWindow(e.target.value) }
       >
-      <sl-option value="">No Slot Selected</sl-option>
-      {#each $windows as window}
-        <sl-option value={JSON.stringify(window)}>{timeWindowStartToStr(window)} {timeWindowDurationToStr(window)}</sl-option>
-      {/each}
+        <sl-option value="">No Time Selected</sl-option>
+        {#each $windows as window}
+          <sl-option value={JSON.stringify(window)}>{timeWindowStartToStr(window)} {timeWindowDurationToStr(window)}</sl-option>
+        {/each}
       </sl-select>
-      {#if anyTime}
-      <span style="margin:0 10px 0 10px">or</span>
-      <DateInput 
-        format={"yyyy-MM-dd HH:mm"}
-        closeOnSelection={true} 
-        placeholder={"Choose any time"}
-        on:select={()=>{
-          windowSelect.value = ""
-          _setSlot()
-        }}
-        bind:value={date} />
-    
+      {#if sessionType.can_any_time}
+        <span style="margin:0 10px 0 10px;">or</span>
+        <DateInput 
+          format={"yyyy-MM-dd HH:mm"}
+          closeOnSelection={true} 
+          placeholder={"Choose any time"}
+          on:select={()=>{
+            windowSelect.value = ""
+            _setSlot()
+          }}
+          bind:value={date} />
       {/if}
+      <div class="pill-button" style="display: flex; width: 75px; margin-left:20px" on:click={() => {
+        slot = undefined
+        updateSelects()
+        }} >
+        Reset
+      </div>
     </div>
     <sl-select bind:this={spaceSelect}
+      style="width:320px;"
       label="Space"
       value={selectedSpace}
       on:sl-change={(e) => doSelectSpace(e.target.value) }
