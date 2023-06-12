@@ -13,6 +13,7 @@ import SiteMapCrud from './SiteMapCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
+  import { errorText } from './utils';
 
 const dispatch = createEventDispatcher();
 
@@ -40,7 +41,7 @@ async function deleteSiteMap() {
     //await store.updateSiteMap(sitemap.original_hash, {trashed:true})
     dispatch('sitemap-deleted', { sitemapHash: sitemap.original_hash });
   } catch (e: any) {
-    errorSnackbar.labelText = `Error deleting the sitemap: ${e.data.data}`;
+    errorSnackbar.labelText = `Error deleting the sitemap: ${errorText(e)}`;
     errorSnackbar.show();
   }
 }

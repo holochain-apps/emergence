@@ -17,6 +17,7 @@ import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/c
 import { encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client';
 import MultiSelect from 'svelte-multiselect'
 import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
+  import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -88,7 +89,7 @@ async function createNote() {
     dispatch('note-created', { note: record });
   } catch (e) {
     console.log("CREATE NOTE ERROR", e)
-    errorSnackbar.labelText = `Error creating the note: ${e.data.data}`;
+    errorSnackbar.labelText = `Error creating the note: ${errorText(e)}`;
     errorSnackbar.show();
   }
   if (modal)

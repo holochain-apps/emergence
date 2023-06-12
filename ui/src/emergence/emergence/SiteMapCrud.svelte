@@ -16,6 +16,7 @@ import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import { encodeHashToBase64, type EntryHash } from '@holochain/client';
+  import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -41,7 +42,7 @@ export const open = (smap) => {
   if (sitemap) {
     text = sitemap.record.entry.text
     pic = sitemap.record.entry.pic
-    uploadFiles.defaultValue = pic ? pic : undefined
+    uploadFiles.defaultValue = pic ? pic : undefined  // can't be null, must be undefined
     tags = sitemap.record.entry.tags
   } else {
     text = ""
@@ -72,7 +73,7 @@ async function createSiteMap() {
     dispatch('sitemap-created', { sitemap: record });
   } catch (e) {
     console.log("CREATE SITEMAP ERROR", e)
-    errorSnackbar.labelText = `Error creating the sitemap: ${e.data.data}`;
+    errorSnackbar.labelText = `Error creating the sitemap: ${errorText(e)}`;
     errorSnackbar.show();
   }
   dialog.hide()

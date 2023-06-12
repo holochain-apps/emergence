@@ -1541,6 +1541,17 @@ export class EmergenceStore {
     }
   }
 
+  async assignProxySessionsToAgent(proxy: ActionHash, agent: AgentPubKey) {
+    const proxyB64 = encodeHashToBase64(proxy)
+    for (const s of get(this.sessions)) {
+        const leaders =s.record.entry.leaders
+        const idx = leaders.findIndex(l=>l.type=="ProxyAgent" && encodeHashToBase64(l.hash) == proxyB64)
+        if (idx >= 0) {
+            leaders[idx] = {type:"Agent", hash:agent}
+        }
+        await this.updateSession(s.original_hash,{leaders})
+    }
+  }
 
   async fetchStuff() {
     let stuff = await this.client.getStuff(this.neededStuff)

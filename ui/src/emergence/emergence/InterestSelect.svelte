@@ -12,6 +12,7 @@ import {  faBookmark, faCheck, faEyeSlash } from '@fortawesome/free-solid-svg-ic
 import type{  ActionHash } from '@holochain/client';
 import type { Snackbar } from '@material/mwc-snackbar';
 import Fa from 'svelte-fa';
+  import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -29,7 +30,7 @@ async function setSessionInterest(interest: SessionInterest) {
   } catch (e: any) {
     console.log("SET SESSION INTEREST ERROR", e)
 
-    errorSnackbar.labelText = `Error attending the session: ${e.data.data}`;
+    errorSnackbar.labelText = `Error attending the session: ${errorText(e)}`;
     errorSnackbar.show();
   }
 }

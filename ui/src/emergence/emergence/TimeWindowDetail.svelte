@@ -10,6 +10,7 @@ import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import Fa from 'svelte-fa'
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
+  import { errorText } from './utils';
 let errorSnackbar: Snackbar;
 
 
@@ -30,7 +31,7 @@ async function deleteTimeWindow() {
     });
     dispatch('timeWindow-deleted', {});
   } catch (e: any) {
-    errorSnackbar.labelText = `Error deleting the timeWindow: ${e.data.data}`;
+    errorSnackbar.labelText = `Error deleting the timeWindow: ${errorText(e)}`;
     errorSnackbar.show();
   }
 }

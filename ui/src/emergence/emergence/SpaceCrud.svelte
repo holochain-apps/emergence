@@ -27,6 +27,7 @@ import { faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import SiteMapLocation from './SiteMapLocation.svelte';
 import MultiSelect from 'svelte-multiselect'
+  import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -108,7 +109,7 @@ async function createSpace() {
     dispatch('space-created', { space: record });
   } catch (e) {
     console.log("CREATE SPACE ERROR", e)
-    errorSnackbar.labelText = `Error creating the space: ${e.data.data}`;
+    errorSnackbar.labelText = `Error creating the space: ${errorText(e)}`;
     errorSnackbar.show();
   }
   dialog.hide()

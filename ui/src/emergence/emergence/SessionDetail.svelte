@@ -22,6 +22,7 @@ import SessionCrud from './SessionCrud.svelte';
 import { slide } from 'svelte/transition';
 import SpaceLink from './SpaceLink.svelte';
 import { Marked } from "@ts-stack/markdown";
+  import { errorText } from './utils';
 
 const dispatch = createEventDispatcher();
 
@@ -82,7 +83,7 @@ async function deleteSession() {
 
     dispatch('session-deleted', { sessionHash: $session.original_hash });
   } catch (e: any) {
-    errorSnackbar.labelText = `Error deleting the session: ${e.data.data}`;
+    errorSnackbar.labelText = `Error deleting the session: ${errorText(e)}`;
     errorSnackbar.show();
   }
 }

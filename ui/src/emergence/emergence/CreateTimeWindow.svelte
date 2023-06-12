@@ -11,6 +11,7 @@ import { faClose, faSave } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import MultiSelect from 'svelte-multiselect'
 import { DateInput } from 'date-picker-svelte'
+  import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -36,7 +37,7 @@ async function createTimeWindow() {
     dispatch('timeWindow-created', { timeWindowHash: actionHash });
     
   } catch (e) {
-    errorSnackbar.labelText = `Error creating the timeWindow: ${e.data.data}`;
+    errorSnackbar.labelText = `Error creating the timeWindow: ${errorText(e)}`;
     errorSnackbar.show();
   }
 }

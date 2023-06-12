@@ -124,7 +124,7 @@ async function createSession() {
     dispatch('session-created', { session: record });
   } catch (e) {
     console.log("CREATE SESSION ERROR", e)
-    errorSnackbar.labelText = `Error creating the session: ${e.data ? e.data.data : e}`;
+    errorSnackbar.labelText = `Error creating the session: ${errorText(e)}`;
     errorSnackbar.show();
   }
   dialog.hide()

@@ -18,6 +18,7 @@ import Confirm from './Confirm.svelte';
 import Avatar from './Avatar.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
 import { slide } from 'svelte/transition';
+  import { errorText } from './utils';
 
 const dispatch = createEventDispatcher();
 
@@ -44,7 +45,7 @@ async function deleteSpace() {
     await store.updateSpace(space.original_hash, {trashed:true})
     dispatch('space-deleted', { spaceHash: space.original_hash });
   } catch (e: any) {
-    errorSnackbar.labelText = `Error deleting the space: ${e.data.data}`;
+    errorSnackbar.labelText = `Error deleting the space: ${errorText(e)}`;
     errorSnackbar.show();
   }
   dialog.hide()

@@ -48,7 +48,6 @@ let createSessionDialog: SessionCrud
 
 onMount(async () => {
   listModeSelect.value = $uiProps.sessionListMode
-  console.log("UI LISTMOD", $uiProps.sessionListMode)
 });
 const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
   const slota = store.getSessionSlot(a)
