@@ -334,9 +334,10 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   </div>
   <div style="display:flex">
     <SessionFilterCtrls
-          on:toggle-filter={()=>{showFilter = !showFilter;}}
-        ></SessionFilterCtrls>
-  
+      showKeywordCancel={true}
+      on:toggle-filter={()=>{showFilter = !showFilter;}}
+    ></SessionFilterCtrls>
+
     <sl-select style="margin-right: 5px;width: 200px;"
     placeholder="Filter by Slot Type"
     on:sl-change={(e) => {slotType = e.target.value 

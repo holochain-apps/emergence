@@ -9,6 +9,7 @@ import '@shoelace-style/shoelace/dist/components/button/button.js';
 
 const dispatch = createEventDispatcher();
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
+export let showKeywordCancel = false
 
 $: uiProps = store.uiProps
 
@@ -32,7 +33,7 @@ export const open = ()=>{
 <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["involvementLeading","involvementGoing","involvementInterested","involvementNoOpinion" ,"involvementHidden"],"sessionsFilter")}} >
   <Fa size="sm" icon={faCheck} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
 {/if}
-{#if $uiProps.sessionsFilter.keyword}
+{#if showKeywordCancel && $uiProps.sessionsFilter.keyword}
 <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"sessionsFilter")}} >
   <Fa size="sm" icon={faMagnifyingGlass} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
 {/if}

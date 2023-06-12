@@ -28,7 +28,7 @@
         >
         {#if showAvatar}
             {#if proxyAgent}
-                <ProxyAgentAvatar size={size} proxyAgentHash={proxyAgent.original_hash}></ProxyAgentAvatar>
+                <span style="margin-right:5px"><ProxyAgentAvatar size={size} proxyAgentHash={proxyAgent.original_hash}></ProxyAgentAvatar></span>
             {:else}
                 No Agent!
             {/if}

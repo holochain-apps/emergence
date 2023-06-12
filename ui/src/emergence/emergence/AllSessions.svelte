@@ -10,7 +10,7 @@ import SessionSummary from './SessionSummary.svelte';
 import SessionCrud from './SessionCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
-import { faArrowUpShortWide, faArrowDownWideShort } from '@fortawesome/free-solid-svg-icons';
+import { faArrowUpShortWide, faArrowDownWideShort, faSearch } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { calcDays, dayToStr, sortWindows, windowDay, windowDayAsTimestamp, windowsInDay } from './utils';
 import { DetailsType, SessionSortOrder, type Info, type Session, type TimeWindow, SessionListMode } from './types';
@@ -72,7 +72,17 @@ on:session-created={() => {} }
     <div class="pill-button"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
     {/if}
       <div class="section-controls">
-        
+        <div class="center-row search-bar">
+          <span class="search-icon"><Fa icon={faSearch} /></span>
+          <sl-input
+            value={$uiProps.peopleFilter.keyword}
+            placeholder="Search by title & description"
+            on:input={e => { 
+              const filter = $uiProps.sessionsFilter;
+              filter.keyword = e.target.value
+              store.setUIprops({sessionsFilter: filter})}}
+          ></sl-input>
+        </div> 
         <SessionFilterCtrls
           on:toggle-filter={()=>{showFilter = !showFilter;}}
         ></SessionFilterCtrls>
@@ -120,6 +130,7 @@ on:session-created={() => {} }
           <SessionSummary 
             showTags={true}
             showSlot={true}
+            showLeaderAvatar={$uiProps.sessionListMode == "detail"}
             showDescription={$uiProps.sessionListMode == "detail"}
             allowSetIntention={$settings.session_types[session.record.entry.session_type].can_rsvp} 
             session={session}>
@@ -313,6 +324,20 @@ on:session-created={() => {} }
   border: dotted 1px blue;
   border-radius: 5px;
   margin: 3px;
-  cursor: pointer;
+  cursor: 
+  pointer;
  }
+ .search-bar {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto 0 auto;
+    position: relative;
+  }
+
+  .search-bar sl-input {
+    width: 100%;
+  }
+  .search-icon {
+    margin-right: 5px;
+  }
 </style>

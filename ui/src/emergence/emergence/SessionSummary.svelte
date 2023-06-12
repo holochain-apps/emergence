@@ -22,6 +22,7 @@ export let showTags = false;
 export let showAmenities = false;
 export let showSlot = false;
 export let showLeaders = true;
+export let showLeaderAvatar = false;
 export let extra = ""
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -119,7 +120,7 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
           <div class="leaders">
               <span style="padding-top: 2px">Hosted by:</span>
               {#each session.record.entry.leaders as leader}
-              <span  style="margin-top: -2px;"><AnyAvatar showAvatar={false} agent={leader}></AnyAvatar></span>
+              <span  style="margin-top: -2px;"><AnyAvatar showAvatar={showLeaderAvatar} size={20} agent={leader}></AnyAvatar></span>
               {/each}
           </div>
         {/if}

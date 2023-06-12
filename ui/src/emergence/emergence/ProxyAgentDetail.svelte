@@ -55,7 +55,7 @@
   });
 
   async function assignProxyAgent() {
-    await store.assignProxyToAgent(proxyAgentHash, assignAgent)
+    await store.assignProxySessionsToAgent(proxyAgentHash, assignAgent)
   }
 
   async function deleteProxyAgent() {
