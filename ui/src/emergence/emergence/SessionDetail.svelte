@@ -9,7 +9,7 @@ import { createEventDispatcher, getContext, onMount } from 'svelte';
 import Fa from 'svelte-fa';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
-import { amenitiesList, durationToStr, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit } from './types';
+import { NULL_HASHB64, amenitiesList, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit } from './types';
 
 import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 import Avatar from './Avatar.svelte';
@@ -48,19 +48,20 @@ $: uiProps = store.uiProps
 let updateSessionDialog
 
 const sessionSlot = (session: Info<Session>): Slot | undefined => {
-  const spaces = session.relations.filter(r=>r.relation.content.path == "session.space")
-        if (spaces.length > 0) {
-          const ri = spaces[spaces.length-1]
-          const r = ri.relation
-          if (r.content.data) {
-            const window = JSON.parse(r.content.data) as TimeWindow
-            return {
-                space: r.dst,
-                window
-            }
-          }
-        }
-        return undefined
+  const slottings = session.relations.filter(r=>r.relation.content.path == "session.slot")
+  console.log("SLOTTINGS", slottings)
+  if (slottings.length > 0) {
+    const ri = slottings[slottings.length-1]
+    const r = ri.relation
+    if (r.content.data) {
+      const window = JSON.parse(r.content.data) as TimeWindow
+      return {
+          space: encodeHashToBase64(r.dst)== NULL_HASHB64 ? undefined : r.dst,
+          window
+      }
+    }
+  }
+  return undefined
 }
 
 $: error, loading, slot, notes, session;

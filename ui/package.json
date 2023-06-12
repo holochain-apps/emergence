@@ -19,6 +19,7 @@
     "@material/mwc-snackbar": "^0.27.0",
     "@msgpack/msgpack": "^2.7.2",
     "@vaadin/date-time-picker": "^23.2.8",
+    "date-picker-svelte": "2.4.3",
     "@fortawesome/free-solid-svg-icons": "^6.3.0",
     "svelte-fa": "3.0.3",
     "@types/javascript-time-ago": "^2.0.3",

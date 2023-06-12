@@ -55,7 +55,8 @@ export const open = (ses) => {
     tags = []
     slot = undefined
   }
-  sesTypeSelect.value = sesType
+  if (sesTypeSelect)
+    sesTypeSelect.value = sesType
   console.log("SLOT", slot)
   slotSelect.setSlot(slot)
   dialog.show()
@@ -84,11 +85,12 @@ let sesType = "0"
 let sesTypeSelect: SlSelect;
 
 $: title, description, leaders, smallest, largest, duration, amenities, slot, slotValid, tags;
-$: isSessionValid = (leaders.length > 0 || $settings.session_types[parseInt(sesType)].can_leaderless) && title !== '' && description !== '' && slotValid && smallest > 0 && largest < MAX_GROUP_SIZE && duration > 0;
+$: sessionType = $settings.session_types[parseInt(sesType)]
+$: isSessionValid = (leaders.length > 0 || sessionType.can_leaderless) && title !== '' && description !== '' && slotValid && smallest > 0 && largest < MAX_GROUP_SIZE && duration > 0;
 $: tagUses = store.allTags
 $: allTags = $tagUses.map(t=>t.tag)
 $: settings = store.settings
-
+$: anyTime = sessionType.can_any_time
 
 onMount(() => {
 });
@@ -122,7 +124,7 @@ async function createSession() {
     dispatch('session-created', { session: record });
   } catch (e) {
     console.log("CREATE SESSION ERROR", e)
-    errorSnackbar.labelText = `Error creating the session: ${e.data.data}`;
+    errorSnackbar.labelText = `Error creating the session: ${e.data ? e.data.data : e}`;
     errorSnackbar.show();
   }
   dialog.hide()
@@ -192,7 +194,7 @@ let dialog
   </div>
   <div style="margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Leaders:</strong>
-      {#if leaders.length == 0 &&!$settings.session_types[parseInt(sesType)].can_leaderless}
+      {#if leaders.length == 0 &&!sessionType.can_leaderless}
         <span class="required">*</span>
       {/if}
     </span>
@@ -275,8 +277,14 @@ let dialog
       >{amenity}</sl-checkbox>
     {/each}
   </div>
-  <SlotSelect bind:this={slotSelect} bind:slot={slot} bind:valid={slotValid} sitemap={store.getCurrentSiteMap()}></SlotSelect>
-  {#if !slotValid} *You must select both a time and a space or neither {/if}
+  <SlotSelect
+    bind:duration={duration}
+    bind:this={slotSelect} 
+    bind:slot={slot} 
+    bind:valid={slotValid}
+    bind:anyTime={anyTime}
+    sitemap={store.getCurrentSiteMap()}></SlotSelect>
+  {#if !slotValid} *You can't select a space without time! {/if}
   {#if session}
     <div style="display: flex; flex-direction: row; justify-content:flex-end;">
       <sl-button

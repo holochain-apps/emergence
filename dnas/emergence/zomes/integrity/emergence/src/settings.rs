@@ -5,7 +5,7 @@ pub struct SessionType {
     pub name: String,
     pub color: String,
     pub can_rsvp: bool,
-    pub can_slot: bool,  
+    pub can_any_time: bool,  
     pub can_leaderless: bool,  
 }
 

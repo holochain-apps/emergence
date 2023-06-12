@@ -33,13 +33,13 @@ pub fn get_settings(_: ()) -> ExternResult<Settings> {
             game_active: false,
             current_sitemap:None, 
             session_types:vec![
-                SessionType {name:"Session".into(), color:"white".into(), can_rsvp: true, can_slot: true, can_leaderless: false},
-                SessionType {name:"Dining".into(), color:"#f3827f".into(), can_rsvp: false, can_slot: false, can_leaderless: true},
-                SessionType {name:"Chill & Relax".into(), color:"#b7cdff".into(), can_rsvp: false, can_slot: false, can_leaderless: true},
-                SessionType {name:"Community Time".into(), color:"#ffbc57".into(), can_rsvp: false, can_slot: false, can_leaderless: true},
-                SessionType {name:"Crativity Time".into(), color:"#9edf7d".into(), can_rsvp: false, can_slot: false, can_leaderless: true},
-                SessionType {name:"Mind-Body-Nature".into(), color:"#efc8fe".into(), can_rsvp: false, can_slot: false, can_leaderless: true},
-                SessionType {name:"Prep".into(), color:"#efc8fe".into(), can_rsvp: false, can_slot: false, can_leaderless: true},
+                SessionType {name:"Session".into(), color:"white".into(), can_rsvp: true, can_any_time: false, can_leaderless: false},
+                SessionType {name:"Dining".into(), color:"#f3827f".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Chill & Relax".into(), color:"#b7cdff".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Community Time".into(), color:"#ffbc57".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Creativity Time".into(), color:"#9edf7d".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Mind-Body-Nature".into(), color:"#efc8fe".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Prep".into(), color:"#efc8fe".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
                 ]});
     }
     links.sort_by(|a,b| b.timestamp.cmp(&a.timestamp));

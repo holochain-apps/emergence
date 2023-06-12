@@ -699,6 +699,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
 }
 
 .modal.create-slot {
+  width: 300px;
   z-index: 100;
 }
 

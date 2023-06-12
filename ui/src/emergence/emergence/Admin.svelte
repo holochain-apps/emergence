@@ -214,7 +214,7 @@
             } catch(e) {
                 console.log("Import Error",e)
             }
-            const relation = s.relations.filter(r=>r.content.path === "session.space").sort((a,b) => b.timestamp - a.timestamp)[0]
+            const relation = s.relations.filter(r=>r.content.path === "session.slot").sort((a,b) => b.timestamp - a.timestamp)[0]
             if (relation) {
                 const window = JSON.parse(relation.content.data)
                 await store.slot(record.actionHash, {window, space: spaces[relation.dst]})

@@ -16,6 +16,10 @@ import {
   decodeHashFromBase64
 } from '@holochain/client';
 
+
+export const NULL_HASHB64 = "uhCkk______________________"
+export const NULL_HASH = decodeHashFromBase64(NULL_HASHB64)
+
 export type EmergenceSignal = {
   type: 'EntryCreated';
   action: SignedActionHashed<Create>;
@@ -61,7 +65,7 @@ export type SessionType  = {
   name: string,
   color: string,
   can_rsvp: boolean,
-  can_slot: boolean,
+  can_any_time: boolean,
   can_leaderless: boolean
 }
 
@@ -175,10 +179,10 @@ export interface UpdateSiteMapInput {
   updated_map: SiteMap,
 }
 
-export interface Slot {
-  space: ActionHash
+export type Slot = {
+  space?: ActionHash
   window: TimeWindow
-}
+} 
 
 export const slotEqual = (slota: Slot| undefined, slotb: Slot|undefined) : boolean => {
   if (slota === undefined && slotb !== undefined) return false

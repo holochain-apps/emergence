@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile, type SessionType, type SessionTypeID } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile, type SessionType, type SessionTypeID, NULL_HASHB64, NULL_HASH } from './emergence/emergence/types';
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
@@ -291,7 +291,7 @@ export class EmergenceStore {
   }
 
   getSessionSlot(session: Info<Session>) : Slot|undefined {
-    const rels = session.relations.filter(r=>r.relation.content.path == "session.space")
+    const rels = session.relations.filter(r=>r.relation.content.path == "session.slot")
     if (rels.length == 0) return undefined
     rels.sort((a,b)=>b.timestamp - a.timestamp)
     const rel = rels[0]
@@ -300,7 +300,7 @@ export class EmergenceStore {
     }
     const window = JSON.parse(rel.relation.content.data) as TimeWindow
     return {
-        space: rel.relation.dst,
+        space: encodeHashToBase64(rel.relation.dst)== NULL_HASHB64 ? undefined : rel.relation.dst,
         window
     }
   }
@@ -324,14 +324,14 @@ export class EmergenceStore {
         interest: new HoloHashMap(),
         slot: undefined
     }
-    const spaces = session.relations.filter(r=>r.relation.content.path === "session.space")
-    if (spaces.length > 0) {
-      let ri = spaces[spaces.length-1]
+    const slottings = session.relations.filter(r=>r.relation.content.path === "session.slot")
+    if (slottings.length > 0) {
+      let ri = slottings[slottings.length-1]
       const r = ri.relation
       if (r.content.data) {
         const window = JSON.parse(r.content.data) as TimeWindow
         rel.slot = {
-            space: r.dst,
+            space: encodeHashToBase64(r.dst)== NULL_HASHB64 ? undefined : r.dst,
             window
         }
       } else rel.slot = undefined
@@ -359,13 +359,13 @@ export class EmergenceStore {
 
   sessionSlotStore(sessionStore: Readable<Info<Session>>) : Readable<Slot|undefined> {
     return derived(sessionStore, $session=> {
-        const spaces = $session.relations.filter(r=>r.relation.content.path == "session.space")
-        if (spaces.length > 0) {
-          let ri = spaces[spaces.length-1]
+        const slottings = $session.relations.filter(r=>r.relation.content.path == "session.slot")
+        if (slottings.length > 0) {
+          let ri = slottings[slottings.length-1]
           const r = ri.relation
           const window = JSON.parse(r.content.data) as TimeWindow
                   return {
-                      space: r.dst,
+                      space: encodeHashToBase64(r.dst)== NULL_HASHB64 ? undefined : r.dst,
                       window
                   }
         }
@@ -398,19 +398,12 @@ export class EmergenceStore {
     const session = this.getSession(sessionHash)
     const sessionSlot = this.getSessionSlot(session)
     if (!sessionSlot) return;
-    // const nullSpace = decodeHashFromBase64("uhCkk______________________")
-    await this.client.createRelations([
+    const spaceDst = sessionSlot.space ? sessionSlot.space : NULL_HASH
+    const relastions = [
         {   src: sessionHash,
-            dst: sessionSlot.space,
+            dst: spaceDst,
             content:  {
-                path: "session.space",
-                data: ""
-            }
-        },
-        {   src: sessionSlot.space,
-            dst: sessionHash,
-            content:  {
-                path: "space.sessions",
+                path: "session.slot",
                 data: ""
             }
         },
@@ -422,42 +415,53 @@ export class EmergenceStore {
             }
         },
     ]
-    )
+    if (sessionSlot.space) {
+        relastions.push(        
+            {   src: sessionSlot.space,
+                dst: sessionHash,
+                content:  {
+                    path: "space.sessions",
+                    data: ""
+                }
+            },
+        )
+    }
+    await this.client.createRelations(relastions)
     await this.fetchSessions()
   }
 
   async slot(session: ActionHash, slot: Slot) {
-    const space = this.getSpace(slot.space)
+    const space = slot.space ? this.getSpace(slot.space) : undefined
+    const spaceDst = slot && slot.space ? slot.space : NULL_HASH
+
+    const relations = [
+        {   src: session,
+            dst: spaceDst,
+            content:  {
+                path: "session.slot",
+                data: JSON.stringify(slot.window)
+            }
+        },
+        {   src: session, // should be agent key
+            dst: session,
+            content:  {
+                path: `feed.${FeedType.SlotSession}`,
+                data: JSON.stringify({space:space ? space.record.entry.name : "<none>", window: slot.window})
+            }
+        },
+    ]
     if (space) {
-        await this.client.createRelations([
-            {   src: session,
-                dst: slot.space,
-                content:  {
-                    path: "session.space",
-                    data: JSON.stringify(slot.window)
-                }
-            },
-            {   src: slot.space,
-                dst: session,
-                content:  {
-                    path: "space.sessions",
-                    data: JSON.stringify(slot.window)
-                }
-            },
-            {   src: session, // should be agent key
-                dst: session,
-                content:  {
-                    path: `feed.${FeedType.SlotSession}`,
-                    data: JSON.stringify({space:space.record.entry.name, window: slot.window})
-                }
-            },
-        ]
-        )
-        await this.fetchSessions()
-    } else {
-        console.log("Couldn't find space", encodeHashToBase64(slot.space))
+        relations.push({   src: slot.space,
+            dst: session,
+            content:  {
+                path: "space.sessions",
+                data: JSON.stringify(slot.window)
+            }
+        })
     }
-  }
+    await this.client.createRelations(relations)
+    await this.fetchSessions()
+}
 
   async createTimeWindow(start: Date, duration: number, tags: Array<string>) : Promise<ActionHash> {
     const timeWindow: TimeWindow = { 
@@ -501,7 +505,10 @@ export class EmergenceStore {
     const record = await this.client.createSession(sessionTypeID, title, amenities, description, leaders, smallest, largest, duration)
     const sessionHash = record.actionHash
     if (slot) {
+        console.log("FISH")
         await this.slot(sessionHash, slot)
+        console.log("FISH2")
+
     }
   
     const relations = [
@@ -791,7 +798,7 @@ export class EmergenceStore {
                 }
             }    
         ))
-        sessions.forEach(s=>s.relations.filter(r=>r.relation.content.path === "session.space").forEach(r=>noteHashes.push(r.relation.dst)))
+        sessions.forEach(s=>s.relations.filter(r=>r.relation.content.path === "session.note").forEach(r=>noteHashes.push(r.relation.dst)))
         this.noteHashes.update((n) => {return noteHashes} )
 
     }
@@ -808,7 +815,7 @@ export class EmergenceStore {
         const session = this.getSession(ri.relation.dst)
         if (session  && !session.record.entry.trashed) {
             const slot = this.getSessionSlot(session)
-            if (slot) {
+            if (slot && slot.space) {
                 if (encodeHashToBase64(slot.space) == encodeHashToBase64(space.original_hash)) {
                 const s = sessions.set(session.original_hash, {session,window:JSON.parse(ri.relation.content.data)})
                 }

@@ -42,7 +42,7 @@ onMount(async () => {
     throw new Error(`The session input is required for the SessionSummary element`);
   }
 });
-$:space = slot? store.getSpace(slot.space) : undefined
+$:space = slot && slot.space ? store.getSpace(slot.space) : undefined
 </script>
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -68,7 +68,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
           {new Date(slot.window.start).toTimeString().slice(0,5)}
         </div>
         <div class="space clickable" on:click={(e)=>{e.stopPropagation();store.openDetails(DetailsType.Space, space.original_hash)}}>
-          {space ? space.record.entry.name : "Unknown"}
+          {space ? space.record.entry.name : ""}
         </div>
         {:else}
         <div class="date">
