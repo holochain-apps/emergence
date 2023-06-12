@@ -41,6 +41,7 @@ export const open = (ses) => {
     tags = sessionSelfTags(session)
     slot = store.getSessionSlot(session)
   } else {
+
     sesType = "0"
     title = ""
     amenities = 0
@@ -49,7 +50,8 @@ export const open = (ses) => {
     largest = 100;
     duration = 30
     amenities = 0;
-    leaders = [{type:"Agent", hash:store.myPubKey}]
+    const sitemap = store.getCurrentSiteMap()
+    leaders = sitemap && sitemap.record.entry.tags[0]=="emergent" ? [{type:"Agent", hash:store.myPubKey}] : []
     tags = []
     slot = undefined
   }
