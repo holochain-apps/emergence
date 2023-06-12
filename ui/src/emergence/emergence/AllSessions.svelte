@@ -1,4 +1,8 @@
 <script lang="ts">
+import '@shoelace-style/shoelace/dist/components/select/select.js';
+import '@shoelace-style/shoelace/dist/components/option/option.js';
+import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
+
 import { onMount, getContext, createEventDispatcher } from 'svelte';
 import { encodeHashToBase64, type Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
@@ -6,7 +10,7 @@ import SessionSummary from './SessionSummary.svelte';
 import SessionCrud from './SessionCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
-import { faList, faTable, faArrowsUpDownLeftRight, faArrowUpShortWide, faArrowDownWideShort } from '@fortawesome/free-solid-svg-icons';
+import { faList, faTable, faArrowsUpDownLeftRight, faArrowUpShortWide, faArrowDownWideShort, faClock, faMap } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { calcDays, dayToStr, sortWindows, windowDay, windowDayAsTimestamp, windowsInDay } from './utils';
 import { DetailsType, SessionSortOrder, type Info, type Session, type TimeWindow } from './types';
@@ -28,7 +32,9 @@ $: windows = store.sitemapFilteredWindows()
 $: error;
 $: uiProps = store.uiProps
 let slotType: string 
-$: slotType  
+$: slotType
+let listModeSelect: SlSelect;
+
 
 $: _days = calcDays($windows, slotType, $uiProps.sessionsFilter) 
 $: days = $uiProps.sessionSort == SessionSortOrder.Ascending ? _days : _days.reverse()
@@ -39,9 +45,9 @@ const windowsInDaySorted = (w: Array<TimeWindow>, day: Date, type): Array<TimeWi
 let showFilter = false
 
 let createSessionDialog: SessionCrud
-let bySpace = false
 
 onMount(async () => {
+  listModeSelect.value = $uiProps.sessionListMode
 });
 const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
   const slota = store.getSessionSlot(a)
@@ -76,18 +82,18 @@ on:session-created={() => {} }
           <Fa icon={$uiProps.sessionSort == SessionSortOrder.Ascending ? faArrowUpShortWide : faArrowDownWideShort} />
         </sl-button>
 
-        <sl-button title={$uiProps.sessionListMode ? "Switch to Grid View" : "Switch to List View"} style="margin-left: 8px; " on:click={() => { store.setUIprops({sessionListMode:!$uiProps.sessionListMode }) }} circle>
-          <Fa icon={$uiProps.sessionListMode ? faTable : faList} />
-        </sl-button>
+        <sl-select style="margin-left:10px;width:150px;" bind:this={listModeSelect}
+          pill
+          on:sl-change={(e) => {
+            store.setUIprops({sessionListMode: e.target.value})
+          }}
+        >
+        <sl-option value="">List</sl-option>
+        <sl-option value="detail">List: Detail</sl-option>
+        <sl-option value="grid-time">Grid: Time</sl-option>
+        <sl-option value="grid-space">Grid: Space</sl-option>
 
-
-        {#if !$uiProps.sessionListMode}
-          <sl-button title="Toggle Axes"  style="margin-left: 8px; " on:click={() => { bySpace = !bySpace }} circle>
-            <Fa icon={faArrowsUpDownLeftRight} />
-          </sl-button>
-        {/if}
-
-
+        </sl-select>
     </div>
   </div>
   {#if showFilter}
@@ -108,19 +114,20 @@ on:session-created={() => {} }
   {:else if $sessions.length === 0}
     <span class="notice">No sessions found.</span>
   {:else}
-    {#if $uiProps.sessionListMode}
+    {#if $uiProps.sessionListMode == "" || $uiProps.sessionListMode == "detail"}
       {#each $sessions.filter(s=> (!s.record.entry.trashed || showDeletedSessions) && store.filterSession(s, $uiProps.sessionsFilter)).sort(sortSessions) as session}
         <div class="session">
           <SessionSummary 
             showTags={true}
             showSlot={true}
+            showDescription={$uiProps.sessionListMode == "detail"}
             allowSetIntention={$settings.session_types[session.record.entry.session_type].can_rsvp} 
             session={session}>
           </SessionSummary>
         </div>
       {/each}
     {:else}
-      {#if bySpace}
+      {#if $uiProps.sessionListMode=="grid-time"}
       <div class="fix-table-head">
       <table style="max-width:100%">
         <th class="empty top-sticky"></th>

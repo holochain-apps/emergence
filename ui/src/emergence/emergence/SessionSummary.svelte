@@ -17,6 +17,7 @@ const dispatch = createEventDispatcher();
 
 export let session: Info<Session>;
 export let allowSetIntention = false;
+export let showDescription = false;
 export let showTags = false;
 export let showAmenities = false;
 export let showSlot = false;
@@ -125,6 +126,11 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
       </div>
     </div>
     <div class="bottom-area">
+      {#if showDescription}
+        <div class="description">
+          {session.record.entry.description}
+        </div>
+      {/if}
       {#if showTags}
         <div class="tags">
           {#each tags as tag}
