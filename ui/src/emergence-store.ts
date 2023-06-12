@@ -996,11 +996,15 @@ export class EmergenceStore {
             return false
     }
     if (filter.space.length>0) {
-        if (!slot) return false
+        if (!slot || !slot.space) return false
         const b64 = encodeHashToBase64(slot.space)
         if (!filter.space.find(s=>encodeHashToBase64(s) === b64)) return false
     }
-   
+    if (filter.types != 0) {
+        if (!(filter.types & (1 << session.record.entry.session_type ))) {
+            return false
+        }
+    }
     return true
 
   }

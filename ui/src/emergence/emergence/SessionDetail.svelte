@@ -49,7 +49,6 @@ let updateSessionDialog
 
 const sessionSlot = (session: Info<Session>): Slot | undefined => {
   const slottings = session.relations.filter(r=>r.relation.content.path == "session.slot")
-  console.log("SLOTTINGS", slottings)
   if (slottings.length > 0) {
     const ri = slottings[slottings.length-1]
     const r = ri.relation

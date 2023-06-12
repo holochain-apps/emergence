@@ -4,7 +4,7 @@
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
   import type { EmergenceStore } from '../../emergence-store';
-  import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck, faMap, faArrowsUpDownLeftRight, faArrowUpShortWide, faArrowDownWideShort } from '@fortawesome/free-solid-svg-icons';
+  import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck, faMap, faArrowsUpDownLeftRight, faArrowUpShortWide, faArrowDownWideShort, faShapes } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
 
 const dispatch = createEventDispatcher();
@@ -20,6 +20,10 @@ export const open = ()=>{
 
 </script>
 
+{#if $uiProps.sessionsFilter.types}
+<div class="pill-button"  on:click={() => {store.resetFilterAttributes(["types"],"sessionsFilter")}} >
+  <Fa size="sm" icon={faShapes} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
+{/if}
 {#if $uiProps.sessionsFilter.timeNow ||$uiProps.sessionsFilter.timeToday || $uiProps.sessionsFilter.timeNext|| $uiProps.sessionsFilter.timePast|| $uiProps.sessionsFilter.timeFuture|| $uiProps.sessionsFilter.timeUnscheduled || $uiProps.sessionsFilter.timeDays.length > 0}
 <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["timeNow","timeToday","timeNext","timePast","timeFuture","timeUnscheduled", "timeDays"],"sessionsFilter")}} >
   <Fa size="sm" icon={faClock} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>

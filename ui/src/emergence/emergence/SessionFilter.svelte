@@ -6,7 +6,7 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
-import { faArrowRotateBack, faCheck, faClock, faClose, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
+import { faArrowRotateBack, faCheck, faClock, faClose, faMagnifyingGlass, faMap, faShapes, faTag } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { defaultSessionsFilter, type SessionsFilter } from './types';
 import { fly } from 'svelte/transition';
@@ -18,6 +18,7 @@ import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 $: windows = store.timeWindows
 $: days = calcDays($windows, "", defaultSessionsFilter()) 
+$: settings = store.settings
 
 const dispatch = createEventDispatcher();
 
@@ -47,6 +48,19 @@ const toggleDayInFilter = (day:Date) => {
       <sl-button style="margin-left: 8px; " on:click={() => { dispatch('close-filter') } } circle>
         <Fa icon={faClose} />
       </sl-button>
+    </div>
+  </div>
+  <div class="center-row" style="background-color:white;">
+    <span style="margin-right: 10px"><Fa icon={faShapes} /></span>
+    <div style="display: flex; flex-direction: column;">
+
+      <div class="wrap-row" style="background-color:white;">
+        {#each $settings.session_types as type, idx}
+        <sl-checkbox 
+        checked={filter.types & 1<<idx} 
+          on:sl-change={e => { filter.types = e.target.checked ? filter.types | 1<<idx : filter.types & ~(1<<idx) ; dispatch('update-filter', filter)} }>{type.name}</sl-checkbox>
+        {/each}
+      </div>
     </div>
   </div>
   <div class="center-row" style="background-color:white;">

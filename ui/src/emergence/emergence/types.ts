@@ -507,6 +507,7 @@ export interface SessionsFilter {
   tags: Array<string>,
   space: Array<ActionHash>,
   keyword: string,
+  types: number
 }
 
 export const defaultSessionsFilter = () : SessionsFilter => {
@@ -526,6 +527,7 @@ export const defaultSessionsFilter = () : SessionsFilter => {
     tags: [],
     space: [],
     keyword: "",
+    types: 0,
   }
 }
 
