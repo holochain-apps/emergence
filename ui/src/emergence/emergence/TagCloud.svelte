@@ -125,8 +125,8 @@
         border-radius: 25px;
         display: inline-block;
         margin: 13px 13px 0 0;
-        border: 1px solid #25bab030;
-        color: #25BAB1;
+        border: 1px solid #2F87D890;
+        color: #2F87D8;
         background-color: transparent;
         transition: all .25s ease;
         margin-bottom: 0;
@@ -139,7 +139,7 @@
 
     .neonText {
         color: #fff;
-        background-color: #25BAB1;
+        background-color: #2F87D8;
         padding: 10px 12px;
         margin: 7px 10px -4px -3px;
         box-shadow: 0 10px 15px rgba(0,0,0,.25);
@@ -148,12 +148,12 @@
 
     .neonText .count {
         background-color: white;
-        color: #25BAB1;
+        color: #2F87D8;
     }
     .count {
         display: inline-block;
         font-size: 12px;
-        background-color: #25bab090;;
+        background-color: #2F87D890;
         color: white;
         width: 18px;
         height: 18px;

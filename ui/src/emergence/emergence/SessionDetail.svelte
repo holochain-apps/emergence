@@ -316,8 +316,8 @@ bind:this={updateSessionDialog}
   }
   .tag {
     display: inline;
-    border: 1px solid #25bab030;
-    color: #25BAB1;
+    border: 1px solid #2F87D840;
+    color: #2F87D8;
     background-color: transparent;
     margin-bottom: 0;
     display: inline;

@@ -457,6 +457,34 @@ animation: spin-animation 1s infinite;
   display: none;
 }
 
+.bookmark svg path {
+  fill: rgba(253, 179, 58, .5);
+}
+
+.bookmark.selected {     
+  background: linear-gradient(129.46deg, #E48C00 8.45%, #FFC42E 93.81%);
+}
+
+.attend svg path {
+  fill: #23AA50;
+}
+
+.attend.selected {        
+  background: linear-gradient(129.46deg, #23AA50 8.45%, #00DAA6 93.81%); 
+}
+
+.hide svg path {
+  fill: rgba(0,0,0,.5);
+}
+
+.hide.selected {
+  background-color: rgba(0,0,0,1);
+}
+
+.bookmark.selected svg path, .attend.selected svg path, .hide.selected svg path {
+  fill: rgba(255,255,255,1)
+}
+
 @media (min-width: 720px) {
 
   .nav-button.selected {
@@ -513,33 +541,6 @@ animation: spin-animation 1s infinite;
     background-color: transparent;
   }
 
-  .bookmark svg path {
-    fill: rgba(253, 179, 58, .5);
-  }
-
-  .bookmark.selected {
-    background-color:  rgba(253, 179, 58, 1);
-  }
-
-  .attend svg path {
-    fill: rgba(70, 47, 216, .5);
-  }
-  
-  .attend.selected {
-    background-color: rgba(70, 47, 216, 1);
-  }
-
-  .hide svg path {
-    fill: rgba(0,0,0,.5);
-  }
-
-  .hide.selected {
-    background-color: rgba(0,0,0,1);
-  }
-
-  .bookmark.selected svg path, .attend.selected svg path, .hide.selected svg path {
-    fill: rgba(255,255,255,1)
-  }
 
   .pill-button {
     display: block;
