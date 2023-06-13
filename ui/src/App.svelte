@@ -203,9 +203,11 @@
         <img style="margin-right:20px" width="100" src="/images/emergence-vertical.svg" 
         on:click={()=>adminCheck()}/>
         <p>Decentralized & local scheduling, collaboration & connection{#if $uiProps.amSteward}!{/if}</p>
+        {#if $prof.status=="complete" && $prof.value == undefined}
+          <create-profile></create-profile>
+        {/if}
       </div>
-    {/if}
-    <profile-prompt>
+    {:else }
       {#if (!sitemaps || $sitemaps.length==0) && !$uiProps.amSteward}
       <div class="app-info">
         <img width="100" src="/images/emergence-vertical.svg" 
@@ -444,7 +446,7 @@
     </div>
     </file-storage-context>
     {/if}
-    </profile-prompt>
+    {/if}
   </profiles-context>
   {/if}
 </main>
