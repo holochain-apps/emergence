@@ -12,7 +12,8 @@ import {  faBookmark, faCheck, faEyeSlash } from '@fortawesome/free-solid-svg-ic
 import type{  ActionHash } from '@holochain/client';
 import type { Snackbar } from '@material/mwc-snackbar';
 import Fa from 'svelte-fa';
-  import { errorText } from './utils';
+import { errorText } from './utils';
+import Confirm from './Confirm.svelte';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -21,6 +22,7 @@ let errorSnackbar: Snackbar;
 
 $: session = store.sessionStore(sessionHash)
 $: relData = store.sessionReleationDataStore(session)
+$: uiProps = store.uiProps
 
 async function setSessionInterest(interest: SessionInterest) {
   try {
@@ -34,9 +36,20 @@ async function setSessionInterest(interest: SessionInterest) {
     errorSnackbar.show();
   }
 }
+let confirmDialog
+function doHide() {
+  setSessionInterest(($relData.myInterest & SessionInterestBit.NoOpinion) + ($relData.myInterest ^ SessionInterestBit.Hidden))
+}
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
+<Confirm 
+    bind:this={confirmDialog}
+    message="Please confirm hiding this session."
+    details="Note: you can find hidden sessions later by selecting 'Hidden' in the filters."
+    noConfirm="confirmHide"
+    on:confirm-confirmed={doHide}>
+  </Confirm>
 
 <div class="interest">
   <div class="interest-button attend"  
@@ -54,7 +67,12 @@ async function setSessionInterest(interest: SessionInterest) {
   <div class="interest-button hide"  
     title="Hide!"
     class:selected={$relData.myInterest & SessionInterestBit.Hidden}
-    on:click={() => {setSessionInterest(($relData.myInterest & SessionInterestBit.NoOpinion) + ($relData.myInterest ^ SessionInterestBit.Hidden))}} >
+    on:click={() => {
+      if ($uiProps.confirmHide)
+        confirmDialog.open()
+      else
+        doHide()
+    }} >
     <div ><Fa icon={ faEyeSlash }/></div>
   </div>
 </div>

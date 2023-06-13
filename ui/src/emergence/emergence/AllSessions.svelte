@@ -138,7 +138,7 @@ on:session-created={() => {} }
         </div>
       {/each}
     {:else}
-      {#if $uiProps.sessionListMode==SessionListMode.GridSpace}
+      {#if $uiProps.sessionListMode==SessionListMode.GridTime}
       <div class="fix-table-head">
       <table style="max-width:100%">
         <th class="empty top-sticky"></th>

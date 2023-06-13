@@ -447,7 +447,8 @@ export interface UIProps {
   sessionListMode: string,
   pane:string,
   sessionSort: SessionSortOrder,
-  spaceSort: SpaceSortOrder
+  spaceSort: SpaceSortOrder,
+  confirmHide: boolean,
 }
 
 export enum SessionListMode {
