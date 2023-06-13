@@ -61,12 +61,12 @@ pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
 fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
     match action.hashed.content.clone() {
         Action::CreateLink(create_link) => {
-            if let Ok(Some(link_type))
+            if let Ok(Some(_link_type))
                 = LinkTypes::from_type(create_link.zome_index, create_link.link_type) {
-                emit_signal(Signal::LinkCreated {
-                    action,
-                    link_type,
-                })?;
+                // emit_signal(Signal::LinkCreated {
+                //     action,
+                //     link_type,
+                // })?;
             }
             Ok(())
         }
@@ -83,15 +83,15 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
                 )?;
             match record.action() {
                 Action::CreateLink(create_link) => {
-                    if let Ok(Some(link_type))
+                    if let Ok(Some(_link_type))
                         = LinkTypes::from_type(
                             create_link.zome_index,
                             create_link.link_type,
                         ) {
-                        emit_signal(Signal::LinkDeleted {
-                            action,
-                            link_type,
-                        })?;
+                        // emit_signal(Signal::LinkDeleted {
+                        //     action,
+                        //     link_type,
+                        // })?;
                     }
                     Ok(())
                 }
@@ -105,34 +105,34 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
             }
         }
         Action::Create(_create) => {
-            if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
-                emit_signal(Signal::EntryCreated {
-                    action,
-                    app_entry,
-                })?;
+            if let Ok(Some(_app_entry)) = get_entry_for_action(&action.hashed.hash) {
+                // emit_signal(Signal::EntryCreated {
+                //     action,
+                //     app_entry,
+                // })?;
             }
             Ok(())
         }
         Action::Update(update) => {
-            if let Ok(Some(app_entry)) = get_entry_for_action(&action.hashed.hash) {
-                if let Ok(Some(original_app_entry))
+            if let Ok(Some(_app_entry)) = get_entry_for_action(&action.hashed.hash) {
+                if let Ok(Some(_original_app_entry))
                     = get_entry_for_action(&update.original_action_address) {
-                    emit_signal(Signal::EntryUpdated {
-                        action,
-                        app_entry,
-                        original_app_entry,
-                    })?;
+                    // emit_signal(Signal::EntryUpdated {
+                    //     action,
+                    //     app_entry,
+                    //     original_app_entry,
+                    // })?;
                 }
             }
             Ok(())
         }
         Action::Delete(delete) => {
-            if let Ok(Some(original_app_entry))
+            if let Ok(Some(_original_app_entry))
                 = get_entry_for_action(&delete.deletes_address) {
-                emit_signal(Signal::EntryDeleted {
-                    action,
-                    original_app_entry,
-                })?;
+                // emit_signal(Signal::EntryDeleted {
+                //     action,
+                //     original_app_entry,
+                // })?;
             }
             Ok(())
         }
