@@ -46,9 +46,14 @@ onMount(() => {
       <span style="margin-right: 10px"><Fa icon={faUser} /></span>
       {#if filter.author}
         <Avatar agentPubKey={filter.author}></Avatar>
-        <div style="margin-left:5px;" class="micro-button" on:click={()=> {filter.author=undefined}} ><Fa  icon={faClose} /></div>
+        <div style="margin-left:5px;" class="micro-button" on:click={()=> {filter.author=undefined; dispatch('update-filter', filter)}} ><Fa  icon={faClose} /></div>
       {:else}
-        <search-agent include-myself={true} clear-on-select={true} on:agent-selected={(e)=>filter.author=e.detail.agentPubKey}></search-agent>
+        <search-agent include-myself={true} clear-on-select={true} 
+          on:agent-selected={(e)=>{
+            filter.author=e.detail.agentPubKey
+            dispatch('update-filter', filter)
+            }}
+        ></search-agent>
       {/if}
     
     </div>

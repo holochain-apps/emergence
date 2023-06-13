@@ -34,12 +34,6 @@
     let showFilter = false
 
 </script>
-{#if showFilter}
-<FeedFilter
-    on:close-filter={()=>showFilter = false}
-    on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
-    filter={$uiProps.feedFilter}></FeedFilter>
-{/if}
 <div class="pane-content flex-center discover">
 
     <sl-tab-group
