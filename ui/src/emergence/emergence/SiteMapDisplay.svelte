@@ -36,6 +36,8 @@
     $: locations = $spaces && picB64 && img && (r>-1)? $spaces.map(s=>{return {loc: store.getSpaceSiteLocation(s, sitemap.original_hash), space:s}}) : []
     $: uiProps = store ? store.uiProps : undefined
 
+    let mapCanvas
+
     onMount(async () => {
         file = await store.fileStorageClient.downloadFile(sitemap.record.entry.pic);
         const data = await file.arrayBuffer();
@@ -46,7 +48,6 @@
         }
 
         //drag to scroll map
-        const mapCanvas = document.getElementById('map');
         mapCanvas.scrollTop = 0;
         mapCanvas.scrollLeft = 0;
 
@@ -137,11 +138,11 @@ on:space-created={() => {} }
 {/if}
 
 {#if loading}
-    <div id="map"  style="display: flex; flex: 1; align-items: center; justify-content: center">
+    <div bind:this={mapCanvas} id="map"  style="display: flex; flex: 1; align-items: center; justify-content: center">
         <sl-spinner></sl-spinner>
     </div>
 {:else}
-    <div id="map" class="SiteMapDisplay {spacesDrawer}">
+    <div bind:this={mapCanvas} id="map" class="SiteMapDisplay {spacesDrawer}">
         <div class="map-controls">
             <div class="toggle-drawer map-control" on:click={() => { spacesDrawer = ! spacesDrawer } } >
                 {#if spacesDrawer}
