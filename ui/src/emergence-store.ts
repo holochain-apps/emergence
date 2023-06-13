@@ -917,15 +917,15 @@ export class EmergenceStore {
         case FeedType.SessionNew: 
         case FeedType.SessionUpdate: 
             const session = this.getSession(elem.about)
-            if (space) {
-                text = session.record.entry.title+space.record.entry.description
+            if (session) {
+                text = session.record.entry.title+session.record.entry.description
             }
             break;
         case FeedType.NoteNew:
         case FeedType.NoteUpdate:
             const note = this.getNote(elem.about)
             if (note) {
-                text = note.record.entry.text
+                text = note.record.entry.text+note.record.entry.tags.join("")
             }
         }
     return text.toLowerCase().search(keyword) >= 0

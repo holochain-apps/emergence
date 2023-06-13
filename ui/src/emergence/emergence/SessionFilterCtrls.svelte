@@ -4,7 +4,7 @@
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
   import type { EmergenceStore } from '../../emergence-store';
-  import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck, faMap, faArrowsUpDownLeftRight, faArrowUpShortWide, faArrowDownWideShort, faShapes } from '@fortawesome/free-solid-svg-icons';
+  import { faClose, faFilter, faTag, faMagnifyingGlass, faClock, faCheck, faMap, faShapes } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
 
 const dispatch = createEventDispatcher();

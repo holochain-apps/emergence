@@ -20,6 +20,7 @@ import AnyAvatar from './AnyAvatar.svelte';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import MultiSelect from 'svelte-multiselect'
+import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []

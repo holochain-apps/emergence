@@ -99,14 +99,14 @@ const toggleDayInFilter = (day:Date) => {
       on:input={e => { filter.tags = e.target.value.split(/,\W*/).filter((w)=>w); console.log(filter.tags); dispatch('update-filter', filter)} }
     ></sl-input>
   </div> 
-  <div class="center-row">
+  <!-- <div class="center-row">
     <span style="margin-right: 4px"><Fa icon={faMagnifyingGlass} /></span>
       <sl-input
       placeholder="search text"
       value={filter.keyword}
       on:input={e => { filter.keyword = e.target.value; ; dispatch('update-filter', filter)} }
     ></sl-input>
-  </div>
+  </div> -->
   <div class="center-row">
     <span style="margin-right: 10px"><Fa icon={faMap} /></span>
     <sl-select style="min-width:100px" multiple clearable

@@ -8,7 +8,7 @@ import '@shoelace-style/shoelace/dist/components/select/select.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import { faArrowRotateBack, faClose, faMagnifyingGlass, faMap, faTag, faUser } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
-import { defaultFeedFilter, defaultSessionsFilter, type FeedFilter, type SessionsFilter } from './types';
+import { defaultFeedFilter, type FeedFilter } from './types';
 import { fly } from 'svelte/transition';
 import type { EmergenceStore } from '../../emergence-store';
 import { storeContext } from '../../contexts';
@@ -61,14 +61,14 @@ onMount(() => {
       on:input={e => { filter.tags = e.target.value.split(/,\W*/).filter((w)=>w) ; dispatch('update-filter', filter)} }
     ></sl-input>
   </div> 
-  <div class="center-row" style="background-color:white;">
+  <!-- <div class="center-row" style="background-color:white;">
     <span style="margin-right: 4px"><Fa icon={faMagnifyingGlass} /></span>
       <sl-input
       value={filter.keyword}
       autocomplete="off"
       on:input={e => { filter.keyword = e.target.value; ; dispatch('update-filter', filter)} }
     ></sl-input>
-  </div>
+  </div> -->
   <div class="center-row">
     <span style="margin-right: 10px"><Fa icon={faMap} /></span>
     <sl-select style="min-width:100px" multiple clearable

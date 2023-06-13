@@ -75,7 +75,7 @@ on:session-created={() => {} }
         <div class="center-row search-bar">
           <span class="search-icon"><Fa icon={faSearch} /></span>
           <sl-input
-            value={$uiProps.peopleFilter.keyword}
+            value={$uiProps.sessionsFilter.keyword}
             placeholder="Search by title & description"
             on:input={e => { 
               const filter = $uiProps.sessionsFilter;

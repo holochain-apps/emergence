@@ -13,7 +13,7 @@
     import TagCloud from './TagCloud.svelte'
     import People from './People.svelte';
     import FeedFilter from './FeedFilter.svelte';
-    import { faClose, faFilter, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
+    import { faClose, faFilter, faMap, faSearch, faTag } from '@fortawesome/free-solid-svg-icons';
     import Fa from 'svelte-fa';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -63,11 +63,11 @@
             <div class="discover-section" style="display: flex; flex-direction: column;">
 
                 <div style="display: flex; flex-direction: row; align-self:flex-end; margin-bottom:10px">
-                    {#if $uiProps.feedFilter.keyword}
+                    <!-- {#if $uiProps.feedFilter.keyword}
                     <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"feedFilter")}} >
                       <Fa size="sm" icon={faMagnifyingGlass} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
                     {/if}
-              
+               -->
                     {#if $uiProps.feedFilter.tags.length>0}
                     <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"feedFilter")}} >
                       <Fa size="sm" icon={faTag} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
@@ -79,6 +79,18 @@
                 </div>
                 <div class="discover section-controls">
                     <h3>Latest activity</h3>
+                    <div class="center-row search-bar">
+                        <span class="search-icon"><Fa icon={faSearch} /></span>
+                        <sl-input
+                          value={$uiProps.feedFilter.keyword}
+                          placeholder="Search content"
+                          on:input={e => { 
+                            const filter = $uiProps.feedFilter;
+                            filter.keyword = e.target.value
+                            store.setUIprops({feedFilter: filter})}}
+                        ></sl-input>
+                      </div> 
+              
                     <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } >
                         <Fa icon={faFilter} /> Filter
                     </sl-button>
@@ -116,6 +128,19 @@
         justify-content: space-between;
         display: flex;
         flex-direction: row;
+        align-items: center;
     }
+    .search-bar {
+        height:20px;
+        max-width: 720px;
+        margin: 0 auto 0 auto;
+        position: relative;
+    }
+
+  .search-bar sl-input {
+  }
+  .search-icon {
+    margin-right: 5px;
+  }
 
 </style>

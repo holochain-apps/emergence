@@ -147,7 +147,6 @@
         for (const s of data.maps) {
             const e = s.entry
             let pic
-            console.log("MAP", e, uploadedPics)
             if (e.pic_data) {
                 pic = await uploadImportedFile(e)
             } else {

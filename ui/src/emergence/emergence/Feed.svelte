@@ -16,7 +16,6 @@
   $: agentSessionsb64 = Array.from(sessions ? sessions : []).map((s)=> encodeHashToBase64(s))
   $: fullFeed = store.feed
   $: uiProps = store.uiProps
-  $: agentB64 = forAgent ? encodeHashToBase64(forAgent) : undefined
   $: feed = filteredFeed($fullFeed, $uiProps)
   $: error;
 
