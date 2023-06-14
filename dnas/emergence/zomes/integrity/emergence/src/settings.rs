@@ -1,9 +1,19 @@
 use hdi::prelude::*;
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+pub struct SessionType {
+    pub name: String,
+    pub color: String,
+    pub can_rsvp: bool,
+    pub can_any_time: bool,  
+    pub can_leaderless: bool,  
+}
+
 #[derive(Serialize, Deserialize, Debug, SerializedBytes, Clone, PartialEq)]
 pub struct Settings {
     pub game_active: bool,
     pub current_sitemap: Option<ActionHash>,
+    pub session_types: Vec<SessionType>
 }
 
 pub fn validate_create_link_settings(

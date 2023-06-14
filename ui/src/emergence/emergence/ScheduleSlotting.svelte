@@ -31,16 +31,35 @@
   $: uiProps = store.uiProps
 
   $: loading, error, creatingTimeWindow;
-  $: spaces = store.spaces
-  $: windows = store.timeWindows
-  $: days = calcDays($windows, slotType, $uiProps.sessionsFilter) 
+  $: allSpaces = store.spaces
+  $: filteredSpaces = filterSpaces($allSpaces, slotType)
+  $: allWindows = store.timeWindows
+  $: filteredWindows = filterWindows($allWindows, slotType)
+
+  $: days = calcDays(filteredWindows, slotType, $uiProps.sessionsFilter) 
   $: sessions = store.sessions
+  $: projection = store.sessionInterestProjection($sessions)
 
   let selectedSessions:HoloHashMap<ActionHash,boolean> = new HoloHashMap()
   let selectedSpaceIdx: number|undefined = undefined
   let selectedWindow: TimeWindow|undefined = undefined
 
   $: selectedSessions, selectedSpaceIdx, selectedWindow
+
+  const filterSpaces = (spaces: Array<Info<Space>>, type: string) => {
+    if (type) { 
+      return spaces.filter(s=>s.record.entry.tags.includes(type))
+    }
+    return spaces
+  }
+
+  const filterWindows = (windows: Array<TimeWindow>, type: string) => {
+    if (type) { 
+      return windows.filter(w=>w.tags.includes(type))
+    }
+    return windows
+  }
+
 
   onMount(async () => {
     loading = false
@@ -64,7 +83,7 @@
     selectedWindow = undefined
 
     if (selectedSpaceIdx !== idx) {
-      $windows.forEach(window=>{
+      filteredWindows.forEach(window=>{
         selectSessions(window,space)
       })
       selectedSpaceIdx = idx
@@ -78,7 +97,7 @@
     selectedSpaceIdx = undefined
 
     if (JSON.stringify(window) !== JSON.stringify(selectedWindow)) {
-      $spaces.forEach(space=>{
+      filteredSpaces.forEach(space=>{
         selectSessions(window, space)
       })
       selectedWindow = window
@@ -209,7 +228,7 @@
     var srcId = e.dataTransfer.getData("text");
 
     const [windowJSON,idx] = elem.id.split("-")
-    const space = $spaces[parseInt(idx)]
+    const space = filteredSpaces[parseInt(idx)]
     const slot = {window:JSON.parse(windowJSON), space:space.original_hash}
     const sessionHash = decodeHashFromBase64(srcId)
 
@@ -220,12 +239,12 @@
 
     if (elem.id && (!sessionSlot || JSON.stringify(sessionSlot.window) != windowJSON) || encodeHashToBase64(slot.space) != encodeHashToBase64(sessionSlot.space)) {
       await store.slot(sessionHash, slot)
-      spaces = store.spaces
+      allSpaces = store.spaces
     }
     if (selectedSpaceIdx) {
       const idx = selectedSpaceIdx
       selectedSpaceIdx = undefined
-      selectSpace(idx, $spaces[idx])
+      selectSpace(idx, filteredSpaces[idx])
     }
     if (selectedWindow) {
       const window = selectedWindow
@@ -315,9 +334,10 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   </div>
   <div style="display:flex">
     <SessionFilterCtrls
-          on:toggle-filter={()=>{showFilter = !showFilter;}}
-        ></SessionFilterCtrls>
-  
+      showKeywordCancel={true}
+      on:toggle-filter={()=>{showFilter = !showFilter;}}
+    ></SessionFilterCtrls>
+
     <sl-select style="margin-right: 5px;width: 200px;"
     placeholder="Filter by Slot Type"
     on:sl-change={(e) => {slotType = e.target.value 
@@ -326,6 +346,8 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
     pill
     clearable
     >
+      <sl-option value={undefined}> None</sl-option>
+
       {#each store.getSlotTypeTags() as type}
         <sl-option value={type}> {type}</sl-option>
       {/each}
@@ -374,11 +396,11 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
 
       >
         <div><strong>Orphan Sessions</strong></div>
-        {#each $sessions.filter((s)=>!s.record.entry.trashed && !store.getSessionSlot(s)) as session}
+        {#each projection.interestData.filter((d)=>!store.getSessionSlot(d.session)) as d}
           <div
-            id={encodeHashToBase64(session.original_hash)}
+            id={encodeHashToBase64(d.session.original_hash)}
             class="orphaned-session"
-            class:tilted={draggedItemId == encodeHashToBase64(session.original_hash)}
+            class:tilted={draggedItemId == encodeHashToBase64(d.session.original_hash)}
             draggable={dragOn}
             on:dragstart={handleDragStart}
             on:dragend={handleDragEnd}              
@@ -387,9 +409,10 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
             on:dragenter={handleDragEnterOrphan} 
             on:dragleave={handleDragLeaveOrphan}  >
             <SessionSummary 
-
               showAmenities={true}
-              session={session}>
+              session={d.session}
+              extra={`Est. Att.: ${d.estimatedAttendance.toFixed(0)}`}
+              >
             </SessionSummary>
             </div>
           </div>
@@ -401,7 +424,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
         {#if bySpace}
         <table style="">
           <th class="empty"></th>
-          {#each $spaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
+          {#each filteredSpaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
             <th class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
               class:tagged={space.record.entry.tags.length > 0}
@@ -410,7 +433,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
               class:amo-warn={draggedAmenitiesCount > 0 && overlappingAmenities(space).length < draggedAmenitiesCount }
               title={spaceToolTip(space)}
               on:click={(e)=>{selectSpace(idx, space); e.stopPropagation()}}>
-]                <SpaceLink spaceHash={space.original_hash}></SpaceLink>
+                <SpaceLink spaceHash={space.original_hash}></SpaceLink>
                 {#if space.record.entry.pic}
                  <div class="space-pic">
                     <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
@@ -423,9 +446,9 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
           {/each}
           {#each days as day}
             <tr>
-              <td colspan="{$spaces.length+1}" >{day.toDateString()}</td>
+              <td class="day" colspan="{filteredSpaces.length+1}" >{day.toDateString()}</td>
             </tr>
-            {#each windowsInDay($windows, day, slotType).sort(sortWindows) as window}
+            {#each windowsInDay(filteredWindows, day, slotType).sort(sortWindows) as window}
             <tr>
               <td class="time-title"
                 class:tagged={window.tags.length > 0}
@@ -436,12 +459,12 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
                 
                   {new Date(window.start).toTimeString().slice(0,5)}
                   {#if $uiProps.amSteward}
-                    <sl-button style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
+                    <sl-button class="trash" style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                       <Fa icon={faTrash} />
                     </sl-button>
                   {/if}
               </td>
-              {#each $spaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
+              {#each filteredSpaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
                 <td 
                   id={`${JSON.stringify(window)}-${idx}}`}
                   class="schedule-slot"
@@ -479,7 +502,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
           <tr>
             <th class="empty"></th>
             {#each days as day}
-            <th style="text-align:left" colspan="{windowsInDay($windows, day, slotType).length+1}">{dayToStr(day)}</th>
+            <th style="text-align:left" colspan="{windowsInDay(filteredWindows, day, slotType).length+1}">{dayToStr(day)}</th>
 
             {/each}
           </tr>
@@ -488,7 +511,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
 
           {#each days as day}
             <th style=""></th>
-            {#each windowsInDay($windows, day, slotType).sort(sortWindows) as window}
+            {#each windowsInDay(filteredWindows, day, slotType).sort(sortWindows) as window}
               <th class="time-title"
                 class:selected={JSON.stringify(selectedWindow) ==  JSON.stringify(window)}
                 class:tagged={window.tags.length > 0}
@@ -498,7 +521,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
     
                 {new Date(window.start).toTimeString().slice(0,5)}
                 {#if $uiProps.amSteward}
-                  <sl-button style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
+                  <sl-button class="trash" style="margin-left: 4px;" on:click={(e)=>{deleteWindow(window);e.stopPropagation()}} circle>
                     <Fa icon={faTrash} />
                   </sl-button>
                 {/if}
@@ -508,7 +531,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
             {/each}
           {/each}
           </tr>
-          {#each $spaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
+          {#each filteredSpaces.sort($uiProps.spaceSort == SpaceSortOrder.Key ? sortSpaceKey : sortSpaceCapacity) as space, idx}
           <tr>
             <td class="space-title"
               class:selected={selectedSpaceIdx ==  idx}
@@ -533,7 +556,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
             {#each days as day}
               <td class="empty"></td>
 
-              {#each $windows.filter(w=>{
+              {#each filteredWindows.filter(w=>{
                   // @ts-ignore
                   return new Date(w.start).toDateString()  == day.toDateString()
                 }).sort(sortWindows) as window}
@@ -614,15 +637,32 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   margin: 5px;
  }
  .space-title {
-  outline: solid 1px;
+  padding: 10px;
+  line-height: 18px;
   cursor: pointer;
+  border-bottom: 1px solid rgba(0,0,0,.3);
  }
  .time-title {
-  outline: solid 1px;
   cursor: pointer;
  }
+
+ .day {
+  font-size: 18px;
+ }
+
+ .time-title .trash {
+  display: none;
+ }
+
+ .time-title:hover .trash {
+  display: block;
+ }
+
  .schedule-slot {
-  outline: solid 1px;
+  border-left: 1px dashed rgba(0,0,0,.2);
+  border-bottom: 1px solid rgba(0,0,0,.3);
+  border-right:none;
+  outline: none;
   cursor: pointer;
  }
  .slotted-session {
@@ -642,10 +682,10 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
  .excluded {
   background: repeating-linear-gradient(
     45deg,
-  rgba(0, 0, 0, 0.2),
-  rgba(0, 0, 0, 0.2) 10px,
-  rgba(0, 0, 0, 0.3) 10px,
-  rgba(0, 0, 0, 0.3) 20px
+  rgba(0, 0, 0, 0.05),
+  rgba(0, 0, 0, 0.05) 10px,
+  rgba(0, 0, 0, 0.1) 10px,
+  rgba(0, 0, 0, 0.1) 20px
     );
  }
  .tilted {
@@ -660,6 +700,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
 }
 
 .modal.create-slot {
+  width: 300px;
   z-index: 100;
 }
 

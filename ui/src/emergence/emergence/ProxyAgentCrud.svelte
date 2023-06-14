@@ -15,6 +15,7 @@ import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import { encodeHashToBase64, type EntryHash } from '@holochain/client';
+  import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -44,7 +45,7 @@ export const open = (pagent) => {
     bio = proxyAgent.record.entry.bio
     location = proxyAgent.record.entry.location
     pic = proxyAgent.record.entry.pic
-    uploadFiles.defaultValue = pic
+    uploadFiles.defaultValue = pic ? pic : undefined  // can't be null, must be undefined
 
   } else {
     nickname = ""
@@ -53,6 +54,7 @@ export const open = (pagent) => {
     pic = undefined
     uploadFiles.defaultValue = undefined
   }
+  console.log("SDF", uploadFiles.defaultValue)
   uploadFiles.reset()
   dialog.show()
 }
@@ -74,7 +76,7 @@ async function createProxyAgent() {
     dispatch('proxyagent-created', { proxyAgent: record });
   } catch (e) {
     console.log("CREATE PROXYAGENT ERROR", e)
-    errorSnackbar.labelText = `Error creating the proxyAgent: ${e.data.data}`;
+    errorSnackbar.labelText = `Error creating the proxyAgent: ${errorText(e)}`;
     errorSnackbar.show();
   }
   dialog.hide()

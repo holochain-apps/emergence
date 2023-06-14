@@ -1,17 +1,22 @@
 <script lang="ts">
+import '@shoelace-style/shoelace/dist/components/select/select.js';
+import '@shoelace-style/shoelace/dist/components/option/option.js';
+import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
+
 import { onMount, getContext, createEventDispatcher } from 'svelte';
 import { encodeHashToBase64, type Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SessionSummary from './SessionSummary.svelte';
-  import SessionCrud from './SessionCrud.svelte';
+import SessionCrud from './SessionCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import SessionFilter from './SessionFilter.svelte';
-import { faClose, faFilter, faList, faTable, faTag, faMagnifyingGlass, faClock, faCheck, faMap, faArrowsUpDownLeftRight, faArrowUpShortWide, faArrowDownWideShort } from '@fortawesome/free-solid-svg-icons';
+import { faArrowUpShortWide, faArrowDownWideShort, faSearch } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import { calcDays, dayToStr, sortWindows, windowDay, windowDayAsTimestamp, windowsInDay } from './utils';
-  import { DetailsType, SessionSortOrder, type Info, type Session, type TimeWindow } from './types';
-  import SessionFilterCtrls from './SessionFilterCtrls.svelte';
-  import SpaceLink from './SpaceLink.svelte';
+import { DetailsType, SessionSortOrder, type Info, type Session, type TimeWindow, SessionListMode } from './types';
+import SessionFilterCtrls from './SessionFilterCtrls.svelte';
+import SpaceLink from './SpaceLink.svelte';
+import Sense from './Sense.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -20,13 +25,16 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let error: any = undefined;
 let showDeletedSessions = false
 
+$: settings = store.settings
 $: sessions = store.sessions
-$: spaces = store.spaces
-$: windows = store.timeWindows
+$: spaces = store.sitemapFilteredSpaces()
+$: windows = store.sitemapFilteredWindows()
 $: error;
 $: uiProps = store.uiProps
 let slotType: string 
-$: slotType  
+$: slotType
+let listModeSelect: SlSelect;
+
 
 $: _days = calcDays($windows, slotType, $uiProps.sessionsFilter) 
 $: days = $uiProps.sessionSort == SessionSortOrder.Ascending ? _days : _days.reverse()
@@ -37,9 +45,9 @@ const windowsInDaySorted = (w: Array<TimeWindow>, day: Date, type): Array<TimeWi
 let showFilter = false
 
 let createSessionDialog: SessionCrud
-let bySpace = false
 
 onMount(async () => {
+  listModeSelect.value = $uiProps.sessionListMode
 });
 const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
   const slota = store.getSessionSlot(a)
@@ -55,13 +63,25 @@ const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
 bind:this={createSessionDialog}
 on:session-created={() => {} }
 ></SessionCrud>
+
+
 <div class="pane-header">
   <div class="header-content">
-    <h3>Sessions</h3>
+    {#if $uiProps.amSteward || (store.getCurrentSiteMap() && store.getCurrentSiteMap().record.entry.tags.includes("emergent"))}
     <div class="pill-button"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
-
+    {/if}
       <div class="section-controls">
-        
+        <div class="center-row search-bar">
+          <span class="search-icon"><Fa icon={faSearch} /></span>
+          <sl-input
+            value={$uiProps.sessionsFilter.keyword}
+            placeholder="Search by title & description"
+            on:input={e => { 
+              const filter = $uiProps.sessionsFilter;
+              filter.keyword = e.target.value
+              store.setUIprops({sessionsFilter: filter})}}
+          ></sl-input>
+        </div> 
         <SessionFilterCtrls
           on:toggle-filter={()=>{showFilter = !showFilter;}}
         ></SessionFilterCtrls>
@@ -71,18 +91,18 @@ on:session-created={() => {} }
           <Fa icon={$uiProps.sessionSort == SessionSortOrder.Ascending ? faArrowUpShortWide : faArrowDownWideShort} />
         </sl-button>
 
-        <sl-button title={$uiProps.sessionListMode ? "Switch to Grid View" : "Switch to List View"} style="margin-left: 8px; " on:click={() => { store.setUIprops({sessionListMode:!$uiProps.sessionListMode }) }} circle>
-          <Fa icon={$uiProps.sessionListMode ? faTable : faList} />
-        </sl-button>
+        <sl-select style="margin-left:10px;width:150px;" bind:this={listModeSelect}
+          pill
+          on:sl-change={(e) => {
+            store.setUIprops({sessionListMode: e.target.value})
+          }}
+        >
+        <sl-option value="">List</sl-option>
+        <sl-option value="detail">List: Detail</sl-option>
+        <sl-option value="grid-time">Grid: Time</sl-option>
+        <sl-option value="grid-space">Grid: Space</sl-option>
 
-
-        {#if !$uiProps.sessionListMode}
-          <sl-button title="Toggle Axes"  style="margin-left: 8px; " on:click={() => { bySpace = !bySpace }} circle>
-            <Fa icon={faArrowsUpDownLeftRight} />
-          </sl-button>
-        {/if}
-
-
+        </sl-select>
     </div>
   </div>
   {#if showFilter}
@@ -93,24 +113,31 @@ on:session-created={() => {} }
   {/if}
 </div>
 <div class="pane-content">
+  {#if $settings.game_active}
+    <div class="sensemaking-game">
+      <Sense></Sense>
+    </div>
+  {/if}
   {#if error}
     <span class="notice">Error fetching the sessions: {error.data.data}.</span>
   {:else if $sessions.length === 0}
     <span class="notice">No sessions found.</span>
   {:else}
-    {#if $uiProps.sessionListMode}
+    {#if $uiProps.sessionListMode == SessionListMode.List || $uiProps.sessionListMode == SessionListMode.ListDetail}
       {#each $sessions.filter(s=> (!s.record.entry.trashed || showDeletedSessions) && store.filterSession(s, $uiProps.sessionsFilter)).sort(sortSessions) as session}
         <div class="session">
           <SessionSummary 
             showTags={true}
             showSlot={true}
-            allowSetIntention={true} 
+            showLeaderAvatar={$uiProps.sessionListMode == "detail"}
+            showDescription={$uiProps.sessionListMode == "detail"}
+            allowSetIntention={$settings.session_types[session.record.entry.session_type].can_rsvp} 
             session={session}>
           </SessionSummary>
         </div>
       {/each}
     {:else}
-      {#if bySpace}
+      {#if $uiProps.sessionListMode==SessionListMode.GridTime}
       <div class="fix-table-head">
       <table style="max-width:100%">
         <th class="empty top-sticky"></th>
@@ -227,6 +254,17 @@ on:session-created={() => {} }
 </div>
 
 <style>
+
+  .sensemaking-game {
+    max-width: 720px;
+    margin: 0 auto;
+    background-color: rgba(73, 80, 93, 1.0);
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 30px;
+    width: 100%;
+  }
+
 .empty {
   background-color: white;
   outline: solid 1px lightgray;
@@ -249,8 +287,10 @@ on:session-created={() => {} }
     width: 100%;
   }
  .space-title {
-  background-color: white;
+  padding: 5px;
+  line-height: 18px;
   outline: solid 1px lightgray;
+  background-color: white;
  }
  .time-title {
   background-color: white;
@@ -265,7 +305,11 @@ on:session-created={() => {} }
   width: 4px;
   outline: solid 1px lightgray;
  }
+ td  {
+  width: 200px;
+ }
  .left-sticky {
+  width:200px;
   position: sticky;
   left: 0;
  }
@@ -275,8 +319,10 @@ on:session-created={() => {} }
  }
 
  .schedule-slot {
-  outline: solid 1px lightgray;
-  background-color: white;
+  border-left: 1px dashed rgba(0,0,0,.2);
+  border-bottom: 1px solid rgba(0,0,0,.3);
+  border-right:none;
+  outline: none;
  }
  .slotted-session {
   background-color: lightgreen;
@@ -287,4 +333,49 @@ on:session-created={() => {} }
   margin: 3px;
   cursor: pointer;
  }
+ .search-bar {
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto 0 auto;
+    position: relative;
+  }
+
+  .search-bar sl-input {
+    width: 100%;
+  }
+  .search-icon {
+    margin-right: 5px;
+  }
+
+  .pill-button {
+    background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
+    min-height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 10px 15px rgba(0,0,0,.35);
+    border-radius: 5px;
+    padding: 0 20px;
+    margin-right: 20px;
+    cursor: pointer;
+  }
+
+
+  .pill-button span {
+    color: white;
+  }
+
+@media (min-width: 720px) {
+  .pill-button {
+    position: sticky;
+    top: 0;
+  }
+
+  .pane-header {
+    top: -20px;
+    position: sticky;
+  }
+}
 </style>

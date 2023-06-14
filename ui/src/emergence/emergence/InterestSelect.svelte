@@ -12,6 +12,8 @@ import {  faBookmark, faCheck, faEyeSlash } from '@fortawesome/free-solid-svg-ic
 import type{  ActionHash } from '@holochain/client';
 import type { Snackbar } from '@material/mwc-snackbar';
 import Fa from 'svelte-fa';
+import { errorText } from './utils';
+import Confirm from './Confirm.svelte';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -20,6 +22,7 @@ let errorSnackbar: Snackbar;
 
 $: session = store.sessionStore(sessionHash)
 $: relData = store.sessionReleationDataStore(session)
+$: uiProps = store.uiProps
 
 async function setSessionInterest(interest: SessionInterest) {
   try {
@@ -29,31 +32,47 @@ async function setSessionInterest(interest: SessionInterest) {
   } catch (e: any) {
     console.log("SET SESSION INTEREST ERROR", e)
 
-    errorSnackbar.labelText = `Error attending the session: ${e.data.data}`;
+    errorSnackbar.labelText = `Error attending the session: ${errorText(e)}`;
     errorSnackbar.show();
   }
+}
+let confirmDialog
+function doHide() {
+  setSessionInterest(($relData.myInterest & SessionInterestBit.NoOpinion) + ($relData.myInterest ^ SessionInterestBit.Hidden))
 }
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
+<Confirm 
+    bind:this={confirmDialog}
+    message="Please confirm hiding this session."
+    details="Note: you can find hidden sessions later by selecting 'Hidden' in the filters."
+    noConfirm="confirmHide"
+    on:confirm-confirmed={doHide}>
+  </Confirm>
 
 <div class="interest">
-  <div class="interest-button bookmark" style="margin-right:5px"
-    title="I'm Interested"
-    class:selected={$relData.myInterest & SessionInterestBit.Interested}
-    on:click={() => {setSessionInterest( ($relData.myInterest & ~SessionInterestBit.Hidden) ^ SessionInterestBit.Interested)}} >
-    <div ><Fa icon={ faBookmark } /></div>
-  </div>
   <div class="interest-button attend"  
     title="I'm Going!"
     class:selected={$relData.myInterest & SessionInterestBit.Going}
     on:click={() => {setSessionInterest(($relData.myInterest & ~SessionInterestBit.Hidden) ^ SessionInterestBit.Going)}} >
     <div ><Fa icon={ faCheck } /></div>
   </div>
+  <div class="interest-button bookmark" style="margin-right:5px"
+    title="I'm Interested"
+    class:selected={$relData.myInterest & SessionInterestBit.Interested}
+    on:click={() => {setSessionInterest( ($relData.myInterest & ~SessionInterestBit.Hidden) ^ SessionInterestBit.Interested)}} >
+    <div ><Fa icon={ faBookmark } /></div>
+  </div>
   <div class="interest-button hide"  
     title="Hide!"
     class:selected={$relData.myInterest & SessionInterestBit.Hidden}
-    on:click={() => {setSessionInterest(($relData.myInterest & SessionInterestBit.NoOpinion) + ($relData.myInterest ^ SessionInterestBit.Hidden))}} >
+    on:click={() => {
+      if ($uiProps.confirmHide)
+        confirmDialog.open()
+      else
+        doHide()
+    }} >
     <div ><Fa icon={ faEyeSlash }/></div>
   </div>
 </div>
@@ -62,7 +81,7 @@ async function setSessionInterest(interest: SessionInterest) {
 <style>
   .interest {
     display:flex;
-    flex-direction: row;
+    flex-direction: column;
   }
   .interest-button {
     display:flex;
@@ -76,4 +95,9 @@ async function setSessionInterest(interest: SessionInterest) {
     margin-right: 5px;
     cursor: pointer;
   }
+@media (min-width: 720px) { 
+  .interest {
+    flex-direction: row;
+  }
+}
 </style>

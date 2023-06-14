@@ -17,8 +17,8 @@
     import NoteDetail from './NoteDetail.svelte';
     import SessionSummary from './SessionSummary.svelte';
     import Feed from './Feed.svelte';
-    import Profile from './Profile.svelte';
     import { slide } from 'svelte/transition';
+    import Avatar from './Avatar.svelte';
 
     const dispatch = createEventDispatcher();
     export let agentPubKey: AgentPubKey
@@ -27,8 +27,12 @@
     let showDeletedSession = false
 
     onMount(async () => {
+        if (agentPubKey === undefined) {
+            throw new Error(`The agentPubKey is required for the Folk element`);
+        }
         await store.fetchAgentStuff(agentPubKey)
-        tabs.show($uiProps.youPanel)
+        if (tabs)
+            tabs.show($uiProps.youPanel)
     });
 
     $: profile = store.profilesStore.profiles.get(agentPubKey)
@@ -45,17 +49,16 @@
               <Fa icon={faCircleArrowLeft} />
             </sl-button>
         </div>
-      
-        
-        <Profile agentPubKey={agentPubKey}></Profile>
 
-     
-        <div style="display: flex; flex-direction: row; align-self:center">
-
-        </div>
     </div>
 
 <div  class="pane-content flex-center">
+          
+    <div class="folk-profile">
+        <Avatar agentPubKey={agentPubKey} ></Avatar>
+        {#if $profile.value.fields.location}<div class="location">{$profile.value.fields.location}</div>{/if}
+        {#if $profile.value.fields.bio}<div class="bio">{$profile.value.fields.bio}</div>{/if}
+    </div>
     <sl-tab-group
         bind:this={tabs}
         on:sl-tab-show={(e)=>store.setUIprops({youPanel:e.detail.name})}
@@ -96,6 +99,18 @@
 {:else}<sl-spinner></sl-spinner>
 {/if}
 <style>
-  
-  </style>
+
+.folk-profile {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    text-align: center;
+    min-width: 200px;
+}  
+
+.location {
+    opacity: .6;
+    font-size: 12px;
+}
+</style>
   

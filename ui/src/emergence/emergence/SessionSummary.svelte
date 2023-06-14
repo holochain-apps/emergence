@@ -17,10 +17,13 @@ const dispatch = createEventDispatcher();
 
 export let session: Info<Session>;
 export let allowSetIntention = false;
+export let showDescription = false;
 export let showTags = false;
 export let showAmenities = false;
 export let showSlot = false;
 export let showLeaders = true;
+export let showLeaderAvatar = false;
+export let extra = ""
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -33,6 +36,8 @@ $: loading, session, slot;
 $: tags = sessionTags(session)
 $: slot = store.getSessionSlot(session)
 $: going = Array.from($relData.interest).filter(([_,i])=> i & (SessionInterestBit.Going+SessionInterestBit.Interested))
+$: settings = store.settings
+$: sessionType = $settings.session_types[session.record.entry.session_type]
 
 onMount(async () => {
   loading = false
@@ -40,7 +45,7 @@ onMount(async () => {
     throw new Error(`The session input is required for the SessionSummary element`);
   }
 });
-$:space = slot? store.getSpace(slot.space) : undefined
+$:space = slot && slot.space ? store.getSpace(slot.space) : undefined
 </script>
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -66,7 +71,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
           {new Date(slot.window.start).toTimeString().slice(0,5)}
         </div>
         <div class="space clickable" on:click={(e)=>{e.stopPropagation();store.openDetails(DetailsType.Space, space.original_hash)}}>
-          {space ? space.record.entry.name : "Unknown"}
+          {space ? space.record.entry.name : ""}
         </div>
         {:else}
         <div class="date">
@@ -100,6 +105,12 @@ $:space = slot? store.getSpace(slot.space) : undefined
                   {going.length}
                 </div>
               </sl-tooltip>
+              {#if extra}
+                <div>
+                  {extra}
+                </div>
+              {/if}
+        
               {:else}
                <Fa icon={faUserGroup} /> 0
               {/if}
@@ -109,18 +120,24 @@ $:space = slot? store.getSpace(slot.space) : undefined
           <div class="leaders">
               <span style="padding-top: 2px">Hosted by:</span>
               {#each session.record.entry.leaders as leader}
-              <span  style="margin-top: -2px;"><AnyAvatar showAvatar={false} agent={leader}></AnyAvatar></span>
+              <span  style="margin-top: 2px;"><AnyAvatar showAvatar={showLeaderAvatar} size={20} agent={leader}></AnyAvatar></span>
               {/each}
           </div>
         {/if}
       </div>
     </div>
     <div class="bottom-area">
+      {#if showDescription}
+        <div class="description">
+          {session.record.entry.description}
+        </div>
+      {/if}
       {#if showTags}
         <div class="tags">
+          <div class="session-type" style={`border: 1px solid ${sessionType.color}; color: ${sessionType.color};`}>{sessionType.name}</div>
           {#each tags as tag}
           <div class="tag clickable-tag" on:click={(e)=>{e.stopPropagation(); store.filterTag(tag,"sessionsFilter")}}>
-            {tag}
+            #{tag}
           </div>
           {/each}
         </div>
@@ -143,11 +160,17 @@ $:space = slot? store.getSpace(slot.space) : undefined
 
 <style>
 
+  .tags {
+    display: block;
+    text-align: left;
+  }
+
   .tag {
-    border: 1px solid #25bab054;
-    color: #25BAB1;
+    border: 1px solid #2F87D850;
+    color: #2F87D8;
     background-color: transparent;
     margin-bottom: 0;
+    display: inline;
   }
 
   .clickable-tag {
@@ -183,7 +206,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
     background: #565E6D;
     width: 105px;
     text-align: center;
-    border-radius: 10px 0 0 10px;
+    border-radius: 0;
     color: white;
     box-shadow: inset -20px 0 30px rgba(0, 0, 0, .5);
   }
@@ -199,12 +222,14 @@ $:space = slot? store.getSpace(slot.space) : undefined
     flex-direction: column;
     padding: 10px 15px;
     justify-content: center;
-    background-color: #fff;
     width: 100%;
   }
   .top-area, .bottom-area {
     display: flex;
     justify-content: space-between;
+  }
+  .bottom-area {
+    flex-direction: column
   }
   .left-side {
     display: flex;
@@ -238,4 +263,22 @@ $:space = slot? store.getSpace(slot.space) : undefined
   :global(.clickable) {
     cursor: pointer;
   }
+
+  .session-type {
+    margin-bottom: 0;
+    display: inline;
+    border-radius: 7px;
+    padding: 5px;
+    margin-right: 5px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    font-size: 12px;
+  }
+
+  @media (min-width: 720px) {
+
+  .slot {
+    border-radius: 10px 0 0 10px;
+  }
+}
 </style>

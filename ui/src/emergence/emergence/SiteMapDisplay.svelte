@@ -11,7 +11,9 @@
     import { fromUint8Array } from "js-base64";
     import { watchResize } from "svelte-watch-resize";
     import  { HoloHashMap } from '@holochain-open-dev/utils';
+    import SpaceCrud from './SpaceCrud.svelte';
     import { encodeHashToBase64, type ActionHash } from '@holochain/client';
+    import AllSpaces from './AllSpaces.svelte';
 
     const dispatch = createEventDispatcher();
 
@@ -26,10 +28,15 @@
     let r = 0
     let markerSize = 30
     let spaceDetails
+    let spacesDrawer = false
+    let createSpaceDialog: SpaceCrud
 
     $: picB64, img, r, spaceDetails
     $: spaces = store.spaces
     $: locations = $spaces && picB64 && img && (r>-1)? $spaces.map(s=>{return {loc: store.getSpaceSiteLocation(s, sitemap.original_hash), space:s}}) : []
+    $: uiProps = store ? store.uiProps : undefined
+
+    let mapCanvas
 
     onMount(async () => {
         file = await store.fileStorageClient.downloadFile(sitemap.record.entry.pic);
@@ -39,13 +46,56 @@
         if (sitemap === undefined) {
             throw new Error(`The sitemap input is required for the SiteMap element`);
         }
+
+        //drag to scroll map
+        mapCanvas.scrollTop = 0;
+        mapCanvas.scrollLeft = 0;
+
+        let pos = { top: 0, left: 0, x: 0, y: 0 };
+
+        const mouseDownHandler = function (e) {
+            // Change the cursor and prevent user from selecting the text
+            console.log('down');
+            mapCanvas.style.cursor = 'grabbing';
+            mapCanvas.style.userSelect = 'none';
+            pos = {
+                // The current scroll
+                left: mapCanvas.scrollLeft,
+                top: mapCanvas.scrollTop,
+                // Get the current mouse position
+                x: e.clientX,
+                y: e.clientY,
+            };
+
+            document.addEventListener('mousemove', mouseMoveHandler);
+            document.addEventListener('mouseup', mouseUpHandler);
+        };
+
+        const mouseMoveHandler = function (e) {
+            // How far the mouse has been moved
+            const dx = e.clientX - pos.x;
+            console.log('move');
+            const dy = e.clientY - pos.y;
+
+            // Scroll the element
+            mapCanvas.scrollTop = pos.top - dy;
+            mapCanvas.scrollLeft = pos.left - dx;
+        };
+
+        const mouseUpHandler = function () {
+            document.removeEventListener('mousemove', mouseMoveHandler);
+            document.removeEventListener('mouseup', mouseUpHandler);
+
+            mapCanvas.style.cursor = 'grab';
+            mapCanvas.style.removeProperty('user-select');
+        };
     });
 
     const handleClick = async (loc) => {
         spaceDetails = loc
     }
 
-    const getSpaceStyle = (location: SiteLocation | undefined) => {
+    const getLocationMarkerStyle = (location: SiteLocation | undefined) => {
         if (!location) return "display:none"
         const x = location.location.x / (img.naturalWidth/img.width) 
         const y = location.location.y / (img.naturalHeight/img.height) 
@@ -74,25 +124,42 @@
     }
 </script>
 
+<SpaceCrud
+bind:this={createSpaceDialog}
+on:space-created={() => {} }
+></SpaceCrud>
+
+{#if spacesDrawer}
+    <div class="spaces-drawer modal">
+        <div class="spaces-list">
+        <AllSpaces></AllSpaces>
+        </div>
+    </div>
+{/if}
+
 {#if loading}
-    <div style="display: flex; flex: 1; align-items: center; justify-content: center">
+    <div bind:this={mapCanvas} id="map"  style="display: flex; flex: 1; align-items: center; justify-content: center">
         <sl-spinner></sl-spinner>
     </div>
 {:else}
-    <div class="SiteMapDisplay">
-        <div class="pane-header">
-            <div class="header-content">
-                <h3>Spaces</h3>
-                <div style="display: flex; flex-direction: row; align-self:center">
-                    <sl-button style="" on:click={() => { dispatch('show-all-spaces') } } >
-                        List View <Fa icon={faList} />
-                    </sl-button>
-                </div>
+    <div bind:this={mapCanvas} id="map" class="SiteMapDisplay {spacesDrawer}">
+        <div class="map-controls">
+            <div class="toggle-drawer map-control" on:click={() => { spacesDrawer = ! spacesDrawer } } >
+                {#if spacesDrawer}
+                <img src="/images/x.svg" height="18">
+                {:else}
+                <Fa icon={faList} />
+                {/if}
             </div>
+            {#if $uiProps.amSteward}
+            <div class="create-space map-control" on:click={() => {createSpaceDialog.open(undefined) } }>
+              <span>+</span> Create
+            </div>
+          {/if}
         </div>
-
-        <div class="pane-content">
-            <div class="pic" use:watchResize={handleResize}>
+        <div class="pane-content spaces-container">
+            
+            <div class="map-image" use:watchResize={handleResize}>
                 <div class="img-container">
                     {#if spaceDetails}
                     <div class="details">
@@ -104,7 +171,7 @@
                 {#each locations as loc}
                 <sl-tooltip >
                     <div slot="content">
-                        <div style="display:flex; flex-direction:column">
+                        <div class="tooltip-text">
                             <span>{loc.space.record.entry.name}</span>
                             {loc.space.record.entry.description}
                             {#each sessionsInSpace(loc.space) as ses}
@@ -113,13 +180,13 @@
                         </div>
                     </div>
                     <div
-                        on:click={store.openDetails(DetailsType.Space, loc.space.original_hash)}
-                        style={getSpaceStyle(loc.loc)} class="location">
+                        on:click={()=> store.openDetails(DetailsType.Space, loc.space.original_hash)}
+                        style={getLocationMarkerStyle(loc.loc)} class="location">
                         {loc.space.record.entry.key}
                     </div>
                 </sl-tooltip>
                 {/each}
-                <img  bind:this={img} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit: cover; overflow: hidden">
+                <img class="map-image" bind:this={img} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit:cover">
                 {/if}
                 </div>
             </div>
@@ -127,14 +194,30 @@
     </div>
 {/if}
 <style>
-img {
+.map-img {
     width:100%;
+    min-height: calc(100vh - 40px);
+}
+
+.create-space {
+    display: block;
+}
+
+.create-space span {
+    color: white;
+    padding-right: 5px;
+}
+
+.content, .open-drawer {
+    color: white;
 }
 
 .SiteMapDisplay {
+    pointer-events: auto;
     width: 100vw;
     height: 100%;
     overflow: auto;
+    cursor: grab;
 }
 .pane-header {
     position: absolute;
@@ -160,12 +243,15 @@ img {
 }
 .location {
     position:absolute;
-    background-color: red;
+    background-color: #FEF1AF;
+    border: 1px solid black;
     border-radius: 50%;
     text-align: center;
-    color: white;
+    color: black;
     font-weight: bold;
     padding-top: 3px;
+    font-family: courier, monospace;
+    font-weight: normal;
     cursor: pointer;
 }
 
@@ -179,5 +265,75 @@ img {
     border: solid 1px;
     border-radius: 10px;
     padding: 10px;
+}
+
+.spaces-container {
+    display:flex;
+    flex-direction: row;
+}
+
+.spaces-drawer {
+    width: 100%;
+    max-width: 320px;
+    max-height: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding-top: 60px;
+}
+
+.spaces-list {
+    padding-bottom: 100px;
+}
+
+.map-controls {
+    position: absolute;
+    top: 70px;
+    left: 20px;
+    transition: all .25s ease;
+    z-index: 5;
+    display: flex;
+    flex-direction: row;
+}
+
+.map-control {
+    background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
+    min-height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 10px 15px rgba(0,0,0,.35);
+    border-radius: 5px;
+    padding: 0 20px;
+    margin-right: 20px;
+    cursor: pointer;
+}
+
+.map-image {
+    min-width: 100vw;
+    min-height: 100vh;
+    max-width: 100%;
+}
+
+.tooltip-text, .tooltip-text span {
+    display: flex; 
+    flex-direction: column;
+    color: white;
+    font-size: 12px;
+}
+
+sl-tooltip {
+    background-color: rgba(131, 58, 217, 1.0);
+}
+
+.tooltip-text span {
+    font-size: 14px;
+    opacity: 1;
+    font-weight: bold;
+}
+
+.true .map-controls {
+    left: 340px;
 }
 </style>

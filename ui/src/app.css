@@ -15,8 +15,8 @@ html, body {
   line-height: 1.5;
   color: rgba(86, 94, 109, 1.0);
   padding: 0px;
-  padding-bottom: 76px; /* Adjust this value based on the height of your bottom navigation */
-  height: 100%; overflow: hidden; /* In general, it's a good idea to have the body take up the full viewport height and have a fixed layout with no scrollbar. Then, you can have a scrollable inner container like .pane-content to handle the overflow of the content. This approach helps keep the page structure clean and allows you to control the scrolling behavior more effectively. */
+  height: 100%;
+  overflow: hidden; /* In general, it's a good idea to have the body take up the full viewport height and have a fixed layout with no scrollbar. Then, you can have a scrollable inner container like .pane-content to handle the overflow of the content. This approach helps keep the page structure clean and allows you to control the scrolling behavior more effectively. */
 }
 
 body {
@@ -84,7 +84,7 @@ input, button {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 3;
+  z-index: 100;
 }
 
 upload-files div {
@@ -103,6 +103,7 @@ upload-files div {
   justify-content: center;
   height: 50px;
   max-width: 50px;
+  font-size: 9px;
   padding: 5px;
   margin: 5px;
   background-color: transparent;
@@ -115,6 +116,7 @@ upload-files div {
   box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.15);
   color: rgba(255,255,255,1);
   padding: 0 20px;
+  border-radius: 5px;
 }
 
 
@@ -147,19 +149,23 @@ upload-files div {
 
 .pane.you .pane-header {
   text-align: center;
-  justify-content: center;
+  justify-content: left;
   display: flex;
+  max-width: 720px;
+  margin: 0 auto;
+  padding-top: 50px;
 }
 
 .card {
   display: flex;
   flex-direction: row;
-  border-radius: 10px;
+  border-radius: 0px;
   background-color: white;
   box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.15);
   align-items: stretch;
   max-width: 720px;
-  margin: 0 auto 10px auto;
+  margin: 0 auto 1px auto;
+  border-top: 1px solid rgba(240, 240, 240, 1.0);
 }
 
 .pane-content {
@@ -191,7 +197,6 @@ upload-files div {
   align-content: center;
   display: flex;
   position: sticky;
-  top: 0;
 }
 
 .header-content {
@@ -245,7 +250,7 @@ html{
 
 .filter-modal {
   max-width: 90%;
-  background-color: rgba(255,255,255,.5);
+  background-color: rgba(255,255,255,.9);
   padding: 10px;
   position: absolute;
   top: 0px;
@@ -281,6 +286,10 @@ html{
 @media (min-width: 720px) {
   .filter-modal {
     height: calc(100vh - 56px);
+  }
+  .card {
+    border-radius: 10px;
+    margin: 0 auto 10px auto;
   }
 }
 
@@ -348,6 +357,7 @@ body {
 }
 
  .slot {
+    min-width: 70px;
    width: 95px;
    display: flex;
    align-items: center;
@@ -435,11 +445,50 @@ animation: spin-animation 1s infinite;
   left: 0;
   overflow: auto;
   z-index: 100;
+  width: 100%;
 }
 
-@media (min-width: 720px) 
-  .create-session {
-    display: none;
+.nav-button .button-title {
+  font-size: 12px;
+}
+
+  
+.create-session {
+  display: none;
+}
+
+.bookmark svg path {
+  fill: rgba(253, 179, 58, .5);
+}
+
+.bookmark.selected {     
+  background: linear-gradient(129.46deg, #E48C00 8.45%, #FFC42E 93.81%);
+}
+
+.attend svg path {
+  fill: #23AA50;
+}
+
+.attend.selected {        
+  background: linear-gradient(129.46deg, #23AA50 8.45%, #00DAA6 93.81%); 
+}
+
+.hide svg path {
+  fill: rgba(0,0,0,.5);
+}
+
+.hide.selected {
+  background-color: rgba(0,0,0,1);
+}
+
+.bookmark.selected svg path, .attend.selected svg path, .hide.selected svg path {
+  fill: rgba(255,255,255,1)
+}
+
+@media (min-width: 720px) {
+
+  .nav-button.selected {
+    border-radius: 0;
   }
   .nav {
     top: 0;
@@ -472,13 +521,20 @@ animation: spin-animation 1s infinite;
 
   body {
     padding-bottom: 0;
-    padding-top: 50px;
   }
 
   .pane-header {
     background-color: transparent;
     z-index: 10;
     box-shadow: none;
+    max-width: 720px;
+    padding-top: 70px;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  .pane.you {
+    padding-top: 50px;
   }
 
   .pane-content {
@@ -492,33 +548,6 @@ animation: spin-animation 1s infinite;
     background-color: transparent;
   }
 
-  .bookmark svg path {
-    fill: rgba(253, 179, 58, .5);
-  }
-
-  .bookmark.selected {
-    background-color:  rgba(253, 179, 58, 1);
-  }
-
-  .attend svg path {
-    fill: rgba(70, 47, 216, .5);
-  }
-  
-  .attend.selected {
-    background-color: rgba(70, 47, 216, 1);
-  }
-
-  .hide svg path {
-    fill: rgba(0,0,0,.5);
-  }
-
-  .hide.selected {
-    background-color: rgba(0,0,0,1);
-  }
-
-  .bookmark.selected svg path, .attend.selected svg path, .hide.selected svg path {
-    fill: rgba(255,255,255,1)
-  }
 
   .pill-button {
     display: block;
@@ -532,7 +561,7 @@ animation: spin-animation 1s infinite;
     align-items: center;
     box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
     cursor: pointer;
-    border: solid 1px rgba(203, 203, 203, .35);
+    border-top: solid 1px rgba(240, 240, 240, 1.0);
   }
 
   .pill-button:hover {
@@ -577,4 +606,4 @@ animation: spin-animation 1s infinite;
     border-radius: 100%;
     box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
   }
-
+}

@@ -13,6 +13,7 @@ import SiteMapCrud from './SiteMapCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
+  import { errorText } from './utils';
 
 const dispatch = createEventDispatcher();
 
@@ -40,7 +41,7 @@ async function deleteSiteMap() {
     //await store.updateSiteMap(sitemap.original_hash, {trashed:true})
     dispatch('sitemap-deleted', { sitemapHash: sitemap.original_hash });
   } catch (e: any) {
-    errorSnackbar.labelText = `Error deleting the sitemap: ${e.data.data}`;
+    errorSnackbar.labelText = `Error deleting the sitemap: ${errorText(e)}`;
     errorSnackbar.show();
   }
 }
@@ -84,6 +85,12 @@ let updateSitemapDialog
     <span style="margin-right: 4px"><strong>Name:</strong></span>
     <span style="white-sitemap: pre-line">{ sitemap.record.entry.text }</span>
   </div>
+
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Slot Type:</strong></span>
+    <span style="white-sitemap: pre-line">{ sitemap.record.entry.tags.join(",") }</span>
+  </div>
+
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Picture</strong></span>

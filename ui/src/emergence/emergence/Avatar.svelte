@@ -19,7 +19,7 @@
   $: nickname = $s.status == "complete" ? $s.value?.nickname : "..."
 </script>
 
-<div class="avatar-{namePosition}"
+<div class="avatar-{namePosition} clickable"
     on:click={(e)=>{
         store.openDetails(DetailsType.Folk,agentPubKey)
         e.stopPropagation()

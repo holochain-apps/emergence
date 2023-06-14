@@ -6,7 +6,6 @@
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
   import SessionCrud from './emergence/emergence/SessionCrud.svelte';
-  import SiteMapCrud from './emergence/emergence/SiteMapCrud.svelte';
   import SpaceCrud from './emergence/emergence/SpaceCrud.svelte';
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
@@ -39,14 +38,13 @@
   import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
   import { getCookie, deleteCookie } from 'svelte-cookie';
   import { Base64 } from 'js-base64'
+    import { schedule_update } from 'svelte/internal';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
   let fileStorageClient: FileStorageClient | undefined;
   let loading = true;
   let profilesStore: ProfilesStore | undefined
-  let creatingMap = false
-  let creatingProxyAgent = false
   let syncing = false
   let error: any = undefined;
   let creds
@@ -56,6 +54,7 @@
   $: prof = profilesStore ? profilesStore.myProfile : undefined
   $: uiProps = store ? store.uiProps : undefined
   $: pane = store ? $uiProps.pane : "sessions"
+  $: sitemaps = store ? store.maps : undefined
 
 
   const base64ToUint8 = (b64:string)=> Base64.toUint8Array(b64);
@@ -133,8 +132,16 @@
     fileStorageClient = new FileStorageClient(client, 'emergence');
     store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
     await store.sync(undefined)
+    initialSync = setInterval(async ()=>{
+      if ($uiProps.amSteward || ($sitemaps && $sitemaps.length > 0)) {clearInterval(initialSync)}
+      else {
+        await doSync()
+      }
+    }, 10000);
+
     loading = false;
   });
+  let initialSync
 
   setContext(storeContext, {
     getStore: () => store,
@@ -153,6 +160,15 @@
         console.log("end sync", new Date);
         syncing=false 
     }
+  let clickCount = 0
+  const adminCheck = () => { 
+    clickCount += 1
+    if (clickCount == 5) {
+      clickCount = 0
+      const amSteward = $uiProps.amSteward
+      store.setUIprops({amSteward:!amSteward}) 
+    }
+  }
 </script>
 
 <main>
@@ -170,13 +186,10 @@
           }}>
           <Fa icon={faArrowRightFromBracket} /> Logout
         </sl-button>
-      {:else}
-        <div>
-          <sl-button style="margin-left: 8px;" on:click={() => window.location.assign("/")}>
-            <Fa icon={faArrowRotateBack} /> Reload
-          </sl-button>
-        </div>
-      {/if}
+        {/if}
+        <sl-button style="margin-left: 8px;" on:click={() => window.location.assign("/")}>
+          <Fa icon={faArrowRotateBack} /> Reload
+        </sl-button>
     </span>
   {:else if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -186,19 +199,33 @@
   {:else}
   <profiles-context store="{profilesStore}">
 
-   
-
     {#if $prof && ($prof.status!=="complete" || $prof.value===undefined)}
-    <div style="text-align:center">
-      <div style="display:flex; justify-content:center; align-items:center;"><img style="margin-right:20px" width="100" src="android-chrome-192x192.png" /><h1>Hello!</h1></div>
-      <p><b>Emergence</b> is a decentralized hApp for discovery, scheduling, connecting and remembering </p>
-      <p>Harness the power of the decentralized web technology for local, ofline collaboration.</p>
-      <p>Continue with a nickname and optional avatar, both of which can be changed later.</p>
-    </div>
-    {/if}
-
-    <profile-prompt>
-
+      <div class="event-intro">
+        <div class="wrapper">
+          <div class="about-event">
+            <img class="dweb-camp" src="/images/dweb-camp.png" 
+            on:click={()=>adminCheck()}/>
+            <p style="color:black">Welcome to camp! Create a profile to discover sessions, find people and take notes {#if $uiProps.amSteward}!{/if}</p>
+          </div>
+          {#if $prof.status=="complete" && $prof.value == undefined}
+          <div class="create-profile">
+            <create-profile></create-profile>
+          </div>
+          {/if}
+        </div>
+      </div>
+    {:else }
+      {#if (!sitemaps || $sitemaps.length==0) && !$uiProps.amSteward}
+      <div class="app-info">
+        <img width="100" src="/images/emergence-vertical.svg" 
+        on:click={()=>adminCheck()}/>
+        <p>Either your node hasn't synchronized yet with the network, or the conference data hasn't yet been set up. Please be patient! </p>
+        <sl-button on:click={() => doSync()}>
+          <span class:spinning={true}> <Fa  icon={faArrowRotateBack} /> </span>Reload
+        </sl-button>
+        {#if syncing}<span class:spinning={true}> <Fa  icon={faSync} /></span>{/if}
+      </div>
+      {:else}
       <div class="nav">
         <div class="button-group">
           <div class="nav-button {pane === "discover" ? "selected":""}"
@@ -229,14 +256,6 @@
           </div>
         </div>
         <div class="button-group settings">
-          <div class="nav-button {pane=="you"?"selected":""}"
-            title="You"
-            on:keypress={()=>{store.setPane('you')}}
-            on:click={()=>{store.setPane('you')}}
-          >
-            <Fa class="nav-icon" icon={faUser} size="2x"/>
-            <span class="button-title you">You</span>
-          </div>
           {#if store && $uiProps.amSteward}
             <div class="nav-button {pane.startsWith("admin")?"selected":""}"
               title="Admin"
@@ -247,6 +266,20 @@
             <span class="button-title settings">Settings</span>
             </div>
           {/if}
+          <div class="nav-button {pane=="you"?"selected":""}"
+            title="You"
+            on:keypress={()=>{store.setPane('you')}}
+            on:dblclick={(e)=>e.stopPropagation()}
+            on:click={(e)=>{
+              e.stopPropagation()
+              if (pane=="you") adminCheck()
+              else store.setPane('you')
+              }}
+          >
+            <Fa class="nav-icon" icon={faUser} size="2x"/>
+            <span class="button-title you">You</span>
+          </div>
+
           <div class="nav-button"
             class:spinning={syncing}
             title="Sync"
@@ -356,7 +389,7 @@
       {/if}
 
       {#if pane=="spaces"}
-      <div class="pane">
+      <div class="pane sitemap">
         {#if store.getCurrentSiteMap()}
           <SiteMapDisplay 
             sitemap={store.getCurrentSiteMap()}
@@ -419,12 +452,47 @@
       {/if}
     </div>
     </file-storage-context>
-    </profile-prompt>
+    {/if}
+    {/if}
   </profiles-context>
   {/if}
 </main>
 
 <style>
+  .app-info {
+    display:flex; justify-content:center; align-items:center; flex-direction: column;
+    max-width: 320px;
+    margin:0 auto;
+    text-align: center;
+    margin-bottom: 30px;
+  }
+
+  .event-intro {
+    width: 100vw;
+    display: block;
+    height: 100vh;
+    background-image: url(/images/dweb-background.jpg);
+    background-size: cover;
+    overflow-y: scroll;
+  }
+
+  .event-intro .wrapper {
+    display: block;
+    height: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .app-info p {
+    opacity: .6;
+    padding-top: 30px;
+  }
+
+  .sitemap {
+    display: flex;
+    flex-direction: row;
+  }
+
   .notice {
     display: block;
     text-align: center;
@@ -434,4 +502,31 @@
     border-radius: 20px;
     margin: auto;
   }
+
+  .about-event {
+    padding: 10px;
+
+  }
+
+  .about-event p {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 15px;
+    margin-bottom: 0;
+  }
+
+  .dweb-camp {
+    max-width: 50vw;
+    margin: 0 auto;
+    display: block;
+  }
+
+@media (min-width: 720px) {
+  .event-intro .wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+  }
+}
 </style>

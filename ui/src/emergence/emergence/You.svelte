@@ -46,17 +46,8 @@
     <update-profile on:cancel-edit-profile={()=>dialog.hide()} on:profile-updated={()=>dialog.hide()}></update-profile>
 </sl-dialog>
 
-    <div class="pane-header">
-        {#if $myProfile.status === "complete"  && $myProfile.value}
-        <h3><Avatar agentPubKey={store.myPubKey}></Avatar></h3>
-        {:else}<sl-spinner></sl-spinner>
-        {/if}
-        <div style="display: flex; flex-direction: row; align-self:center">
-            <sl-button style="margin-left: 8px;" on:click={() => dialog.show()} circle>
-                <Fa icon={faEdit} />
-            </sl-button>
-        </div>
-        <div style="display: flex; flex-direction: row; align-self:center">
+
+        <!-- <div style="display: flex; flex-direction: row; align-self:center">
             <sl-checkbox
                 bind:this={steward}
                 checked={$uiProps.amSteward}
@@ -69,16 +60,20 @@
                 on:sl-change={e => { store.setUIprops({debuggingEnabled:debuging.checked})} }
                 >Enable Debugging
             </sl-checkbox>
-        </div>
-    </div>
+        </div> -->
 
 <div class="pane-content flex-center">
+    
+    {#if $myProfile.status === "complete"  && $myProfile.value}
+    {:else}<sl-spinner></sl-spinner>
+    {/if}
     
     <sl-tab-group
         bind:this={tabs}
         on:sl-tab-show={(e)=>store.setUIprops({youPanel:e.detail.name})}
     >
-        <sl-tab slot="nav" panel="updates">Updates</sl-tab>
+        <sl-tab slot="nav" panel="profile">Profile</sl-tab>
+        <sl-tab slot="nav" panel="activity">Activity</sl-tab>
         <sl-tab slot="nav" panel="notes">Notes</sl-tab>
         <sl-tab slot="nav" panel="sessions">Sessions</sl-tab>
         <sl-tab-panel name="sessions">
@@ -95,16 +90,23 @@
 
         </sl-tab-panel>
         <sl-tab-panel name="notes">
+            <div class="wrapper">
             {#if $agentNotes.get(store.myPubKey).length == 0}
                 You haven't created any notes yet.. 
             {/if}
             {#each $agentNotes.get(store.myPubKey) as note}
                 <NoteDetail showDeleted={false} showFrame={true} noteHash={note}></NoteDetail>
             {/each}
-            
+            </div>
         </sl-tab-panel>
-        <sl-tab-panel name="updates">
+        <sl-tab-panel name="activity">
             <Feed forAgent={store.myPubKey}></Feed>
+        </sl-tab-panel>
+        <sl-tab-panel name="profile" class="profile">
+            <h3><Avatar agentPubKey={store.myPubKey}></Avatar></h3>
+            <sl-button style="margin-left: 8px;" on:click={() => dialog.show()} circle>
+                <Fa icon={faEdit} />
+            </sl-button>
         </sl-tab-panel>
     </sl-tab-group>
 
@@ -117,6 +119,22 @@
 
     :global(sl-tab-group) {
         text-align: center;
+        max-width: 720px;
+        margin: 0 auto;
+    }
+    sl-tab-group {
+        max-width: 100%;
+    }
+    
+    .pane-content {
+        padding-top: 0;
+    }
+
+    .activity {
+        padding: 0 10px;
+    }
+    .wrapper {
+        width: 100%;
         max-width: 720px;
         margin: 0 auto;
     }

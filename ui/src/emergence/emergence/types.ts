@@ -16,6 +16,10 @@ import {
   decodeHashFromBase64
 } from '@holochain/client';
 
+
+export const NULL_HASHB64 = "uhCkk______________________"
+export const NULL_HASH = decodeHashFromBase64(NULL_HASHB64)
+
 export type EmergenceSignal = {
   type: 'EntryCreated';
   action: SignedActionHashed<Create>;
@@ -56,8 +60,18 @@ export type AnyAgentDetailed =
 {type: 'ProxyAgent', hash: ActionHash, bio:string, location: string, nickname: string, avatarImage: EntryHash} |
 {type: 'Agent', hash: AgentPubKey, bio:string, location: string, nickname: string}
 
+export type SessionTypeID = number
+export type SessionType  = {
+  name: string,
+  color: string,
+  can_rsvp: boolean,
+  can_any_time: boolean,
+  can_leaderless: boolean
+}
+
 export interface Session { 
   key: string;
+  session_type: SessionTypeID,
   title: string;
   description: string;
   leaders: Array<AnyAgent>,
@@ -95,6 +109,7 @@ export interface RawInfo {
 export interface UpdateSessionInput {
   original_session_hash: ActionHash,
   previous_session_hash: ActionHash,
+  updated_type: SessionTypeID,
   updated_title: string,
   updated_description: string;
   updated_leaders: Array<AnyAgent>,
@@ -141,6 +156,7 @@ export interface UpdateNoteInput {
 export interface SiteMap {
   text: string,
   pic: EntryHash,
+  tags: Array<string>,
 }
 
 export interface ProxyAgent {
@@ -163,10 +179,10 @@ export interface UpdateSiteMapInput {
   updated_map: SiteMap,
 }
 
-export interface Slot {
-  space: ActionHash
+export type Slot = {
+  space?: ActionHash
   window: TimeWindow
-}
+} 
 
 export const slotEqual = (slota: Slot| undefined, slotb: Slot|undefined) : boolean => {
   if (slota === undefined && slotb !== undefined) return false
@@ -360,7 +376,7 @@ export interface Coordinates {
 }
 
 export interface SiteLocation {
-  imageHash: EntryHash,
+  imageHash: ActionHash,
   location: Coordinates
 }
 
@@ -428,11 +444,20 @@ export interface UIProps {
   feedFilter: FeedFilter
   peopleFilter: PeopleFilter
   detailsStack: Array<Details>,
-  sessionListMode: boolean,
+  sessionListMode: string,
   pane:string,
   sessionSort: SessionSortOrder,
-  spaceSort: SpaceSortOrder
+  spaceSort: SpaceSortOrder,
+  confirmHide: boolean,
 }
+
+export enum SessionListMode {
+  List = "",
+  ListDetail = "detail",
+  GridTime = "grid-time",
+  GridSpace = "grid-space",
+}
+
 
 export enum DetailsType {
   Session = 0,
@@ -491,6 +516,7 @@ export interface SessionsFilter {
   tags: Array<string>,
   space: Array<ActionHash>,
   keyword: string,
+  types: number
 }
 
 export const defaultSessionsFilter = () : SessionsFilter => {
@@ -510,6 +536,7 @@ export const defaultSessionsFilter = () : SessionsFilter => {
     tags: [],
     space: [],
     keyword: "",
+    types: 0,
   }
 }
 
@@ -517,4 +544,39 @@ export const defaultSessionsFilter = () : SessionsFilter => {
 export interface Settings {
   game_active: boolean,
   current_sitemap?: ActionHash,
+  session_types: Array<SessionType>,
+}
+
+export interface InterestData {
+  session:Info<Session>, 
+  estimatedAttendance:number,
+  percentInterest:number,
+  assesments:number,
+  passCount:number,
+  goingCount:number,
+  bookmarkedCount:number,
+}
+
+export interface Projection {
+  totalAssesments: number,
+  peopleCount: number,
+  likelyCount: number,
+  maxAttendance: number,
+  minAttendance: number,
+  interestData: Array<InterestData>
+}
+
+
+export interface DownloadedFile {
+  file: File,
+  data?: string,
+}
+
+export interface PersonData {
+  type: string, 
+  hash: ActionHash, 
+  nickname: string,
+  bio: string,
+  location: string
+  avatarImage: EntryHash,
 }

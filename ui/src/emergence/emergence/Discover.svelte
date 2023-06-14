@@ -11,44 +11,30 @@
     import type { EmergenceStore } from '../../emergence-store';
     import Feed from './Feed.svelte';
     import TagCloud from './TagCloud.svelte'
-    import Sense from './Sense.svelte';
     import People from './People.svelte';
     import FeedFilter from './FeedFilter.svelte';
-    import { faClose, faFilter, faMagnifyingGlass, faMap, faTag } from '@fortawesome/free-solid-svg-icons';
+    import { faClose, faFilter, faMap, faSearch, faTag } from '@fortawesome/free-solid-svg-icons';
     import Fa from 'svelte-fa';
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     $: uiProps = store.uiProps
-    $: settings = store.settings
     let tabs : SlTabGroup
+    let tagCloud: TagCloud
 
     onMount(async () => {        
         await store.fetchAgentStuff(store.myPubKey)
-
-        tabs.show($uiProps.discoverPanel)
+        const [panel, sub] = $uiProps.discoverPanel.split('#')
+        if (tabs) {
+            tabs.show(panel)
+            if (panel == "tags" && sub) {
+                tagCloud.setTag(sub)
+            }
+        }
     });
     let showFilter = false
 
 </script>
-
-<div class="pane-header">
-    <div class="header-content">
-        <h3>Discover</h3>
-        
-    </div>
-</div>
-{#if showFilter}
-<FeedFilter
-    on:close-filter={()=>showFilter = false}
-    on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
-    filter={$uiProps.feedFilter}></FeedFilter>
-{/if}
 <div class="pane-content flex-center discover">
-    <div class="discover-section">
-        {#if $settings.game_active}
-            <Sense></Sense>
-        {/if}
-    </div>
 
     <sl-tab-group
         bind:this={tabs}
@@ -60,7 +46,7 @@
 
         <sl-tab-panel name="tags">
             <div class="discover-section">
-                <TagCloud></TagCloud>
+                <TagCloud bind:this={tagCloud}></TagCloud>
             </div>
         </sl-tab-panel>
         <sl-tab-panel name="people">
@@ -71,11 +57,11 @@
             <div class="discover-section" style="display: flex; flex-direction: column;">
 
                 <div style="display: flex; flex-direction: row; align-self:flex-end; margin-bottom:10px">
-                    {#if $uiProps.feedFilter.keyword}
+                    <!-- {#if $uiProps.feedFilter.keyword}
                     <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["keyword"],"feedFilter")}} >
                       <Fa size="sm" icon={faMagnifyingGlass} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
                     {/if}
-              
+               -->
                     {#if $uiProps.feedFilter.tags.length>0}
                     <div class="pill-button"  on:click={() => {store.resetFilterAttributes(["tags"],"feedFilter")}} >
                       <Fa size="sm" icon={faTag} /><Fa size="sm" icon={faFilter} /> <Fa size="sm" icon={faClose} /></div>
@@ -87,6 +73,18 @@
                 </div>
                 <div class="discover section-controls">
                     <h3>Latest activity</h3>
+                    <div class="center-row search-bar">
+                        <span class="search-icon"><Fa icon={faSearch} /></span>
+                        <sl-input
+                          value={$uiProps.feedFilter.keyword}
+                          placeholder="Search content"
+                          on:input={e => { 
+                            const filter = $uiProps.feedFilter;
+                            filter.keyword = e.target.value
+                            store.setUIprops({feedFilter: filter})}}
+                        ></sl-input>
+                      </div> 
+              
                     <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } >
                         <Fa icon={faFilter} /> Filter
                     </sl-button>
@@ -111,10 +109,41 @@
 
 </div>
 <style>
+
+    .pane-content {
+        padding-top: 0px;
+    }
+
+    sl-tab-group {
+        max-width: 100%;
+    }
+    
     .discover.section-controls {
         justify-content: space-between;
         display: flex;
         flex-direction: row;
+        align-items: center;
     }
+    .search-bar {
+        height:20px;
+        max-width: 720px;
+        margin: 0 auto 0 auto;
+        position: relative;
+    }
+
+  .search-bar sl-input {
+  }
+  .search-icon {
+    margin-right: 5px;
+  }
+
+
+
+@media (min-width: 720px) {
+    .pane-content {
+        padding-top: 50px;
+    }
+
+}
 
 </style>

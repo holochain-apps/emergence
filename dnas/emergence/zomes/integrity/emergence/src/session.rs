@@ -18,6 +18,7 @@ pub struct Session {
     pub largest: u32,
     pub duration: u32,
     pub amenities: u32,
+    pub session_type: u32,
     pub trashed: bool,
 }
 pub fn validate_create_session(

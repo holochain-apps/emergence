@@ -20,7 +20,7 @@
 {#if agent.type=="Agent"}
     <Avatar size={size} namePosition={namePosition} showAvatar={showAvatar} showNickname={showNickname} agentPubKey={agent.hash}></Avatar>
 {:else}
-    <div class="avatar-{namePosition}"
+    <div class="avatar-{namePosition} clickable"
         on:click={(e)=>{
             store.openDetails(DetailsType.ProxyAgent, agent.hash)
             e.stopPropagation()
@@ -28,7 +28,7 @@
         >
         {#if showAvatar}
             {#if proxyAgent}
-                <ProxyAgentAvatar size={size} proxyAgentHash={proxyAgent.original_hash}></ProxyAgentAvatar>
+                <span style="margin-right:5px"><ProxyAgentAvatar size={size} proxyAgentHash={proxyAgent.original_hash}></ProxyAgentAvatar></span>
             {:else}
                 No Agent!
             {/if}
@@ -49,7 +49,6 @@
         flex-direction: row;
         justify-content:center;
         position: relative;
-        top: 4px;
         align-items: center;
     }
     .avatar-row show-image {

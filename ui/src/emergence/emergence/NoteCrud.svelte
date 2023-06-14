@@ -16,10 +16,13 @@ import type { EmergenceStore } from '../../emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import { encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client';
 import MultiSelect from 'svelte-multiselect'
+import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
+  import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
 
+const FILE_TYPES = "image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,audio/mp3,audio/m4a,audio/ogg,application/pdf,text/plain"
 const dispatch = createEventDispatcher();
 export let note: Info<Note>|undefined = undefined;  // set this if update
 export let sessionHash: ActionHash;
@@ -30,6 +33,7 @@ let pic: EntryHash | undefined = undefined;
 let tags = []
 
 let errorSnackbar: Snackbar;
+let uploadFiles: UploadFiles
 
 $: text, tags
 $: isNoteValid = text !== ""
@@ -47,21 +51,27 @@ export const open = (n) => {
     pic = note.record.entry.pic
     tags = note.record.entry.tags
     sessionHash = note.record.entry.session
+    uploadFiles.defaultValue = pic ? pic : undefined  // can't be null, must be undefined
   } else {
     clear()
   }
+  uploadFiles.reset()
   if (modal)
     dialog.show()
 }
 
 export const clear = () =>{
   text = ""
-    pic = undefined
-    tags = []
+  pic = undefined
+  tags = []
+  uploadFiles.defaultValue = undefined
+  uploadFiles.reset()
 }
 
 async function updateNote() {
   if (note) {
+    const pic = uploadFiles.value
+
     const updateRecord = await store.updateNote(note.original_hash, text, tags, pic)
     if (updateRecord) {
       dispatch('note-updated', { actionHash: updateRecord.actionHash });
@@ -73,11 +83,13 @@ async function updateNote() {
 
 async function createNote() {  
   try {
+    const pic = uploadFiles.value
+
     const record = await store.createNote(sessionHash, text, tags, pic)
     dispatch('note-created', { note: record });
   } catch (e) {
     console.log("CREATE NOTE ERROR", e)
-    errorSnackbar.labelText = `Error creating the note: ${e.data.data}`;
+    errorSnackbar.labelText = `Error creating the note: ${errorText(e)}`;
     errorSnackbar.show();
   }
   if (modal)
@@ -95,8 +107,8 @@ let dialog
 <div style="display: flex; flex-direction: column">
               
   <div style="margin-bottom: 16px">
-    <sl-textarea 
-      label=Text 
+    test
+    <sl-textarea
       value={ text } on:input={e => { text = e.target.value;} }
     ></sl-textarea>
   </div>
@@ -111,11 +123,12 @@ let dialog
       />
   </div>
   
-  <div style="margin-bottom: 16px; height: 100px">
+  <div style="margin-bottom: 16px;">
     <span>Add a pic (optional):</span >
     <upload-files
+    bind:this={uploadFiles}
     one-file
-    accepted-files="image/jpeg,image/png,image/gif,image/svg"
+    accepted-files={FILE_TYPES}
     defaultValue={pic ? encodeHashToBase64(pic) : undefined}
     on:file-uploaded={(e) => {
       pic = e.detail.file.hash;
@@ -155,35 +168,37 @@ let dialog
 {:else}
 <div style="display: flex; flex-direction: column; width: 100%; max-width: 720px; ">
   <div style="display:flex;flex-direction: row">
-    <div style="display: flex; flex-direction: column; width: 80%; margin-right: 10px;">
+    <div style="display: flex; flex-direction: column; width: 100%; margin-right: 10px;">
 
-      <div style="margin-bottom: 16px; ">
+      <div class="new-note">
+        <h4>Add a note</h4>
         <sl-textarea 
-          label=Text 
+          resize=auto
+          autocomplete={"off"}
           value={ text } on:input={e => { text = e.target.value;} }
         ></sl-textarea>
       </div>
-      <div style="margin-bottom: 16px">
-        <span>Tags:</span >
+      <div style="margin: 16px 0">
         <MultiSelect 
           --sms-bg="white"
           bind:selected={tags} 
           options={allTags} 
           allowUserOptions={true}
+          placeholder="Add tags"
           />
       </div>
-    </div>
-    <div style="margin-bottom: 16px;">
-      <span>Image (optional):</span >
+
+    <div style="margin-bottom: 16px; display: flex; flex-direction: row; justify-content: space-between;">
       <upload-files
+        bind:this={uploadFiles}
         one-file
-        accepted-files="image/jpeg,image/png,image/gif,image/svg"
+        accepted-files={FILE_TYPES}
         defaultValue={pic ? encodeHashToBase64(pic) : undefined}
         on:file-uploaded={(e) => {
           pic = e.detail.file.hash;
         }}
       ></upload-files>
-      <div style="margin-top:10px;">
+      <div>
       {#if note}
           <div style="display: flex; flex-direction: row">
             <sl-button
@@ -210,6 +225,7 @@ let dialog
       </div>
 
     </div>
+    </div>
 
   </div>
   
@@ -219,14 +235,28 @@ let dialog
 {/if}
 <style>
   upload-files {
-    --placeholder-font-size: 14px;
+    min-width: 200px;
+    --placeholder-font-size: 12px;
     --icon-font-size: 50px;
     --message-margin: 0px;
     --message-margin-top: 0px;
+    --preview-height: 60px;
+    --preview-width: 60px;
+    --details-padding: 5px;
   }
   upload-files::part(dropzone) {
-    height: 128px;
+    height: 40px;
+    display: flex;
+    flex-direction: row;
     width: 100px;
     min-height: 0px;
+  }
+
+  upload-files::part(dropzone) button {
+    min-width: 124px;
+  }
+
+  .new-note h4 {
+    opacity: .5;
   }
 </style>

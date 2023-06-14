@@ -9,7 +9,7 @@ import { createEventDispatcher, getContext, onMount } from 'svelte';
 import Fa from 'svelte-fa';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
-import { amenitiesList, durationToStr, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit } from './types';
+import { NULL_HASHB64, amenitiesList, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit } from './types';
 
 import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 import Avatar from './Avatar.svelte';
@@ -22,6 +22,7 @@ import SessionCrud from './SessionCrud.svelte';
 import { slide } from 'svelte/transition';
 import SpaceLink from './SpaceLink.svelte';
 import { Marked } from "@ts-stack/markdown";
+  import { errorText } from './utils';
 
 const dispatch = createEventDispatcher();
 
@@ -42,25 +43,25 @@ $: entry = $session.record.entry
 $: slot = sessionSlot($session)
 $: notes = sessionNotes($session)
 $: tags = sessionTags($session)
-
+$: settings = store.settings
 $: uiProps = store.uiProps
 
 let updateSessionDialog
 
 const sessionSlot = (session: Info<Session>): Slot | undefined => {
-  const spaces = session.relations.filter(r=>r.relation.content.path == "session.space")
-        if (spaces.length > 0) {
-          const ri = spaces[spaces.length-1]
-          const r = ri.relation
-          if (r.content.data) {
-            const window = JSON.parse(r.content.data) as TimeWindow
-            return {
-                space: r.dst,
-                window
-            }
-          }
-        }
-        return undefined
+  const slottings = session.relations.filter(r=>r.relation.content.path == "session.slot")
+  if (slottings.length > 0) {
+    const ri = slottings[slottings.length-1]
+    const r = ri.relation
+    if (r.content.data) {
+      const window = JSON.parse(r.content.data) as TimeWindow
+      return {
+          space: encodeHashToBase64(r.dst)== NULL_HASHB64 ? undefined : r.dst,
+          window
+      }
+    }
+  }
+  return undefined
 }
 
 $: error, loading, slot, notes, session;
@@ -82,7 +83,7 @@ async function deleteSession() {
 
     dispatch('session-deleted', { sessionHash: $session.original_hash });
   } catch (e: any) {
-    errorSnackbar.labelText = `Error deleting the session: ${e.data.data}`;
+    errorSnackbar.labelText = `Error deleting the session: ${errorText(e)}`;
     errorSnackbar.show();
   }
 }
@@ -136,80 +137,89 @@ bind:this={updateSessionDialog}
   <Confirm bind:this={confirmDialog}
     message="This will remove this session for everyone!" on:confirm-confirmed={deleteSession}></Confirm>
 
-  <div class="details">
+  <div class="details card">
 
     <div class="properties">
       <div class="general-info">
+        {#if slot}
+          <div class="timeslot">{timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}</div>
+        {/if}
         <h3 class="title">{ entry.title }</h3>
         <div class="leaders">
-          <span style="margin-right: 4px"><strong>Hosted by </strong></span>
+          <span class="hosted-by"><strong>Hosted by </strong></span>
           {#each entry.leaders as leader}
-            <div style="margin-right:10px"><AnyAvatar agent={leader}></AnyAvatar></div>
+            <div style="margin-right:10px"><AnyAvatar showNickname={true} showAvatar={false} agent={leader}></AnyAvatar></div>
           {/each}
         </div>
+        <div class="attenders">
+          {#each Array.from($relData.interest.entries()).filter(([key,value])=>value & SessionInterestBit.Going) as [key,value]}
+        {/each}
+      </div>
         <div class="description"> {@html Marked.parse(entry.description) }</div>
         <div class="tags">
           {#each tags as tag}
-            <div class="tag">
-              {tag}
+            <div class="tag clickable-tag"
+              on:click={()=>{
+                store.setUIprops({discoverPanel:`tags#${tag}`})
+                store.setPane("discover")
+              }}
+            >
+              #{tag}
             </div>
           {/each}
         </div>
-      </div>
+
+
 
       {#if $uiProps.debuggingEnabled}
-        <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-          <span style="margin-right: 4px"><strong>Original Hash:</strong></span>
-          <span style="white-space: pre-line">{ encodeHashToBase64($session.original_hash) }</span>
-        </div>
-        <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-            <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
-          <span style="white-space: pre-line">{ encodeHashToBase64($session.record.actionHash) }</span>
+      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+        <span style="margin-right: 4px"><strong>Original Hash:</strong></span>
+        <span style="white-space: pre-line">{ encodeHashToBase64($session.original_hash) }</span>
+      </div>
+      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+          <span style="margin-right: 4px"><strong>Action Hash:</strong></span>
+        <span style="white-space: pre-line">{ encodeHashToBase64($session.record.actionHash) }</span>
+      </div>
+    {/if}
+
+
+    {#if $uiProps.amSteward}
+    <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+      <span style="margin-right: 4px"><strong>Key:</strong></span>
+      <span style="white-space: pre-line">{ entry.key }</span>
+    </div>
+    {/if}
+    <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+      <span style="margin-right: 4px"><strong>Type:</strong></span>
+      <span style="white-space: pre-line">{ $settings.session_types[entry.session_type].name }</span>
+      <div style={`margin-left:5px;width:20px;height:20px;border-radius:50%;background:${$settings.session_types[entry.session_type].color}`}>&nbsp</div>
+    </div>
+    <!-- <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+      <span style="margin-right: 4px"><strong>Smallest Group Size:</strong></span>
+      <span style="white-space: pre-line">{ entry.smallest }</span>
+    </div> -->
+    {#if $uiProps.amSteward}
+    <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+      <span style="margin-right: 4px"><strong>Required Amenities:</strong></span>
+      <span style="white-space: pre-line">
+        {amenitiesList(entry.amenities).join(", ")}
+      </span>
+    </div>
+    {/if}
+      {#if $settings.session_types[$session.record.entry.session_type].can_rsvp}
+        <div class="call-to-action">
+          <div class="interest">
+            <Fa icon={faUserGroup} /> {$relData.interest.size} attending 
+            <!-- <span class="interest-max">/ { entry.largest }</span> -->
+          </div>
+          <div class="action">
+            <InterestSelect sessionHash={sessionHash}></InterestSelect>
+          </div>
         </div>
       {/if}
-
-
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-        <span style="margin-right: 4px"><strong>Key:</strong></span>
-        <span style="white-space: pre-line">{ entry.key }</span>
-      </div>
-
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-        <span style="margin-right: 4px"><strong>Smallest Group Size:</strong></span>
-        <span style="white-space: pre-line">{ entry.smallest }</span>
-      </div>
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-        <span style="margin-right: 4px"><strong>Duration:</strong></span>
-        <span style="white-space: pre-line">{ durationToStr(entry.duration) }</span>
-      </div>
-      
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-        <span style="margin-right: 4px"><strong>Required Amenities:</strong></span>
-        <span style="white-space: pre-line">
-          {amenitiesList(entry.amenities).join(", ")}
-        </span>
-      </div>
-      <div style="display: flex; flex-direction: row; margin-bottom: 16px">
-        {#if slot}
-        Scheduled in <SpaceLink spaceHash={slot.space}></SpaceLink> on {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
-        {/if}
       </div>
     </div>
 
-    <div class="stats">
-      <div class="action">
-        <InterestSelect sessionHash={sessionHash}></InterestSelect>
-      </div>
-  
-      <div class="interest">
-          <Fa icon={faUserGroup} /> {$relData.interest.size} <span class="interest-max">/ { entry.largest }</span>
-      </div>
-      <div class="attenders">
-          {#each Array.from($relData.interest.entries()).filter(([key,value])=>value & SessionInterestBit.Going) as [key,value]}
-          <Avatar agentPubKey={key}></Avatar>
-        {/each}
-      </div>
-    </div>
   
   </div>
   <div class="notes">
@@ -233,11 +243,30 @@ bind:this={updateSessionDialog}
 {/if}
 
 <style>
+
+  .call-to-action {
+    display: flex;
+    align-items: center;
+    margin-top: 15px;
+    justify-content: space-between;
+    flex-direction: row;
+    padding: 15px;
+    box-shadow: 0 5px 5px rgba(86, 94, 109, .25);
+    border-radius: 5px;
+    border-top: 1px solid #f0f0f0;
+    margin-bottom: -14px;
+  }
   .general-info {
     width: 100%;
     margin: 0 auto;
-    padding-bottom: 30px;
   }
+
+  .hosted-by {
+    margin-right: 4px;
+    position: relative;
+    top: 4px;
+  }
+
   .event-image {
     height: 300px;
     width: 100%;
@@ -249,12 +278,16 @@ bind:this={updateSessionDialog}
     margin-bottom: 15px;
   }
   .title {
-    font-size: 36px;
+    font-size: 48px;
     text-align: left;
   }
   .leaders {
+    position: relative;
+    top: -20px;
+    opacity: .6;
     font-size: 12px;
     display: inline-flex;
+    align-items: center;
   }
 
   .leaders holo-identicon {
@@ -264,7 +297,30 @@ bind:this={updateSessionDialog}
     padding-bottom: 8px;
   }
   .tags {
+    display: block;
     padding-top: 8px;
+  }
+
+  .timeslot {
+    display: inline-block;
+    padding: 5px 10px;
+    background: #565E6D;
+    text-align: center;
+    border-radius: 10px 10px 0 0;
+    color: white;
+    font-size: 14px;
+    box-shadow: inset -20px 0 30px rgba(0, 0, 0, .5);
+    position: absolute;
+    top: -31px;
+    left: 0;
+  }
+  .tag {
+    display: inline;
+    border: 1px solid #2F87D840;
+    color: #2F87D8;
+    background-color: transparent;
+    margin-bottom: 0;
+    display: inline;
   }
   .notes {
     display:flex;
@@ -274,22 +330,28 @@ bind:this={updateSessionDialog}
     width: 100%;
   }
   .notes-add {
-    background-color: lightgray;
-    padding: 10px;
-    border-radius: 10px;
+    padding: 15px;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.15);
+    background-color: rgba(247, 247, 248, 1.0);
+    z-index: 13;
+    border-top: 1px solid rgba(240, 230, 230, 1.0);
+    margin-bottom: 20px;
   }
   .notes-list {
     flex:1;
-    overflow-y: scroll;
   }
   .details {
     display: flex;
-    flex-direction: row; 
+    flex-direction: row;
     align-items: flex-start;
     margin-bottom: 16px;
     justify-content: space-between;
     max-width: 720px;
-    margin: 0 auto;
+    margin: 30px auto 0 auto;
+    padding: 15px;
+    position: relative;
+    border-radius: 0 10px 0 0;
   }
 
   :global(.controls) {
@@ -298,14 +360,23 @@ bind:this={updateSessionDialog}
     justify-content: space-between;
   }
 
-  .controls div sl-button {
+  .controls sl-button {
     margin-left: 5px;
+    box-shadow: 0 15px 25px rgba(0,0,0,.3);
+    border-radius: 100%;
+  }
+
+  .call-to-action {
+    position: sticky;
+    top: 0;
   }
 
   .action {
     padding-bottom: 15px;
-    position: sticky;
-    top: 0;
+  }
+
+  .pane-header {
+    padding-top: 20px;
   }
 
   .pane-header h2 {
@@ -320,6 +391,7 @@ bind:this={updateSessionDialog}
   }
 
   .properties {
+    width: 100%;
     display: flex;
     flex-direction: column; 
     margin-bottom: 16px;
@@ -337,4 +409,14 @@ bind:this={updateSessionDialog}
     margin: 10px;
     background-color: aqua;
   }
+
+  .clickable-tag {
+    cursor: pointer;
+  }
+  .clickable-tag:hover {
+    border: 1px solid #25bab054;
+    color: #25BAB1;
+    background-color: rgb(240, 249, 2244);
+  }
+
 </style>

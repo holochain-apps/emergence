@@ -88,9 +88,10 @@ export class EmergenceClient {
     return key
   }
   
-  async createSession(title: string, amenities: number, description: string, leaders:Array<AnyAgent>, smallest: number, largest: number, duration: number) : Promise<EntryRecord<Session>> {
+  async createSession(sessionType: SessionTypeID, title: string, amenities: number, description: string, leaders:Array<AnyAgent>, smallest: number, largest: number, duration: number) : Promise<EntryRecord<Session>> {
     const sessionEntry: Session = { 
         key: this.genKey(),
+        session_type: sessionType,
         title,
         description,
         leaders,
@@ -171,10 +172,11 @@ export class EmergenceClient {
     return this.callZome('delete_note', actionHash)
   }
 
-  async createSiteMap(text: string, pic: EntryHash | undefined) : Promise<EntryRecord<SiteMap>> {
+  async createSiteMap(text: string, pic: EntryHash | undefined, tags: Array<string>) : Promise<EntryRecord<SiteMap>> {
     const mapEntry: SiteMap = { 
         text,
         pic,
+        tags,
       };
     
     return new EntryRecord(await this.callZome('create_map', mapEntry))

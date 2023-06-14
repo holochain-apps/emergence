@@ -93,3 +93,7 @@ export const sortSlot = (a:Slot|undefined, b: Slot|undefined) => {
   const valB = b == undefined ? 0 : b.window.start
   return valA - valB
 }
+
+export const errorText = (e) => {
+  return e.data ? e.data : e
+} 

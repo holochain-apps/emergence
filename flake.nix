@@ -1,33 +1,30 @@
 {
-  description = "Template for Holochain app development";
+  description = "Flake for Holochain app development";
 
-  inputs = {
-    nixpkgs.follows = "holochain/nixpkgs";
-
+inputs = {
     versions.url = "github:holochain/holochain?dir=versions/0_1";
-    holochain = {
+    holochain-flake = {
       url = "github:holochain/holochain";
       inputs.versions.follows = "versions";
+      inputs.holochain.url = "github:holochain/holochain/holochain-0.1.5-beta-rc.1";
     };
+
+    nixpkgs.follows = "holochain-flake/nixpkgs";
   };
 
   outputs = inputs @ { ... }:
-    inputs.holochain.inputs.flake-parts.lib.mkFlake
-      {
-        inherit inputs;
-      }
-      {
-        systems = builtins.attrNames inputs.holochain.devShells;
-        perSystem =
-          { config
-          , pkgs
-          , system
-          , ...
-          }: {
+    inputs.holochain-flake.inputs.flake-parts.lib.mkFlake { inherit inputs; }
+    {
+        systems = builtins.attrNames inputs.holochain-flake.devShells;
+        perSystem = { config, pkgs, system, ... }: {
             devShells.default = pkgs.mkShell {
-              inputsFrom = [ inputs.holochain.devShells.${system}.holonix ];
-              packages = [ pkgs.nodejs-18_x ];
+                inputsFrom = [
+                    inputs.holochain-flake.devShells.${system}.holonix
+                ];
+                packages = [
+                    pkgs.nodejs-18_x
+                ];
             };
-          };
-      };
+        };
+    };
 }
