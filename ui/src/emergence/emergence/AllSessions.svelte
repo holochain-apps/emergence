@@ -67,7 +67,6 @@ on:session-created={() => {} }
 
 <div class="pane-header">
   <div class="header-content">
-    <h3>Sessions</h3>
     {#if $uiProps.amSteward || (store.getCurrentSiteMap() && store.getCurrentSiteMap().record.entry.tags.includes("emergent"))}
     <div class="pill-button"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
     {/if}
@@ -347,4 +346,36 @@ on:session-created={() => {} }
   .search-icon {
     margin-right: 5px;
   }
+
+  .pill-button {
+    background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
+    min-height: 40px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 10px 15px rgba(0,0,0,.35);
+    border-radius: 5px;
+    padding: 0 20px;
+    margin-right: 20px;
+    cursor: pointer;
+  }
+
+
+  .pill-button span {
+    color: white;
+  }
+
+@media (min-width: 720px) {
+  .pill-button {
+    position: sticky;
+    top: 0;
+  }
+
+  .pane-header {
+    top: -20px;
+    position: sticky;
+  }
+}
 </style>

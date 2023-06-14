@@ -15,8 +15,8 @@ html, body {
   line-height: 1.5;
   color: rgba(86, 94, 109, 1.0);
   padding: 0px;
-  padding-bottom: 76px; /* Adjust this value based on the height of your bottom navigation */
-  height: 100%; overflow: hidden; /* In general, it's a good idea to have the body take up the full viewport height and have a fixed layout with no scrollbar. Then, you can have a scrollable inner container like .pane-content to handle the overflow of the content. This approach helps keep the page structure clean and allows you to control the scrolling behavior more effectively. */
+  height: 100%;
+  overflow: hidden; /* In general, it's a good idea to have the body take up the full viewport height and have a fixed layout with no scrollbar. Then, you can have a scrollable inner container like .pane-content to handle the overflow of the content. This approach helps keep the page structure clean and allows you to control the scrolling behavior more effectively. */
 }
 
 body {
@@ -84,7 +84,7 @@ input, button {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 3;
+  z-index: 100;
 }
 
 upload-files div {
@@ -197,7 +197,6 @@ upload-files div {
   align-content: center;
   display: flex;
   position: sticky;
-  top: 0;
 }
 
 .header-content {
@@ -446,6 +445,7 @@ animation: spin-animation 1s infinite;
   left: 0;
   overflow: auto;
   z-index: 100;
+  width: 100%;
 }
 
 .nav-button .button-title {
@@ -521,13 +521,20 @@ animation: spin-animation 1s infinite;
 
   body {
     padding-bottom: 0;
-    padding-top: 50px;
   }
 
   .pane-header {
     background-color: transparent;
     z-index: 10;
     box-shadow: none;
+    max-width: 720px;
+    padding-top: 70px;
+    justify-content: center;
+    margin: 0 auto;
+  }
+
+  .pane.you {
+    padding-top: 50px;
   }
 
   .pane-content {

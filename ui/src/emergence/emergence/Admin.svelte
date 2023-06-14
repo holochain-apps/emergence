@@ -274,7 +274,7 @@
         {#if $sitemaps.length > 0}
         <sl-select
           value={$settings.current_sitemap ? encodeHashToBase64($settings.current_sitemap) : undefined}
-          style="margin: 8px;"
+          style="margin: 8px; position: relative; top: -26px;"
           label="Current Site Map"
           on:sl-change={(e) => {
             const s= $settings
@@ -292,10 +292,10 @@
 
     </div>
 
-    
-    <h3> Sensemaking game is {#if $settings.game_active}Active{:else}Inactive{/if}</h3>
-    <SenseResults></SenseResults>
-
+    <div class="game-status">
+        <h3> Sensemaking game is {#if $settings.game_active}Active{:else}Inactive{/if}</h3>
+        <SenseResults></SenseResults>
+    </div>
 
    
 </div>
@@ -305,11 +305,17 @@
         margin-left:15px;
     }
 
+    .game-status {
+        max-width: 720px;
+        margin: 0 auto;
+    }
+    
     .admin-controls {
         display: flex;
         width: 100%;
         flex-wrap: wrap;
         justify-content: center;
+        margin: 0 auto;
     }
 
     .header-content h3 {

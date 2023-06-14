@@ -82,7 +82,6 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
       </div>
     </div>
   {/if}
-  <div class="session-type" style={`width:20px;background:${$settings.session_types[session.record.entry.session_type].color}`}> </div>
   <div class="info clickable">
     <div class="top-area">
       <div class="left-side">
@@ -134,6 +133,9 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
       {/if}
       {#if showTags}
         <div class="tags">
+          {#if $settings.session_types[session.record.entry.session_type].color != 'white'}
+          <div class="session-type" style={`border: 1px solid ${$settings.session_types[session.record.entry.session_type].color}; color: ${$settings.session_types[session.record.entry.session_type].color};`}>Session type</div>
+          {/if}
           {#each tags as tag}
           <div class="tag clickable-tag" on:click={(e)=>{e.stopPropagation(); store.filterTag(tag,"sessionsFilter")}}>
             #{tag}
@@ -226,6 +228,9 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   .top-area, .bottom-area {
     display: flex;
     justify-content: space-between;
+  }
+  .bottom-area {
+    flex-direction: column
   }
   .left-side {
     display: flex;

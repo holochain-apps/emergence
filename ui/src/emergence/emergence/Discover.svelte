@@ -111,7 +111,7 @@
 <style>
 
     .pane-content {
-        padding-top: 0;
+        padding-top: 0px;
     }
 
     sl-tab-group {
@@ -136,5 +136,14 @@
   .search-icon {
     margin-right: 5px;
   }
+
+
+
+@media (min-width: 720px) {
+    .pane-content {
+        padding-top: 50px;
+    }
+
+}
 
 </style>

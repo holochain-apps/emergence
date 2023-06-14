@@ -278,6 +278,7 @@ on:space-created={() => {} }
     max-height: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
+    padding-top: 60px;
 }
 
 .spaces-list {
@@ -286,7 +287,7 @@ on:space-created={() => {} }
 
 .map-controls {
     position: absolute;
-    top: 20px;
+    top: 70px;
     left: 20px;
     transition: all .25s ease;
     z-index: 5;

@@ -38,6 +38,7 @@
   import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
   import { getCookie, deleteCookie } from 'svelte-cookie';
   import { Base64 } from 'js-base64'
+    import { schedule_update } from 'svelte/internal';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -199,13 +200,19 @@
   <profiles-context store="{profilesStore}">
 
     {#if $prof && ($prof.status!=="complete" || $prof.value===undefined)}
-      <div class="app-info">
-        <img style="margin-right:20px" width="100" src="/images/emergence-vertical.svg" 
-        on:click={()=>adminCheck()}/>
-        <p>Decentralized & local scheduling, collaboration & connection{#if $uiProps.amSteward}!{/if}</p>
-        {#if $prof.status=="complete" && $prof.value == undefined}
-          <create-profile></create-profile>
-        {/if}
+      <div class="event-intro">
+        <div class="wrapper">
+          <div class="about-event">
+            <img class="dweb-camp" src="/images/dweb-camp.png" 
+            on:click={()=>adminCheck()}/>
+            <p style="color:black">Welcome to camp! Create a profile to discover sessions, find people and take notes {#if $uiProps.amSteward}!{/if}</p>
+          </div>
+          {#if $prof.status=="complete" && $prof.value == undefined}
+          <div class="create-profile">
+            <create-profile></create-profile>
+          </div>
+          {/if}
+        </div>
       </div>
     {:else }
       {#if (!sitemaps || $sitemaps.length==0) && !$uiProps.amSteward}
@@ -460,6 +467,22 @@
     margin-bottom: 30px;
   }
 
+  .event-intro {
+    width: 100vw;
+    display: block;
+    height: 100vh;
+    background-image: url(/images/dweb-background.jpg);
+    background-size: cover;
+    overflow-y: scroll;
+  }
+
+  .event-intro .wrapper {
+    display: block;
+    height: 100%;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
   .app-info p {
     opacity: .6;
     padding-top: 30px;
@@ -480,4 +503,30 @@
     margin: auto;
   }
 
+  .about-event {
+    padding: 10px;
+
+  }
+
+  .about-event p {
+    font-size: 14px;
+    text-align: center;
+    margin-top: 15px;
+    margin-bottom: 0;
+  }
+
+  .dweb-camp {
+    max-width: 50vw;
+    margin: 0 auto;
+    display: block;
+  }
+
+@media (min-width: 720px) {
+  .event-intro .wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+  }
+}
 </style>

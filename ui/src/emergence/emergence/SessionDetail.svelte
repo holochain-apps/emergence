@@ -375,6 +375,10 @@ bind:this={updateSessionDialog}
     padding-bottom: 15px;
   }
 
+  .pane-header {
+    padding-top: 20px;
+  }
+
   .pane-header h2 {
     font-size: 24px;
     line-height: 30px;
