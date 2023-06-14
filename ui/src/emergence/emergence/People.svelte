@@ -11,6 +11,7 @@
   import { DetailsType, sessionInterestToString, type Info, type ProxyAgent } from './types';
   import { faInfoCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
+  import PersonSummary from './PersonSummary.svelte';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -76,104 +77,22 @@
   {:else}
 
   <div class="people">
-    {#each people as {type, hash, bio, location, nickname, avatarImage}}
-      <div class="person card clickable"
-      on:click={(e)=>{
-        store.openDetails(type == "ProxyAgent" ? DetailsType.ProxyAgent : DetailsType.Folk, hash)
-        e.stopPropagation()
-    }}    >
-        <div class="details">
-          {#if type == "ProxyAgent"}
-            <div style="margin-right:10px">
-              {#if avatarImage}
-                <show-image style={`width:50px`} image-hash={encodeHashToBase64(avatarImage)}></show-image>
-              {:else}
-                <holo-identicon disable-tooltip={true} disable-copy={true} size={50} hash={hash}></holo-identicon>
-              {/if}
-            </div>
-          {:else}
-              <agent-avatar disable-tooltip={true} disable-copy={true} size={50} agent-pub-key="{encodeHashToBase64(hash)}"></agent-avatar>
-              
-            <div class="info">
-              <div class="name">{nickname}</div>
-              <div class="location">{#if location}<span>{location}</span>{/if}</div>
-            </div>
-          {/if}
-          {#if type == "ProxyAgent"}
-            <sl-tooltip >
-              <div slot="content" style="color:white">
-                This person is a proxy agent, i.e. they don't have an account on the system and were added by administrators, likely because they are a session leader.
-              </div>
-              <span style="display:flex; align-items:center; font-weight:bold" title="Proxy agent">{nickname} <Fa style="margin-left:5px" icon={faInfoCircle}/></span>
-            </sl-tooltip>
-          {/if}
-        </div>
-        <div style="display:flex;flex-direction:row;align-items: left;margin-left:20px;">
-          <!-- {#if type== "ProxyAgent"} -->
-            <span style="font-weight:strong">Hosting:</span>
-            {#each $allSessions.filter((s) =>
-              s.record.entry.leaders.find(
-                (l) =>
-                  encodeHashToBase64(l.hash) ==
-                  encodeHashToBase64(hash)
-              )
-            ) as session}
-             <div style="margin-left:5px">{ session.record.entry.title} </div>
-
-            {/each}
-
-          <!-- {:else}
-            {#each $agentSessions.get(hash) ? Array.from($agentSessions.get(hash)):  [] as [session, interest] }
-              {#if !store.getSession(session)} &lt;unknown Session&gt;
-              {:else}
-                <div style="margin-left:5px">{sessionInterestToString(interest)}: { store.getSession(session).record.entry.title}, </div>
-              {/if}
-            {/each}
-          {/if} -->
-        </div>
-        </div>
+    {#each people as person}
+      <PersonSummary
+        person={person}
+        on:person-selected={()=>{
+          store.openDetails(
+          person.type == "ProxyAgent" ? DetailsType.ProxyAgent : DetailsType.Folk,
+          person.hash
+        );
+  }}
+      ></PersonSummary>
     {/each}
   </div>
   {/if}
 {/if}
 
 <style>
-  .person{
-    margin-bottom: 8px; 
-    padding: 10px;
-    width:100%; 
-    display: flex;
-    justify-content: space-between;
-  }
-
-  .details {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-  }
-
-  .people {
-    width: 100%;
-  }
-
-  .name {
-    font-size: 16px;
-    font-weight: bold;
-  }
-
-  .location {
-    font-size: 12px;
-    font-weight: normal;
-    opacity: .5;
-  }
-
-  .info {
-    display: flex;
-    flex-direction: column;
-    padding-left: 10px;
-    justify-content: left;
-    text-align: left;
-  }
 
   .search-bar {
     width: 100%;

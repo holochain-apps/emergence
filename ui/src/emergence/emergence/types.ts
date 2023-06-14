@@ -571,3 +571,12 @@ export interface DownloadedFile {
   file: File,
   data?: string,
 }
+
+export interface PersonData {
+  type: string, 
+  hash: ActionHash, 
+  nickname: string,
+  bio: string,
+  location: string
+  avatarImage: EntryHash,
+}
