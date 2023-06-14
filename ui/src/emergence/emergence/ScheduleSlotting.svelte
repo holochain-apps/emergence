@@ -159,10 +159,14 @@
   }
   let orphanCount = 0
   function handleDragEnterOrphan(e) {
+    if (!draggedItemId) return
+
     orphanCount+=1
     dragTarget="orphan"
   }
   function handleDragLeaveOrphan(e) {
+    if (!draggedItemId) return
+
     orphanCount-=1
     if (orphanCount == 0)
       dragTarget=""
@@ -170,13 +174,16 @@
 
   async function handleDragDropOrphan(e:DragEvent) {
     e.preventDefault();
-    const sessionHash = decodeHashFromBase64(draggedItemId)
-    await store.unslot(sessionHash)
+    if (draggedItemId) {
+      const sessionHash = decodeHashFromBase64(draggedItemId)
+      await store.unslot(sessionHash)
+    }
     clearDrag()
 
   }
 
   function handleDragEnter(e) {
+    if (!draggedItemId) return
     const target = e.target as HTMLElement
     const elem = findDropSlotParentElement(target)
     if (!elem.classList.contains("excluded")) {
@@ -210,6 +217,10 @@
 
   async function handleDragDropSession(e:DragEvent) {
     e.preventDefault();
+    if (!draggedItemId) {
+      clearDrag()
+      return
+    }
     const target = e.target as HTMLElement
     const elem = findDropSlotParentElement(target)
     if (elem.classList.contains("excluded")) {

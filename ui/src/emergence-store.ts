@@ -292,6 +292,7 @@ export class EmergenceStore {
   }
 
   getSessionSlot(session: Info<Session>) : Slot|undefined {
+    if (!session) return undefined
     const rels = session.relations.filter(r=>r.relation.content.path == "session.slot")
     if (rels.length == 0) return undefined
     rels.sort((a,b)=>b.timestamp - a.timestamp)
