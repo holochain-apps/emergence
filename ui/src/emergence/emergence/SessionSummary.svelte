@@ -134,7 +134,9 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
       {/if}
       {#if showTags}
         <div class="tags">
-          <div class="session-type" style={`border: 1px solid ${sessionType.color}; color: ${sessionType.color};`}>{sessionType.name}</div>
+          {#if session.record.entry.session_type != 0}
+            <div class="session-type" style={`border: 1px solid ${sessionType.color}; color: ${sessionType.color};`}>{sessionType.name}</div>
+          {/if}
           {#each tags as tag}
           <div class="tag clickable-tag" on:click={(e)=>{e.stopPropagation(); store.filterTag(tag,"sessionsFilter")}}>
             #{tag}

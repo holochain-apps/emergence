@@ -223,9 +223,10 @@
             <img class="dweb-camp" src="/images/dweb-camp.png" 
         on:click={()=>adminCheck()}/>
         <p>Either your node hasn't synchronized yet with the network, or the conference data hasn't yet been set up. Please be patient! </p>
+        <div style="display:flex;justify-items:center;width:100%">
         <sl-button on:click={() => doSync()}>
           <span class:spinning={true}> <Fa  icon={faArrowRotateBack} /> </span>Reload
-        </sl-button>
+        </sl-button></div>
         {#if syncing}<span class:spinning={true}> <Fa  icon={faSync} /></span>{/if}
       </div></div></div>
       {:else}

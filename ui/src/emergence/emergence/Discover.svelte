@@ -72,7 +72,6 @@
                     {/if}
                 </div>
                 <div class="discover section-controls">
-                    <h3>Latest activity</h3>
                     <div class="center-row search-bar">
                         <span class="search-icon"><Fa icon={faSearch} /></span>
                         <sl-input
@@ -119,15 +118,15 @@
     }
     
     .discover.section-controls {
-        justify-content: space-between;
+        justify-content: flex-end;
         display: flex;
         flex-direction: row;
         align-items: center;
+        flex-wrap: wrap;
     }
     .search-bar {
-        height:20px;
         max-width: 720px;
-        margin: 0 auto 0 auto;
+        margin: 0 10px 0 0;
         position: relative;
     }
 

@@ -231,6 +231,7 @@ upload-files div {
   align-self: center;
   position: sticky;
   top: 30px;
+  flex-wrap: wrap;
 }
 
 /*color theme*/
