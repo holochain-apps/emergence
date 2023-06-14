@@ -37,6 +37,7 @@ $: tags = sessionTags(session)
 $: slot = store.getSessionSlot(session)
 $: going = Array.from($relData.interest).filter(([_,i])=> i & (SessionInterestBit.Going+SessionInterestBit.Interested))
 $: settings = store.settings
+$: sessionType = $settings.session_types[session.record.entry.session_type]
 
 onMount(async () => {
   loading = false
@@ -133,7 +134,7 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
       {/if}
       {#if showTags}
         <div class="tags">
-          <div class="session-type" style={`border: 1px solid ${$settings.session_types[session.record.entry.session_type].color}; color: ${$settings.session_types[session.record.entry.session_type].color};`}>Session type</div>
+          <div class="session-type" style={`border: 1px solid ${sessionType.color}; color: ${sessionType.color};`}>{sessionType.name}</div>
           {#each tags as tag}
           <div class="tag clickable-tag" on:click={(e)=>{e.stopPropagation(); store.filterTag(tag,"sessionsFilter")}}>
             #{tag}
