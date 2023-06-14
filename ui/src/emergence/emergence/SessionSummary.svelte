@@ -119,7 +119,7 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
           <div class="leaders">
               <span style="padding-top: 2px">Hosted by:</span>
               {#each session.record.entry.leaders as leader}
-              <span  style="margin-top: -2px;"><AnyAvatar showAvatar={showLeaderAvatar} size={20} agent={leader}></AnyAvatar></span>
+              <span  style="margin-top: 2px;"><AnyAvatar showAvatar={showLeaderAvatar} size={20} agent={leader}></AnyAvatar></span>
               {/each}
           </div>
         {/if}
@@ -133,9 +133,7 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
       {/if}
       {#if showTags}
         <div class="tags">
-          {#if $settings.session_types[session.record.entry.session_type].color != 'white'}
           <div class="session-type" style={`border: 1px solid ${$settings.session_types[session.record.entry.session_type].color}; color: ${$settings.session_types[session.record.entry.session_type].color};`}>Session type</div>
-          {/if}
           {#each tags as tag}
           <div class="tag clickable-tag" on:click={(e)=>{e.stopPropagation(); store.filterTag(tag,"sessionsFilter")}}>
             #{tag}
@@ -263,6 +261,17 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }
   :global(.clickable) {
     cursor: pointer;
+  }
+
+  .session-type {
+    margin-bottom: 0;
+    display: inline;
+    border-radius: 7px;
+    padding: 5px;
+    margin-right: 5px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+    font-size: 12px;
   }
 
   @media (min-width: 720px) {
