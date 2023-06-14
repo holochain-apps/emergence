@@ -288,8 +288,10 @@ on:session-created={() => {} }
     width: 100%;
   }
  .space-title {
-  background-color: white;
+  padding: 5px;
+  line-height: 18px;
   outline: solid 1px lightgray;
+  background-color: white;
  }
  .time-title {
   background-color: white;
@@ -304,7 +306,11 @@ on:session-created={() => {} }
   width: 4px;
   outline: solid 1px lightgray;
  }
+ td  {
+  width: 200px;
+ }
  .left-sticky {
+  width:200px;
   position: sticky;
   left: 0;
  }
@@ -314,8 +320,10 @@ on:session-created={() => {} }
  }
 
  .schedule-slot {
-  outline: solid 1px lightgray;
-  background-color: white;
+  border-left: 1px dashed rgba(0,0,0,.2);
+  border-bottom: 1px solid rgba(0,0,0,.3);
+  border-right:none;
+  outline: none;
  }
  .slotted-session {
   background-color: lightgreen;
@@ -324,8 +332,7 @@ on:session-created={() => {} }
   border: dotted 1px blue;
   border-radius: 5px;
   margin: 3px;
-  cursor: 
-  pointer;
+  cursor: pointer;
  }
  .search-bar {
     width: 100%;
