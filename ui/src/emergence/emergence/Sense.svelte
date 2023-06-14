@@ -91,16 +91,16 @@
         <h2>{session.record.entry.title}</h2>
         <div class="leaders">
           {#each session.record.entry.leaders as leader}
-            <div><AnyAvatar agent={leader}></AnyAvatar></div>
+            <div class="leader"><AnyAvatar agent={leader}></AnyAvatar></div>
+          {/each}
+        </div>
+        <div class="tags">
+          {#each sessionTags(session) as tag}
+            <div class="tag">#{tag}</div>
           {/each}
         </div>
         <div class="description">
           {session.record.entry.description}
-        </div>
-        <div class="tags">
-          {#each sessionTags(session) as tag}
-            <div class="tag">{tag}</div>
-          {/each}
         </div>
       </div>
     </div>
@@ -170,11 +170,17 @@
     align-items: center;
   }
   .leaders {
-    display: flex;
-    flex-direction: column;
+    display: block;
   }
+
+  .leader {
+    display: inline-block;
+    padding-right: 10px;
+  }
+
   .slot {
     display: flex;
+    min-width: 100px;
     align-items: center;
     width: auto;
     background-color: rgba(243, 243, 245, 1.0);
@@ -200,6 +206,14 @@
     color: rgba(77, 200, 194, 1.0);
     display: block;
     text-align: center;
+  }
+  
+  .tag {
+    border: 1px solid #2F87D850;
+    color: #2F87D8;
+    background-color: transparent;
+    margin-bottom: 0;
+    display: inline;
   }
 
   .time {

@@ -334,14 +334,14 @@ on:session-created={() => {} }
   cursor: pointer;
  }
  .search-bar {
-    width: 100%;
     max-width: 720px;
     margin: 0 auto 0 auto;
     position: relative;
   }
 
-  .search-bar sl-input {
+  .search-bar sl-input input {
     width: 100%;
+    border: 1px solid red;
   }
   .search-icon {
     margin-right: 5px;
