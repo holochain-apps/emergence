@@ -216,15 +216,18 @@
       </div>
     {:else }
       {#if (!sitemaps || $sitemaps.length==0) && !$uiProps.amSteward}
-      <div class="app-info">
-        <img width="100" src="/images/emergence-vertical.svg" 
+      <div class="event-intro">
+        <div class="wrapper">
+          <div class="about-event">
+
+            <img class="dweb-camp" src="/images/dweb-camp.png" 
         on:click={()=>adminCheck()}/>
         <p>Either your node hasn't synchronized yet with the network, or the conference data hasn't yet been set up. Please be patient! </p>
         <sl-button on:click={() => doSync()}>
           <span class:spinning={true}> <Fa  icon={faArrowRotateBack} /> </span>Reload
         </sl-button>
         {#if syncing}<span class:spinning={true}> <Fa  icon={faSync} /></span>{/if}
-      </div>
+      </div></div></div>
       {:else}
       <div class="nav">
         <div class="button-group">
