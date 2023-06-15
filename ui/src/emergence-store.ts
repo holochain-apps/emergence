@@ -59,6 +59,7 @@ export const neededStuffStore = (client: EmergenceClient) => {
     , 1000);
     return {
         notes: {
+            all: ()=> get(notes),
             get: (actionHash:ActionHash) : AsyncReadable<Info<Note>|undefined> =>{
                 if (neededStuff.notes) {
                     neededStuff.notes.push(actionHash)
