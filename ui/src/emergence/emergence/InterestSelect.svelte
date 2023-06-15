@@ -46,16 +46,17 @@ function doHide() {
   setSessionInterest(($relData.myInterest & SessionInterestBit.NoOpinion) + ($relData.myInterest ^ SessionInterestBit.Hidden))
 }
 </script>
-<mwc-snackbar bind:this={errorSnackbar} leading>
-</mwc-snackbar>
-<Confirm 
+<div class="confirm-hide">
+  <Confirm 
     bind:this={confirmDialog}
     message="Please confirm hiding this session."
     details="Note: you can find hidden sessions later by selecting 'Hidden' in the filters."
     noConfirm="confirmHide"
     on:confirm-confirmed={doHide}>
   </Confirm>
-
+</div>
+<mwc-snackbar bind:this={errorSnackbar} leading>
+</mwc-snackbar>
 <div class="interest">
   <div class="interest-button attend"  
     title="I'm Going!"
@@ -90,6 +91,12 @@ function doHide() {
 
 
 <style>
+  .confirm-hide {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+  }
   .interest {
     display:flex;
     flex-direction: column;
