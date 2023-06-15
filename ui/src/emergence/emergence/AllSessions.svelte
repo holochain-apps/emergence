@@ -381,6 +381,7 @@ on:session-created={() => {} }
   .show-search {
     display: block;
   }
+
   .search-icon {
     margin-right: 0;
     border: 1px solid rgba(212, 212, 217, 1.0);

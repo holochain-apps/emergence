@@ -43,7 +43,7 @@
         flex-direction: row;
         justify-content:center;
         position: relative;
-        top: 4px;
+        height: 100%;
         align-items: center;
     }
     .avatar-row agent-avatar{
