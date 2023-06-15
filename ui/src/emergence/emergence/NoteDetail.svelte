@@ -168,7 +168,8 @@
     font-weight: bold;
   }
   .post-date {
-    font-size: 0.9em;
+    font-size: 11px;
+    opacity: .4;
   }  
   .avatar {
     font-weight: bold;

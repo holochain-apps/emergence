@@ -27,7 +27,7 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
   <div class="elem-body">
     {#if feedElem.type === FeedType.SessionNew}
       <div class="type">
-        <Avatar agentPubKey={feedElem.author} size={18}></Avatar> created a session</div>
+        <div class="avatar"><Avatar agentPubKey={feedElem.author} size={18}></Avatar></div> created a session</div>
       <SessionLink sessionHash={feedElem.about}></SessionLink>
     {/if}
     {#if feedElem.type === FeedType.SessionUpdate}
@@ -40,7 +40,7 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     {/if}
     {#if feedElem.type === FeedType.SessionSetInterest}
 
-      <Avatar agentPubKey={feedElem.author} size={18}></Avatar>
+      <div class="avatar"><Avatar agentPubKey={feedElem.author} size={18}></Avatar></div>
       {#if feedElem.detail == SessionInterestBit.Interested}
         is interested in
       {:else if feedElem.detail == SessionInterestBit.Going}
@@ -128,6 +128,11 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     position: absolute;
     top: 4px;
     right: 4px;
+  }
+
+  .avatar {
+    position: relative;
+    top: 5px;
   }
 
   .type {

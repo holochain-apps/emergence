@@ -297,7 +297,7 @@ let confirmDialog
   }
 
   .amenity {
-    border: 1px solid rgba(123, 66, 217, .5);
+    border: 1px solid rgba(123, 66, 217, .2);
     color: rgba(123, 66, 217, 1.0);
     border-radius: 7px;
     padding: 5px;

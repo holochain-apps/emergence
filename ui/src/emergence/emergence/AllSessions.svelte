@@ -386,8 +386,8 @@ on:session-created={() => {} }
     margin-right: 0;
     border: 1px solid rgba(212, 212, 217, 1.0);
     background-color: white;
-    height: 40px;
-    width: 40px;
+    height: 35px;
+    width: 35px;
     display: flex;
     align-items: center;
     justify-content: center;;
@@ -433,6 +433,11 @@ on:session-created={() => {} }
 }
 
 @media (min-width: 720px) {
+
+  .section-controls sl-select {
+    box-shadow: 0 10px 15px rgba(0,0,0,.15);
+    border-radius: 100%;
+  }
   .pill-button {
     position: sticky;
     top: 0;

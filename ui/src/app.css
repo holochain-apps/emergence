@@ -12,7 +12,7 @@
 html, body {
   font-family: "Poppins", sans-serif;
   letter-spacing: -.008rem;
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5;
   color: rgba(86, 94, 109, 1.0);
   padding: 0px;
@@ -624,5 +624,7 @@ animation: spin-animation 1s infinite;
     border: none;
     border-radius: 100%;
     box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
+    width: 35px;
+    height: 35px;
   }
 }

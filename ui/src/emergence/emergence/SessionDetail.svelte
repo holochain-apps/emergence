@@ -148,7 +148,7 @@ bind:this={updateSessionDialog}
         <div class="leaders">
           <span class="hosted-by"><strong>Hosted by </strong></span>
           {#each entry.leaders as leader}
-            <div style="margin-right:10px"><AnyAvatar showNickname={true} showAvatar={false} agent={leader}></AnyAvatar></div>
+            <div style="margin-right:10px; position: relative; top: 6px;"><AnyAvatar showNickname={true} showAvatar={true} agent={leader}></AnyAvatar></div>
           {/each}
         </div>
         <div class="attenders">
@@ -278,12 +278,12 @@ bind:this={updateSessionDialog}
     margin-bottom: 15px;
   }
   .title {
-    font-size: 48px;
+    font-size: 30px;
     text-align: left;
   }
   .leaders {
     position: relative;
-    top: -20px;
+    top: -10px;
     opacity: .6;
     font-size: 12px;
     display: inline-flex;

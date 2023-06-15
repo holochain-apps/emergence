@@ -89,14 +89,14 @@
                     </sl-button>
                 </div>
             </div>
+            {#if showFilter}
             <div class="discover-filter">
-                {#if showFilter}
                 <FeedFilter
                     on:close-filter={()=>showFilter = false}
                     on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
                     filter={$uiProps.feedFilter}></FeedFilter>
-                {/if}
             </div>
+            {/if}
             <div class="discover-section feed" style="">
                 <Feed></Feed>            
             </div>
@@ -118,11 +118,12 @@
     }
     
     .discover.section-controls {
-        justify-content: flex-end;
+        justify-content: space-between;
         display: flex;
         flex-direction: row;
         align-items: center;
         flex-wrap: wrap;
+        padding-bottom: 15px;
     }
     .search-bar {
         max-width: 720px;

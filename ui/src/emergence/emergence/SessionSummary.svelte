@@ -168,7 +168,7 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }
 
   .tag {
-    border: 1px solid #2F87D850;
+    border: 1px solid #2F87D830;
     color: #2F87D8;
     background-color: transparent;
     margin-bottom: 0;
