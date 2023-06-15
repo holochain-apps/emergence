@@ -254,37 +254,39 @@
         <!-- <sl-button style="margin: 8px;"  on:click={async () => { throw("error!")} }>
             Error!
         </sl-button> -->
-
-        <sl-button id="schedule-button" style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
+        <div id="schedule-button">        
+        <sl-button  style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
             Schedule
-        </sl-button>
+        </sl-button></div>
 
-        <sl-button id="sitemaps-button" style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
+        <div id="sitemaps-button">
+        <sl-button  style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
             Site Maps
-        </sl-button>
-
-        <sl-button id="proxyagents-button" style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
+        </sl-button></div>
+        <div id="proxyagents-button">
+        <sl-button  style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
             Proxy Agents
-        </sl-button>
-
-        <sl-button id="export-button" style="margin: 8px;"  on:click={async () => await doExport()}>
+        </sl-button></div>
+        <div id="export-button">
+        <sl-button  style="margin: 8px;"  on:click={async () => await doExport()}>
             Export
-        </sl-button>
-
-        <sl-button id="import-button" style="margin: 8px;" on:click={()=>fileinput.click()}>
+        </sl-button></div>
+        <div id="import-button">
+        <sl-button  style="margin: 8px;" on:click={()=>fileinput.click()}>
             Import
-        </sl-button>
-        <sl-button id="gameactive-button" style="margin: 8px;" on:click={()=> {
+        </sl-button></div>
+        <div id="gameactive-button">
+        <sl-button  style="margin: 8px;" on:click={()=> {
             const s= $settings
             s.game_active = ! s.game_active
             store.setSettings(s)
         }
         }>
             {$settings.game_active ? 'Deactivate Sensing Game' : 'Activate Sensing Game'}
-        </sl-button>
+        </sl-button></div>
         {#if $sitemaps.length > 0}
+        <div id="sitemmap-select"> 
         <sl-select
-          id="sitem,ap-select" 
           value={$settings.current_sitemap ? encodeHashToBase64($settings.current_sitemap) : undefined}
           style="margin: 8px; position: relative; top: -26px;"
           label="Current Site Map"
@@ -298,7 +300,7 @@
         {#each $sitemaps as map}
             <sl-option value={encodeHashToBase64(map.original_hash)}>{map.record.entry.text}</sl-option>
         {/each}
-        </sl-select>
+        </sl-select></div>
 
     {/if}
 
