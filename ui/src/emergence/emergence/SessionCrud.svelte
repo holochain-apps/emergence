@@ -177,9 +177,8 @@ let dialog
       </div>
     </div>
   {/if}
-  <div style="margin-bottom: 16px">
+  <div id="title-textfield" style="margin-bottom: 16px">
     <sl-input
-      id="title-textfield"
       label=Title
       autocomplete="off"
       value={title}
@@ -187,9 +186,9 @@ let dialog
       required
     ></sl-input>
   </div>
-  <div style="margin-bottom: 16px">
+  <div id="description-textarea"
+    style="margin-bottom: 16px">
     <sl-textarea
-      id="descript-textarea"
       label=Description 
       autocomplete="off"
       value={ description } on:input={e => { description = e.target.value;} }
@@ -204,9 +203,9 @@ let dialog
     </span>
     <div style="display:flex;">
       {#each leaders as leader, i}
-        <div style="display:flex;margin-right:10px">
+        <div id="delete-leader-button" style="display:flex;margin-right:10px">
           <AnyAvatar agent={leader}></AnyAvatar>
-          <sl-button id="delete-leader-button" style="margin-left: 8px;" on:click={() => deleteLeader(i)} circle>
+          <sl-button style="margin-left: 8px;" on:click={() => deleteLeader(i)} circle>
             <Fa icon={faTrash} />
           </sl-button>
         </div>      
@@ -216,9 +215,8 @@ let dialog
       <search-agent field-label="Add Leader" include-myself={true} clear-on-select={true} on:agent-selected={(e)=>addleader({type:"Agent", hash:e.detail.agentPubKey})}></search-agent>
 
       {#if $uiProps.amSteward}
+        <div id="proxyagent-select">
           <sl-select
-            id="proxyagent-select"
-
             bind:this={proxyAgentSelect}
             label="Add Proxy Agent"
             on:sl-change={(e) => {
@@ -231,10 +229,11 @@ let dialog
           <sl-option value={option.value}>{option.label}</sl-option>
           {/each}
           </sl-select>
+        </div>
       {/if}
       </div>  
   </div>
-  <div style="margin-bottom: 16px">
+  <div id="tags-multiselect" style="margin-bottom: 16px">
     <span>Tags:</span >
     <MultiSelect 
       bind:selected={tags} 
@@ -262,9 +261,8 @@ let dialog
         ></sl-input>
       </div>
     </div> -->
-    <div style="margin-bottom: 16px;">
+    <div id="duration-textfield" style="margin-bottom: 16px;">
       <sl-input
-        id="duration-textfield"
         style="width:120px"
         maxlength=4
         label="Duration (min)"
@@ -284,48 +282,55 @@ let dialog
       >{amenity}</sl-checkbox>
     {/each}
   </div>
-  <SlotSelect
-    bind:duration={duration}
-    bind:this={slotSelect} 
-    bind:slot={slot} 
-    bind:valid={slotValid}
-    bind:sessionType={sessionType}
-    sitemap={store.getCurrentSiteMap()}></SlotSelect>
-  {#if !slotValid}
-    {#if sessionType.can_any_time}
-      *You can't select a space without time!
-    {:else}
-      *You must select both a space and time, or niether.
+  <div id="slotselect">
+    <SlotSelect
+      bind:duration={duration}
+      bind:this={slotSelect} 
+      bind:slot={slot} 
+      bind:valid={slotValid}
+      bind:sessionType={sessionType}
+      sitemap={store.getCurrentSiteMap()}></SlotSelect>
+    {#if !slotValid}
+      {#if sessionType.can_any_time}
+        *You can't select a space without time!
+      {:else}
+        *You must select both a space and time, or niether.
+      {/if}
     {/if}
-  {/if}
-  {#if session}
+  </div>
+{#if session}
     <div style="display: flex; flex-direction: row; justify-content:flex-end;">
-      <sl-button
-        id="cancel-button"
-        label="Cancel"
-        on:click={() => dialog.hide()}
-        style=" margin-right: 16px"
-        >Cancel</sl-button>
+      <div id="cancel-button" >
+        <sl-button
+          label="Cancel"
+          on:click={() => dialog.hide()}
+          style=" margin-right: 16px"
+          >Cancel</sl-button>
+      </div>
+      <div id="save-button" >
         <sl-button 
-        style=""
-        on:click={() => updateSession()}
-        disabled={!isSessionValid}
-        variant=primary>Save</sl-button>
+          style=""
+          on:click={() => updateSession()}
+          disabled={!isSessionValid}
+          variant=primary>Save</sl-button>
+      </div>
     </div>
   {:else}
   <div style="display: flex; flex-direction: row; justify-content:flex-end;">
-    <sl-button
-      id="cancel-button"
-      label="Cancel"
-      on:click={() => {dialog.hide()}}
-      style="margin-right: 16px"
-      >Cancel</sl-button>
-
-    <sl-button 
-      id="create-session-button"
-      on:click={() => createSession()}
-      disabled={!isSessionValid}
-      variant=primary>Create Session</sl-button>
+    <div id="cancel-button" >
+      <sl-button
+        id="cancel-button"
+        label="Cancel"
+        on:click={() => {dialog.hide()}}
+        style="margin-right: 16px"
+        >Cancel</sl-button>
+    </div>
+    <div id="create-session-button" >
+      <sl-button 
+        on:click={() => createSession()}
+        disabled={!isSessionValid}
+        variant=primary>Create Session</sl-button>
+      </div>
   </div>
   {/if}
 
