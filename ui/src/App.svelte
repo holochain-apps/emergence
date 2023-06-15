@@ -70,7 +70,6 @@
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
-    let appPort : string = import.meta.env.VITE_APP_PORT
     let installed_app_id = "emergence"
     const credsJson = getCookie("creds")
     if (credsJson) {
@@ -95,13 +94,14 @@
     let url = ""
     if (creds) {
       console.log("CREDS", creds)
-      url = `${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.hostname}:${creds.appPort}`
+      url = `${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.host}/${creds.appPath}`
       client = await AppAgentWebsocket.connect(url, installed_app_id);
       const appInfo = await client.appInfo()
       console.log("appInfo", appInfo)
       const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
       setSigningCredentials(cell_id, creds.creds)
     } else {
+      let appPort: string = import.meta.env.VITE_APP_PORT
       url = `ws://localhost:${appPort}`
       client = await AppAgentWebsocket.connect(url, installed_app_id);
       if (adminPort) {
