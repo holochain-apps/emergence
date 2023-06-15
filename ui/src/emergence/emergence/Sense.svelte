@@ -6,7 +6,7 @@
   import type { EmergenceStore } from '../../emergence-store';
   import { sessionTags, type Info, type Session, SessionInterestBit } from './types';
   import Fa from 'svelte-fa';
-  import { faArrowRight, faBookmark, faStar } from '@fortawesome/free-solid-svg-icons';
+  import { faArrowRight, faBookmark, faClose, faStar } from '@fortawesome/free-solid-svg-icons';
   import SenseResults from './SenseResults.svelte';
   import AnyAvatar from './AnyAvatar.svelte';
 
@@ -49,7 +49,8 @@
     .map(({ value }) => value)
     return shuffled
   }
-
+let instructionsVisible = true
+let gameActive = false
 </script>
 {#if error}
 <span>Error fetching the sense: {error.data.data}.</span>
@@ -59,15 +60,20 @@
   <SenseResults></SenseResults>
 </div>
 {:else}
-<div class="sense-wrapper">
+<div class="sense-wrapper"
+  class:game-active={gameActive}>
   <div class="controls">
-    <div style="border: 1px solid white; color: white; font-size: 10px;">close button</div>
+    <sl-button style="margin-left: 8px; " on:click={() => { gameActive = false; instructionsVisible = true} } circle>
+      <Fa icon={faClose} />
+    </sl-button>
   </div>
-<div class="instructions" id="instructions">
+<div class="instructions"
+  class:close={!instructionsVisible}
+  >
   <h3>Welcome to Tomorrow!</h3>
   <p>Woah! Over **** sessions have been proposed!</p>
   <p>Help figure out what gets scheduled where by quickly setting your interest on proposed sessions. Sessions with most interest will get scheduled first.</p>
-  <div class="begin-button"  on:click={() => { document.getElementById('instructions').classList.add("close")  }}>Begin</div>
+  <div class="begin-button"  on:click={() => { instructionsVisible = false; gameActive = true  }}>Begin</div>
 </div>
 <div class="sense">
     <div class="remaining">Remaining: {count - senseIdx}</div>
