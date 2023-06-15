@@ -140,6 +140,7 @@ let dialog
   {#if note}
     <div style="display: flex; flex-direction: row">
       <sl-button
+      id="cancel-button"
       label="Cancel"
       on:click={() =>  dialog.hide()}
       style="flex: 1; margin-right: 16px"
@@ -153,6 +154,7 @@ let dialog
   {:else}
   <div style="display: flex; flex-direction: row">
     <sl-button
+    id="cancel-button"
     label="Cancel"
     on:click={() => dialog.hide()}
     style="flex: 1; margin-right: 16px"
@@ -173,7 +175,8 @@ let dialog
 
       <div class="new-note">
         <h4>Add a note</h4>
-        <sl-textarea 
+        <sl-textarea
+          id="note-textarea"
           resize=auto
           autocomplete={"off"}
           value={ text } on:input={e => { text = e.target.value;} }
@@ -181,7 +184,8 @@ let dialog
       </div>
       <div style="margin: 16px 0">
         <MultiSelect 
-          --sms-bg="white"
+          id="tags-select"
+        --sms-bg="white"
           bind:selected={tags} 
           options={allTags} 
           allowUserOptions={true}
@@ -203,6 +207,7 @@ let dialog
       {#if note}
           <div style="display: flex; flex-direction: row">
             <sl-button
+            id="cancel-button"
             label="Cancel"
             on:click={() =>  dialog.hide()}
             style="flex: 1; margin-right: 16px"
@@ -216,11 +221,13 @@ let dialog
         {:else}
           <div style="display: flex; flex-direction: row; justify-content: flex-end">
             <sl-button 
-            style="flex: 1;"
+              id="create-note-button"
 
-            on:click={() => createNote()}
-            disabled={!isNoteValid}
-            variant=primary>Create Note</sl-button>
+              style="flex: 1;"
+
+              on:click={() => createNote()}
+              disabled={!isNoteValid}
+              variant=primary>Create Note</sl-button>
           </div>
         {/if}
       </div>

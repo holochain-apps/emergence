@@ -163,6 +163,7 @@ let dialog
       <div>
 
         <sl-select
+          id="session-type-select"
           bind:this={sesTypeSelect}
           label="Session Type"
           on:sl-change={(e) => {
@@ -178,15 +179,17 @@ let dialog
   {/if}
   <div style="margin-bottom: 16px">
     <sl-input
-    label=Title
-    autocomplete="off"
-    value={title}
-    on:input={e => { title = e.target.value; } }
-    required
-  ></sl-input>
+      id="title-textfield"
+      label=Title
+      autocomplete="off"
+      value={title}
+      on:input={e => { title = e.target.value; } }
+      required
+    ></sl-input>
   </div>
   <div style="margin-bottom: 16px">
-    <sl-textarea 
+    <sl-textarea
+      id="descript-textarea"
       label=Description 
       autocomplete="off"
       value={ description } on:input={e => { description = e.target.value;} }
@@ -203,7 +206,7 @@ let dialog
       {#each leaders as leader, i}
         <div style="display:flex;margin-right:10px">
           <AnyAvatar agent={leader}></AnyAvatar>
-          <sl-button style="margin-left: 8px;" on:click={() => deleteLeader(i)} circle>
+          <sl-button id="delete-leader-button" style="margin-left: 8px;" on:click={() => deleteLeader(i)} circle>
             <Fa icon={faTrash} />
           </sl-button>
         </div>      
@@ -214,6 +217,8 @@ let dialog
 
       {#if $uiProps.amSteward}
           <sl-select
+            id="proxyagent-select"
+
             bind:this={proxyAgentSelect}
             label="Add Proxy Agent"
             on:sl-change={(e) => {
@@ -259,17 +264,18 @@ let dialog
     </div> -->
     <div style="margin-bottom: 16px;">
       <sl-input
-      style="width:120px"
-      maxlength=4
-      label="Duration (min)"
-      value={isNaN(duration)? '' : `${duration}`}
-      on:input={e => { duration = parseInt(e.target.value); } }
-      required
-    ></sl-input>
+        id="duration-textfield"
+        style="width:120px"
+        maxlength=4
+        label="Duration (min)"
+        value={isNaN(duration)? '' : `${duration}`}
+        on:input={e => { duration = parseInt(e.target.value); } }
+        required
+      ></sl-input>
     </div>
   </div>
   <div style="margin-bottom: 16px">
-    <div style="font-size: 16px" on:click={()=>amenities = 0}>Required Amenities </div>
+    <div id="clear-amentities-button" style="font-size: 16px" on:click={()=>amenities = 0}>Required Amenities </div>
     {#each Amenities as amenity, i}
       <sl-checkbox
         bind:this={amenityElems[i]}
@@ -295,28 +301,31 @@ let dialog
   {#if session}
     <div style="display: flex; flex-direction: row; justify-content:flex-end;">
       <sl-button
-      label="Cancel"
-      on:click={() => dialog.hide()}
-      style=" margin-right: 16px"
-      >Cancel</sl-button>
-      <sl-button 
-      style=""
-      on:click={() => updateSession()}
-      disabled={!isSessionValid}
-      variant=primary>Save</sl-button>
+        id="cancel-button"
+        label="Cancel"
+        on:click={() => dialog.hide()}
+        style=" margin-right: 16px"
+        >Cancel</sl-button>
+        <sl-button 
+        style=""
+        on:click={() => updateSession()}
+        disabled={!isSessionValid}
+        variant=primary>Save</sl-button>
     </div>
   {:else}
   <div style="display: flex; flex-direction: row; justify-content:flex-end;">
     <sl-button
-    label="Cancel"
-    on:click={() => {dialog.hide()}}
-    style="margin-right: 16px"
-    >Cancel</sl-button>
+      id="cancel-button"
+      label="Cancel"
+      on:click={() => {dialog.hide()}}
+      style="margin-right: 16px"
+      >Cancel</sl-button>
 
     <sl-button 
-    on:click={() => createSession()}
-    disabled={!isSessionValid}
-    variant=primary>Create Session</sl-button>
+      id="create-session-button"
+      on:click={() => createSession()}
+      disabled={!isSessionValid}
+      variant=primary>Create Session</sl-button>
   </div>
   {/if}
 

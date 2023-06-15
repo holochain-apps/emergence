@@ -255,26 +255,26 @@
             Error!
         </sl-button> -->
 
-        <sl-button style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
+        <sl-button id="schedule-button" style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
             Schedule
         </sl-button>
 
-        <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
+        <sl-button id="sitemaps-button" style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
             Site Maps
         </sl-button>
 
-        <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
+        <sl-button id="proxyagents-button" style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
             Proxy Agents
         </sl-button>
 
-        <sl-button style="margin: 8px;"  on:click={async () => await doExport()}>
+        <sl-button id="export-button" style="margin: 8px;"  on:click={async () => await doExport()}>
             Export
         </sl-button>
 
-        <sl-button style="margin: 8px;" on:click={()=>fileinput.click()}>
+        <sl-button id="import-button" style="margin: 8px;" on:click={()=>fileinput.click()}>
             Import
         </sl-button>
-        <sl-button style="margin: 8px;" on:click={()=> {
+        <sl-button id="gameactive-button" style="margin: 8px;" on:click={()=> {
             const s= $settings
             s.game_active = ! s.game_active
             store.setSettings(s)
@@ -284,6 +284,7 @@
         </sl-button>
         {#if $sitemaps.length > 0}
         <sl-select
+          id="sitem,ap-select" 
           value={$settings.current_sitemap ? encodeHashToBase64($settings.current_sitemap) : undefined}
           style="margin: 8px; position: relative; top: -26px;"
           label="Current Site Map"

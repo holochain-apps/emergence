@@ -239,7 +239,7 @@
       {:else}
       <div class="nav">
         <div class="button-group">
-          <div class="nav-button {pane === "discover" ? "selected":""}"
+          <div id="nav-discover" class="nav-button {pane === "discover" ? "selected":""}"
             title="Discover"
             on:keypress={()=>{store.setPane('discover')}}
             on:click={()=>{store.setPane('discover')}}
@@ -247,7 +247,7 @@
             <Fa class="nav-icon" icon={faHome} size="2x"/>
             <span class="button-title">Discover</span>
           </div>
-          <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
+          <div id="nav-sessions" class="nav-button {pane.startsWith("sessions")?"selected":""}"
             title="Sessions"
             on:keypress={()=>{store.setPane('sessions')}}
             on:click={()=>{store.setPane('sessions')}}
@@ -257,7 +257,7 @@
           </div>
     
     
-          <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
+          <div id="nav-spaces" class="nav-button {pane.startsWith("spaces")?"selected":""}"
             title="Spaces"
             on:keypress={()=>{store.setPane('spaces')}}
             on:click={()=>{store.setPane('spaces')}}
@@ -268,7 +268,7 @@
         </div>
         <div class="button-group settings">
           {#if store && $uiProps.amSteward}
-            <div class="nav-button {pane.startsWith("admin")?"selected":""}"
+            <div id="nav-admin" class="nav-button {pane.startsWith("admin")?"selected":""}"
               title="Admin"
               on:keypress={()=>{store.setPane('admin')}}
               on:click={()=>{store.setPane('admin')}}
@@ -277,7 +277,7 @@
             <span class="button-title settings">Settings</span>
             </div>
           {/if}
-          <div class="nav-button {pane=="you"?"selected":""}"
+          <div id="nav-you" class="nav-button {pane=="you"?"selected":""}"
             title="You"
             on:keypress={()=>{store.setPane('you')}}
             on:dblclick={(e)=>e.stopPropagation()}
@@ -291,7 +291,7 @@
             <span class="button-title you">You</span>
           </div>
 
-          <div class="nav-button"
+          <div id="nav-sync" class="nav-button"
             class:spinning={syncing}
             title="Sync"
             on:keypress={()=>{doSync()}}
@@ -303,7 +303,7 @@
             <span class="button-title sync">Sync</span>
           </div>
           {#if getCookie("creds")}
-            <div class="nav-button"
+            <div id="nav-logout" class="nav-button"
               title="Logout"
               on:click={()=>{
                 window.location.assign("/reset")
