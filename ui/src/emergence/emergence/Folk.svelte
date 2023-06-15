@@ -110,12 +110,16 @@
     min-width: 200px;
 }  
 
+sl-tab-group {
+    width: 100%;
+}
+
 .card {
     flex-direction: column;
 }
 
 .pane-header {
-    padding-top: 0;
+    padding-top: 10px;
     padding-bottom: 30px;
 }
 

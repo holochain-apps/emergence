@@ -447,7 +447,7 @@ on:session-created={() => {} }
   }
 
   .pane-header {
-    top: -20px;
+    top: 40px;
     position: sticky;
   }
 }
