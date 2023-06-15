@@ -6,7 +6,7 @@
   import type { EmergenceStore } from '../../emergence-store';
   import { sessionTags, type Info, type Session, SessionInterestBit } from './types';
   import Fa from 'svelte-fa';
-  import { faArrowRight, faBookmark, faClose, faStar } from '@fortawesome/free-solid-svg-icons';
+  import { faArrowRight, faBookmark, faClose, faCheck } from '@fortawesome/free-solid-svg-icons';
   import SenseResults from './SenseResults.svelte';
   import AnyAvatar from './AnyAvatar.svelte';
 
@@ -70,8 +70,8 @@ let gameActive = false
 <div class="instructions"
   class:close={!instructionsVisible}
   >
-  <h3>Welcome to Tomorrow!</h3>
-  <p>Woah! Over **** sessions have been proposed!</p>
+  <h3>Tomorrow is today!</h3>
+  <p>**** of you proposed **** sessions for Tomorrow!</p>
   <p>Help figure out what gets scheduled where by quickly setting your interest on proposed sessions. Sessions with most interest will get scheduled first.</p>
   <div class="begin-button"  on:click={() => { instructionsVisible = false; gameActive = true  }}>Begin</div>
 </div>
@@ -124,7 +124,7 @@ let gameActive = false
         size="large"
         label="Going"
         on:click={() => {swipe(SessionInterestBit.Going)}}
-      ><Fa icon={faStar} /></sl-button>
+      ><Fa icon={faCheck} class="foo" /></sl-button>
         Going
       </div>
       <div class="button">
@@ -132,6 +132,7 @@ let gameActive = false
         circle
         size="large"
         label="Interested"
+        color="red"
         on:click={() => {swipe(SessionInterestBit.Interested)}}
         ><Fa icon={faBookmark} /></sl-button>
         Interested
@@ -216,6 +217,8 @@ let gameActive = false
 
   .instructions {
     background-color: rgba(49, 54, 63, .90);
+    background-image: url(/images/dweb-background.jpg);
+    background-size: 300%;
     border-radius: 5px;
     position: absolute;
     top: 0;
@@ -236,7 +239,7 @@ let gameActive = false
   }
 
   .instructions h3, .instructions p {
-    color: white;
+    color: black;
   }
 
   .instructions p {
@@ -341,7 +344,12 @@ let gameActive = false
     width:75px;
     align-items: center;
   }
+  .foo {
+    color: red;
+  }
   @media (min-width: 720px) {
-  
+    .instructions {
+      background-size: 180%;
+    }
   }
 </style>

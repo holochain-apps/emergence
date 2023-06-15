@@ -247,9 +247,9 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }
 
   .leaders {
-    font-size: 12px;
-    display: inline-flex;
+    font-size: 10px;
     margin-bottom: 5px;
+    text-align: left;
   }
 
   .leaders span {
@@ -278,6 +278,10 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }
 
   @media (min-width: 720px) {
+
+    .leaders {
+      font-size: 12px;
+    }
 
   .slot {
     border-radius: 10px 0 0 10px;

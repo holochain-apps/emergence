@@ -10,7 +10,8 @@
 }
 
 html, body {
-  font-family: "Roboto", sans-serif;
+  font-family: "Poppins", sans-serif;
+  letter-spacing: -.008rem;
   font-size: 16px;
   line-height: 1.5;
   color: rgba(86, 94, 109, 1.0);
