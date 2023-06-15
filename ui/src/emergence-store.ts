@@ -122,6 +122,7 @@ export class EmergenceStore {
     sessionSort: SessionSortOrder.Ascending,
     spaceSort: SpaceSortOrder.Capacity,
     confirmHide: true,
+    searchVisible: false,
   })
   settings: Writable<Settings> = writable({game_active: false, session_types:[]})
 

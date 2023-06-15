@@ -58,6 +58,7 @@ const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
   if (slotb) valb = slotb.window.start
   return $uiProps.sessionSort == SessionSortOrder.Ascending ? vala - valb : valb - vala
 }
+
 </script>
 <SessionCrud
 bind:this={createSessionDialog}
@@ -72,9 +73,21 @@ on:session-created={() => {} }
     {/if}
       <div class="section-controls">
         <div class="center-row search-bar">
-          <span class="search-icon"  on:click={() => { document.getElementsByClassName('search-bar')[0].classList.add('show-search'); }}><Fa icon={faSearch} /></span>
-          <div class="search-input">
+          <sl-button class="search-icon"  
+            on:click={() => {
+              if ($uiProps.searchVisible) {
+                const filter = $uiProps.sessionsFilter;
+                filter.keyword = ""
+                store.setUIprops({sessionsFilter: filter})
+              }
+              store.setUIprops({searchVisible: ! $uiProps.searchVisible}) 
+              }} circle>
+            <Fa icon={faSearch} />
+          </sl-button>
+          <div class="search-input"
+          class:show-search={$uiProps.searchVisible}>
             <sl-input
+              
               value={$uiProps.sessionsFilter.keyword}
               placeholder="Search by title & description"
               on:input={e => { 
@@ -346,13 +359,16 @@ on:session-created={() => {} }
     position:absolute;
     bottom: -60px;
     left: -10px;
-    display: block;
     padding: 10px;
     background-color: white;
     border-radius: 0 0 5px 5px;
   }
 
-  .search-bar.show-search {
+  .search-input {
+    display: none;
+  }
+
+  .show-search {
     display: block;
   }
   .search-icon {

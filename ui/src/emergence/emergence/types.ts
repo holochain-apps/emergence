@@ -449,6 +449,7 @@ export interface UIProps {
   sessionSort: SessionSortOrder,
   spaceSort: SpaceSortOrder,
   confirmHide: boolean,
+  searchVisible: boolean,
 }
 
 export enum SessionListMode {
