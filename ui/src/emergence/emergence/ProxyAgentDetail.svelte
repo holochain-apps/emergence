@@ -146,8 +146,8 @@
   </div>
   <div class="card">
   <div class="details">
-    <div style="display: flex; flex-direction: column; margin-left:20px">
-      <div style="display: flex; flex-direction: row">
+    <div style="display: flex; flex-direction: column;">
+      <div style="display: flex; flex-direction: row; padding-bottom: 15px; align-items: center; justify-content: center;">
         <div class="pic">
           <ProxyAgentAvatar size={170} {proxyAgentHash} />
         </div>
@@ -177,11 +177,8 @@
       </div>
       <div>
         {#if sessions}
-          <div
-            style="display: flex; flex-direction: column; margin-bottom: 16px"
-          >
-            <span style="margin-right: 4px"><strong>Sessions:</strong></span>
-            <div style="display: flex; flex-direction: row;">
+          <div style="display: flex; flex-direction: column; margin-bottom: 16px">
+            <div style="display: flex; flex-direction: column; width: 100%;">
               {#each Array.from(sessions ? sessions : []) as session}
                 <SessionSummary {session} />
               {/each}
@@ -207,6 +204,14 @@
 </div>
 
 <style>
+  .details {
+    width: 100%;
+    padding: 15px;
+  }
+
+  .pane-header {
+    padding-top: 0;
+  }
   .pic {
     max-width: 300px;
   }

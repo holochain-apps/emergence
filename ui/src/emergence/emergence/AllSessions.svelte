@@ -65,6 +65,11 @@ bind:this={createSessionDialog}
 on:session-created={() => {} }
 ></SessionCrud>
 
+{#if $settings.game_active}
+<div class="sensemaking-game">
+  <Sense></Sense>
+</div>
+{/if}
 
 <div class="pane-header">
   <div class="header-content">
@@ -128,11 +133,6 @@ on:session-created={() => {} }
   {/if}
 </div>
 <div class="pane-content">
-  {#if $settings.game_active}
-    <div class="sensemaking-game">
-      <Sense></Sense>
-    </div>
-  {/if}
   {#if error}
     <span class="notice">Error fetching the sessions: {error.data.data}.</span>
   {:else if $sessions.length === 0}
@@ -280,8 +280,9 @@ on:session-created={() => {} }
     background-color: rgba(73, 80, 93, 1.0);
     padding: 15px;
     border-radius: 0;
-    margin-bottom: 30px;
+    margin-bottom: 10px;
     width: 100%;
+    margin-top: 70px;
   }
 
 .empty {
@@ -414,6 +415,9 @@ on:session-created={() => {} }
     font-size: 14px;
   }
 
+  .pane-header {
+    padding-top: 0;
+  }
 
   .pill-button span {
     color: white;

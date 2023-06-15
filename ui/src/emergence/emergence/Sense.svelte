@@ -59,9 +59,15 @@
   <SenseResults></SenseResults>
 </div>
 {:else}
-<div class="instructions">
-  <h3>Sensemake: Help us estimate attendance!</h3>
-  <p>Here are some sessions, please indicate your interest by clicking the buttons below.</p>
+<div class="sense-wrapper">
+  <div class="controls">
+    <div style="border: 1px solid white; color: white; font-size: 10px;">close button</div>
+  </div>
+<div class="instructions" id="instructions">
+  <h3>Welcome to Tomorrow!</h3>
+  <p>Woah! Over **** sessions have been proposed!</p>
+  <p>Help figure out what gets scheduled where by quickly setting your interest on proposed sessions. Sessions with most interest will get scheduled first.</p>
+  <div class="begin-button"  on:click={() => { document.getElementById('instructions').classList.add("close")  }}>Begin</div>
 </div>
 <div class="sense">
     <div class="remaining">Remaining: {count - senseIdx}</div>
@@ -136,10 +142,84 @@
 
     </div>
   </div>
-
+</div>
 {/if}
 
 <style>
+
+  .begin-button {
+    background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
+    min-height: 30px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 10px 15px rgba(0,0,0,.35);
+    border-radius: 5px;
+    padding: 0 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    height: 40px;
+    margin-top: 20px;
+  }
+
+  .sense-wrapper {
+    position: relative;
+    transition: all .25s ease;
+  }
+
+  .sense-wrapper.game-active {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(73, 80, 93, 1.0);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    overflow-y: scroll;
+  }
+
+  .sense-wrapper .close-game {
+    display: none;
+  }
+
+  .sense-wrapper .controls {
+    position: absolute;
+    z-index: 1001;
+    top: 20px;
+    left: 20px;
+  }
+
+  .sense-wrapper.game-active .close-game {
+    display: block;
+  }
+
+  .instructions {
+    background-color: rgba(49, 54, 63, .90);
+    border-radius: 5px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    justify-content: center;
+    display: flex;
+    text-align: center;
+    padding: 30px;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+  }
+
+  .instructions.close {
+    display: none;
+  }
+
   .instructions h3, .instructions p {
     color: white;
   }
@@ -151,7 +231,9 @@
     display: flex;
     flex-direction: column;
     margin: 0;
-    min-width: 100%;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
   }
 
   .slot-details {
@@ -244,5 +326,7 @@
     width:75px;
     align-items: center;
   }
-
+  @media (min-width: 720px) {
+  
+  }
 </style>
