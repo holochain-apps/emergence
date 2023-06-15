@@ -79,7 +79,6 @@ input, button {
   justify-content: space-between;
   background-color: var(--primary-color);
   background-color: #fff;
-  padding: 0.5rem 0;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -96,13 +95,12 @@ upload-files div {
   text-align: center;
   color: var(--light-text-color);
   padding: 0.5rem;
-  font-size: 0.875rem;
+  font-size: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 50px;
-  max-width: 50px;
   font-size: 9px;
   padding: 5px;
   margin: 5px;
@@ -111,12 +109,21 @@ upload-files div {
   transition: all .25s ease;
 }
 
+.nav-button span {
+  opacity: .5;
+}
+
 .nav-button.selected {
   background: linear-gradient(228.21deg, #8E2FD8 0%, #2F87D8 94.99%);
   box-shadow: 0px 15px 25px rgba(0, 0, 0, 0.15);
   color: rgba(255,255,255,1);
-  padding: 0 20px;
-  border-radius: 5px;
+  padding: 0px 10px;
+  height: 100%;
+  margin:0;
+}
+
+.nav-button.selected span {
+  opacity: 1;
 }
 
 
@@ -135,7 +142,7 @@ upload-files div {
   padding: 0px;
   background-color: var(--bg-color);
   background-color: #fff;
-  height: calc(100% - 76px); /* Subtract the height of the bottom navigation */
+  height: calc(100% - 60px); /* Subtract the height of the bottom navigation */
   display: flex;
   justify-content: flex-start;
   align-items: center;
@@ -496,7 +503,7 @@ animation: spin-animation 1s infinite;
     bottom: auto;
     box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
     justify-content: space-between;
-    padding: 0;
+
   }
 
   .nav-button {
@@ -508,7 +515,8 @@ animation: spin-animation 1s infinite;
   }
 
   .nav-button .button-title {
-    font-size: 16px;
+    font-size: 14px;
+    padding-top: 0;
   }
 
   svg.nav-icon {

@@ -72,15 +72,17 @@ on:session-created={() => {} }
     {/if}
       <div class="section-controls">
         <div class="center-row search-bar">
-          <span class="search-icon"><Fa icon={faSearch} /></span>
-          <sl-input
-            value={$uiProps.sessionsFilter.keyword}
-            placeholder="Search by title & description"
-            on:input={e => { 
-              const filter = $uiProps.sessionsFilter;
-              filter.keyword = e.target.value
-              store.setUIprops({sessionsFilter: filter})}}
-          ></sl-input>
+          <span class="search-icon"  on:click={() => { document.getElementsByClassName('search-bar')[0].classList.add('show-search'); }}><Fa icon={faSearch} /></span>
+          <div class="search-input">
+            <sl-input
+              value={$uiProps.sessionsFilter.keyword}
+              placeholder="Search by title & description"
+              on:input={e => { 
+                const filter = $uiProps.sessionsFilter;
+                filter.keyword = e.target.value
+                store.setUIprops({sessionsFilter: filter})}}
+            ></sl-input>
+          </div>
         </div> 
         <SessionFilterCtrls
           on:toggle-filter={()=>{showFilter = !showFilter;}}
@@ -91,7 +93,7 @@ on:session-created={() => {} }
           <Fa icon={$uiProps.sessionSort == SessionSortOrder.Ascending ? faArrowUpShortWide : faArrowDownWideShort} />
         </sl-button>
 
-        <sl-select style="margin-left:10px;width:150px;" bind:this={listModeSelect}
+        <sl-select style="margin-left:10px;width:120px; font-size: 12px;" bind:this={listModeSelect}
           pill
           on:sl-change={(e) => {
             store.setUIprops({sessionListMode: e.target.value})
@@ -335,21 +337,45 @@ on:session-created={() => {} }
  }
  .search-bar {
     max-width: 720px;
-    margin: 0 auto 0 auto;
-    position: relative;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 0;
   }
 
-  .search-bar sl-input input {
-    width: 100%;
-    border: 1px solid red;
+  .search-bar .search-input {
+    position:absolute;
+    bottom: -60px;
+    left: -10px;
+    display: block;
+    padding: 10px;
+    background-color: white;
+    border-radius: 0 0 5px 5px;
+  }
+
+  .search-bar.show-search {
+    display: block;
   }
   .search-icon {
-    margin-right: 5px;
+    margin-right: 0;
+    border: 1px solid rgba(212, 212, 217, 1.0);
+    background-color: white;
+    height: 40px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;;
+    border-radius: 40px;
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
+    z-index: 5;
+  }
+
+  .search-icon.selected {
+    background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
   }
 
   .pill-button {
     background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
-    min-height: 40px;
+    min-height: 30px;
     min-width: 40px;
     display: flex;
     align-items: center;
@@ -357,9 +383,10 @@ on:session-created={() => {} }
     color: white;
     box-shadow: 0 10px 15px rgba(0,0,0,.35);
     border-radius: 5px;
-    padding: 0 20px;
-    margin-right: 20px;
+    padding: 0 10px;
+    margin-right: 10px;
     cursor: pointer;
+    font-size: 14px;
   }
 
 

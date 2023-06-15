@@ -79,7 +79,7 @@
             {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"}
           </div>
           {:else}
-          <div class="date">
+          <div class="date tba">
             Slot TBA
           </div>
           <div class="time">--:--</div>
@@ -150,9 +150,8 @@
   .sense {
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    margin: 10px;
-    min-width: 400px;
+    margin: 0;
+    min-width: 100%;
   }
 
   .slot-details {
