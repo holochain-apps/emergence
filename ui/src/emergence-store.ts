@@ -785,7 +785,7 @@ export class EmergenceStore {
   }
 
   async fetchSession(sessions: Array<ActionHash>) {
-    try {  
+    try {
         let stuff = await this.client.getStuff({sessions})
         if (stuff.sessions) {
             stuff.sessions.forEach(session=>{
@@ -795,6 +795,9 @@ export class EmergenceStore {
                         const idx = n.findIndex(s=>encodeHashToBase64(s.original_hash)== sB64)
                         if (idx >= 0) {
                             n[idx] = session
+                        }
+                        else {
+                            n.push(session)
                         }
                         return n
                     } )
@@ -1639,7 +1642,9 @@ export class EmergenceStore {
                         if (idx >= 0) {
                             n[idx] = space
                         }
-                        return n
+                        else {
+                            n.push(space)
+                        }                        return n
                     } )
                 }
             })
