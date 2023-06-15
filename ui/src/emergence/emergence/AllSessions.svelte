@@ -106,7 +106,7 @@ on:session-created={() => {} }
           <Fa icon={$uiProps.sessionSort == SessionSortOrder.Ascending ? faArrowUpShortWide : faArrowDownWideShort} />
         </sl-button>
 
-        <sl-select style="margin-left:10px;width:120px; font-size: 12px;" bind:this={listModeSelect}
+        <sl-select style="margin-left:10px;" bind:this={listModeSelect}
           pill
           on:sl-change={(e) => {
             store.setUIprops({sessionListMode: e.target.value})
@@ -128,11 +128,6 @@ on:session-created={() => {} }
   {/if}
 </div>
 <div class="pane-content">
-  {#if $settings.game_active}
-    <div class="sensemaking-game">
-      <Sense></Sense>
-    </div>
-  {/if}
   {#if error}
     <span class="notice">Error fetching the sessions: {error.data.data}.</span>
   {:else if $sessions.length === 0}
@@ -270,12 +265,16 @@ on:session-created={() => {} }
 
 <style>
 
+  .pane-content {
+    padding-top: 0;
+  }
+
   .sensemaking-game {
     max-width: 720px;
     margin: 0 auto;
     background-color: rgba(73, 80, 93, 1.0);
     padding: 15px;
-    border-radius: 10px;
+    border-radius: 0;
     margin-bottom: 30px;
     width: 100%;
   }
@@ -348,6 +347,11 @@ on:session-created={() => {} }
   margin: 3px;
   cursor: pointer;
  }
+
+ sl-select {
+  max-width: 70px;
+ }
+
  .search-bar {
     max-width: 720px;
     flex-direction: column;
@@ -409,11 +413,24 @@ on:session-created={() => {} }
   .pill-button span {
     color: white;
   }
+@media (min-width: 375px) {
+  .section-controls sl-select {
+    max-width: 120px;
+  }
+}
 
 @media (min-width: 720px) {
   .pill-button {
     position: sticky;
     top: 0;
+  }
+
+  .pane-content {
+    padding-top: 20px;
+  }
+  
+  .sensemaking-game {
+    border-radius: 10px;
   }
 
   .pane-header {

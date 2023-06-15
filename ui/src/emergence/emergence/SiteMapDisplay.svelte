@@ -274,6 +274,7 @@ on:space-created={() => {} }
 
 .spaces-drawer {
     width: 100%;
+    min-width: 280px;
     max-width: 320px;
     max-height: 100%;
     overflow-y: scroll;
@@ -334,6 +335,13 @@ sl-tooltip {
 }
 
 .true .map-controls {
-    left: 340px;
+    left: 280px;
+}
+
+
+@media (min-width: 720px) {
+    .true .map-controls {
+        left: 340px;
+    }
 }
 </style>
