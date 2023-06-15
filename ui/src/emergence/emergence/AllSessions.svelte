@@ -444,12 +444,15 @@ on:session-created={() => {} }
   
   .sensemaking-game {
     border-radius: 10px;
+    margin-bottom: -50px;
     margin-top: 70px;
   }
 
   .pane-header {
-    top: 40px;
-    position: sticky;
+    margin-top: 50px;
+    top: 35px;
+    max-width: 740px;
+    margin-bottom: 0;
   }
 }
 </style>

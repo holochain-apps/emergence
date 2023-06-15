@@ -172,6 +172,7 @@ let gameActive = false
   }
 
   .sense-wrapper {
+    background-color: rgba(73, 80, 93, 0);
     position: relative;
     transition: all .25s ease;
   }
@@ -182,7 +183,7 @@ let gameActive = false
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(73, 80, 93, 1.0);
+    background-color: rgba(73, 80, 93, .95);
     z-index: 10000;
     align-items: center;
     justify-content: center;

@@ -344,6 +344,10 @@ sl-tooltip {
     .true .map-controls {
         left: 340px;
     }
+
+    .spaces-container {
+        padding-top: 50px;
+    }
 }
 
 @media (min-width: 1000px) {
