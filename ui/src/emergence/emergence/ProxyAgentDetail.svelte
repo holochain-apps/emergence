@@ -144,7 +144,7 @@
       </div>
     </div>
   </div>
-
+  <div class="card">
   <div class="details">
     <div style="display: flex; flex-direction: column; margin-left:20px">
       <div style="display: flex; flex-direction: row">
@@ -173,21 +173,23 @@
               >
             </div>
           {/if}
-          {#if sessions}
-            <div
-              style="display: flex; flex-direction: column; margin-bottom: 16px"
-            >
-              <span style="margin-right: 4px"><strong>Sessions:</strong></span>
-              <div style="display: flex; flex-direction: row;">
-                {#each Array.from(sessions ? sessions : []) as session}
-                  <SessionSummary {session} />
-                {/each}
-              </div>
-            </div>
-          {/if}
         </div>
       </div>
-
+      <div>
+        {#if sessions}
+          <div
+            style="display: flex; flex-direction: column; margin-bottom: 16px"
+          >
+            <span style="margin-right: 4px"><strong>Sessions:</strong></span>
+            <div style="display: flex; flex-direction: row;">
+              {#each Array.from(sessions ? sessions : []) as session}
+                <SessionSummary {session} />
+              {/each}
+            </div>
+          </div>
+        {/if}
+      </div>
+      </div>
       {#if $uiProps.amSteward && sessions.length > 0}
       <search-agent 
         field-label="Assign Sessions To:" 
