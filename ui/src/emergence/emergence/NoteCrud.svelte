@@ -22,7 +22,8 @@ import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
 
-const FILE_TYPES = "image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,audio/mp3,audio/m4a,audio/ogg,application/pdf,text/plain"
+//const FILE_TYPES = "image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,audio/mp3,audio/m4a,audio/ogg,application/pdf,text/plain"
+const FILE_TYPES = "image/jpeg,image/png,image/gif,image/bmp,image/svg,audio/x-aiff,audio/mp3,audio/m4a,audio/ogg,application/pdf,text/plain"
 const dispatch = createEventDispatcher();
 export let note: Info<Note>|undefined = undefined;  // set this if update
 export let sessionHash: ActionHash;

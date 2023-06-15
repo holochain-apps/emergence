@@ -38,7 +38,6 @@
   import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
   import { getCookie, deleteCookie } from 'svelte-cookie';
   import { Base64 } from 'js-base64'
-    import { schedule_update } from 'svelte/internal';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -209,7 +208,9 @@
           </div>
           {#if $prof.status=="complete" && $prof.value == undefined}
           <div class="create-profile">
-            <create-profile></create-profile>
+            <create-profile
+              on:profile-created={()=>{}}
+            ></create-profile>
           </div>
           {/if}
         </div>

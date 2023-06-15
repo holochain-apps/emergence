@@ -740,7 +740,7 @@ export class EmergenceStore {
             }
         },
     ])
-    this.fetchSessions()
+    this.fetchSession(sessionHash)
   }
 
   sessionInterestProjection(sessions: Array<Info<Session>>) : Projection  {
@@ -781,30 +781,64 @@ export class EmergenceStore {
       }
   }
 
+  async fetchSession(sessionHash:ActionHash) {
+    try {  
+        let stuff = await this.client.getStuff({sessions:[sessionHash]})
+        if (stuff.sessions && stuff.sessions[0]) {
+            const session = stuff.sessions[0]
+            const sB64 = encodeHashToBase64(sessionHash)
+            this.sessions.update((n) => {
+                const idx = n.findIndex(s=>encodeHashToBase64(s.original_hash)== sB64)
+                if (idx >= 0) {
+                    n[idx] = session
+                }
+                return n
+            } )
+            this.updateMyInterest(session)
+            const noteHashes = []
+            session.relations.filter(r=>r.relation.content.path === "session.note").forEach(r=>noteHashes.push(r.relation.dst))
+            this.noteHashes.update((notes) => {
+                noteHashes.forEach(h=>{
+                    if (!notes.find(n=>encodeHashToBase64(n)==encodeHashToBase64(h))) {
+                        notes.push(h)
+                    }
+                })
+                return notes
+            } )
+        }
+    }
+    catch (e) {
+        console.log(`Error fetching session: ${encodeHashToBase64(sessionHash)}`, e)
+    }
+  } 
+
+  updateMyInterest(session: Info<Session>) {
+    session.record.entry.leaders.forEach(l=> 
+        {
+            if (encodeHashToBase64(l.hash) == this.myPubKeyBase64) {
+                this.agentSessions.update((n) => {
+                    let si = n.get(this.myPubKey)
+                    if (!si) {
+                        si = new HoloHashMap()
+                        n.set(l.hash,si)
+                    }
+                    si.set(session.original_hash,SessionInterestBit.Interested)
+                    return n
+                } )
+            }
+        }    
+    )
+  }
+
   async fetchSessions() {
     try {
         await this.fetchSpaces()
         const sessions = await this.client.getSessions()
         this.sessions.update((n) => {return sessions} )
         const noteHashes = []
-        sessions.forEach(s=> s.record.entry.leaders.forEach(l=> 
-            {
-                if (encodeHashToBase64(l.hash) == this.myPubKeyBase64) {
-                    this.agentSessions.update((n) => {
-                        let si = n.get(this.myPubKey)
-                        if (!si) {
-                            si = new HoloHashMap()
-                            n.set(l.hash,si)
-                        }
-                        si.set(s.original_hash,SessionInterestBit.Interested)
-                        return n
-                    } )
-                }
-            }    
-        ))
+        sessions.forEach(s=> this.updateMyInterest(s))
         sessions.forEach(s=>s.relations.filter(r=>r.relation.content.path === "session.note").forEach(r=>noteHashes.push(r.relation.dst)))
         this.noteHashes.update((n) => {return noteHashes} )
-
     }
     catch (e) {
         console.log("Error fetching sessions", e)
