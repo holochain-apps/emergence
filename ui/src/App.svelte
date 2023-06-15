@@ -92,17 +92,18 @@
         error = e.reason
       }
     }
-
+    let url = ""
     if (creds) {
       console.log("CREDS", creds)
-      const url = `${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.hostname}:${creds.appPort}`
+      url = `${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.hostname}:${creds.appPort}`
       client = await AppAgentWebsocket.connect(url, installed_app_id);
       const appInfo = await client.appInfo()
       console.log("appInfo", appInfo)
       const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
       setSigningCredentials(cell_id, creds.creds)
     } else {
-      client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, installed_app_id);
+      url = `ws://localhost:${appPort}`
+      client = await AppAgentWebsocket.connect(url, installed_app_id);
       if (adminPort) {
         const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
         const cellIds = await adminWebsocket.listCellIds()
@@ -129,7 +130,7 @@
     });
 
     fileStorageClient = new FileStorageClient(client, 'emergence');
-    store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
+    store = new EmergenceStore(new EmergenceClient(url,installed_app_id, client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
     await store.sync(undefined)
     initialSync = setInterval(async ()=>{
       if ($uiProps.amSteward || ($sitemaps && $sitemaps.length > 0)) {clearInterval(initialSync)}

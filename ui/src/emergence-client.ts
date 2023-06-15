@@ -1,12 +1,13 @@
 // import {  } from './types';
 
-import type {
-     ActionHash,
-     AgentPubKey,
-     AppAgentCallZomeRequest,
-     AppAgentClient,
-     EntryHash,
-     HoloHash,
+import {
+  AppAgentWebsocket,
+     type ActionHash,
+     type AgentPubKey,
+     type AppAgentCallZomeRequest,
+     type AppAgentClient,
+     type EntryHash,
+     type HoloHash,
 } from '@holochain/client';
 import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse, Settings, ProxyAgent, UpdateProxyAgentInput, AnyAgent, SessionTypeID } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
@@ -14,7 +15,11 @@ import { EntryRecord } from '@holochain-open-dev/utils';
 
 
 export class EmergenceClient {
+  reconnecting = false
+
   constructor(
+    public url: string,
+    public installed_app_id,
     public client: AppAgentClient,
     public roleName: string,
     public zomeName = 'emergence'
@@ -33,7 +38,6 @@ export class EmergenceClient {
 //       }
 //     });
 //   }
-
 
   async createRelations(relations: Array<Relation>) : Promise<ActionHash> {
     return this.callZome('create_relations', relations)
@@ -278,17 +282,33 @@ export class EmergenceClient {
   }
 
   async getSettings() : Promise<Settings> {
-    return await this.callZome('get_settings', undefined)
+    return this.callZome('get_settings', undefined)
   }
 
-  private callZome(fn_name: string, payload: any) {
+  private async callZome(fn_name: string, payload: any) {
     const req: AppAgentCallZomeRequest = {
       role_name: this.roleName,
       zome_name: this.zomeName,
       fn_name,
       payload,
     };
-    return this.client.callZome(req, 30000);
+    try {
+      return await this.client.callZome(req, 30000);
+    } catch(e) {
+      console.log(`Got error on zome call to ${fn_name}:`, e.message)
+      if (e.message == "Socket is not open") {
+        if (!this.reconnecting) {
+          console.log("attempting to reconnect")
+          this.reconnecting = true
+          this.client = await AppAgentWebsocket.connect(this.url, this.installed_app_id);
+          const result =  await this.client.callZome(req, 30000);
+          this.reconnecting = false
+          return result
+        }
+        
+      }
+      throw(e)
+    }
   }
   /** Scene */
 
