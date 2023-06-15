@@ -128,6 +128,11 @@ on:session-created={() => {} }
   {/if}
 </div>
 <div class="pane-content">
+  {#if $settings.game_active}
+    <div class="sensemaking-game">
+      <Sense></Sense>
+    </div>
+  {/if}
   {#if error}
     <span class="notice">Error fetching the sessions: {error.data.data}.</span>
   {:else if $sessions.length === 0}
