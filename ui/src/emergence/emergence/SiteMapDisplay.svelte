@@ -186,7 +186,7 @@ on:space-created={() => {} }
                     </div>
                 </sl-tooltip>
                 {/each}
-                <img class="map-image" bind:this={img} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit:cover">
+                <img class="map-image" bind:this={img} src="data:{file.type};base64,{picB64}">
                 {/if}
                 </div>
             </div>
@@ -312,9 +312,10 @@ on:space-created={() => {} }
 }
 
 .map-image {
-    min-width: 100vw;
     min-height: 100vh;
     max-width: 100%;
+    flex: 1;
+    width: auto;
 }
 
 .tooltip-text, .tooltip-text span {
@@ -343,5 +344,9 @@ sl-tooltip {
     .true .map-controls {
         left: 340px;
     }
+}
+
+@media (min-width: 1000px) {
+
 }
 </style>
