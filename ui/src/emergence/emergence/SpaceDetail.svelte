@@ -49,7 +49,7 @@ async function deleteSpace() {
     errorSnackbar.show();
   }
   dialog.hide()
-  store.fetchSpaces()
+  store.fetchSpace([space.original_hash])
 }
 
 const slottedSessionTitle = (ss: SlottedSession) : string => {

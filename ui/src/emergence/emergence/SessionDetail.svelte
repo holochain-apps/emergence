@@ -108,7 +108,7 @@ let confirmDialog
 bind:this={updateSessionDialog}
   session={ $session}
   on:session-updated={async () => {
-    await store.fetchSessions()
+    await store.fetchSession([sessionHash])
   } }
 ></SessionCrud>
 

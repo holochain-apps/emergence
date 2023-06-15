@@ -403,7 +403,7 @@ export class EmergenceStore {
     const sessionSlot = this.getSessionSlot(session)
     if (!sessionSlot) return;
     const spaceDst = sessionSlot.space ? sessionSlot.space : NULL_HASH
-    const relastions = [
+    const relations = [
         {   src: sessionHash,
             dst: spaceDst,
             content:  {
@@ -420,7 +420,7 @@ export class EmergenceStore {
         },
     ]
     if (sessionSlot.space) {
-        relastions.push(        
+        relations.push(        
             {   src: sessionSlot.space,
                 dst: sessionHash,
                 content:  {
@@ -430,8 +430,9 @@ export class EmergenceStore {
             },
         )
     }
-    await this.client.createRelations(relastions)
-    await this.fetchSessions()
+    await this.client.createRelations(relations)
+    await this.fetchSession([sessionHash])
+    await this.fetchSpace([spaceDst])
   }
 
   async slot(session: ActionHash, slot: Slot) {
@@ -464,7 +465,12 @@ export class EmergenceStore {
         })
     }
     await this.client.createRelations(relations)
-    await this.fetchSessions()
+    const promises = [this.fetchSession([session])]
+    if (slot && slot.space) {
+        promises.push(this.fetchSpace([spaceDst]))
+    }
+    const allPromise = Promise.all(promises)
+    await allPromise
 }
 
   async createTimeWindow(start: Date, duration: number, tags: Array<string>) : Promise<ActionHash> {
@@ -509,10 +515,7 @@ export class EmergenceStore {
     const record = await this.client.createSession(sessionTypeID, title, amenities, description, leaders, smallest, largest, duration)
     const sessionHash = record.actionHash
     if (slot) {
-        console.log("FISH")
         await this.slot(sessionHash, slot)
-        console.log("FISH2")
-
     }
   
     const relations = [
@@ -536,7 +539,7 @@ export class EmergenceStore {
 
     await this.client.createRelations(relations)
 
-    this.fetchSessions()
+    this.fetchSession([sessionHash])
     return record
   }
 
@@ -740,7 +743,7 @@ export class EmergenceStore {
             }
         },
     ])
-    this.fetchSession(sessionHash)
+    this.fetchSession([sessionHash])
   }
 
   sessionInterestProjection(sessions: Array<Info<Session>>) : Projection  {
@@ -781,34 +784,37 @@ export class EmergenceStore {
       }
   }
 
-  async fetchSession(sessionHash:ActionHash) {
+  async fetchSession(sessions: Array<ActionHash>) {
     try {  
-        let stuff = await this.client.getStuff({sessions:[sessionHash]})
-        if (stuff.sessions && stuff.sessions[0]) {
-            const session = stuff.sessions[0]
-            const sB64 = encodeHashToBase64(sessionHash)
-            this.sessions.update((n) => {
-                const idx = n.findIndex(s=>encodeHashToBase64(s.original_hash)== sB64)
-                if (idx >= 0) {
-                    n[idx] = session
+        let stuff = await this.client.getStuff({sessions})
+        if (stuff.sessions) {
+            stuff.sessions.forEach(session=>{
+                if (session) {
+                    const sB64 = encodeHashToBase64(session.original_hash)
+                    this.sessions.update((n) => {
+                        const idx = n.findIndex(s=>encodeHashToBase64(s.original_hash)== sB64)
+                        if (idx >= 0) {
+                            n[idx] = session
+                        }
+                        return n
+                    } )
+                    this.updateMyInterest(session)
+                    const noteHashes = []
+                    session.relations.filter(r=>r.relation.content.path === "session.note").forEach(r=>noteHashes.push(r.relation.dst))
+                    this.noteHashes.update((notes) => {
+                        noteHashes.forEach(h=>{
+                            if (!notes.find(n=>encodeHashToBase64(n)==encodeHashToBase64(h))) {
+                                notes.push(h)
+                            }
+                        })
+                        return notes
+                    } )
                 }
-                return n
-            } )
-            this.updateMyInterest(session)
-            const noteHashes = []
-            session.relations.filter(r=>r.relation.content.path === "session.note").forEach(r=>noteHashes.push(r.relation.dst))
-            this.noteHashes.update((notes) => {
-                noteHashes.forEach(h=>{
-                    if (!notes.find(n=>encodeHashToBase64(n)==encodeHashToBase64(h))) {
-                        notes.push(h)
-                    }
-                })
-                return notes
-            } )
+            })
         }
     }
     catch (e) {
-        console.log(`Error fetching session: ${encodeHashToBase64(sessionHash)}`, e)
+        console.log(`Error fetching session: ${sessions.map(s=>encodeHashToBase64(s))}`, e)
     }
   } 
 
@@ -891,10 +897,10 @@ export class EmergenceStore {
             tags.push(t)
         }
     })
-    await this.createSession(sessionA.record.entry.session_type, title,description,leaders,smallest,largest,duration,amenities,slot,tags)
+    const newSession = await this.createSession(sessionA.record.entry.session_type, title,description,leaders,smallest,largest,duration,amenities,slot,tags)
     await this.updateSession(sessionHashA, {trashed: true})
     await this.updateSession(sessionHashB, {trashed: true})
-    await this.fetchSessions()
+    await this.fetchSession([sessionHashA,sessionHashB,newSession.actionHash])
   }
 
   filterPeople( person: AnyAgentDetailed, filter: PeopleFilter) : boolean {
@@ -1107,7 +1113,7 @@ export class EmergenceStore {
         })
     }
     await this.client.createRelations(relations)
-    this.fetchSpaces()
+    this.fetchSpace([record.actionHash])
     return record
   }
 
@@ -1220,9 +1226,9 @@ export class EmergenceStore {
             this.client.createRelations(relations)
             if (location) {
                 // FIXME we could get more sophisticated and fiture out out to update the state
-                // without calling fetch spaces.  i.e. at least only fetch one space!!
+                // without calling fetch spaces. 
                 // but preferably be able to do so with what's returned by create relations.
-                this.fetchSpaces()
+                this.fetchSpace([spaceHash])
             } else {
                 this.spaces.update((spaces) => {
                     spaces[idx].record = record
@@ -1289,7 +1295,7 @@ export class EmergenceStore {
     ))
     await this.client.createRelations(relations)
     this.needNote(record.actionHash)
-    this.fetchSessions()
+    this.fetchSession([sessionHash])
     return record
   }
 
@@ -1369,7 +1375,7 @@ export class EmergenceStore {
                 encodeHashToBase64(ri.relation.dst) == hashB64
                 ).map(ri=>ri.create_link_hash)
             await this.client.deleteRelations(relations)
-            this.fetchSessions()
+            this.fetchSession([session.original_hash])
         }
         this.client.createRelations([
             {   src: record.actionHash, // should be agent key
@@ -1620,6 +1626,30 @@ export class EmergenceStore {
         this.neededStuff.notes = [hash]
     }
   }
+
+  async fetchSpace(spaces: Array<ActionHash>) {
+    try {
+        let stuff = await this.client.getStuff({spaces})
+        if (stuff.spaces) {
+            stuff.spaces.forEach(space=>{
+                if (space) {
+                    const sB64 = encodeHashToBase64(space.original_hash)
+                    this.spaces.update((n) => {
+                        const idx = n.findIndex(s=>encodeHashToBase64(s.original_hash)== sB64)
+                        if (idx >= 0) {
+                            n[idx] = space
+                        }
+                        return n
+                    } )
+                }
+            })
+        }
+    }
+    catch (e) {
+        console.log("Error fetching spaces", e)
+    }
+  }
+
 
   async fetchSpaces() {
     try {
