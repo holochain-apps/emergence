@@ -97,3 +97,9 @@ export const sortSlot = (a:Slot|undefined, b: Slot|undefined) => {
 export const errorText = (e) => {
   return e.data ? e.data : e
 } 
+
+export const wait = (milliseconds) => {
+  return new Promise(resolve => {
+      setTimeout(resolve, milliseconds);
+  });
+}

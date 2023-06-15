@@ -173,7 +173,8 @@
 
 <main>
   {#if error}
-    <span class="notice">
+    <span class="notice modal" style="max-width:700px;position:absolute; top:60px; left: 0;right: 0;margin: 0 auto; z-index:1000"
+    >
       <h3>I'm sorry to say it, but there has been an error ☹️</h3>
       <div style="padding:10px; margin:10px; background:lightcoral;border-radius: 10px;">
         {error}
@@ -187,11 +188,15 @@
           <Fa icon={faArrowRightFromBracket} /> Logout
         </sl-button>
         {/if}
+        <sl-button style="margin-left: 8px;" on:click={() => error=undefined}>
+          Ignore
+        </sl-button>
         <sl-button style="margin-left: 8px;" on:click={() => window.location.assign("/")}>
           <Fa icon={faArrowRotateBack} /> Reload
         </sl-button>
     </span>
-  {:else if loading}
+  {/if}
+  {#if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
       <sl-spinner
  />

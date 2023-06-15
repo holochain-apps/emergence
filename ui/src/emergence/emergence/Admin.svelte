@@ -13,6 +13,7 @@
     import '@shoelace-style/shoelace/dist/components/option/option.js';
     import SenseResults from "./SenseResults.svelte";
   import type { HoloHashMap } from "@holochain-open-dev/utils";
+  import { xlink_attr } from "svelte/internal";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -250,6 +251,10 @@
   </div>
 <div class="pane-content">
     <div class="admin-controls">
+        <!-- <sl-button style="margin: 8px;"  on:click={async () => { throw("error!")} }>
+            Error!
+        </sl-button> -->
+
         <sl-button style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
             Schedule
         </sl-button>

@@ -11,6 +11,7 @@ import {
 } from '@holochain/client';
 import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse, Settings, ProxyAgent, UpdateProxyAgentInput, AnyAgent, SessionTypeID } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
+import { wait } from './emergence/emergence/utils';
 // import { UnsubscribeFunction } from 'emittery';
 
 
@@ -40,15 +41,15 @@ export class EmergenceClient {
 //   }
 
   async createRelations(relations: Array<Relation>) : Promise<ActionHash> {
-    return this.callZome('create_relations', relations)
+    return await this.callZome('create_relations', relations)
   }
 
-  getRelations(hash: HoloHash) : Promise<Array<RelationInfo>> {
-    return this.callZome('get_relations', hash)
+  async getRelations(hash: HoloHash) : Promise<Array<RelationInfo>> {
+    return await this.callZome('get_relations', hash)
   }
 
   async deleteRelations(relations: Array<ActionHash>) {
-    return this.callZome('delete_relations', relations)
+    return await this.callZome('delete_relations', relations)
   }
 
   async getFeed(agent: AgentPubKey | undefined) : Promise<Array<FeedElem>> {
@@ -67,19 +68,19 @@ export class EmergenceClient {
   }
 
   async getTags() : Promise<Array<TagUse>> {
-    return this.callZome('get_tags', undefined)
+    return await this.callZome('get_tags', undefined)
   }
 
   async createTimeWindow(timeWindow: TimeWindow) : Promise<ActionHash> {
-    return this.callZome('create_time_window', timeWindow)
+    return await this.callZome('create_time_window', timeWindow)
   }
 
-  getTimeWindows() : Promise<Array<TimeWindow>> {
-    return this.callZome('get_time_windows',null)
+  async getTimeWindows() : Promise<Array<TimeWindow>> {
+    return await this.callZome('get_time_windows',null)
   }
 
   async deleteTimeWindow(timeWindow: TimeWindow) : Promise<undefined> {
-    return this.callZome('delete_time_window', timeWindow)
+    return await this.callZome('delete_time_window', timeWindow)
   }
 
   genKey = () => {
@@ -112,8 +113,8 @@ export class EmergenceClient {
     return new EntryRecord(await this.callZome('update_session', update))
   }
 
-  deleteSession(actionHash: ActionHash) {
-    return this.callZome('delete_session', actionHash)
+  async deleteSession(actionHash: ActionHash) {
+    return await this.callZome('delete_session', actionHash)
   }
 
   async getSessions() : Promise<Array<Info<Session>>> {
@@ -137,11 +138,11 @@ export class EmergenceClient {
   }
 
   async updateSpace(update: UpdateSpaceInput) : Promise<EntryRecord<Space>> {
-    return new EntryRecord(await this.callZome('update_space', update))
+    return await new EntryRecord(await this.callZome('update_space', update))
   }
 
-  deleteSpace(actionHash: ActionHash) {
-    return this.callZome('delete_space', actionHash)
+  async deleteSpace(actionHash: ActionHash) {
+    return await this.callZome('delete_space', actionHash)
   }
 
   async getSpaces() : Promise<Array<Info<Space>>> {
@@ -171,8 +172,8 @@ export class EmergenceClient {
     return new EntryRecord(await this.callZome('update_note', update))
   }
 
-  deleteNote(actionHash: ActionHash) {
-    return this.callZome('delete_note', actionHash)
+  async deleteNote(actionHash: ActionHash) {
+    return await this.callZome('delete_note', actionHash)
   }
 
   async createSiteMap(text: string, pic: EntryHash | undefined, tags: Array<string>) : Promise<EntryRecord<SiteMap>> {
@@ -189,8 +190,8 @@ export class EmergenceClient {
     return new EntryRecord(await this.callZome('update_map', update))
   }
 
-  deleteSiteMap(actionHash: ActionHash) {
-    return this.callZome('delete_map', actionHash)
+  async deleteSiteMap(actionHash: ActionHash) {
+    return await this.callZome('delete_map', actionHash)
   }
 
   async getSiteMaps() : Promise<Array<Info<SiteMap>>> {
@@ -220,8 +221,8 @@ export class EmergenceClient {
     return new EntryRecord(await this.callZome('update_proxy_agent', update))
   }
 
-  deleteProxyAgent(actionHash: ActionHash) {
-    return this.callZome('delete_proxy_agent', actionHash)
+  async deleteProxyAgent(actionHash: ActionHash) {
+    return await this.callZome('delete_proxy_agent', actionHash)
   }
 
   async getProxyAgents() : Promise<Array<Info<ProxyAgent>>> {
@@ -282,7 +283,7 @@ export class EmergenceClient {
   }
 
   async getSettings() : Promise<Settings> {
-    return this.callZome('get_settings', undefined)
+    return await this.callZome('get_settings', undefined)
   }
 
   private async callZome(fn_name: string, payload: any) {
@@ -293,21 +294,29 @@ export class EmergenceClient {
       payload,
     };
     try {
+      while(this.reconnecting) {
+        console.log("reconnecting, waiting 1 second")
+        await wait(1000)
+      }
       return await this.client.callZome(req, 30000);
     } catch(e) {
       console.log(`Got error on zome call to ${fn_name}:`, e.message)
       if (e.message == "Socket is not open") {
         if (!this.reconnecting) {
-          console.log("attempting to reconnect")
+          console.log("attempting to reconnect...")
           this.reconnecting = true
           this.client = await AppAgentWebsocket.connect(this.url, this.installed_app_id);
+          console.log("got a new client, retrying zome call...")
           const result =  await this.client.callZome(req, 30000);
           this.reconnecting = false
           return result
+        } {
+          console.log("allready reconnecting!")
         }
         
+      } else {
+        throw(e)
       }
-      throw(e)
     }
   }
   /** Scene */
