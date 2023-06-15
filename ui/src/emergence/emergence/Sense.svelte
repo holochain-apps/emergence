@@ -184,8 +184,12 @@
     overflow-y: scroll;
   }
 
-  .sense-wrapper .close-game {
+  .sense-wrapper .close-game, .controls {
     display: none;
+  }
+
+  .game-active .controls {
+    display: block;
   }
 
   .sense-wrapper .controls {
@@ -193,6 +197,10 @@
     z-index: 1001;
     top: 20px;
     left: 20px;
+  }
+
+  .game-active .instructions {
+    opacity: 0;
   }
 
   .sense-wrapper.game-active .close-game {

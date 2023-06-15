@@ -277,12 +277,12 @@ on:session-created={() => {} }
   .sensemaking-game {
     max-width: 720px;
     margin: 0 auto;
-    background-color: rgba(73, 80, 93, 1.0);
+    background-color: white;
     padding: 15px;
     border-radius: 0;
     margin-bottom: 10px;
     width: 100%;
-    margin-top: 70px;
+    margin-top: 0;
   }
 
 .empty {
@@ -416,7 +416,10 @@ on:session-created={() => {} }
   }
 
   .pane-header {
-    padding-top: 0;
+    padding-top: 10px;
+    position: sticky;
+    margin-bottom: 10px;
+    top: 0;
   }
 
   .pill-button span {
@@ -440,6 +443,7 @@ on:session-created={() => {} }
   
   .sensemaking-game {
     border-radius: 10px;
+    margin-top: 70px;
   }
 
   .pane-header {
