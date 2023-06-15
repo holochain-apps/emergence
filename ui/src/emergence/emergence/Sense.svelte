@@ -70,8 +70,8 @@ let gameActive = false
 <div class="instructions"
   class:close={!instructionsVisible}
   >
-  <h3>Tomorrow is today!</h3>
-  <p>**** of you proposed **** sessions for Tomorrow!</p>
+  <h3>Today is Tomorrow</h3>
+  <strong>**** people proposed **** sessions for Tomorrow!</strong>
   <p>Help figure out what gets scheduled where by quickly setting your interest on proposed sessions. Sessions with most interest will get scheduled first.</p>
   <div class="begin-button"  on:click={() => { instructionsVisible = false; gameActive = true  }}>Begin</div>
 </div>
@@ -238,8 +238,12 @@ let gameActive = false
     display: none;
   }
 
-  .instructions h3, .instructions p {
+  .instructions h3, .instructions p, .instructions strong {
     color: black;
+  }
+
+  .instructions h3 {
+    font-size: 24px;
   }
 
   .instructions p {

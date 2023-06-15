@@ -66,8 +66,10 @@ on:session-created={() => {} }
 ></SessionCrud>
 
 {#if $settings.game_active}
-<div class="sensemaking-game">
-  <Sense></Sense>
+<div class="background">
+  <div class="sensemaking-game">
+    <Sense></Sense>
+  </div>
 </div>
 {/if}
 
@@ -274,11 +276,16 @@ on:session-created={() => {} }
     padding-top: 0;
   }
 
+  .background {
+    width: 100%;
+    transition: all .25s ease;
+    padding: 0;
+  }
+
   .sensemaking-game {
     max-width: 720px;
     margin: 0 auto;
     background-color: white;
-    padding: 15px;
     border-radius: 0;
     margin-bottom: 10px;
     width: 100%;
@@ -426,13 +433,15 @@ on:session-created={() => {} }
   .pill-button span {
     color: white;
   }
-@media (min-width: 375px) {
-  .section-controls sl-select {
-    max-width: 120px;
-  }
-}
 
 @media (min-width: 720px) {
+  .background {
+    width: 100%;
+    height: 100%;
+
+background: linear-gradient(180deg, rgba(86, 94, 109, 0.05) 0%, rgba(86, 94, 109, 0.26) 100%);
+    padding: 100px;
+  }
 
   .section-controls sl-select {
     box-shadow: 0 10px 15px rgba(0,0,0,.15);
@@ -450,11 +459,12 @@ on:session-created={() => {} }
   .sensemaking-game {
     border-radius: 10px;
     margin-bottom: -50px;
-    margin-top: 70px;
+    padding: 0;
+    margin-top: 0;
   }
 
   .pane-header {
-    margin-top: 50px;
+    margin-top: 0;
     top: 35px;
     max-width: 740px;
     margin-bottom: 0;
