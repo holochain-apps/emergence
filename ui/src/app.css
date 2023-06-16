@@ -297,6 +297,7 @@ html{
   .filter-modal {
     height: calc(100vh - 50px);
     top: 50px;
+    position: fixed;
     right: 0;
   }
   .card {

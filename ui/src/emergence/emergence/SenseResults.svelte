@@ -66,11 +66,17 @@ const attendanceColor = (attendance: number) : string => {
   .projections {
     display: flex;
     flex-direction: column;
-    border: solid 1px gray;
+    border: dashed 1px rgba(86, 94, 109, .3);
     background-color: white;
     border-radius: 20px;
     padding: 10px;
     margin: 10px;
+  }
+
+  h3 {
+    text-align: center;
+    opacity: .5;
+    font-size: 14px;
   }
 
 </style>

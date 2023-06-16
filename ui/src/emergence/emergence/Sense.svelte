@@ -309,6 +309,7 @@ let gameActive = false
     color: rgba(77, 200, 194, 1.0);
     display: block;
     text-align: center;
+    padding-top: 10px;
   }
   
   .tag {

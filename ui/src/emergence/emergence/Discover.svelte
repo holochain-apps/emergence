@@ -84,7 +84,7 @@
                         ></sl-input>
                       </div> 
               
-                    <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } >
+                    <sl-button style="box-shadow: none; height: 30px; width: 80px" size=small on:click={() => { showFilter = !showFilter } } >
                         <Fa icon={faFilter} /> Filter
                     </sl-button>
                 </div>
