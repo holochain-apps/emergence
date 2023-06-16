@@ -112,9 +112,11 @@ let gameActive = false
             <div class="tag">#{tag}</div>
           {/each}
         </div>
-        <div class="description">
-          {@html Marked.parse(session.entry.description) }
-        </div>
+        {#if session.record.entry.description}
+          <div class="description">
+            {@html Marked.parse(session.record.entry.description) }
+          </div>
+        {/if}
       </div>
     </div>
 

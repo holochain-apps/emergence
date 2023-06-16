@@ -44,7 +44,6 @@
   let fileStorageClient: FileStorageClient | undefined;
   let loading = true;
   let profilesStore: ProfilesStore | undefined
-  let syncing = false
   let error: any = undefined;
   let creds
 
@@ -154,12 +153,8 @@
   let createSpaceDialog: SpaceCrud
 
   const doSync=async () => {
-        syncing = true;
-        console.log("start sync", new Date);
         await store.sync(undefined);
-        console.log("end sync", new Date);
-        syncing=false 
-    }
+  }
   let clickCount = 0
   const adminCheck = () => { 
     clickCount += 1
@@ -234,7 +229,7 @@
         <sl-button on:click={() => doSync()}>
           <span class:spinning={true}> <Fa  icon={faArrowRotateBack} /> </span>Reload
         </sl-button></div>
-        {#if syncing}<span class:spinning={true}> <Fa  icon={faSync} /></span>{/if}
+        {#if $uiProps && $uiProps.syncing}<span class:spinning={true}> <Fa  icon={faSync} /></span>{/if}
       </div></div></div>
       {:else}
       <div class="nav">
@@ -292,14 +287,16 @@
           </div>
 
           <div id="nav-sync" class="nav-button"
-            class:spinning={syncing}
             title="Sync"
             on:keypress={()=>{doSync()}}
             on:click={()=>{doSync()}}
           >
+            <span
+            class:spinning={$uiProps && $uiProps.syncing}
+            >
             <Fa 
               class="nav-icon "
-              icon={faSync} size="2x"/>
+              icon={faSync} size="2x"/></span>
             <span class="button-title sync">Sync</span>
           </div>
           {#if getCookie("creds")}

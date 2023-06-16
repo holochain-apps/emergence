@@ -76,7 +76,6 @@ export const neededStuffStore = (client: EmergenceClient) => {
                 }
             )},
             clear: (actionHashes: Array<ActionHash>)=>{
-                console.log("CLEARING", actionHashes)
                 notes.update(notes =>{
                      actionHashes.forEach(h=>notes.delete(h))
                      return notes
@@ -123,6 +122,7 @@ export class EmergenceStore {
     spaceSort: SpaceSortOrder.Capacity,
     confirmHide: true,
     searchVisible: false,
+    syncing: 0,
   })
   settings: Writable<Settings> = writable({game_active: false, session_types:[]})
 
@@ -191,7 +191,10 @@ export class EmergenceStore {
         case 'sessions':
             this.fetchSessions()
             break;
-    }
+        case 'admin':
+            this.sync(undefined)
+            break;
+        }
   }
 
   stuffIsNeeded() {
@@ -1726,6 +1729,7 @@ export class EmergenceStore {
     try {
         const startTime = performance.now();
         console.log("FETCHING FEED ", filter);
+        this.setUIprops({syncing: get(this.uiProps).syncing+1})
 
         const feed = await this.client.getFeed(filter)
         console.log("FEED ITEMS RETURNED:", feed.length, feed, elapsed(startTime))
@@ -1744,9 +1748,11 @@ export class EmergenceStore {
             return n
         } )
         console.log("FETCHING FEED COMPLETE AFTER ", elapsed(startTime))
+        this.setUIprops({syncing: get(this.uiProps).syncing-1})
 
     }
     catch (e) {
+        this.setUIprops({syncing: get(this.uiProps).syncing-1})
         console.log("Error fetching feed", e)
     }
   }
@@ -1763,6 +1769,9 @@ export class EmergenceStore {
     }
   }
   async sync(agent: AgentPubKey | undefined) {
+    this.setUIprops({syncing: get(this.uiProps).syncing+1})
+    const starTime = performance.now()
+    console.log("start sync");
     await this.getSettings()
     await this.fetchTags()
     await this.fetchSessions() // fetches spaces and timewindows
@@ -1772,6 +1781,8 @@ export class EmergenceStore {
     }
     await this.fetchSiteMaps()
     await this.fetchProxyAgents()
+    console.log("end sync", elapsed(starTime));
+    this.setUIprops({syncing: get(this.uiProps).syncing-1})
   }
 
 }

@@ -12,8 +12,7 @@
     import '@shoelace-style/shoelace/dist/components/select/select.js';
     import '@shoelace-style/shoelace/dist/components/option/option.js';
     import SenseResults from "./SenseResults.svelte";
-  import type { HoloHashMap } from "@holochain-open-dev/utils";
-  import { xlink_attr } from "svelte/internal";
+    import type { HoloHashMap } from "@holochain-open-dev/utils";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -255,7 +254,7 @@
             Error!
         </sl-button> -->
         <div id="schedule-button">        
-        <sl-button  style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
+        <sl-button  style="margin: 8px;"  on:click={() => { dispatch('open-slotting')} }>
             Schedule
         </sl-button></div>
 
