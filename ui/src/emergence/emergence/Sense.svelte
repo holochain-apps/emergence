@@ -71,7 +71,7 @@ let gameActive = false
   class:close={!instructionsVisible}
   >
   <h3>Today is Tomorrow</h3>
-  <strong>**** people proposed **** sessions for Tomorrow!</strong>
+  <strong>X people proposed Y sessions for Tomorrow!</strong>
   <p>Help figure out what gets scheduled where by quickly setting your interest on proposed sessions. Sessions with most interest will get scheduled first.</p>
   <div class="begin-button"  on:click={() => { instructionsVisible = false; gameActive = true  }}>Begin</div>
 </div>
@@ -219,7 +219,8 @@ let gameActive = false
     background-color: rgba(49, 54, 63, .90);
     background-image: url(/images/dweb-background.jpg);
     background-size: 300%;
-    border-radius: 5px;
+    background-position: 50% 50%;
+    border-radius: 10px;
     position: absolute;
     top: 0;
     left: 0;

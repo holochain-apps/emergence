@@ -101,6 +101,23 @@ function doHide() {
     display:flex;
     flex-direction: column;
   }
+
+  .interest-button.attend {
+    border: 1px solid rgba(35, 170, 80, .4);
+  }
+
+  .interest-button.bookmark {
+    border: 1px solid rgba(254, 217, 165, .7);
+  }
+
+  .interest-button.hide {
+    opacity: .6;
+  }
+
+  .interest-button:hover {
+    opacity: 1;
+  }
+
   .interest-button {
     display:flex;
     justify-content: center;
