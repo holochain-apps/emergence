@@ -198,7 +198,7 @@ let dialog
   </div>
   <div style="margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Leaders:</strong>
-      {#if leaders.length == 0 &&!sessionType.can_leaderless}
+      {#if !sessionType.can_leaderless}
         <span class="required">*</span>
       {/if}
     </span>
@@ -271,16 +271,6 @@ let dialog
         ></sl-input>
       </div>
     </div> -->
-    <div id="duration-textfield" style="margin-bottom: 16px;">
-      <sl-input
-        style="width:120px"
-        maxlength=4
-        label="Duration (min)"
-        value={isNaN(duration)? '' : `${duration}`}
-        on:input={e => { duration = parseInt(e.target.value); } }
-        required
-      ></sl-input>
-    </div>
   </div>
   <div style="margin-bottom: 16px">
     <div id="clear-amentities-button" style="font-size: 16px" on:click={()=>amenities = 0}>Required Amenities </div>

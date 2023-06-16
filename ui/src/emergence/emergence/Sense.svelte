@@ -30,7 +30,7 @@
     const filteredSessions = $original.filter(s=>{
       const relData = store.getSessionReleationData(s)
       const myRecordedInterest = relData.interest.get(store.myPubKey)
-      return !s.record.entry.trashed && 
+      return s.record.entry.session_type==0 && !s.record.entry.trashed && 
         myRecordedInterest==undefined &&
         !s.record.entry.leaders.find(l=>encodeHashToBase64(l.hash) == store.myPubKeyBase64)
     })

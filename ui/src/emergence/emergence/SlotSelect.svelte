@@ -107,15 +107,27 @@
       </sl-select>
       {#if sessionType.can_any_time}
         <span style="margin:0 10px 0 10px;">or</span>
-        <DateInput 
-          format={"yyyy-MM-dd HH:mm"}
-          closeOnSelection={true} 
-          placeholder={"Choose any time"}
-          on:select={()=>{
-            windowSelect.value = ""
-            _setSlot()
-          }}
-          bind:value={date} />
+        <div style="display:flex; flex-direction:column">
+          <DateInput 
+            format={"yyyy-MM-dd HH:mm"}
+            closeOnSelection={true} 
+            placeholder={"Choose any time"}
+            on:select={()=>{
+              windowSelect.value = ""
+              _setSlot()
+            }}
+            bind:value={date} />
+          <div id="duration-textfield">
+            <sl-input
+              style="width:120px"
+              maxlength=4
+              label="Duration (min)"
+              value={isNaN(duration)? '' : `${duration}`}
+              on:input={e => { duration = parseInt(e.target.value); } }
+              required
+            ></sl-input>
+          </div>
+        </div>
       {/if}
       <div class="pill-button" style="display: flex; width: 75px; margin-left:20px" on:click={() => {
         slot = undefined
