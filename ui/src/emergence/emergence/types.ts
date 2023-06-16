@@ -269,7 +269,6 @@ export const Amenities = [
   "Table",
   "Screen",
   "Seating",
-  "Wifi",
   "Indoor",
   "Outdoor",]
 
@@ -299,6 +298,9 @@ export interface SessionRelationData {
 
 export interface GetFeedInput {
   agent_filter?: AgentPubKey
+  newer_than?: Timestamp
+  older_than?: Timestamp
+  count?: number
 }
 
 export enum FeedType {
@@ -325,6 +327,7 @@ export enum FeedType {
 }
 
 export interface FeedElem {
+  hash: ActionHash,
   timestamp: Timestamp,
   author: AgentPubKey,
   about: ActionHash,
@@ -449,6 +452,8 @@ export interface UIProps {
   sessionSort: SessionSortOrder,
   spaceSort: SpaceSortOrder,
   confirmHide: boolean,
+  searchVisible: boolean,
+  syncing: number,
 }
 
 export enum SessionListMode {

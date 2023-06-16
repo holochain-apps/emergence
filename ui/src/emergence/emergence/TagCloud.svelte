@@ -28,7 +28,7 @@
         return words
 	}
     onMount(async () => {
-        store.fetchTags()
+        //store.fetchTags()
     });
     let selectedTags = []
     let innerWidth = 0
@@ -74,8 +74,8 @@
     </div>
     {#if selectedTags.length>0}
     <div class="results">
-        <div style="display: flex; justify-content: space-between; width: 100%; border-top: 1px solid rgba(228, 228, 231, 1.0); margin-top: 30px; padding-top: 15px; margin-bottom: 15px">
-            <span>Results</span>
+        <div style="display: flex; justify-content: space-between; width: 100%; border-top: 1px dashed rgba(228, 228, 231, 1.0); margin-top: 30px; padding-top: 15px; margin-bottom: 15px">
+            <span style="opacity: .5;">Results</span>
 
             <div class="pill-button" style="display: flex; width: 75px; align-self: end;margin-bottom:5px" on:click={() => {
                 selectedTags=[]
@@ -120,12 +120,12 @@
         padding-bottom: 30px;
     }
     .word {
-        font-size: 18px;
+        font-size: 12px;
         padding: 5px 9px;
         border-radius: 25px;
         display: inline-block;
         margin: 13px 13px 0 0;
-        border: 1px solid #2F87D890;
+        border: 1px solid #2F87D830;
         color: #2F87D8;
         background-color: transparent;
         transition: all .25s ease;
@@ -162,4 +162,11 @@
         top: -3px;
         position: relative;
     }
+
+
+@media (min-width: 720px) {
+    .word {
+        font-size: 14px;
+    }
+}
 </style>

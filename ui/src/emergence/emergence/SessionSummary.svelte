@@ -134,7 +134,9 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
       {/if}
       {#if showTags}
         <div class="tags">
-          <div class="session-type" style={`border: 1px solid ${sessionType.color}; color: ${sessionType.color};`}>{sessionType.name}</div>
+          {#if session.record.entry.session_type != 0}
+            <div class="session-type" style={`background-color: ${sessionType.color};`}>{sessionType.name}</div>
+          {/if}
           {#each tags as tag}
           <div class="tag clickable-tag" on:click={(e)=>{e.stopPropagation(); store.filterTag(tag,"sessionsFilter")}}>
             #{tag}
@@ -166,11 +168,12 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }
 
   .tag {
-    border: 1px solid #2F87D850;
+    border: 1px solid #2F87D830;
     color: #2F87D8;
     background-color: transparent;
     margin-bottom: 0;
     display: inline;
+    font-size: 11px;
   }
 
   .clickable-tag {
@@ -183,14 +186,14 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }
 
   .time {
-    font-size: 24px;
+    font-size: 18px;
     color: white;
     margin-top: -3px;
     margin-bottom: -3px;
   }
   .date, .space {
-    font-size: 12px;
-    line-height: 12px;
+    font-size: 10px;
+    line-height: 10px;
     font-weight: normal;
     margin-bottom: 0;
     color: white;
@@ -245,9 +248,9 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }
 
   .leaders {
-    font-size: 12px;
-    display: inline-flex;
+    font-size: 10px;
     margin-bottom: 5px;
+    text-align: left;
   }
 
   .leaders span {
@@ -271,11 +274,16 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
     padding: 5px;
     margin-right: 5px;
     padding-top: 0px;
+    color: white;
     padding-bottom: 0px;
-    font-size: 12px;
+    font-size: 11px;
   }
 
   @media (min-width: 720px) {
+
+    .leaders {
+      font-size: 12px;
+    }
 
   .slot {
     border-radius: 10px 0 0 10px;

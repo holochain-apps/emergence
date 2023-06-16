@@ -34,7 +34,6 @@ $: nickname, bio, location
 $: isProxyAgentValid = nickname !== ""
 
 onMount(() => {
-  store.fetchTags()
 });
 
 export const open = (pagent) => {

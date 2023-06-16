@@ -22,7 +22,8 @@ import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
 
-const FILE_TYPES = "image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,audio/mp3,audio/m4a,audio/ogg,application/pdf,text/plain"
+//const FILE_TYPES = "image/jpeg,image/png,image/gif,image/bmp,image/svg,video/mp4,video/webm,audio/mpeg,audio/x-aiff,audio/mp3,audio/m4a,audio/ogg,application/pdf,text/plain"
+const FILE_TYPES = "image/jpeg,image/png,image/gif,image/bmp,image/svg,audio/x-aiff,audio/mp3,audio/m4a,audio/ogg,application/pdf,text/plain"
 const dispatch = createEventDispatcher();
 export let note: Info<Note>|undefined = undefined;  // set this if update
 export let sessionHash: ActionHash;
@@ -106,17 +107,25 @@ let dialog
 <sl-dialog label={note ? "Edit Note" : "Create Note"} bind:this={dialog}>
 <div style="display: flex; flex-direction: column">
               
-  <div style="margin-bottom: 16px">
-    test
+  <div id="note-textarea" style="margin-bottom: 16px">
     <sl-textarea
       value={ text } on:input={e => { text = e.target.value;} }
     ></sl-textarea>
   </div>
 
-  <div style="margin-bottom: 16px">
+  <div id="tags-select" style="margin-bottom: 16px">
     <span>Tags:</span >
     <MultiSelect 
       --sms-bg="white"
+      on:add={(e)=>{
+        const tag = e.detail.option
+        if (tag.length > 30) {
+          errorSnackbar.labelText = "Maximum tag length is 30 characters";
+          errorSnackbar.show();
+          const idx= tags.findIndex(t=>tag==t)
+          tags.splice(idx,1)
+        }
+        }}
       bind:selected={tags} 
       options={allTags} 
       allowUserOptions={true}
@@ -138,20 +147,26 @@ let dialog
 
   {#if note}
     <div style="display: flex; flex-direction: row">
-      <sl-button
-      label="Cancel"
-      on:click={() =>  dialog.hide()}
-      style="flex: 1; margin-right: 16px"
-      >Cancel</sl-button>
-      <sl-button 
-      style="flex: 1;"
-      on:click={() => updateNote()}
-      disabled={!isNoteValid}
-      variant=primary>Save</sl-button>
+      <div id="cancel-button">
+        <sl-button
+        id="cancel-button"
+        label="Cancel"
+        on:click={() =>  dialog.hide()}
+        style="flex: 1; margin-right: 16px"
+        >Cancel</sl-button>
+      </div>
+      <div id="save-button">
+        <sl-button 
+          style="flex: 1;"
+          on:click={() => updateNote()}
+          disabled={!isNoteValid}
+          variant=primary>Save</sl-button>
+      </div>
     </div>
   {:else}
   <div style="display: flex; flex-direction: row">
     <sl-button
+    id="cancel-button"
     label="Cancel"
     on:click={() => dialog.hide()}
     style="flex: 1; margin-right: 16px"
@@ -170,18 +185,27 @@ let dialog
   <div style="display:flex;flex-direction: row">
     <div style="display: flex; flex-direction: column; width: 100%; margin-right: 10px;">
 
-      <div class="new-note">
+      <div id="note-textarea" class="new-note">
         <h4>Add a note</h4>
-        <sl-textarea 
+        <sl-textarea
           resize=auto
           autocomplete={"off"}
           value={ text } on:input={e => { text = e.target.value;} }
         ></sl-textarea>
       </div>
-      <div style="margin: 16px 0">
+      <div id="tags-select" style="margin: 16px 0">
         <MultiSelect 
-          --sms-bg="white"
-          bind:selected={tags} 
+        --sms-bg="white"
+          on:add={(e)=>{
+            const tag = e.detail.option
+            if (tag.length > 30) {
+              errorSnackbar.labelText = "Maximum tag length is 30 characters";
+              errorSnackbar.show();
+              const idx= tags.findIndex(t=>tag==t)
+              tags.splice(idx,1)
+            }
+            }}
+            bind:selected={tags} 
           options={allTags} 
           allowUserOptions={true}
           placeholder="Add tags"
@@ -201,25 +225,28 @@ let dialog
       <div>
       {#if note}
           <div style="display: flex; flex-direction: row">
-            <sl-button
-            label="Cancel"
-            on:click={() =>  dialog.hide()}
-            style="flex: 1; margin-right: 16px"
-            >Cancel</sl-button>
-            <sl-button 
-            style="flex: 1;"
-            on:click={() => updateNote()}
-            disabled={!isNoteValid}
-            variant=primary>Save</sl-button>
+            <div id="cancel-button">
+              <sl-button
+              label="Cancel"
+              on:click={() =>  dialog.hide()}
+              style="flex: 1; margin-right: 16px"
+              >Cancel</sl-button>
+            </div>
+            <div id="save-button">
+              <sl-button 
+              style="flex: 1;"
+              on:click={() => updateNote()}
+              disabled={!isNoteValid}
+              variant=primary>Save</sl-button>
+            </div>
           </div>
         {:else}
-          <div style="display: flex; flex-direction: row; justify-content: flex-end">
+          <div id="create-note-button" style="display: flex; flex-direction: row; justify-content: flex-end">
             <sl-button 
-            style="flex: 1;"
-
-            on:click={() => createNote()}
-            disabled={!isNoteValid}
-            variant=primary>Create Note</sl-button>
+              style="flex: 1;"
+              on:click={() => createNote()}
+              disabled={!isNoteValid}
+              variant=primary>Create Note</sl-button>
           </div>
         {/if}
       </div>

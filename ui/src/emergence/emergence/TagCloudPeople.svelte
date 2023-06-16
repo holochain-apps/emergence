@@ -38,7 +38,7 @@
         <span class="tag">#{tag}</span>
         <div style="display:flex;">
         {#each folk as agent}
-            <div style="display:flex; position: relative; top: -4px; margin-left: 10px;">
+            <div style="display:flex; position: relative; margin-left: 10px;">
                 <Avatar agentPubKey={agent.agentPubKey}></Avatar>
             </div>
         {/each}
@@ -55,8 +55,8 @@
     background-color: transparent;
     margin-bottom: 0;
     display: inline;
-    font-size: 12px;
-    height: 30px;
-    line-height: 30px;
+    font-size: 11px;
+    line-height: 11px;
+    padding: 3px 5px;
   }
 </style>

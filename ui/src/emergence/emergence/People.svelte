@@ -5,11 +5,10 @@
   import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import { encodeHashToBase64 } from '@holochain/client';
   import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
-  import { DetailsType, sessionInterestToString, type Info, type ProxyAgent } from './types';
-  import { faInfoCircle, faSearch } from '@fortawesome/free-solid-svg-icons';
+  import { DetailsType, type Info, type ProxyAgent } from './types';
+  import { faSearch } from '@fortawesome/free-solid-svg-icons';
   import Fa from 'svelte-fa';
   import PersonSummary from './PersonSummary.svelte';
 
@@ -17,14 +16,12 @@
 
   let error: any = undefined;
 
-  $: agentSessions = store.agentSessions
   $: allProfiles = store.profilesStore.allProfiles
   $: allPeople = $allProfiles.status=== "complete" ? Array.from($allProfiles.value.entries()) : []
   $: uiProps = store.uiProps
   $: proxyAgents = store.proxyAgents
   $: people = filteredPeople(allPeople, $proxyAgents, $uiProps)
   $: error;
-  $: allSessions = store.sessions;
 
   const filteredPeople = (allPeople, proxyAgents: Array<Info<ProxyAgent>>, uiProps) => {
     const detailedPeople = allPeople.map(([key,profile])=> {

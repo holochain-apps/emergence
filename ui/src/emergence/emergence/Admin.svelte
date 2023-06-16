@@ -1,10 +1,10 @@
 <script lang="ts">
-    import { decodeHashFromBase64, encodeHashToBase64, type EntryHash } from "@holochain/client";
+    import { decodeHashFromBase64, encodeHashToBase64, type ActionHash, type EntryHash } from "@holochain/client";
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
-    import { sessionSelfTags, type Info } from "./types";
+    import { sessionSelfTags, type Info, type Note } from "./types";
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
@@ -12,6 +12,7 @@
     import '@shoelace-style/shoelace/dist/components/select/select.js';
     import '@shoelace-style/shoelace/dist/components/option/option.js';
     import SenseResults from "./SenseResults.svelte";
+    import type { HoloHashMap } from "@holochain-open-dev/utils";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -83,10 +84,13 @@
             sessions.push(info)
         }
         const notes = []
-        for (const s of get(store.notes)) {
-            const info = await serializeInfo(s, true)
-            info.entry['session'] = encodeHashToBase64(info.entry['session'])
-            notes.push(info)
+        const n: HoloHashMap<ActionHash, Info<Note>| undefined> = store.neededStuffStore.notes.all()
+        if (n) {
+            for (const s of n.values()) {
+                const info = await serializeInfo(s, true)
+                info.entry['session'] = encodeHashToBase64(info.entry['session'])
+                notes.push(info)
+            }
         }
         
         const maps = []
@@ -134,7 +138,7 @@
         if (e.pic_data) {
             const file = new File([toUint8Array(e.pic_data)], e.pic_file.name, {
                     lastModified: e.pic_data.last_modifed,
-                    type: e.pic_data.file_type,
+                    type: e.pic_file.file_type,
                      });
             pic = await store.fileStorageClient.uploadFile(file);
             uploadedPics[e.pic_hash] = pic
@@ -215,8 +219,10 @@
             }
             const relation = s.relations.filter(r=>r.content.path === "session.slot").sort((a,b) => b.timestamp - a.timestamp)[0]
             if (relation) {
-                const window = JSON.parse(relation.content.data)
-                await store.slot(record.actionHash, {window, space: spaces[relation.dst]})
+                if (relation.content.data) {
+                    const window = JSON.parse(relation.content.data)
+                    await store.slot(record.actionHash, {window, space: spaces[relation.dst]})
+                }
             }
 
         }
@@ -244,34 +250,41 @@
   </div>
 <div class="pane-content">
     <div class="admin-controls">
-        <sl-button style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
+        <!-- <sl-button style="margin: 8px;"  on:click={async () => { throw("error!")} }>
+            Error!
+        </sl-button> -->
+        <div id="schedule-button">        
+        <sl-button  style="margin: 8px;"  on:click={() => { dispatch('open-slotting')} }>
             Schedule
-        </sl-button>
+        </sl-button></div>
 
-        <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
+        <div id="sitemaps-button">
+        <sl-button  style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
             Site Maps
-        </sl-button>
-
-        <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
+        </sl-button></div>
+        <div id="proxyagents-button">
+        <sl-button  style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
             Proxy Agents
-        </sl-button>
-
-        <sl-button style="margin: 8px;"  on:click={async () => await doExport()}>
+        </sl-button></div>
+        <div id="export-button">
+        <sl-button  style="margin: 8px;"  on:click={async () => await doExport()}>
             Export
-        </sl-button>
-
-        <sl-button style="margin: 8px;" on:click={()=>fileinput.click()}>
+        </sl-button></div>
+        <div id="import-button">
+        <sl-button  style="margin: 8px;" on:click={()=>fileinput.click()}>
             Import
-        </sl-button>
-        <sl-button style="margin: 8px;" on:click={()=> {
+        </sl-button></div>
+        <div id="gameactive-button">
+        <sl-button  style="margin: 8px;" on:click={()=> {
             const s= $settings
             s.game_active = ! s.game_active
             store.setSettings(s)
         }
         }>
             {$settings.game_active ? 'Deactivate Sensing Game' : 'Activate Sensing Game'}
-        </sl-button>
+        </sl-button></div>
         {#if $sitemaps.length > 0}
+        <div id="sitemmap-select"> 
         <sl-select
           value={$settings.current_sitemap ? encodeHashToBase64($settings.current_sitemap) : undefined}
           style="margin: 8px; position: relative; top: -26px;"
@@ -286,7 +299,7 @@
         {#each $sitemaps as map}
             <sl-option value={encodeHashToBase64(map.original_hash)}>{map.record.entry.text}</sl-option>
         {/each}
-        </sl-select>
+        </sl-select></div>
 
     {/if}
 

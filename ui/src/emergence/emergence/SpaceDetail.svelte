@@ -49,7 +49,7 @@ async function deleteSpace() {
     errorSnackbar.show();
   }
   dialog.hide()
-  store.fetchSpaces()
+  store.fetchSpace([space.original_hash])
 }
 
 const slottedSessionTitle = (ss: SlottedSession) : string => {
@@ -242,8 +242,17 @@ let confirmDialog
   }
 
   .space-detail {
-    display: flex;
-    flex-direction: row; margin-bottom: 16px;
+    display: block;
+    margin-bottom: 16px;
+  }
+
+  .pane-header {
+    padding-top: 0px;
+    padding-bottom: 10px;
+  }
+
+  .pane-content {
+    padding-top: 10px;
   }
 
   .pic-card {
@@ -288,18 +297,20 @@ let confirmDialog
   }
 
   .amenity {
-    border: 1px solid rgba(123, 66, 217, .5);
+    border: 1px solid rgba(123, 66, 217, .2);
     color: rgba(123, 66, 217, 1.0);
     border-radius: 7px;
     padding: 5px;
     margin-right: 5px;
+    margin-bottom: 5px;
     padding-top: 0px;
     padding-bottom: 0px;
     font-size: 12px;
-    display: flex;
+    display: inline-flex;
     padding: 3px 8px;
     justify-content: center;
     align-items: center;
+    display: inline-block;
     line-height: 24px;
   }
 

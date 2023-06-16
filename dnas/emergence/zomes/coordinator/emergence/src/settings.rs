@@ -34,12 +34,16 @@ pub fn get_settings(_: ()) -> ExternResult<Settings> {
             current_sitemap:None, 
             session_types:vec![
                 SessionType {name:"Session".into(), color:"white".into(), can_rsvp: true, can_any_time: false, can_leaderless: false},
-                SessionType {name:"Dining".into(), color:"#f3827f".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
-                SessionType {name:"Chill & Relax".into(), color:"#b7cdff".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
-                SessionType {name:"Community Time".into(), color:"#ffbc57".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
-                SessionType {name:"Creativity Time".into(), color:"#9edf7d".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
-                SessionType {name:"Mind-Body-Nature".into(), color:"#efc8fe".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
-                SessionType {name:"Prep".into(), color:"#efc8fe".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Children".into(), color:"#54ded9".into(), can_rsvp: true, can_any_time: false, can_leaderless: false},
+                SessionType {name:"Community Time".into(), color:"#54ded9".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Creativity Time".into(), color:"#acfc0d".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Dining".into(), color:"#f07567".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Chill & Relax".into(), color:"#dec2ff".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Mind-Body-Nature".into(), color:"#f07567".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Panel/Discussion".into(), color:"#b1b1b1".into(), can_rsvp: false, can_any_time: true, can_leaderless: false},
+                SessionType {name:"Prep".into(), color:"#d1d7e0".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
+                SessionType {name:"Talk".into(), color:"#6292f4".into(), can_rsvp: false, can_any_time: true, can_leaderless: false},
+                SessionType {name:"Workshop".into(), color:"#6292f4".into(), can_rsvp: false, can_any_time: true, can_leaderless: false},
                 ]});
     }
     links.sort_by(|a,b| b.timestamp.cmp(&a.timestamp));

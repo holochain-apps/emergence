@@ -58,29 +58,53 @@ const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
   if (slotb) valb = slotb.window.start
   return $uiProps.sessionSort == SessionSortOrder.Ascending ? vala - valb : valb - vala
 }
+
 </script>
 <SessionCrud
 bind:this={createSessionDialog}
 on:session-created={() => {} }
 ></SessionCrud>
 
+{#if $settings.game_active}
+<div class="background">
+  <div class="sensemaking-game">
+    <Sense></Sense>
+  </div>
+</div>
+{:else}
+ <div class="spacer"></div>
+{/if}
 
 <div class="pane-header">
   <div class="header-content">
     {#if $uiProps.amSteward || (store.getCurrentSiteMap() && store.getCurrentSiteMap().record.entry.tags.includes("emergent"))}
-    <div class="pill-button"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
+    <div id="create-button" class="pill-button"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
     {/if}
       <div class="section-controls">
         <div class="center-row search-bar">
-          <span class="search-icon"><Fa icon={faSearch} /></span>
-          <sl-input
-            value={$uiProps.sessionsFilter.keyword}
-            placeholder="Search by title & description"
-            on:input={e => { 
-              const filter = $uiProps.sessionsFilter;
-              filter.keyword = e.target.value
-              store.setUIprops({sessionsFilter: filter})}}
-          ></sl-input>
+          <sl-button class="search-icon"  
+            on:click={() => {
+              if ($uiProps.searchVisible) {
+                const filter = $uiProps.sessionsFilter;
+                filter.keyword = ""
+                store.setUIprops({sessionsFilter: filter})
+              }
+              store.setUIprops({searchVisible: ! $uiProps.searchVisible}) 
+              }} circle>
+            <Fa icon={faSearch} />
+          </sl-button>
+          <div class="search-input"
+          class:show-search={$uiProps.searchVisible}>
+            <sl-input
+              
+              value={$uiProps.sessionsFilter.keyword}
+              placeholder="Search by title & description"
+              on:input={e => { 
+                const filter = $uiProps.sessionsFilter;
+                filter.keyword = e.target.value
+                store.setUIprops({sessionsFilter: filter})}}
+            ></sl-input>
+          </div>
         </div> 
         <SessionFilterCtrls
           on:toggle-filter={()=>{showFilter = !showFilter;}}
@@ -91,7 +115,7 @@ on:session-created={() => {} }
           <Fa icon={$uiProps.sessionSort == SessionSortOrder.Ascending ? faArrowUpShortWide : faArrowDownWideShort} />
         </sl-button>
 
-        <sl-select style="margin-left:10px;width:150px;" bind:this={listModeSelect}
+        <sl-select style="margin-left:10px;" bind:this={listModeSelect}
           pill
           on:sl-change={(e) => {
             store.setUIprops({sessionListMode: e.target.value})
@@ -113,11 +137,6 @@ on:session-created={() => {} }
   {/if}
 </div>
 <div class="pane-content">
-  {#if $settings.game_active}
-    <div class="sensemaking-game">
-      <Sense></Sense>
-    </div>
-  {/if}
   {#if error}
     <span class="notice">Error fetching the sessions: {error.data.data}.</span>
   {:else if $sessions.length === 0}
@@ -255,14 +274,24 @@ on:session-created={() => {} }
 
 <style>
 
+  .pane-content {
+    padding-top: 0;
+  }
+
+  .background {
+    width: 100%;
+    transition: all .25s ease;
+    padding: 0;
+  }
+
   .sensemaking-game {
     max-width: 720px;
     margin: 0 auto;
-    background-color: rgba(73, 80, 93, 1.0);
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 30px;
+    background-color: white;
+    border-radius: 0;
+    margin-bottom: 10px;
     width: 100%;
+    margin-top: 0;
   }
 
 .empty {
@@ -273,6 +302,11 @@ on:session-created={() => {} }
   display: block;
   text-align: center;
   padding: 25px;
+}
+
+.spacer {
+  height: 0;
+  transition: all .25s ease;
 }
 
   .fix-table-head {
@@ -333,23 +367,56 @@ on:session-created={() => {} }
   margin: 3px;
   cursor: pointer;
  }
+
+ sl-select {
+  max-width: 70px;
+ }
+
  .search-bar {
-    width: 100%;
     max-width: 720px;
-    margin: 0 auto 0 auto;
-    position: relative;
+    flex-direction: column;
+    align-items: flex-start;
+    margin-bottom: 0;
   }
 
-  .search-bar sl-input {
-    width: 100%;
+  .search-bar .search-input {
+    position:absolute;
+    bottom: -60px;
+    left: -10px;
+    padding: 10px;
+    background-color: white;
+    border-radius: 0 0 5px 5px;
   }
+
+  .search-input {
+    display: none;
+  }
+
+  .show-search {
+    display: block;
+  }
+
   .search-icon {
-    margin-right: 5px;
+    margin-right: 0;
+    border: 1px solid rgba(212, 212, 217, 1.0);
+    background-color: white;
+    height: 35px;
+    width: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;;
+    border-radius: 40px;
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
+    z-index: 5;
+  }
+
+  .search-icon.selected {
+    background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
   }
 
   .pill-button {
     background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
-    min-height: 40px;
+    min-height: 30px;
     min-width: 40px;
     display: flex;
     align-items: center;
@@ -357,25 +424,62 @@ on:session-created={() => {} }
     color: white;
     box-shadow: 0 10px 15px rgba(0,0,0,.35);
     border-radius: 5px;
-    padding: 0 20px;
-    margin-right: 20px;
+    padding: 0 10px;
+    margin-right: 10px;
     cursor: pointer;
+    font-size: 14px;
   }
 
+  .pane-header {
+    padding-top: 10px;
+    position: sticky;
+    margin-bottom: 10px;
+    top: 0;
+  }
 
   .pill-button span {
     color: white;
   }
 
 @media (min-width: 720px) {
+  .spacer {
+    height: 50px;
+  }
+  .background {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(180deg, rgba(86, 94, 109, 0.05) 0%, rgba(86, 94, 109, 0.26) 100%);
+    padding: 100px;
+  }
+
+  .section-controls sl-select {
+    box-shadow: 0 10px 15px rgba(0,0,0,.15);
+    border-radius: 100%;
+    min-width: 130px;
+  }
   .pill-button {
     position: sticky;
     top: 0;
   }
 
+  .pane-content {
+    padding-top: 20px;
+  }
+  
+  .sensemaking-game {
+    border-radius: 10px;
+    margin-bottom: -50px;
+    padding: 0;
+    box-shadow: 0 10px 15px rgba(0,0,0,.15);
+    margin-top: 0;
+    border-bottom: 1px solid rgba(86, 94, 109, .6);
+  }
+
   .pane-header {
-    top: -20px;
-    position: sticky;
+    margin-top: 0;
+    top: 35px;
+    max-width: 740px;
+    margin-bottom: 0;
   }
 }
 </style>

@@ -47,9 +47,11 @@
             throw new Error(`The sitemap input is required for the SiteMap element`);
         }
 
-        //drag to scroll map
-        mapCanvas.scrollTop = 0;
-        mapCanvas.scrollLeft = 0;
+        if (mapCanvas) { // sometimes it looks like svelte doesn't complete the bind before this runs
+            //drag to scroll map
+            mapCanvas.scrollTop = 0;
+            mapCanvas.scrollLeft = 0;
+        }
 
         let pos = { top: 0, left: 0, x: 0, y: 0 };
 
@@ -186,7 +188,7 @@ on:space-created={() => {} }
                     </div>
                 </sl-tooltip>
                 {/each}
-                <img class="map-image" bind:this={img} src="data:{file.type};base64,{picB64}" style="flex: 1; object-fit:cover">
+                <img class="map-image" bind:this={img} src="data:{file.type};base64,{picB64}">
                 {/if}
                 </div>
             </div>
@@ -274,6 +276,7 @@ on:space-created={() => {} }
 
 .spaces-drawer {
     width: 100%;
+    min-width: 280px;
     max-width: 320px;
     max-height: 100%;
     overflow-y: scroll;
@@ -311,9 +314,10 @@ on:space-created={() => {} }
 }
 
 .map-image {
-    min-width: 100vw;
     min-height: 100vh;
     max-width: 100%;
+    flex: 1;
+    width: auto;
 }
 
 .tooltip-text, .tooltip-text span {
@@ -334,6 +338,21 @@ sl-tooltip {
 }
 
 .true .map-controls {
-    left: 340px;
+    left: 280px;
+}
+
+
+@media (min-width: 720px) {
+    .true .map-controls {
+        left: 340px;
+    }
+
+    .spaces-container {
+        padding-top: 50px;
+    }
+}
+
+@media (min-width: 1000px) {
+
 }
 </style>

@@ -6,9 +6,10 @@
   import type { EmergenceStore } from '../../emergence-store';
   import { sessionTags, type Info, type Session, SessionInterestBit } from './types';
   import Fa from 'svelte-fa';
-  import { faArrowRight, faBookmark, faStar } from '@fortawesome/free-solid-svg-icons';
+  import { faArrowRight, faBookmark, faClose, faCheck } from '@fortawesome/free-solid-svg-icons';
   import SenseResults from './SenseResults.svelte';
   import AnyAvatar from './AnyAvatar.svelte';
+  import { Marked } from "@ts-stack/markdown";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -29,7 +30,7 @@
     const filteredSessions = $original.filter(s=>{
       const relData = store.getSessionReleationData(s)
       const myRecordedInterest = relData.interest.get(store.myPubKey)
-      return !s.record.entry.trashed && 
+      return s.record.entry.session_type==0 && !s.record.entry.trashed && 
         myRecordedInterest==undefined &&
         !s.record.entry.leaders.find(l=>encodeHashToBase64(l.hash) == store.myPubKeyBase64)
     })
@@ -49,7 +50,8 @@
     .map(({ value }) => value)
     return shuffled
   }
-
+let instructionsVisible = true
+let gameActive = false
 </script>
 {#if error}
 <span>Error fetching the sense: {error.data.data}.</span>
@@ -59,9 +61,20 @@
   <SenseResults></SenseResults>
 </div>
 {:else}
-<div class="instructions">
-  <h3>Sensemake: Help us estimate attendance!</h3>
-  <p>Here are some sessions, please indicate your interest by clicking the buttons below.</p>
+<div class="sense-wrapper"
+  class:game-active={gameActive}>
+  <div class="controls">
+    <sl-button style="margin-left: 8px; " on:click={() => { gameActive = false; instructionsVisible = true} } circle>
+      <Fa icon={faClose} />
+    </sl-button>
+  </div>
+<div class="instructions"
+  class:close={!instructionsVisible}
+  >
+  <h3>Today is Tomorrow</h3>
+  <strong>X people proposed Y sessions for Tomorrow!</strong>
+  <p>Help figure out what gets scheduled where by quickly setting your interest on proposed sessions. Sessions with most interest will get scheduled first.</p>
+  <div class="begin-button"  on:click={() => { instructionsVisible = false; gameActive = true  }}>Begin</div>
 </div>
 <div class="sense">
     <div class="remaining">Remaining: {count - senseIdx}</div>
@@ -79,7 +92,7 @@
             {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"}
           </div>
           {:else}
-          <div class="date">
+          <div class="date tba">
             Slot TBA
           </div>
           <div class="time">--:--</div>
@@ -91,17 +104,19 @@
         <h2>{session.record.entry.title}</h2>
         <div class="leaders">
           {#each session.record.entry.leaders as leader}
-            <div><AnyAvatar agent={leader}></AnyAvatar></div>
+            <div class="leader"><AnyAvatar agent={leader}></AnyAvatar></div>
           {/each}
-        </div>
-        <div class="description">
-          {session.record.entry.description}
         </div>
         <div class="tags">
           {#each sessionTags(session) as tag}
-            <div class="tag">{tag}</div>
+            <div class="tag">#{tag}</div>
           {/each}
         </div>
+        {#if session.record.entry.description}
+          <div class="description">
+            {@html Marked.parse(session.record.entry.description) }
+          </div>
+        {/if}
       </div>
     </div>
 
@@ -112,7 +127,7 @@
         size="large"
         label="Going"
         on:click={() => {swipe(SessionInterestBit.Going)}}
-      ><Fa icon={faStar} /></sl-button>
+      ><Fa icon={faCheck} class="foo" /></sl-button>
         Going
       </div>
       <div class="button">
@@ -120,6 +135,7 @@
         circle
         size="large"
         label="Interested"
+        color="red"
         on:click={() => {swipe(SessionInterestBit.Interested)}}
         ><Fa icon={faBookmark} /></sl-button>
         Interested
@@ -136,12 +152,102 @@
 
     </div>
   </div>
-
+</div>
 {/if}
 
 <style>
-  .instructions h3, .instructions p {
+
+  .begin-button {
+    background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
+    min-height: 30px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     color: white;
+    box-shadow: 0 10px 15px rgba(0,0,0,.35);
+    border-radius: 5px;
+    padding: 0 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    height: 40px;
+    margin-top: 20px;
+  }
+
+  .sense-wrapper {
+    background-color: rgba(73, 80, 93, 0);
+    position: relative;
+    transition: all .25s ease;
+  }
+
+  .sense-wrapper.game-active {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(73, 80, 93, .95);
+    z-index: 10000;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+    overflow-y: scroll;
+  }
+
+  .sense-wrapper .close-game, .controls {
+    display: none;
+  }
+
+  .game-active .controls {
+    display: block;
+  }
+
+  .sense-wrapper .controls {
+    position: absolute;
+    z-index: 1001;
+    top: 20px;
+    left: 20px;
+  }
+
+  .game-active .instructions {
+    opacity: 0;
+  }
+
+  .sense-wrapper.game-active .close-game {
+    display: block;
+  }
+
+  .instructions {
+    background-color: rgba(49, 54, 63, .90);
+    background-image: url(/images/dweb-background.jpg);
+    background-size: 300%;
+    background-position: 50% 50%;
+    border-radius: 10px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    justify-content: center;
+    display: flex;
+    text-align: center;
+    padding: 30px;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+  }
+
+  .instructions.close {
+    display: none;
+  }
+
+  .instructions h3, .instructions p, .instructions strong {
+    color: black;
+  }
+
+  .instructions h3 {
+    font-size: 24px;
   }
 
   .instructions p {
@@ -150,9 +256,10 @@
   .sense {
     display: flex;
     flex-direction: column;
-    padding: 10px;
-    margin: 10px;
-    min-width: 400px;
+    margin: 0;
+    width: 100%;
+    max-width: 720px;
+    margin: 0 auto;
   }
 
   .slot-details {
@@ -170,11 +277,17 @@
     align-items: center;
   }
   .leaders {
-    display: flex;
-    flex-direction: column;
+    display: block;
   }
+
+  .leader {
+    display: inline-block;
+    padding-right: 10px;
+  }
+
   .slot {
     display: flex;
+    min-width: 100px;
     align-items: center;
     width: auto;
     background-color: rgba(243, 243, 245, 1.0);
@@ -200,6 +313,15 @@
     color: rgba(77, 200, 194, 1.0);
     display: block;
     text-align: center;
+    padding-top: 10px;
+  }
+  
+  .tag {
+    border: 1px solid #2F87D850;
+    color: #2F87D8;
+    background-color: transparent;
+    margin-bottom: 0;
+    display: inline;
   }
 
   .time {
@@ -231,5 +353,12 @@
     width:75px;
     align-items: center;
   }
-
+  .foo {
+    color: red;
+  }
+  @media (min-width: 720px) {
+    .instructions {
+      background-size: 180%;
+    }
+  }
 </style>

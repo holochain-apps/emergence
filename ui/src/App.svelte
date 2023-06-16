@@ -38,14 +38,12 @@
   import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
   import { getCookie, deleteCookie } from 'svelte-cookie';
   import { Base64 } from 'js-base64'
-    import { schedule_update } from 'svelte/internal';
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
   let fileStorageClient: FileStorageClient | undefined;
   let loading = true;
   let profilesStore: ProfilesStore | undefined
-  let syncing = false
   let error: any = undefined;
   let creds
 
@@ -71,7 +69,6 @@
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
-    let appPort : string = import.meta.env.VITE_APP_PORT
     let installed_app_id = "emergence"
     const credsJson = getCookie("creds")
     if (credsJson) {
@@ -93,17 +90,19 @@
         error = e.reason
       }
     }
-
+    let url = ""
     if (creds) {
       console.log("CREDS", creds)
-      const url = `${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.hostname}:${creds.appPort}`
+      url = `${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.host}/${creds.appPath}`
       client = await AppAgentWebsocket.connect(url, installed_app_id);
       const appInfo = await client.appInfo()
       console.log("appInfo", appInfo)
       const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
       setSigningCredentials(cell_id, creds.creds)
     } else {
-      client = await AppAgentWebsocket.connect(`ws://localhost:${appPort}`, installed_app_id);
+      let appPort: string = import.meta.env.VITE_APP_PORT
+      url = `ws://localhost:${appPort}`
+      client = await AppAgentWebsocket.connect(url, installed_app_id);
       if (adminPort) {
         const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
         const cellIds = await adminWebsocket.listCellIds()
@@ -130,7 +129,7 @@
     });
 
     fileStorageClient = new FileStorageClient(client, 'emergence');
-    store = new EmergenceStore(new EmergenceClient(client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
+    store = new EmergenceStore(new EmergenceClient(url,installed_app_id, client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
     await store.sync(undefined)
     initialSync = setInterval(async ()=>{
       if ($uiProps.amSteward || ($sitemaps && $sitemaps.length > 0)) {clearInterval(initialSync)}
@@ -154,12 +153,8 @@
   let createSpaceDialog: SpaceCrud
 
   const doSync=async () => {
-        syncing = true;
-        console.log("start sync", new Date);
         await store.sync(undefined);
-        console.log("end sync", new Date);
-        syncing=false 
-    }
+  }
   let clickCount = 0
   const adminCheck = () => { 
     clickCount += 1
@@ -173,7 +168,8 @@
 
 <main>
   {#if error}
-    <span class="notice">
+    <span class="notice modal" style="max-width:700px;position:absolute; top:60px; left: 0;right: 0;margin: 0 auto; z-index:1000"
+    >
       <h3>I'm sorry to say it, but there has been an error ☹️</h3>
       <div style="padding:10px; margin:10px; background:lightcoral;border-radius: 10px;">
         {error}
@@ -187,11 +183,15 @@
           <Fa icon={faArrowRightFromBracket} /> Logout
         </sl-button>
         {/if}
+        <sl-button style="margin-left: 8px;" on:click={() => error=undefined}>
+          Ignore
+        </sl-button>
         <sl-button style="margin-left: 8px;" on:click={() => window.location.assign("/")}>
           <Fa icon={faArrowRotateBack} /> Reload
         </sl-button>
     </span>
-  {:else if loading}
+  {/if}
+  {#if loading}
     <div style="display: flex; flex: 1; align-items: center; justify-content: center">
       <sl-spinner
  />
@@ -209,26 +209,32 @@
           </div>
           {#if $prof.status=="complete" && $prof.value == undefined}
           <div class="create-profile">
-            <create-profile></create-profile>
+            <create-profile
+              on:profile-created={()=>{}}
+            ></create-profile>
           </div>
           {/if}
         </div>
       </div>
     {:else }
       {#if (!sitemaps || $sitemaps.length==0) && !$uiProps.amSteward}
-      <div class="app-info">
-        <img width="100" src="/images/emergence-vertical.svg" 
+      <div class="event-intro">
+        <div class="wrapper">
+          <div class="about-event">
+
+            <img class="dweb-camp" src="/images/dweb-camp.png" 
         on:click={()=>adminCheck()}/>
         <p>Either your node hasn't synchronized yet with the network, or the conference data hasn't yet been set up. Please be patient! </p>
+        <div style="display:flex;justify-items:center;width:100%">
         <sl-button on:click={() => doSync()}>
           <span class:spinning={true}> <Fa  icon={faArrowRotateBack} /> </span>Reload
-        </sl-button>
-        {#if syncing}<span class:spinning={true}> <Fa  icon={faSync} /></span>{/if}
-      </div>
+        </sl-button></div>
+        {#if $uiProps && $uiProps.syncing}<span class:spinning={true}> <Fa  icon={faSync} /></span>{/if}
+      </div></div></div>
       {:else}
       <div class="nav">
         <div class="button-group">
-          <div class="nav-button {pane === "discover" ? "selected":""}"
+          <div id="nav-discover" class="nav-button {pane === "discover" ? "selected":""}"
             title="Discover"
             on:keypress={()=>{store.setPane('discover')}}
             on:click={()=>{store.setPane('discover')}}
@@ -236,7 +242,7 @@
             <Fa class="nav-icon" icon={faHome} size="2x"/>
             <span class="button-title">Discover</span>
           </div>
-          <div class="nav-button {pane.startsWith("sessions")?"selected":""}"
+          <div id="nav-sessions" class="nav-button {pane.startsWith("sessions")?"selected":""}"
             title="Sessions"
             on:keypress={()=>{store.setPane('sessions')}}
             on:click={()=>{store.setPane('sessions')}}
@@ -246,7 +252,7 @@
           </div>
     
     
-          <div class="nav-button {pane.startsWith("spaces")?"selected":""}"
+          <div id="nav-spaces" class="nav-button {pane.startsWith("spaces")?"selected":""}"
             title="Spaces"
             on:keypress={()=>{store.setPane('spaces')}}
             on:click={()=>{store.setPane('spaces')}}
@@ -257,7 +263,7 @@
         </div>
         <div class="button-group settings">
           {#if store && $uiProps.amSteward}
-            <div class="nav-button {pane.startsWith("admin")?"selected":""}"
+            <div id="nav-admin" class="nav-button {pane.startsWith("admin")?"selected":""}"
               title="Admin"
               on:keypress={()=>{store.setPane('admin')}}
               on:click={()=>{store.setPane('admin')}}
@@ -266,7 +272,7 @@
             <span class="button-title settings">Settings</span>
             </div>
           {/if}
-          <div class="nav-button {pane=="you"?"selected":""}"
+          <div id="nav-you" class="nav-button {pane=="you"?"selected":""}"
             title="You"
             on:keypress={()=>{store.setPane('you')}}
             on:dblclick={(e)=>e.stopPropagation()}
@@ -280,19 +286,21 @@
             <span class="button-title you">You</span>
           </div>
 
-          <div class="nav-button"
-            class:spinning={syncing}
+          <div id="nav-sync" class="nav-button"
             title="Sync"
             on:keypress={()=>{doSync()}}
             on:click={()=>{doSync()}}
           >
+            <span
+            class:spinning={$uiProps && $uiProps.syncing}
+            >
             <Fa 
               class="nav-icon "
-              icon={faSync} size="2x"/>
+              icon={faSync} size="2x"/></span>
             <span class="button-title sync">Sync</span>
           </div>
           {#if getCookie("creds")}
-            <div class="nav-button"
+            <div id="nav-logout" class="nav-button"
               title="Logout"
               on:click={()=>{
                 window.location.assign("/reset")
@@ -504,7 +512,7 @@
   }
 
   .about-event {
-    padding: 10px;
+    padding: 20px;
 
   }
 

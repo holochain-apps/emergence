@@ -52,7 +52,7 @@
 
     </div>
 
-<div  class="pane-content flex-center">
+<div  class="pane-content flex-center card">
           
     <div class="folk-profile">
         <Avatar agentPubKey={agentPubKey} ></Avatar>
@@ -67,31 +67,33 @@
         <sl-tab slot="nav" panel="notes">Notes</sl-tab>
         <sl-tab slot="nav" panel="sessions">Sessions</sl-tab>
         <sl-tab-panel name="sessions">
-            {#if $agentSessions.get(agentPubKey).size == 0}
-                No sessions created or going/interested 
-            {/if}
-
-            {#each Array.from($agentSessions.get(agentPubKey).keys()).map(s =>store.getSession(s)) as session}
-                {#if session && (!session.record.entry.trashed || showDeletedSession)}
-                <SessionSummary 
-                showTags={true} showSlot={true} allowSetIntention={true} session={session}></SessionSummary>
+            <div class="wrapper">
+                {#if $agentSessions.get(agentPubKey).size == 0}
+                    No sessions created or going/interested 
                 {/if}
-            {/each}
 
-
+                {#each Array.from($agentSessions.get(agentPubKey).keys()).map(s =>store.getSession(s)) as session}
+                    {#if session && (!session.record.entry.trashed || showDeletedSession)}
+                    <SessionSummary 
+                    showTags={true} showSlot={true} allowSetIntention={true} session={session}></SessionSummary>
+                    {/if}
+                {/each}
+            </div>
         </sl-tab-panel>
         <sl-tab-panel name="notes">
-            {#if $agentNotes.get(agentPubKey).length == 0}
-                No notes created
-            {/if}
-            {#each $agentNotes.get(agentPubKey) as note}
-                <NoteDetail showDeleted={false} showFrame={true} noteHash={note}></NoteDetail>
-            {/each}
-            
-          
+            <div class="wrapper">
+                {#if $agentNotes.get(agentPubKey).length == 0}
+                    No notes created
+                {/if}
+                {#each $agentNotes.get(agentPubKey) as note}
+                    <NoteDetail showDeleted={false} showFrame={true} noteHash={note}></NoteDetail>
+                {/each}
+            </div>
         </sl-tab-panel>
         <sl-tab-panel name="updates">
-            <Feed forAgent={agentPubKey}></Feed>
+            <div class="wrapper">
+                <Feed forAgent={agentPubKey}></Feed>
+            </div>
         </sl-tab-panel>
     </sl-tab-group>
 
@@ -107,6 +109,28 @@
     text-align: center;
     min-width: 200px;
 }  
+
+sl-tab-group {
+    width: 100%;
+}
+
+.card {
+    flex-direction: column;
+}
+
+.pane-header {
+    padding-top: 10px;
+    padding-bottom: 30px;
+}
+
+.pane-content {
+    padding-bottom: 0;
+    margin-bottom: 100px;
+}
+
+.wrapper {
+    padding: 15px;
+}
 
 .location {
     opacity: .6;

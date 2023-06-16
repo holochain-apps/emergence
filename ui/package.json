@@ -6,11 +6,11 @@
     "build": "vite build",
     "build-check": "npm run check && vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "package": "npm run build && cd dist && bestzip ../dist.zip *"
+    "package": "rm dist.zip && npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "^0.12.2",
-    "@holochain-open-dev/profiles": "^0.14.1",
+    "@holochain-open-dev/profiles": "^0.14.3",
     "@holochain-open-dev/stores": "^0.4.0",
     "@holochain-open-dev/utils": "^0.12.2",
     "@holochain-open-dev/file-storage": "0.4.3",

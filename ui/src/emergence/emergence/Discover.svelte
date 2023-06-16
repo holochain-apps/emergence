@@ -72,7 +72,6 @@
                     {/if}
                 </div>
                 <div class="discover section-controls">
-                    <h3>Latest activity</h3>
                     <div class="center-row search-bar">
                         <span class="search-icon"><Fa icon={faSearch} /></span>
                         <sl-input
@@ -85,19 +84,19 @@
                         ></sl-input>
                       </div> 
               
-                    <sl-button style=" " size=small on:click={() => { showFilter = !showFilter } } >
+                    <sl-button style="box-shadow: none; height: 30px; width: 80px" size=small on:click={() => { showFilter = !showFilter } } >
                         <Fa icon={faFilter} /> Filter
                     </sl-button>
                 </div>
             </div>
+            {#if showFilter}
             <div class="discover-filter">
-                {#if showFilter}
                 <FeedFilter
                     on:close-filter={()=>showFilter = false}
                     on:update-filter={(e)=>{store.setUIprops({feedFilter: e.detail})}}
                     filter={$uiProps.feedFilter}></FeedFilter>
-                {/if}
             </div>
+            {/if}
             <div class="discover-section feed" style="">
                 <Feed></Feed>            
             </div>
@@ -115,6 +114,7 @@
     }
 
     sl-tab-group {
+        --track-color: white;
         max-width: 100%;
     }
     
@@ -123,11 +123,26 @@
         display: flex;
         flex-direction: row;
         align-items: center;
+        flex-wrap: wrap;
+        padding-bottom: 15px;
+    }
+
+    sl-tab[aria-selected="true"] {
+        border: 1px solid red;
+    }
+
+
+    sl-tab-group::part(active-tab-indicator) {
+        border: 1px solid rgba(66, 118, 217, .4);
+    }
+
+    sl-tab::part(active-tab) { 
+        color: white;
+        background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
     }
     .search-bar {
-        height:20px;
         max-width: 720px;
-        margin: 0 auto 0 auto;
+        margin: 0 10px 0 0;
         position: relative;
     }
 
@@ -137,6 +152,10 @@
     margin-right: 5px;
   }
 
+  sl-tab-group::part(nav) {
+    background: linear-gradient(180deg, rgba(86, 94, 109, 0.05) 0%, rgba(86, 94, 109, 0.26) 100%);
+    border-bottom: none;
+  }
 
 
 @media (min-width: 720px) {
