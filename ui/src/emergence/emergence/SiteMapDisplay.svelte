@@ -47,9 +47,11 @@
             throw new Error(`The sitemap input is required for the SiteMap element`);
         }
 
-        //drag to scroll map
-        mapCanvas.scrollTop = 0;
-        mapCanvas.scrollLeft = 0;
+        if (mapCanvas) { // sometimes it looks like svelte doesn't complete the bind before this runs
+            //drag to scroll map
+            mapCanvas.scrollTop = 0;
+            mapCanvas.scrollLeft = 0;
+        }
 
         let pos = { top: 0, left: 0, x: 0, y: 0 };
 
