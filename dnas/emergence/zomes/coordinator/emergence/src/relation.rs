@@ -72,23 +72,25 @@ pub fn get_feed(input: GetFeedInput) -> ExternResult<Vec<RelationInfo>> {
             timestamp: link.timestamp,
             relation,
         };
-
+        // if let Some(newer_than) = input.newer_than {
+        //     debug!("filter: {}, actual: {}", newer_than, link.timestamp)
+        // }
         let mut filtered = 
             match input.newer_than {
-                Some(newer_than) => link.timestamp> newer_than ,
+                Some(newer_than) => link.timestamp<= newer_than ,
                 None => false
             };
         if !filtered {
             filtered = 
                 match input.older_than {
-                    Some(older_than) => link.timestamp< older_than ,
+                    Some(older_than) => link.timestamp >= older_than ,
                     None => false
                 };
 
             if !filtered {
                 filtered = 
                     match input.agent_filter {
-                        Some(ref agent) => *agent == link.author ,
+                        Some(ref agent) => *agent != link.author ,
                         None => false
                     };
             }

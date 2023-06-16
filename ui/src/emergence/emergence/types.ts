@@ -301,6 +301,7 @@ export interface GetFeedInput {
   agent_filter?: AgentPubKey
   newer_than?: Timestamp
   older_than?: Timestamp
+  count?: number
 }
 
 export enum FeedType {
@@ -327,6 +328,7 @@ export enum FeedType {
 }
 
 export interface FeedElem {
+  hash: ActionHash,
   timestamp: Timestamp,
   author: AgentPubKey,
   about: ActionHash,

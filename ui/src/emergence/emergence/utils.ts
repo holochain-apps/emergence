@@ -103,3 +103,9 @@ export const wait = (milliseconds) => {
       setTimeout(resolve, milliseconds);
   });
 }
+
+export const elapsed = (startTime) => {
+  const endTime = performance.now();
+  var timeDiff = endTime - startTime; //in ms 
+  return Math.round(timeDiff);
+}

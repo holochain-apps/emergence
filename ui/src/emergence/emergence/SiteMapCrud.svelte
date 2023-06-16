@@ -34,7 +34,6 @@ $: text
 $: isSiteMapValid = text !== ""
 
 onMount(() => {
-  store.fetchTags()
 });
 
 export const open = (smap) => {

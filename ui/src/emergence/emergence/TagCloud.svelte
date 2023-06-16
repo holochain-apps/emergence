@@ -28,7 +28,7 @@
         return words
 	}
     onMount(async () => {
-        store.fetchTags()
+        //store.fetchTags()
     });
     let selectedTags = []
     let innerWidth = 0

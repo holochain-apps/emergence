@@ -32,11 +32,6 @@
   }
 
   onMount(async () => {
-    // get everything newer than newest
-    const newest = $fullFeed[0]
-    if (newest) {
-      await store.fetchFeed({newer_than:Math.trunc(newest.timestamp)});
-    }
     if (forAgent)
       await store.fetchAgentStuff(forAgent);
   });

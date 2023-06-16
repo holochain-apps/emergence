@@ -60,6 +60,7 @@ export class EmergenceClient {
       const author = r.src
       author[1] =32
         return {
+          hash: ri.create_link_hash,
           timestamp: ri.timestamp/1000,
           author,
           about: r.dst,

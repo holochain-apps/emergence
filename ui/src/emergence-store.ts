@@ -19,7 +19,7 @@ import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space
 import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
-import { filterTime, sessionHasTags } from './emergence/emergence/utils';
+import { elapsed, filterTime, sessionHasTags } from './emergence/emergence/utils';
 import { fromUint8Array } from 'js-base64';
 Marked.setOptions
 ({
@@ -176,9 +176,22 @@ export class EmergenceStore {
     this.setUIprops({detailsStack})
   }
 
-  setPane = (pane) => {
+  setPane = async (pane) => {
+    console.log("SET PANE", pane)
     this.setUIprops({pane, detailsStack:[]})
-    this.sync(undefined)
+    switch(pane) {
+        case 'discover':
+            // get everything newer than newest
+            const newest = get(this.feed)[0]
+            if (newest) {
+                await this.fetchFeed({newer_than:Math.trunc(newest.timestamp)*1000});
+            }
+            //this.fetchFeed({});
+            break;
+        case 'sessions':
+            this.fetchSessions()
+            break;
+    }
   }
 
   stuffIsNeeded() {
@@ -499,6 +512,8 @@ export class EmergenceStore {
   }
 
   async fetchTimeWindows() {
+    console.log("FETCHING ALL TIME WINDOWS")
+
     const timeWindows = await this.client.getTimeWindows()
     this.timeWindows.update((n) => {return timeWindows} )
   }
@@ -840,6 +855,7 @@ export class EmergenceStore {
   }
 
   async fetchSessions() {
+    console.log("FETCHING ALL SESSIONS")
     try {
         await this.fetchSpaces()
         const sessions = await this.client.getSessions()
@@ -1477,6 +1493,7 @@ export class EmergenceStore {
   }
 
   async fetchSiteMaps() {
+    console.log("FETCHING ALL SITE MAPS")
     try {
         const maps = await this.client.getSiteMaps()
         this.maps.update((n) => {return maps} )
@@ -1579,6 +1596,7 @@ export class EmergenceStore {
   }
 
   async fetchProxyAgents() {
+    console.log("FETCHING ALL PROXY AGENTS")
     try {
         const proxyAgents = await this.client.getProxyAgents()
         this.proxyAgents.update((n) => {return proxyAgents} )
@@ -1644,7 +1662,8 @@ export class EmergenceStore {
                         }
                         else {
                             n.push(space)
-                        }                        return n
+                        }
+                        return n
                     } )
                 }
             })
@@ -1657,6 +1676,8 @@ export class EmergenceStore {
 
 
   async fetchSpaces() {
+    console.log("FETCHING ALL SPACES")
+
     try {
         const spaces = await this.client.getSpaces()
         this.spaces.update((n) => {return spaces} )
@@ -1703,8 +1724,26 @@ export class EmergenceStore {
 
   async fetchFeed(filter: GetFeedInput) {
     try {
+        const startTime = performance.now();
+        console.log("FETCHING FEED ", filter);
+
         const feed = await this.client.getFeed(filter)
-        this.feed.update((n) => {return feed} )
+        console.log("FEED ITEMS RETURNED:", feed.length, feed, elapsed(startTime))
+        this.feed.update((n) => {
+            feed.forEach(f=>{
+                const fB64 = encodeHashToBase64(f.hash)
+                const idx = n.findIndex(s=>encodeHashToBase64(s.hash) == fB64)
+                if (idx >= 0) {
+                    n[idx] = f
+                }
+                else {
+                    n.push(f)
+                }
+                return n
+            })
+            return n
+        } )
+        console.log("FETCHING FEED COMPLETE AFTER ", elapsed(startTime))
 
     }
     catch (e) {
@@ -1713,6 +1752,8 @@ export class EmergenceStore {
   }
 
   async fetchTags() {
+    console.log("FETCHING ALL TAGS")
+
     try {
         const tags = await this.client.getTags()
         this.allTags.update((n) => {return tags} )
