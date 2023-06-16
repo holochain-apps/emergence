@@ -181,6 +181,7 @@ let dialog
     <sl-input
       label=Title
       autocomplete="off"
+      maxlength={60}
       value={title}
       on:input={e => { title = e.target.value; } }
       required

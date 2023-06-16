@@ -269,7 +269,6 @@ export const Amenities = [
   "Table",
   "Screen",
   "Seating",
-  "Wifi",
   "Indoor",
   "Outdoor",]
 
