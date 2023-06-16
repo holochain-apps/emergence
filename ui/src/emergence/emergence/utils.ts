@@ -31,10 +31,13 @@ export const timestampDay = (timestamp: Timestamp) : Timestamp => {
 }
 
 export const filterTime = (now: number, filter:SessionsFilter, window: TimeWindow): boolean => {
-  if (!filter.timeNow && !filter.timeToday && !filter.timeNext && !filter.timePast && !filter.timeFuture && filter.timeDays.length==0) return true
-
   const windowStart = window.start
   const windowEnd = window.start + window.duration*ONE_MINUTE_OF_MS
+  if (!filter.timeNow && !filter.timeToday && !filter.timeNext && !filter.timePast && !filter.timeFuture && filter.timeDays.length==0) {
+    if (windowEnd < now) return false
+    return true
+  }
+
   const wDay = windowDayAsTimestamp(window)
 
   if ( filter.timeNow && (windowStart >= now && windowEnd <= now)) return true

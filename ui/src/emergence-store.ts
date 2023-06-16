@@ -1030,7 +1030,7 @@ export class EmergenceStore {
   filterSession(session:Info<Session>, filter: SessionsFilter) : boolean {
     const slot = this.getSessionSlot(session)
     if (!slot && (filter.timeNow || filter.timeToday ||  filter.timeNext || filter.timePast || filter.timeFuture)) return false
-    if (slot && filter.timeUnscheduled) return false
+    if (filter.timeUnscheduled && slot) return false
     const now = (new Date).getTime()
 
     if (slot && !filterTime(now, filter, slot.window)) return false

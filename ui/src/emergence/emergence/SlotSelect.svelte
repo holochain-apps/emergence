@@ -93,7 +93,7 @@
 <div style="display:flex; flex-direction:row">
   <div style="margin-bottom: 16px; display:flex; flex-direction:column">
     
-    <div style="display:flex; flex-direction:row; align-items:center;">
+    <div style="display:flex; flex-direction:row; align-items:flex-start;">
       <sl-select  
         style="width:320px;"
         bind:this={windowSelect}
