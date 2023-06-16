@@ -55,8 +55,8 @@
     background-color: transparent;
     margin-bottom: 0;
     display: inline;
-    font-size: 12px;
-    height: 30px;
-    line-height: 30px;
+    font-size: 11px;
+    line-height: 11px;
+    padding: 3px 5px;
   }
 </style>

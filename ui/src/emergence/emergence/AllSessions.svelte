@@ -71,6 +71,8 @@ on:session-created={() => {} }
     <Sense></Sense>
   </div>
 </div>
+{:else}
+ <div class="spacer"></div>
 {/if}
 
 <div class="pane-header">
@@ -302,6 +304,11 @@ on:session-created={() => {} }
   padding: 25px;
 }
 
+.spacer {
+  height: 0;
+  transition: all .25s ease;
+}
+
   .fix-table-head {
     overflow: auto;
     height: 100%;
@@ -435,6 +442,9 @@ on:session-created={() => {} }
   }
 
 @media (min-width: 720px) {
+  .spacer {
+    height: 50px;
+  }
   .background {
     width: 100%;
     height: 100%;

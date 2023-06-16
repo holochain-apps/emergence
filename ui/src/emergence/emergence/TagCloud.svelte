@@ -125,7 +125,7 @@
         border-radius: 25px;
         display: inline-block;
         margin: 13px 13px 0 0;
-        border: 1px solid #2F87D890;
+        border: 1px solid #2F87D830;
         color: #2F87D8;
         background-color: transparent;
         transition: all .25s ease;
@@ -166,7 +166,7 @@
 
 @media (min-width: 720px) {
     .word {
-        font-size: 16px;
+        font-size: 14px;
     }
 }
 </style>
