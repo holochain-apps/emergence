@@ -49,7 +49,7 @@ export const open = (ses) => {
     description = ""
     smallest = 2;
     largest = 100;
-    duration = 30
+    duration = 60
     amenities = 0;
     const sitemap = store.getCurrentSiteMap()
     leaders = sitemap && sitemap.record.entry.tags[0]=="emergent" ? [{type:"Agent", hash:store.myPubKey}] : []
@@ -236,7 +236,16 @@ let dialog
   <div id="tags-multiselect" style="margin-bottom: 16px">
     <span>Tags:</span >
     <MultiSelect 
-      bind:selected={tags} 
+      bind:selected={tags}
+      on:add={(e)=>{
+        const tag = e.detail.option
+        if (tag.length > 30) {
+          errorSnackbar.labelText = "Maximum tag length is 30 characters";
+          errorSnackbar.show();
+          const idx= tags.findIndex(t=>tag==t)
+          tags.splice(idx,1)
+        }
+        }}
       options={allTags} 
       allowUserOptions={true}
       />

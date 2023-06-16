@@ -117,6 +117,15 @@ let dialog
     <span>Tags:</span >
     <MultiSelect 
       --sms-bg="white"
+      on:add={(e)=>{
+        const tag = e.detail.option
+        if (tag.length > 30) {
+          errorSnackbar.labelText = "Maximum tag length is 30 characters";
+          errorSnackbar.show();
+          const idx= tags.findIndex(t=>tag==t)
+          tags.splice(idx,1)
+        }
+        }}
       bind:selected={tags} 
       options={allTags} 
       allowUserOptions={true}
@@ -187,7 +196,16 @@ let dialog
       <div id="tags-select" style="margin: 16px 0">
         <MultiSelect 
         --sms-bg="white"
-          bind:selected={tags} 
+          on:add={(e)=>{
+            const tag = e.detail.option
+            if (tag.length > 30) {
+              errorSnackbar.labelText = "Maximum tag length is 30 characters";
+              errorSnackbar.show();
+              const idx= tags.findIndex(t=>tag==t)
+              tags.splice(idx,1)
+            }
+            }}
+            bind:selected={tags} 
           options={allTags} 
           allowUserOptions={true}
           placeholder="Add tags"
