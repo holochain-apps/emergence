@@ -23,17 +23,17 @@ console.log();
 // **** TEST PARAMETERS ****
 
 const conductorCount = 1;
-let agentsPerConductor = 100;
+let agentsPerConductor = 1;
 const agentsPerConductorIncrementor = 20;
 
-let notesPerMin = 600;
+let notesPerMin = 1;
 const notesPerMinIncrementor = 200;
 
 let testRunCount = 1;
-const testRunCountMax = 2;
-const testDuration = 1000 * 110;
+const testRunCountMax = 1;
+const testDuration = 1000 * 5;
 
-const intervalMargin = agentsPerConductor * 10;
+const intervalMargin = agentsPerConductor * 0;
 
 const metricsPerMin: { timeElapsedToCreateAllNotes: number }[] = [];
 
@@ -85,7 +85,7 @@ do {
         });
 
 
-    // console.log("Exchanging all peer infos...");
+    // console.log("Exchanging all peer info...");
     // await scenario.shareAllAgents();
     // console.log();
 
@@ -112,7 +112,7 @@ do {
 
     // agent 1 creates a bunch of sessions
     for (let x = 0; x < sessionsCount; x++) {
-        const session = await store.createSession(`session ${x}`, "description", [], 2, 10, 60, 1, null, [])
+        const session = await store.createSession(x, `session ${x}`, "description", [], 2, 10, 60, 1, null, [])
         assert.ok(session);
     }
     const sessions = await emergenceClient.getSessions();
@@ -134,64 +134,71 @@ do {
     let thisMinuteMetricsSaved = false;
 
     do {
-        if (notesCreatedThisMinute < notesPerMin) {
-            for (let i = 0; i < clientsPlayers.length; i++) {
-                const notesForConductor = [];
-                for (let j = 0; j < clientsPlayers[i].players.length; j++) {
-                    const cell = clientsPlayers[i].players[j].cells[0];
-                    const sessionIndex = getRandomNumber(sessions);
-                    const note: Note = {
-                        session: sessions[sessionIndex].original_hash,
-                        text: `note: minute ${Math.ceil(totalTimeElapsed / 1000 / 60)}`,
-                        tags: [],
-                        trashed: false
-                    };
-                    notesForConductor.push(createNote(cell, note));
-                }
-                const notes: Record[] = await Promise.all(notesForConductor);
-                notesCreatedThisMinute += notes.length;
-                notesCreatedTotal += notes.length;
-                console.log(`Created ${notes.length} notes, ${notesCreatedThisMinute} this minute and ${notesCreatedTotal} in total.`);
-                if (notesCreatedThisMinute >= notesPerMin) {
-                    startTimeDhtSync = Date.now();
-                }
-                // notes.forEach((note) => store.needNote(note.signed_action.hashed.hash));
-            }
-        } else if (!thisMinuteMetricsSaved) {
-            const timeElapsedToCreateAllNotes = Date.now() - thisMinuteStartTime;
-            metricsPerMin.push({ timeElapsedToCreateAllNotes });
-            thisMinuteMetricsSaved = true;
-        }
+        // if (notesCreatedThisMinute < notesPerMin) {
+        //     for (let i = 0; i < clientsPlayers.length; i++) {
+        //         const notesForConductor = [];
+        //         for (let j = 0; j < clientsPlayers[i].players.length; j++) {
+        //             const cell = clientsPlayers[i].players[j].cells[0];
+        //             const sessionIndex = getRandomNumber(sessions);
+        //             const note: Note = {
+        //                 session: sessions[sessionIndex].original_hash,
+        //                 text: `note: minute ${Math.ceil(totalTimeElapsed / 1000 / 60)}`,
+        //                 tags: [],
+        //                 trashed: false
+        //             };
+        //             notesForConductor.push(createNote(cell, note));
+        //         }
+        //         const notes: Record[] = await Promise.all(notesForConductor);
+        //         notesCreatedThisMinute += notes.length;
+        //         notesCreatedTotal += notes.length;
+        //         console.log(`Created ${notes.length} notes, ${notesCreatedThisMinute} this minute and ${notesCreatedTotal} in total.`);
+        //         if (notesCreatedThisMinute >= notesPerMin) {
+        //             startTimeDhtSync = Date.now();
+        //         }
+        //         // notes.forEach((note) => store.needNote(note.signed_action.hashed.hash));
+        //     }
+        // } else if (!thisMinuteMetricsSaved) {
+        //     const timeElapsedToCreateAllNotes = Date.now() - thisMinuteStartTime;
+        //     metricsPerMin.push({ timeElapsedToCreateAllNotes });
+        //     thisMinuteMetricsSaved = true;
+        // }
 
         totalTimeElapsed = Date.now() - startTime;
-        if (totalTimeElapsed % outputInterval <= intervalMargin) {
-            const elapsedTime = Math.round(totalTimeElapsed / 1000);
-            console.log(`Checkpoint: ${elapsedTime} seconds elapsed. ${notesCreatedTotal} notes created until now.`);
-            outputPrinted = true;
-        } else {
-            outputPrinted = false;
+        // if (totalTimeElapsed % outputInterval <= intervalMargin) {
+        //     const elapsedTime = Math.round(totalTimeElapsed / 1000);
+        //     console.log(`Checkpoint: ${elapsedTime} seconds elapsed. ${notesCreatedTotal} notes created until now.`);
+        //     outputPrinted = true;
+        // } else {
+        //     outputPrinted = false;
+        // }
+
+        console.log('hello', totalTimeElapsed, totalTimeElapsed % 1000, intervalMargin, totalTimeElapsed % 1000 <= intervalMargin);
+        if (totalTimeElapsed > 0 && totalTimeElapsed % 1000 <= intervalMargin) {
+            const clientIndex = getRandomNumber(clientsPlayers);
+            const playerIndex = getRandomNumber(clientsPlayers[clientIndex].players);
+            emergenceClient.getFeed(clientsPlayers[clientIndex].players[playerIndex].agentPubKey).then((value) => console.log(`client ${clientIndex} player ${playerIndex} feed ${value}`));
         }
 
-        if (!dhtsSynced && totalTimeElapsed % checkDhtSyncInterval <= intervalMargin) {
-            if (notesCreatedThisMinute >= notesPerMin) {
-                dhtsSynced = await areDhtsSynced(clientsPlayers.flatMap((clientPlayer) => clientPlayer.client.conductors), cellId);
-                const timeElapsedToSyncDht = Math.round((Date.now() - startTimeDhtSync) / 1000);
-                if (dhtsSynced) {
-                    console.log(`DHTs synced; it took ${timeElapsedToSyncDht} seconds.`);
-                } else {
-                    console.log(`DHTs not yet synced after ${timeElapsedToSyncDht} seconds.`);
-                }
-            }
-        }
+        // if (!dhtsSynced && totalTimeElapsed % checkDhtSyncInterval <= intervalMargin) {
+        //     if (notesCreatedThisMinute >= notesPerMin) {
+        //         dhtsSynced = await areDhtsSynced(clientsPlayers.flatMap((clientPlayer) => clientPlayer.client.conductors), cellId);
+        //         const timeElapsedToSyncDht = Math.round((Date.now() - startTimeDhtSync) / 1000);
+        //         if (dhtsSynced) {
+        //             console.log(`DHTs synced; it took ${timeElapsedToSyncDht} seconds.`);
+        //         } else {
+        //             console.log(`DHTs not yet synced after ${timeElapsedToSyncDht} seconds.`);
+        //         }
+        //     }
+        // }
 
         if (totalTimeElapsed > 0 && totalTimeElapsed % (1000 * 60) <= intervalMargin) {
             console.log("-------------- A minute has passed. --------------");
-            if (notesCreatedThisMinute < notesPerMin) {
-                console.log(`Failed to create ${notesPerMin} notes this minute. Created ${notesCreatedThisMinute}. Aborting test run.`);
-                testRunCount = testRunCountMax; // end tests
-                testRunFailed = true;
-                break;
-            }
+            // if (notesCreatedThisMinute < notesPerMin) {
+            //     console.log(`Failed to create ${notesPerMin} notes this minute. Created ${notesCreatedThisMinute}. Aborting test run.`);
+            //     testRunCount = testRunCountMax; // end tests
+            //     testRunFailed = true;
+            //     break;
+            // }
 
             if (!minuteResetHappened) {
                 notesCreatedThisMinute = 0;
@@ -209,15 +216,15 @@ do {
 
     console.log();
 
-    if (!testRunFailed) {
-        let avgToCreateNotes = 0;
-        metricsPerMin.forEach((metrics) => {
-            // console.log(`It took ${metrics.timeElapsedToCreateAllNotes} ms to create ${notesPerMin} notes.`);
-            avgToCreateNotes += metrics.timeElapsedToCreateAllNotes;
-        });
-        avgToCreateNotes /= metricsPerMin.length;
-        console.log(`On average it took ${avgToCreateNotes} ms to create ${notesPerMin} notes.`);
-    }
+    // if (!testRunFailed) {
+    //     let avgToCreateNotes = 0;
+    //     metricsPerMin.forEach((metrics) => {
+    //         // console.log(`It took ${metrics.timeElapsedToCreateAllNotes} ms to create ${notesPerMin} notes.`);
+    //         avgToCreateNotes += metrics.timeElapsedToCreateAllNotes;
+    //     });
+    //     avgToCreateNotes /= metricsPerMin.length;
+    //     console.log(`On average it took ${avgToCreateNotes} ms to create ${notesPerMin} notes.`);
+    // }
 
     // const feed = await store.fetchFeed();
     // console.log('feed', feed);
@@ -229,7 +236,7 @@ do {
     await scenario.cleanUp();
 
     testRunCount++;
-    agentsPerConductor+= agentsPerConductorIncrementor;
+    agentsPerConductor += agentsPerConductorIncrementor;
     notesPerMin += notesPerMinIncrementor;
 
     console.groupEnd();
