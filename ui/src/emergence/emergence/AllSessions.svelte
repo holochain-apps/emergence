@@ -98,7 +98,7 @@ on:session-created={() => {} }
             <sl-input
               
               value={$uiProps.sessionsFilter.keyword}
-              placeholder="Search by title & description"
+              placeholder="Search title, description & hosts"
               on:input={e => { 
                 const filter = $uiProps.sessionsFilter;
                 filter.keyword = e.target.value

@@ -102,6 +102,7 @@ export class EmergenceStore {
   agentNotes: Writable<HoloHashMap<AgentPubKey, Array<ActionHash>>> = writable(new HoloHashMap())
   agentSessions: Writable<HoloHashMap<AgentPubKey,HoloHashMap<ActionHash,SessionInterest>>> = writable(new HoloHashMap())
   files: HoloHashMap<AgentPubKey,DownloadedFile> = new HoloHashMap()
+  proxyAgentNicknames: HoloHashMap<ActionHash, string> = new HoloHashMap()
   neededStuff: GetStuffInput = {}
   myPubKeyBase64: string
   loader = undefined
@@ -1025,6 +1026,23 @@ export class EmergenceStore {
       }
     return []
   }
+
+  sessionLeaderNameIncludes = (session:Info<Session>, word:string):boolean => {
+    for (const l of session.record.entry.leaders) {
+        if (l.type=="ProxyAgent") {
+            const nick = this.proxyAgentNicknames.get(l.hash)
+            if (nick && nick.toLowerCase().search(word) >= 0) return true
+        } else {
+            const profile = get(this.profilesStore.profiles.get(l.hash))
+            if (profile.status === "complete"  && profile.value) {
+                const nick = profile.value.nickname
+                if (nick && nick.toLowerCase().search(word) >= 0) return true
+            }
+
+        }
+    }
+    return false
+  }
   
 
   filterSession(session:Info<Session>, filter: SessionsFilter) : boolean {
@@ -1058,7 +1076,9 @@ export class EmergenceStore {
     if (filter.keyword) {
         const word = filter.keyword.toLowerCase() 
         if (session.record.entry.description.toLowerCase().search(word) < 0 &&
-            session.record.entry.title.toLowerCase().search(word) < 0)
+            session.record.entry.title.toLowerCase().search(word) < 0  &&
+            !this.sessionLeaderNameIncludes(session, word)
+            )
             return false
     }
     if (filter.space.length>0) {
@@ -1603,6 +1623,7 @@ export class EmergenceStore {
     try {
         const proxyAgents = await this.client.getProxyAgents()
         this.proxyAgents.update((n) => {return proxyAgents} )
+        proxyAgents.forEach(p=>this.proxyAgentNicknames.set(p.original_hash,p.record.entry.nickname))
     }
     catch (e) {
         console.log("Error fetching sitemaps", e)
