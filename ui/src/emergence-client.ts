@@ -8,8 +8,9 @@ import {
      type AppAgentClient,
      type EntryHash,
      type HoloHash,
+     type Timestamp,
 } from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse, Settings, ProxyAgent, UpdateProxyAgentInput, AnyAgent, SessionTypeID } from './emergence/emergence/types';
+import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse, Settings, ProxyAgent, UpdateProxyAgentInput, AnyAgent, SessionTypeID, GetFeedInput } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
 import { wait } from './emergence/emergence/utils';
 // import { UnsubscribeFunction } from 'emittery';
@@ -52,8 +53,8 @@ export class EmergenceClient {
     return await this.callZome('delete_relations', relations)
   }
 
-  async getFeed(agent: AgentPubKey | undefined) : Promise<Array<FeedElem>> {
-    const relations: Array<RelationInfo> = await this.callZome('get_feed', {agent_filter: agent})
+  async getFeed(filter: GetFeedInput) : Promise<Array<FeedElem>> {
+    const relations: Array<RelationInfo> = await this.callZome('get_feed', filter)
     return relations.map(ri => {
       const r = ri.relation
       const author = r.src

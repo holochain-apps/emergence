@@ -48,7 +48,10 @@ pub fn delete_relations(input: Vec<ActionHash>) -> ExternResult<()> {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetFeedInput {
-    agent_filter: Option<AgentPubKey> // Placeholder
+    agent_filter: Option<AgentPubKey>, // Placeholder
+    newer_than: Option<Timestamp>,
+    older_than: Option<Timestamp>,
+    count: Option<usize>,
 }
 
 #[hdk_extern]
@@ -69,12 +72,35 @@ pub fn get_feed(input: GetFeedInput) -> ExternResult<Vec<RelationInfo>> {
             timestamp: link.timestamp,
             relation,
         };
-        match input.agent_filter {
-            Some(ref agent) => if *agent == link.author {
-                relations.push(relation_info)
+
+        let mut filtered = 
+            match input.newer_than {
+                Some(newer_than) => link.timestamp> newer_than ,
+                None => false
+            };
+        if !filtered {
+            filtered = 
+                match input.older_than {
+                    Some(older_than) => link.timestamp< older_than ,
+                    None => false
+                };
+
+            if !filtered {
+                filtered = 
+                    match input.agent_filter {
+                        Some(ref agent) => *agent == link.author ,
+                        None => false
+                    };
             }
-            None => relations.push(relation_info)
-        };
+        }
+        if !filtered {
+            relations.push(relation_info)
+        }
+        relations.sort_by(|a,b| b.timestamp.cmp(&a.timestamp));
+
+        if let Some(count) = input.count {
+            relations.truncate(count);
+        }
     }
     Ok(relations)
 }

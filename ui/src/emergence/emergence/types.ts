@@ -299,6 +299,8 @@ export interface SessionRelationData {
 
 export interface GetFeedInput {
   agent_filter?: AgentPubKey
+  newer_than?: Timestamp
+  older_than?: Timestamp
 }
 
 export enum FeedType {
