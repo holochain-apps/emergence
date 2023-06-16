@@ -9,6 +9,7 @@
   import { faArrowRight, faBookmark, faClose, faCheck } from '@fortawesome/free-solid-svg-icons';
   import SenseResults from './SenseResults.svelte';
   import AnyAvatar from './AnyAvatar.svelte';
+  import { Marked } from "@ts-stack/markdown";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -112,7 +113,7 @@ let gameActive = false
           {/each}
         </div>
         <div class="description">
-          {session.record.entry.description}
+          {@html Marked.parse(session.entry.description) }
         </div>
       </div>
     </div>
