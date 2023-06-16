@@ -59,6 +59,7 @@
     width:100%; 
     display: flex;
     justify-content: left;
+    font-size: 12px;
   }
 
   .activity {

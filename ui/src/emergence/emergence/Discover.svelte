@@ -114,6 +114,7 @@
     }
 
     sl-tab-group {
+        --track-color: white;
         max-width: 100%;
     }
     
@@ -124,6 +125,20 @@
         align-items: center;
         flex-wrap: wrap;
         padding-bottom: 15px;
+    }
+
+    sl-tab[aria-selected="true"] {
+        border: 1px solid red;
+    }
+
+
+    sl-tab-group::part(active-tab-indicator) {
+        border: 1px solid rgba(66, 118, 217, .4);
+    }
+
+    sl-tab::part(active-tab) { 
+        color: white;
+        background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
     }
     .search-bar {
         max-width: 720px;
@@ -137,6 +152,10 @@
     margin-right: 5px;
   }
 
+  sl-tab-group::part(nav) {
+    background: linear-gradient(180deg, rgba(86, 94, 109, 0.05) 0%, rgba(86, 94, 109, 0.26) 100%);
+    border-bottom: none;
+  }
 
 
 @media (min-width: 720px) {
