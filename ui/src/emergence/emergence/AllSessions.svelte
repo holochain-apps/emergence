@@ -438,14 +438,14 @@ on:session-created={() => {} }
   .background {
     width: 100%;
     height: 100%;
-
-background: linear-gradient(180deg, rgba(86, 94, 109, 0.05) 0%, rgba(86, 94, 109, 0.26) 100%);
+    background: linear-gradient(180deg, rgba(86, 94, 109, 0.05) 0%, rgba(86, 94, 109, 0.26) 100%);
     padding: 100px;
   }
 
   .section-controls sl-select {
     box-shadow: 0 10px 15px rgba(0,0,0,.15);
     border-radius: 100%;
+    min-width: 130px;
   }
   .pill-button {
     position: sticky;
@@ -460,7 +460,9 @@ background: linear-gradient(180deg, rgba(86, 94, 109, 0.05) 0%, rgba(86, 94, 109
     border-radius: 10px;
     margin-bottom: -50px;
     padding: 0;
+    box-shadow: 0 10px 15px rgba(0,0,0,.15);
     margin-top: 0;
+    border-bottom: 1px solid rgba(86, 94, 109, .6);
   }
 
   .pane-header {
