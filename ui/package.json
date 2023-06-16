@@ -6,7 +6,7 @@
     "build": "vite build",
     "build-check": "npm run check && vite build",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "package": "npm run build && cd dist && bestzip ../dist.zip *"
+    "package": "rm dist.zip && npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
     "@holochain/client": "^0.12.2",
