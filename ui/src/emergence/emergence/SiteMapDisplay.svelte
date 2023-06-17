@@ -244,17 +244,18 @@ on:space-created={() => {} }
     padding: 0px;
 }
 .location {
-    position:absolute;
-    background-color: #FEF1AF;
-    border: 1px solid black;
+    position: absolute;
+    border: 1px solid rgba(33, 179, 95, .5);
     border-radius: 50%;
     text-align: center;
-    color: black;
+    color: white;
     font-weight: bold;
+    text-shadow: 1px 1px #0D5E3340;
     padding-top: 3px;
-    font-family: courier, monospace;
     font-weight: normal;
     cursor: pointer;
+    background: linear-gradient(129.46deg, #4ED27A 8.45%, #00FFC2 93.81%);
+    box-shadow: 0 5px 5px rgba(0,0,0,.2);
 }
 
 .details {

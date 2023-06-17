@@ -84,7 +84,7 @@
                         ></sl-input>
                       </div> 
               
-                    <sl-button style="box-shadow: none; height: 30px; width: 80px" size=small on:click={() => { showFilter = !showFilter } } >
+                    <sl-button class="filter" on:click={() => { showFilter = !showFilter } } >
                         <Fa icon={faFilter} /> Filter
                     </sl-button>
                 </div>
@@ -134,6 +134,18 @@
     sl-tab-group::part(nav) {
     background: linear-gradient(180deg, rgba(86, 94, 109, 0.05) 0%, rgba(86, 94, 109, 0.26) 100%);
     border-bottom: none;
+    }
+
+    .section-controls sl-button.filter {
+        width: auto;
+        height: auto;
+        box-shadow: none;
+    }
+
+    .section-controls sl-button.filter::part(base) {
+        box-shadow: none;
+        height: 35px;
+        width: 80px
     }
 
     .discover.section-controls {

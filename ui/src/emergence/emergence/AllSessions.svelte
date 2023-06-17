@@ -308,7 +308,7 @@ on:session-created={() => {} }
   height: 0px;
   margin-bottom: 30px;
   width: 100%;
-  display: block;
+  display: none;
   transition: all .25s ease;
 }
 
@@ -447,6 +447,7 @@ on:session-created={() => {} }
 @media (min-width: 720px) {
   .spacer {
     height: 50px;
+    display: block;
   }
   .background {
     width: 100%;

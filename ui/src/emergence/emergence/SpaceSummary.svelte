@@ -78,13 +78,13 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
     {:else}
       <img class="no-pic" src="/images/no-pic.svg">
     {/if}
-    
+    {#if space.record.entry.key} <span class="location">{space.record.entry.key}</span>{/if}
   </div>
   <div class="info">
     <div class="name-row">
       <div class="name">
         <sl-tooltip placement="top-start" content={space.record.entry.description}>
-          <span>{ space.record.entry.name }{#if space.record.entry.key} ({space.record.entry.key}){/if}</span>
+          <span>{ space.record.entry.name }</span>
         </sl-tooltip>
       </div>
       <div class="sessions">
@@ -139,6 +139,28 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
     font-size: 12px;
     opacity: .5;
     flex-direction: row;
+  }
+
+  .location {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    text-shadow: 1px 1px #0D5E3340;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 14px;
+    border: 1px solid rgba(33, 179, 95, .5);
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    font-weight: normal;
+    cursor: pointer;
+    background: linear-gradient(129.46deg, #4ED27A 8.45%, #00FFC2 93.81%);
+    box-shadow: 0 5px 5px rgba(0,0,0,.2);
   }
 
   .info {

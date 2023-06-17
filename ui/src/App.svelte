@@ -528,7 +528,7 @@
     margin: 0 auto;
     display: block;
   }
-
+  
 @media (min-width: 720px) {
   .event-intro .wrapper {
     display: flex;

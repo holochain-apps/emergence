@@ -773,12 +773,17 @@ export class EmergenceStore {
     this.fetchSession([sessionHash])
   }
 
-  sessionInterestProjection(sessions: Array<Info<Session>>) : Projection  {
+  peopleCount() : number {
     const allProfiles = get(this.profilesStore.allProfiles)
     const peopleCount = allProfiles.status=== "complete" ? Array.from(allProfiles.value.keys()).length : 0
+    return peopleCount
+  }
+
+  sessionInterestProjection(sessions: Array<Info<Session>>) : Projection  {
+    const peopleCount = this.peopleCount()
 
     let totalAssesments = 0
-    let interestData = sessions.filter(s=> (!s.record.entry.trashed)).map(session=>{
+    let interestData = sessions.filter(s=> (s.record.entry.session_type==0 && !s.record.entry.trashed)).map(session=>{
         const relData = this.getSessionReleationData(session)
         const interests = Array.from(relData.interest)
         const assesments = interests.length
@@ -802,6 +807,7 @@ export class EmergenceStore {
     }).sort((a,b)=>b.estimatedAttendance- a.estimatedAttendance)
     const est = interestData.map(p=>p.estimatedAttendance)
     return {
+        sessionCount: interestData.length,
         totalAssesments,
         peopleCount,
         likelyCount,

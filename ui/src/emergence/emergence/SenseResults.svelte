@@ -4,7 +4,6 @@
   import type { Record } from '@holochain/client15';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import { type Info, type Session, SessionInterestBit, type Projection } from './types';
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -40,7 +39,7 @@ const attendanceColor = (attendance: number) : string => {
 <span>Error: {error}.</span>
 {:else}
 <div class="projections">
-  <h3>Attendees: {projection.peopleCount}; Assesments: {projection.totalAssesments}</h3>
+  <h3>Sessions: {projection.sessionCount}; Attendees: {projection.peopleCount}; Assesments: {projection.totalAssesments}</h3>
   <table>
     <tr>    
       <th>Session</th><th>Estimated Attendance</th><th>Interest %</th><th>No Opinion</th><th>Going</th><th>Interested</th><th>Assesments</th>

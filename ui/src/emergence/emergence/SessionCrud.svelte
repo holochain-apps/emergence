@@ -196,8 +196,25 @@ let dialog
       required
     ></sl-textarea>
   </div>
+  <div id="tags-multiselect" style="margin-bottom: 16px">
+    <span>Tags:</span >
+    <MultiSelect 
+      bind:selected={tags}
+      on:add={(e)=>{
+        const tag = e.detail.option
+        if (tag.length > 30) {
+          errorSnackbar.labelText = "Maximum tag length is 30 characters";
+          errorSnackbar.show();
+          const idx= tags.findIndex(t=>tag==t)
+          tags.splice(idx,1)
+        }
+        }}
+      options={allTags} 
+      allowUserOptions={true}
+      />
+  </div>
   <div style="margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Leaders:</strong>
+    <span style="margin-right: 4px"><strong class="form-label">Leaders:</strong>
       {#if !sessionType.can_leaderless}
         <span class="required">*</span>
       {/if}
@@ -234,23 +251,6 @@ let dialog
       {/if}
       </div>  
   </div>
-  <div id="tags-multiselect" style="margin-bottom: 16px">
-    <span>Tags:</span >
-    <MultiSelect 
-      bind:selected={tags}
-      on:add={(e)=>{
-        const tag = e.detail.option
-        if (tag.length > 30) {
-          errorSnackbar.labelText = "Maximum tag length is 30 characters";
-          errorSnackbar.show();
-          const idx= tags.findIndex(t=>tag==t)
-          tags.splice(idx,1)
-        }
-        }}
-      options={allTags} 
-      allowUserOptions={true}
-      />
-  </div>
   <div style="display:flex">
     <!-- <div style="margin-bottom: 16px; display:flex; flex-direction:column">
       <span>Group Size:</span >
@@ -273,7 +273,7 @@ let dialog
     </div> -->
   </div>
   <div style="margin-bottom: 16px">
-    <div id="clear-amentities-button" style="font-size: 16px" on:click={()=>amenities = 0}>Required Amenities </div>
+    <div id="clear-amentities-button" class="form-label" on:click={()=>amenities = 0}>Required Amenities </div>
     {#each Amenities as amenity, i}
       <sl-checkbox
         bind:this={amenityElems[i]}
@@ -338,9 +338,44 @@ let dialog
 </sl-dialog>
 
 <style>
+  sl-input::part(form-control-label), sl-textarea::part(form-control-label), #tags-multiselect span, .form-label {
+    text-transform: uppercase;
+    font-weight: normal;
+    font-size: 12px;
+    opacity: .7;
+  }
+
+:global(div.multiselect > ul.selected > li) {
+  border: 1px solid #2F87D830 !important;
+  color: #2F87D8 !important;
+  background-color: transparent !important;
+  margin-bottom: 0;
+  display: inline;
+  border-radius: 5px;
+  font-size: 14px;
+}
+  
   sl-checkbox {
     margin-right:15px;
   }
+
+  sl-dialog::part(panel) {
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100vw;
+    height: 100%;
+  }
+
+  sl-dialog::part(title) {
+    font-size: 14px;
+    font-weight: bold;
+  }
+
+  sl-dialog::part(header) {
+    box-shadow: 0 10px 15px rgba(0,0,0,.15);
+    width: 100%;
+  }
+
   .type-color {
     margin-left:5px; width:45px; height:45px; border: solid 1px; 
     background-color: var(--type-bg-color, white);
@@ -348,4 +383,29 @@ let dialog
   .required {
     color: inherit;
   }
+
+  sl-button[variant="primary"]::part(base) {
+    background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
+    min-height: 30px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 10px 15px rgba(0,0,0,.35);
+    border-radius: 5px;
+    padding: 0 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
+@media (min-width: 720px) {
+  sl-dialog::part(panel) {
+    height: auto;
+    width: 100%;
+    max-width: 700px;
+    max-height: calc(100% - var(--sl-spacing-2x-large));
+  }
+}
 </style>
