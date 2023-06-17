@@ -120,7 +120,7 @@
         </div>
         <div class="tags">
           {#each $note.value.record.entry.tags as tag}
-            <div class="tag">{tag}</div>
+            <div class="tag">#{tag}</div>
           {/each}
         </div>
         {#if $note.value.record.entry.pic}
@@ -148,7 +148,7 @@
     box-shadow: 0 5px 10px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
     border-radius: 10px;
     margin: .5em;
-    padding: .5em;
+    padding: 15px;
   }
   .post-header {
     display: flex;
@@ -182,12 +182,6 @@
     overflow: hidden;
   }
   
-  :global(.tags) {
-    display: flex;
-    margin-bottom: .25em;
-    font-size: .9em;
-    padding: 0px;
-  }
   .post-pic {
     /*TODO: figure out best way to control content width 
     higher up the dom like at the pane level 
@@ -196,20 +190,20 @@
     margin: 0 auto;
     margin:auto;
   }
-  :global(.tag) {
-    color: white;
-    background-color: gray;
-    border-radius: 7px;
-    padding: 5px;
-    margin-right: 5px;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    font-size: 12px;
-    margin-bottom: .25em;
-    background-color: rgba(243, 243, 245, 1.0);
-    color: rgba(0, 0, 0, .5);
+
+  .tags {
+    display: block;
+    padding-top: 8px;
   }
 
+  .tag {
+    display: inline;
+    border: 1px solid #2F87D840;
+    color: #2F87D8;
+    background-color: transparent;
+    margin-bottom: 0;
+    display: inline;
+  }
 
 
   /*debug*/

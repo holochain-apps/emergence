@@ -305,7 +305,10 @@ on:session-created={() => {} }
 }
 
 .spacer {
-  height: 0;
+  height: 0px;
+  margin-bottom: 30px;
+  width: 100%;
+  display: block;
   transition: all .25s ease;
 }
 
@@ -463,7 +466,7 @@ on:session-created={() => {} }
   }
 
   .pane-content {
-    padding-top: 45px;
+    padding-top: 15px;
   }
   
   .sensemaking-game {
@@ -478,7 +481,7 @@ on:session-created={() => {} }
   .pane-header {
     margin-top: 0;
     top: 40px;
-    max-width: 740px;
+    max-width: 100%;
     margin-bottom: 0;
   }
 }

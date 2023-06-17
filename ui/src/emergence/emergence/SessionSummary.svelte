@@ -201,13 +201,13 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }
   .space {
     overflow: hidden;
-    max-height: 24px;
+    max-height: 20px;
   }
   .slot {
     display: flex;
     align-items: center;
     background: #565E6D;
-    width: 105px;
+    width: 50px;
     text-align: center;
     border-radius: 0;
     color: white;

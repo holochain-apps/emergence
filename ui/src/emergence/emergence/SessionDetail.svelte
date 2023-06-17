@@ -305,12 +305,6 @@ bind:this={updateSessionDialog}
   .description p {
     margin-bottom: 10px;
   }
-
-  .tags {
-    display: block;
-    padding-top: 8px;
-  }
-
   .timeslot {
     display: inline-block;
     padding: 5px 10px;
@@ -324,6 +318,12 @@ bind:this={updateSessionDialog}
     top: -31px;
     left: 0;
   }
+
+  .tags {
+    display: block;
+    padding-top: 8px;
+  }
+
   .tag {
     display: inline;
     border: 1px solid #2F87D840;
@@ -387,6 +387,8 @@ bind:this={updateSessionDialog}
 
   .pane-header {
     padding-top: 20px;
+    position: sticky;
+    top: -10px;
   }
 
   .pane-header h2 {
