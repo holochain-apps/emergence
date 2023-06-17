@@ -65,7 +65,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 
 </div>
 {:else if error}
-<span>Error fetching the space: {error.data.data}</span>
+<span>Error fetching the space: {error}</span>
 {:else}
 
 

@@ -107,7 +107,6 @@
         const adminWebsocket = await AdminWebsocket.connect(new URL(`ws://localhost:${adminPort}`))
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
-        console.log("credentials set")
       }
     }
   

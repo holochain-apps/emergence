@@ -44,7 +44,7 @@ onMount(async () => {
 </div>
 <div class="pane-content">
   {#if error}
-    <span>Error fetching the proxyagents: {error.data.data}.</span>
+    <span>Error fetching the proxyagents: {error}.</span>
   {:else if $proxyAgents.length === 0}
     <span class="notice">No Proxy Agents Found.</span>
   {:else}

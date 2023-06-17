@@ -36,6 +36,14 @@ Marked.setOptions
 TimeAgo.addDefaultLocale(en)
 const LIKELY_TO_ATTEND_PERCENT = .8
 
+class HolochainError extends Error {
+    constructor(name: string, message: string) {
+      super();
+      this.name = name;
+      this.message = message;
+    }
+  }
+
 export const neededStuffStore = (client: EmergenceClient) => {
     const notes = writable(new HoloHashMap<ActionHash, Info<Note>| undefined>())
     const neededStuff: GetStuffInput = {}

@@ -327,7 +327,7 @@
   <sl-spinner></sl-spinner>
 </div>
 {:else if error}
-<span>Error fetching the wall: {error.data.data}.</span>
+<span>Error fetching the wall: {error}.</span>
 {:else}
 
 {#if showFilter}

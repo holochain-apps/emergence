@@ -50,7 +50,7 @@
     <sl-spinner />
   </div>
 {:else if error}
-  <span>Error: {error.data.data}</span>
+  <span>Error: {error}</span>
 {:else}
   <div
     class="person card clickable"

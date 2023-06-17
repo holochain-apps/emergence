@@ -27,7 +27,7 @@
   <sl-spinner></sl-spinner>
 </div>
 {:else if error}
-<span>Error fetching the timeWindows: {error.data.data}.</span>
+<span>Error fetching the timeWindows: {error}.</span>
 {:else if $timeWindows.length === 0}
 <span>No timeWindows found.</span>
 {:else}

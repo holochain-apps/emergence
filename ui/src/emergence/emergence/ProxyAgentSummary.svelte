@@ -44,7 +44,7 @@ onMount(async () => {
 
 </div>
 {:else if error}
-<span>Error fetching the proxyAgent: {error.data.data}</span>
+<span>Error fetching the proxyAgent: {error}</span>
 {:else}
 
 <div class="summary card"

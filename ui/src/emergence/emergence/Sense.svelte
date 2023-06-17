@@ -55,7 +55,7 @@ let instructionsVisible = true
 let gameActive = false
 </script>
 {#if error}
-<span>Error fetching the sense: {error.data.data}.</span>
+<span>Error fetching the sense: {error}.</span>
 {:else if !session}
 <div style="display:flex;flex-direction:column;">
   <h2 class="complete">All Done, thanks!</h2>

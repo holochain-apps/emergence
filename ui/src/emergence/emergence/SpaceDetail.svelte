@@ -79,7 +79,7 @@ let confirmDialog
 
 
 {#if error}
-<span>Error fetching the space: {error.data.data}</span>
+<span>Error fetching the space: {error}</span>
 {:else}
 
 <div transition:slide={{ axis: 'x', duration: 400 }}  class="SpaceDetail pane-content">

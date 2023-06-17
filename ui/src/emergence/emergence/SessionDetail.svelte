@@ -101,7 +101,7 @@ let confirmDialog
 
 </div>
 {:else if error}
-<span>Error fetching the session: {error.data.data}</span>
+<span>Error fetching the session: {error}</span>
 {:else}
 
 <SessionCrud

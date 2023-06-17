@@ -58,7 +58,7 @@
 
 </script>
 {#if error}
-<span>Error fetching the people: {error.data.data}.</span>
+<span>Error fetching the people: {error}.</span>
 {:else}
   <div class="center-row search-bar">
     <span class="search-icon"><Fa icon={faSearch} /></span>

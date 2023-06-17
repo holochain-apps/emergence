@@ -36,7 +36,7 @@ onMount(async () => {
 <div>
 
   {#if error}
-    <span class="notice">Error fetching the spaces: {error.data.data}.</span>
+    <span class="notice">Error fetching the spaces: {error}.</span>
   {:else if $spaces.length === 0}
     <span class="notice">No spaces found.</span>
   {:else}

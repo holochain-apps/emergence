@@ -63,7 +63,7 @@ let updateSitemapDialog
   <sl-spinner></sl-spinner>
 </div>
 {:else if error}
-<span>Error fetching the sitemap: {error.data.data}</span>
+<span>Error fetching the sitemap: {error}</span>
 {:else}
   <Confirm 
     bind:this={confirmDialog}

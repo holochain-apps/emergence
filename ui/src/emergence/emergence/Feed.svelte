@@ -39,7 +39,7 @@
 </script>
 
 {#if error}
-<span>Error fetching the feed: {error.data.data}.</span>
+<span>Error fetching the feed: {error}.</span>
 {:else if feed.length === 0}
 <span>No Activity</span>
 {:else}

@@ -138,7 +138,7 @@ on:session-created={() => {} }
 </div>
 <div class="pane-content">
   {#if error}
-    <span class="notice">Error fetching the sessions: {error.data.data}.</span>
+    <span class="notice">Error fetching the sessions: {error}.</span>
   {:else if $sessions.length === 0}
     <span class="notice">No sessions found.</span>
   {:else}

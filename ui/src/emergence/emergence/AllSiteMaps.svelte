@@ -45,7 +45,7 @@ onMount(async () => {
 </div>
 <div class="pane-content">
   {#if error}
-    <span>Error fetching the sitemaps: {error.data.data}.</span>
+    <span>Error fetching the sitemaps: {error}.</span>
   {:else if $sitemaps.length === 0}
     <span>No sitemaps found.</span>
   {:else}
