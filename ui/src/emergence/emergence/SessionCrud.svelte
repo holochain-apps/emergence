@@ -384,6 +384,22 @@ let dialog
     color: inherit;
   }
 
+  sl-button[variant="primary"]::part(base) {
+    background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
+    min-height: 30px;
+    min-width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 10px 15px rgba(0,0,0,.35);
+    border-radius: 5px;
+    padding: 0 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+
 @media (min-width: 720px) {
   sl-dialog::part(panel) {
     height: auto;
