@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, type AppAgentClient, setSigningCredentials } from '@holochain/client';
+  import { AdminWebsocket, type AppAgentClient, setSigningCredentials } from '@holochain/client15';
   import { AppAgentWebsocket } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
@@ -61,7 +61,7 @@
     const creds = JSON.parse(json)
     creds.creds.capSecret = base64ToUint8(creds.creds.capSecret)
     creds.creds.keyPair.publicKey = base64ToUint8(creds.creds.keyPair.publicKey)
-    creds.creds.keyPair.secretKey = base64ToUint8(creds.creds.keyPair.secretKey)
+    creds.creds.keyPair.privateKey = base64ToUint8(creds.creds.keyPair.privateKey)
     creds.creds.signingKey = base64ToUint8(creds.creds.signingKey)
     return creds
   };
@@ -104,7 +104,7 @@
       url = `ws://localhost:${appPort}`
       client = await AppAgentWebsocket.connect(url, installed_app_id);
       if (adminPort) {
-        const adminWebsocket = await AdminWebsocket.connect(`ws://localhost:${adminPort}`)
+        const adminWebsocket = await AdminWebsocket.connect(new URL(`ws://localhost:${adminPort}`))
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
