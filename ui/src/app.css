@@ -1,3 +1,28 @@
+@font-face {
+  font-family: "Poppins";
+  src: url('/fonts/Poppins-Regular.ttf');
+  font-weight: regular;
+}
+@font-face {
+  font-family: "Poppins";
+  src: url('/fonts/Poppins-SemiBold.ttf');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url('/fonts/Poppins-Italic.ttf');
+  font-style: italic;
+}
+
+@font-face {
+  font-family: "Poppins";
+  src: url('/fonts/Poppins-SemiBoldItalic.ttf');
+  font-style: italic;
+  font-weight: bold;
+}
+
+
 :root {
   --mdc-theme-primary: #7B1FA2;
   --mdc-theme-secondary: #FF5722;
