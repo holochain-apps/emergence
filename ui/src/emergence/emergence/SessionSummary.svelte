@@ -62,7 +62,7 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }}>
   {#if showSlot}
     <div class="slot">
-      <div class="slot-wrapper">
+      <div class="slot-wrapper" style={`background-color: ${sessionType.color}40; height: 100%;`}>
         {#if slot}
         <div class="date">
           {new Date(slot.window.start).toLocaleString('en-US', { weekday: 'long' })}
