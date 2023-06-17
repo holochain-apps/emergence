@@ -295,7 +295,17 @@ bind:this={updateSessionDialog}
   }
   .description {
     padding-bottom: 8px;
+    overflow: hidden;
   }
+
+  .description pre {
+    overflow: scroll;
+  }
+
+  .description p {
+    margin-bottom: 10px;
+  }
+
   .tags {
     display: block;
     padding-top: 8px;

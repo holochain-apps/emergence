@@ -463,7 +463,7 @@ on:session-created={() => {} }
   }
 
   .pane-content {
-    padding-top: 20px;
+    padding-top: 45px;
   }
   
   .sensemaking-game {
@@ -477,7 +477,7 @@ on:session-created={() => {} }
 
   .pane-header {
     margin-top: 0;
-    top: 35px;
+    top: 40px;
     max-width: 740px;
     margin-bottom: 0;
   }

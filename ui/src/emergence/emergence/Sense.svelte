@@ -86,7 +86,7 @@ let gameActive = false
             {new Date(slot.window.start).toDateString().slice(0,10)}
           </div>
           <div class="time">
-            {new Date(slot.window.start).toTimeString().slice(0,5)}
+            • {new Date(slot.window.start).toTimeString().slice(0,5)} •
           </div>
           <div class="space">
             {store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"}
@@ -117,6 +117,7 @@ let gameActive = false
             {@html Marked.parse(session.record.entry.description) }
           </div>
         {/if}
+        <div class="bg"></div>
       </div>
     </div>
 
@@ -157,6 +158,10 @@ let gameActive = false
 
 <style>
 
+  .tags {
+    display: block;
+  }
+
   .begin-button {
     background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
     min-height: 30px;
@@ -193,6 +198,18 @@ let gameActive = false
     justify-content: center;
     display: flex;
     overflow-y: scroll;
+  }
+
+  .description {
+    max-height: 150px;
+  }
+  .bg {
+    width: 100%;
+    height: 30px;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%);
   }
 
   .sense-wrapper .close-game, .controls {
@@ -263,7 +280,9 @@ let gameActive = false
   }
 
   .slot-details {
-    padding-left: 15px;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
   }
   .sense-item {
     padding: 10px;
@@ -272,9 +291,9 @@ let gameActive = false
     width:100%; 
     height: 100%;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     box-shadow: 0px 10px 15px rgba(0,0,0,.2);
-    align-items: center;
+    align-items: flex-start;
   }
   .leaders {
     display: block;
@@ -290,13 +309,16 @@ let gameActive = false
     min-width: 100px;
     align-items: center;
     width: auto;
-    background-color: rgba(243, 243, 245, 1.0);
+    background-color: rgba(86, 94, 109, 1.0);
     text-align: center;
     border-radius: 5px;
+    height: 24px;
+    margin-right: auto;
   }
   .slot-wrapper {
     padding: 5px;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
     width: 100%;
     height: auto;
   }
@@ -325,19 +347,27 @@ let gameActive = false
   }
 
   .time {
-    font-size: 1.7em;
-    margin-top: -6px;
-    margin-bottom: -2px;
+    font-size: 12px;
+    padding: 8px;
+    color: white;
   }
   .date, .space {
     font-size: 12px;
     font-weight: normal;
+    margin-bottom: 0;
+    color: white;
   }
   .buttons {
     margin-top: 20px;
     display: flex;
     flex-direction: row;
     justify-content: center;
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    justify-content: center;
+    z-index: 1;
+    left: 0;
   }
   .buttons div {
     font-size: 12px;
@@ -359,6 +389,11 @@ let gameActive = false
   @media (min-width: 720px) {
     .instructions {
       background-size: 180%;
+    }
+
+    .buttons {
+      position: relative;
+      bottom: initial;
     }
   }
 </style>
