@@ -159,7 +159,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
     font-weight: bold;
     font-weight: normal;
     cursor: pointer;
-    background: linear-gradient(129.46deg, #4ED27A 8.45%, #00FFC2 93.81%);
+    background: linear-gradient(129.46deg, #2F87D8 8.45%, #00D1FF 93.81%);
     box-shadow: 0 5px 5px rgba(0,0,0,.2);
   }
 
