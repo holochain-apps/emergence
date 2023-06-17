@@ -113,6 +113,10 @@ const attendanceColor = (attendance: number) : string => {
   .title {
     max-width: 210px;
   }
+
+  .projections {
+    max-height: 50vh;
+  }
 }
 
 </style>
