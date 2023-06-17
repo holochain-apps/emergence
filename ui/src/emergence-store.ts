@@ -1540,7 +1540,7 @@ export class EmergenceStore {
             dst: record.actionHash,
             content:  {
                 path: `feed.${FeedType.ProxyAgentNew}`,
-                data: JSON.stringify("nickname")
+                data: JSON.stringify(nickname)
             }
         },
     ]

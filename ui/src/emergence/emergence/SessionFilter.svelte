@@ -23,11 +23,14 @@
   import { storeContext } from "../../contexts";
   import { decodeHashFromBase64, encodeHashToBase64 } from "@holochain/client";
   import { calcDays, dayToStr } from "./utils";
+  import { RecordBag } from "@holochain-open-dev/utils";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();
   $: windows = store.timeWindows;
   $: days = calcDays($windows, "", defaultSessionsFilter());
   $: settings = store.settings;
+  $: currentSiteMap = store.getCurrentSiteMap()
+  $: currentSiteMapType = currentSiteMap ? currentSiteMap.record.entry.tags[0] : undefined
 
   const dispatch = createEventDispatcher();
 
@@ -106,7 +109,7 @@
         dispatch("update-filter", filter);
       }}
     >
-      {#each $spaces as space}
+      {#each $spaces.filter(s=> currentSiteMapType == undefined || s.record.entry.tags[0] == currentSiteMapType) as space}
         <sl-option value={encodeHashToBase64(space.original_hash)}
           >{space.record.entry.name} ({space.record.entry.key})</sl-option
         >
