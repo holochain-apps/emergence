@@ -284,7 +284,7 @@ bind:this={updateSessionDialog}
   .leaders {
     position: relative;
     top: -10px;
-    opacity: .6;
+    opacity: .8;
     font-size: 12px;
     display: inline-flex;
     align-items: center;

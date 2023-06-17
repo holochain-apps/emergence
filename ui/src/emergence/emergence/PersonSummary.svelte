@@ -112,7 +112,7 @@
     >
       <!-- {#if type== "ProxyAgent"} -->
       {#if hostedSessions.length > 0}
-        <span style="font-weight:strong">Hosting:</span>
+        <span style="font-weight:strong">Hosting:</span>{hostedSessions.idx}
         {#each hostedSessions as session, idx}
           <div style="margin-left:5px"><SessionLink sessionHash={session.original_hash}></SessionLink></div>
         {/each}

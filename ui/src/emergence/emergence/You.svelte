@@ -136,6 +136,7 @@
     .wrapper {
         width: 100%;
         max-width: 720px;
+        text-align: left;
         margin: 0 auto;
     }
     sl-tab-group {
