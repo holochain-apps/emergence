@@ -130,11 +130,12 @@
         background-color: transparent;
         transition: all .25s ease;
         margin-bottom: 0;
-        display: inline;
+        display: block;
         transform: scale(1.3);
         margin-left: 20px;
         opacity: 1;
         margin-right: 20px;
+        max-height: 40px;
     }
 
     .word:hover {
@@ -145,7 +146,6 @@
         color: #fff;
         background-color: #2F87D8;
         padding: 10px 12px;
-        margin: 7px 10px -4px -3px;
         box-shadow: 0 10px 15px rgba(0,0,0,.25);
     }
 
@@ -194,7 +194,7 @@
         opacity: 1;
         margin-right: 10px;
     }
-
+    
     .neonText .count {
         background-color: white;
         color: #2F87D8;
