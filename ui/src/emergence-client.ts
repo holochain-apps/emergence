@@ -1,18 +1,15 @@
 // import {  } from './types';
 
-import {
-  AppAgentWebsocket,
-     type ActionHash,
-     type AgentPubKey,
-     type AppAgentCallZomeRequest,
-     type AppAgentClient,
-     type EntryHash,
-     type HoloHash,
-     type Timestamp,
-} from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse, Settings, ProxyAgent, UpdateProxyAgentInput, AnyAgent, SessionTypeID, GetFeedInput } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
-import { wait } from './emergence/emergence/utils';
+import type {
+  ActionHash,
+  AgentPubKey,
+  AppAgentCallZomeRequest,
+  AppAgentClient,
+  EntryHash,
+  HoloHash
+} from '@holochain/client15';
+import type { AnyAgent, FeedElem, GetFeedInput, GetStuffInput, GetStuffOutput, Info, Note, ProxyAgent, Relation, RelationInfo, Session, SessionTypeID, Settings, SiteMap, Space, TagUse, TimeWindow, UpdateNoteInput, UpdateProxyAgentInput, UpdateSessionInput, UpdateSiteMapInput, UpdateSpaceInput } from './emergence/emergence/types';
 // import { UnsubscribeFunction } from 'emittery';
 
 
@@ -295,31 +292,7 @@ export class EmergenceClient {
       fn_name,
       payload,
     };
-    try {
-      while(this.reconnecting) {
-        console.log("reconnecting, waiting 1 second")
-        await wait(1000)
-      }
-      return await this.client.callZome(req, 30000);
-    } catch(e) {
-      console.log(`Got error on zome call to ${fn_name}:`, e.message)
-      if (e.message == "Socket is not open") {
-        if (!this.reconnecting) {
-          console.log("attempting to reconnect...")
-          this.reconnecting = true
-          this.client = await AppAgentWebsocket.connect(this.url, this.installed_app_id);
-          console.log("got a new client, retrying zome call...")
-          const result =  await this.client.callZome(req, 30000);
-          this.reconnecting = false
-          return result
-        } {
-          console.log("allready reconnecting!")
-        }
-        
-      } else {
-        throw(e)
-      }
-    }
+    return await this.client.callZome(req, 30000);
   }
   /** Scene */
 

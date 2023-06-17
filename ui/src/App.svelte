@@ -1,7 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, type AppAgentClient, setSigningCredentials } from '@holochain/client15';
-  import { AppAgentWebsocket } from '@holochain/client';
+  import { AdminWebsocket, AppAgentWebsocket, type AppAgentClient,getSigningCredentials, setSigningCredentials, encodeHashToBase64 } from '@holochain/client15';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
@@ -90,10 +89,10 @@
         error = e.reason
       }
     }
-    let url = ""
+    let url
     if (creds) {
       console.log("CREDS", creds)
-      url = `${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.host}/${creds.appPath}`
+      url = new URL(`${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.host}/${creds.appPath}`)
       client = await AppAgentWebsocket.connect(url, installed_app_id);
       const appInfo = await client.appInfo()
       console.log("appInfo", appInfo)
@@ -101,7 +100,7 @@
       setSigningCredentials(cell_id, creds.creds)
     } else {
       let appPort: string = import.meta.env.VITE_APP_PORT
-      url = `ws://localhost:${appPort}`
+      url = new URL(`ws://localhost:${appPort}`)
       client = await AppAgentWebsocket.connect(url, installed_app_id);
       if (adminPort) {
         const adminWebsocket = await AdminWebsocket.connect(new URL(`ws://localhost:${adminPort}`))
