@@ -112,10 +112,11 @@
     >
       <!-- {#if type== "ProxyAgent"} -->
       {#if hostedSessions.length > 0}
-        <span style="font-weight:strong">Hosting:</span>{hostedSessions.idx}
-        {#each hostedSessions as session, idx}
-          <div style="margin-left:5px"><SessionLink sessionHash={session.original_hash}></SessionLink></div>
-        {/each}
+        <span style="font-weight:strong">Hosting:</span>
+        <div style="margin-left:5px"><SessionLink sessionHash={hostedSessions[0].original_hash}></SessionLink></div>
+        {#if hostedSessions.length > 1}
+          and {hostedSessions.length - 1} other{#if hostedSessions.lenght>2}s{/if}
+        {/if}
       {/if}
 
       <!-- {:else}
