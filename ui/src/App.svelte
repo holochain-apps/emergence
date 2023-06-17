@@ -98,15 +98,17 @@
       const appInfo = await client.appInfo()
       console.log("appInfo", appInfo)
       const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
-      setSigningCredentials(cell_id, creds.creds)
+      await setSigningCredentials(cell_id, creds.creds)
     } else {
       let appPort: string = import.meta.env.VITE_APP_PORT
       url = `ws://localhost:${appPort}`
       client = await AppAgentWebsocket.connect(url, installed_app_id);
+      console.log("Dev mode admin port:", adminPort)
       if (adminPort) {
         const adminWebsocket = await AdminWebsocket.connect(new URL(`ws://localhost:${adminPort}`))
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
+        console.log("credentials set")
       }
     }
   
