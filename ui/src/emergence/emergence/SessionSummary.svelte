@@ -256,7 +256,7 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
 
   .leaders span {
     display: inline-block;
-    opacity: .5;
+    opacity: .8;
     padding-right: 4px;
   }
 
