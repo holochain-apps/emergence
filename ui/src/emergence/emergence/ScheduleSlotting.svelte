@@ -62,6 +62,10 @@
 
 
   onMount(async () => {
+    const currentMap = store.getCurrentSiteMap()
+    if (currentMap && slotTypeFilterSelect) {
+      slotTypeFilterSelect.value = currentMap.record.entry.tags[0]
+    }
     loading = false
   });
 
@@ -315,6 +319,7 @@
   const mergeSession = async () => {
     await store.mergeSessions(mergeA, mergeB )
   }
+  let slotTypeFilterSelect
 </script>
 
 <Confirm 
@@ -350,6 +355,8 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
     ></SessionFilterCtrls>
 
     <sl-select style="margin-right: 5px;width: 200px;"
+    bind:this={slotTypeFilterSelect}
+
     placeholder="Filter by Slot Type"
     on:sl-change={(e) => {slotType = e.target.value 
 
