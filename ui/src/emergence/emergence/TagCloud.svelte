@@ -55,7 +55,7 @@
   {#if $tags.length > 0}
     <div class="cloud">
         {#each words.sort((a,b)=>b.count-a.count) as word}
-        <div class="word"
+        <div class="word num{word.count}"
             class:neonText={selectedTags.find(t=>t.toLocaleLowerCase() == word.text.toLowerCase())}
             on:click={(e)=> {
                 const tag = word.text
@@ -120,7 +120,7 @@
         padding-bottom: 30px;
     }
     .word {
-        font-size: 12px;
+        font-size: 14px;
         padding: 5px 9px;
         border-radius: 25px;
         display: inline-block;
@@ -130,7 +130,12 @@
         background-color: transparent;
         transition: all .25s ease;
         margin-bottom: 0;
-        display: inline;
+        display: block;
+        transform: scale(1.3);
+        margin-left: 20px;
+        opacity: 1;
+        margin-right: 20px;
+        max-height: 40px;
     }
 
     .word:hover {
@@ -141,11 +146,55 @@
         color: #fff;
         background-color: #2F87D8;
         padding: 10px 12px;
-        margin: 7px 10px -4px -3px;
         box-shadow: 0 10px 15px rgba(0,0,0,.25);
     }
 
+    .word.num1 {
+        transform: scale(.6);
+        margin-left: -21px;
+        margin-top: 0;
+        opacity: .8;
+        margin-right: -21px;
+    }
 
+    .word.num2 {
+        margin-top: 3px;
+        transform: scale(.7);
+        margin-left: -12px;
+        opacity: .85;
+        margin-right: -12px;
+    }
+    .word.num3 {
+        transform: scale(.80);
+        margin-left: -5px;
+        opacity: .90;
+        margin-right: -5px;
+    }
+    .word.num4 {
+        transform: scale(.9);
+        margin-left: 0px;
+        opacity: .90;
+        margin-right: 0px;
+    }
+    .word.num5 {
+        transform: scale(1);
+        margin-left: 10px;
+        opacity: .95;
+        margin-right: 10px;
+    }
+    .word.num6 {
+        transform: scale(1.1);
+        margin-left: 10px;
+        opacity: 1;
+        margin-right: 10px;
+    }
+    .word.num7 {
+        transform: scale(1.2);
+        margin-left: 10px;
+        opacity: 1;
+        margin-right: 10px;
+    }
+    
     .neonText .count {
         background-color: white;
         color: #2F87D8;

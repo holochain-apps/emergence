@@ -120,7 +120,9 @@ sl-tab-group {
 
 .pane-header {
     padding-top: 10px;
-    padding-bottom: 30px;
+    padding-bottom: 10px;
+    position: sticky;
+    top: 0;
 }
 
 .pane-content {

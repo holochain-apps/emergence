@@ -62,7 +62,7 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }}>
   {#if showSlot}
     <div class="slot">
-      <div class="slot-wrapper">
+      <div class="slot-wrapper" style={`background-color: ${sessionType.color}40; height: 100%;`}>
         {#if slot}
         <div class="date">
           {new Date(slot.window.start).toLocaleString('en-US', { weekday: 'long' })}
@@ -186,13 +186,13 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }
 
   .time {
-    font-size: 18px;
+    font-size: 16px;
     color: white;
     margin-top: -3px;
     margin-bottom: -3px;
   }
   .date, .space {
-    font-size: 10px;
+    font-size: 9px;
     line-height: 10px;
     font-weight: normal;
     margin-bottom: 0;
@@ -201,16 +201,17 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
   }
   .space {
     overflow: hidden;
-    max-height: 24px;
+    max-height: 20px;
   }
   .slot {
     display: flex;
     align-items: center;
     background: #565E6D;
-    width: 105px;
+    width: 40px;
     text-align: center;
     border-radius: 0;
     color: white;
+    min-width: 55px;
     box-shadow: inset -20px 0 30px rgba(0, 0, 0, .5);
   }
   .slot-wrapper {
@@ -255,7 +256,7 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
 
   .leaders span {
     display: inline-block;
-    opacity: .5;
+    opacity: .8;
     padding-right: 4px;
   }
 
@@ -272,7 +273,7 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
     display: inline;
     border-radius: 7px;
     padding: 5px;
-    margin-right: 5px;
+    margin-right: 2px;
     padding-top: 0px;
     color: white;
     padding-bottom: 0px;
@@ -285,7 +286,16 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
       font-size: 12px;
     }
 
+    .date, .space {
+      font-size: 11px;
+    }
+
+    .time {
+      font-size: 18px;
+    }
+
   .slot {
+    min-width: 70px;
     border-radius: 10px 0 0 10px;
   }
 }

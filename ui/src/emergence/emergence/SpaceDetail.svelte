@@ -249,6 +249,8 @@ let confirmDialog
   .pane-header {
     padding-top: 0px;
     padding-bottom: 10px;
+    position: sticky;
+    top: 0;
   }
 
   .pane-content {

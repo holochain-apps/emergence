@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, AppAgentWebsocket, type AppAgentClient,getSigningCredentials, setSigningCredentials, encodeHashToBase64 } from '@holochain/client15';
+  import { AdminWebsocket, AppAgentWebsocket, type AppAgentClient, setSigningCredentials } from '@holochain/client15';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
