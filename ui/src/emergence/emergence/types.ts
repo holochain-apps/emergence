@@ -563,6 +563,7 @@ export interface InterestData {
 }
 
 export interface Projection {
+  sessionCount: number,
   totalAssesments: number,
   peopleCount: number,
   likelyCount: number,
