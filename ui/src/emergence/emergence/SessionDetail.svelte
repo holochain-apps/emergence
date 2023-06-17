@@ -378,6 +378,7 @@ bind:this={updateSessionDialog}
 
   .call-to-action {
     position: sticky;
+    z-index: 20;
     top: 0;
   }
 
