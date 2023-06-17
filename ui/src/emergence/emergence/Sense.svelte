@@ -16,10 +16,11 @@
   let error: any = undefined;
   let senseIdx = 0
   let sessions
+  let fullDescription = false
 
   $: original = store.sessions
   $: sessions = []
-  $: error, senseIdx;
+  $: error, senseIdx, fullDescription;
   $: session = sessions ? sessions[senseIdx] : undefined
   $: slot = session ? store.getSessionSlot(session) : undefined
 
@@ -113,7 +114,10 @@ let gameActive = false
           {/each}
         </div>
         {#if session.record.entry.description}
-          <div class="description">
+          <div 
+            class="description"
+            class:full-description={fullDescription}
+            on:click={()=>fullDescription = !fullDescription}>
             {@html Marked.parse(session.record.entry.description) }
           </div>
         {/if}
@@ -202,7 +206,14 @@ let gameActive = false
 
   .description {
     max-height: 150px;
+    cursor: pointer;
   }
+  .full-description {
+    max-height: 300px;
+    overflow: auto;
+  }
+
+
   .bg {
     width: 100%;
     height: 30px;
