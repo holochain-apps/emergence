@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { encodeHashToBase64, type ActionHash } from '@holochain/client';
+    import { encodeHashToBase64, type ActionHash } from '@holochain/client15';
     import { storeContext } from '../../contexts';
     import type { EmergenceStore  } from '../../emergence-store';
     import { createEventDispatcher, getContext } from 'svelte';

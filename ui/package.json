@@ -9,7 +9,6 @@
     "package": "rm -f dist.zip && npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
-    "@holochain/client": "^0.12.2",
     "@holochain/client15": "npm:@holochain/client@^0.15.0",
     "@holochain-open-dev/profiles": "^0.14.3",
     "@holochain-open-dev/stores": "^0.4.0",

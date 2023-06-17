@@ -12,7 +12,7 @@ import { defaultSessionsFilter, type SessionsFilter } from './types';
 import { fly } from 'svelte/transition';
 import type { EmergenceStore } from '../../emergence-store';
 import { storeContext } from '../../contexts';
-import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
+import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client15';
   import { calcDays, dayToStr } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();

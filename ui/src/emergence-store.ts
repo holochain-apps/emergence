@@ -6,7 +6,7 @@ import {
     type AgentPubKey,
     decodeHashFromBase64,
     type EntryHash,
-} from '@holochain/client';
+} from '@holochain/client15';
 
 import type { EmergenceClient } from './emergence-client';
 

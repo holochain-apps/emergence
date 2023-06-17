@@ -16,7 +16,7 @@ import SpaceCrud from './SpaceCrud.svelte';
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
 import Avatar from './Avatar.svelte';
-import { encodeHashToBase64,  } from '@holochain/client';
+import { encodeHashToBase64,  } from '@holochain/client15';
 import { slide } from 'svelte/transition';
   import { errorText } from './utils';
 

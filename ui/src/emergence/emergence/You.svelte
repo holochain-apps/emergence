@@ -12,7 +12,7 @@
     import Fa from 'svelte-fa'
     import { faEdit, faPowerOff } from '@fortawesome/free-solid-svg-icons';
 
-    import type {  Record } from '@holochain/client';
+    import type {  Record } from '@holochain/client15';
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import NoteDetail from './NoteDetail.svelte';

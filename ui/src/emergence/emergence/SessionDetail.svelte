@@ -11,7 +11,7 @@ import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
 import { NULL_HASHB64, amenitiesList, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit } from './types';
 
-import { encodeHashToBase64, type ActionHash } from '@holochain/client';
+import { encodeHashToBase64, type ActionHash } from '@holochain/client15';
 import Avatar from './Avatar.svelte';
 import AnyAvatar from './AnyAvatar.svelte';
 import Confirm from './Confirm.svelte';

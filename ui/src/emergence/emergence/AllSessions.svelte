@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/components/option/option.js';
 import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
 
 import { onMount, getContext, createEventDispatcher } from 'svelte';
-import { encodeHashToBase64, type Record } from '@holochain/client';
+import { encodeHashToBase64, type Record } from '@holochain/client15';
 import { storeContext } from '../../contexts';
 import SessionSummary from './SessionSummary.svelte';
 import SessionCrud from './SessionCrud.svelte';

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount, getContext, createEventDispatcher } from 'svelte';
-import type { Record } from '@holochain/client';
+import type { Record } from '@holochain/client15';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
 import Fa from 'svelte-fa';

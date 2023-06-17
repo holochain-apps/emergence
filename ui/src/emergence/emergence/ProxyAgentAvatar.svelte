@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { encodeHashToBase64, type AgentPubKey, type ActionHash } from "@holochain/client";
+  import { encodeHashToBase64, type AgentPubKey, type ActionHash } from "@holochain/client15";
   import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
   import "@holochain-open-dev/elements/dist/elements/holo-identicon.js";
   import { storeContext } from '../../contexts';

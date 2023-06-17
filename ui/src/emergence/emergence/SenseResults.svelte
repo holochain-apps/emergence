@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import type { Record } from '@holochain/client';
+  import type { Record } from '@holochain/client15';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import { type Info, type Session, SessionInterestBit, type Projection } from './types';

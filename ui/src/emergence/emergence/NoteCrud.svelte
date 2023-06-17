@@ -14,7 +14,7 @@ import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
-import { encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client';
+import { encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client15';
 import MultiSelect from 'svelte-multiselect'
 import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
   import { errorText } from './utils';

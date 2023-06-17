@@ -15,7 +15,7 @@ import MultiSelect from 'svelte-multiselect'
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import { encodeHashToBase64, type EntryHash } from '@holochain/client';
+import { encodeHashToBase64, type EntryHash } from '@holochain/client15';
   import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();

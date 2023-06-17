@@ -16,7 +16,7 @@
   import ProxyAgentCrud from "./ProxyAgentCrud.svelte";
   import type { EmergenceStore } from "../../emergence-store";
   import Confirm from "./Confirm.svelte";
-  import { encodeHashToBase64, type ActionHash, type AgentPubKey } from "@holochain/client";
+  import { encodeHashToBase64, type ActionHash, type AgentPubKey } from "@holochain/client15";
   import { slide } from "svelte/transition";
   import SessionSummary from "./SessionSummary.svelte";
   import ProxyAgentAvatar from "./ProxyAgentAvatar.svelte";

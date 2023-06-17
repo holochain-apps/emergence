@@ -9,7 +9,7 @@ import { SessionInterestBit, type SessionInterest } from './types';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
 import {  faBookmark, faCheck, faEllipsis, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
-import type{  ActionHash } from '@holochain/client';
+import type{  ActionHash } from '@holochain/client15';
 import type { Snackbar } from '@material/mwc-snackbar';
 import Fa from 'svelte-fa';
 import { errorText } from './utils';

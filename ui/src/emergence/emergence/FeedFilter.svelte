@@ -12,7 +12,7 @@ import { defaultFeedFilter, type FeedFilter } from './types';
 import { fly } from 'svelte/transition';
 import type { EmergenceStore } from '../../emergence-store';
 import { storeContext } from '../../contexts';
-import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
+import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client15';
 import "@holochain-open-dev/profiles/dist/elements/search-agent.js";
   import Avatar from './Avatar.svelte';
 

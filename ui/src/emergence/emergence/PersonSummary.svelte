@@ -10,7 +10,7 @@
   import type { Snackbar } from "@material/mwc-snackbar";
   import "@material/mwc-snackbar";
   import type { EmergenceStore } from "../../emergence-store";
-  import { encodeHashToBase64 } from "@holochain/client";
+  import { encodeHashToBase64 } from "@holochain/client15";
   import Fa from "svelte-fa";
   import { faInfoCircle } from "@fortawesome/free-solid-svg-icons";
   import SessionLink from "./SessionLink.svelte";
