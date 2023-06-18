@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import { type Record, encodeHashToBase64 } from '@holochain/client15';
+  import { type Record, encodeHashToBase64, type ActionHash } from '@holochain/client15';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import { sessionTags, type Info, type Session, SessionInterestBit } from './types';
@@ -28,6 +28,8 @@
   const SESSIONS_TO_ASSESS = 20
   $: count = 0
 
+  let swipes: Array<[ActionHash, SessionInterestBit]> = []
+
   onMount(async () => {
     const filteredSessions = $original.filter(s=>{
       const relData = store.getSessionReleationData(s)
@@ -42,8 +44,12 @@
   });
 
   const swipe = (interest: SessionInterestBit) => {
-    store.setSessionInterest(session.record.actionHash, interest)
+    //store.setSessionInterest(session.record.actionHash, interest)
+    swipes.push([session.original_hash,interest])
     senseIdx += 1
+    if (count - senseIdx  == 0) {
+      store.setSessionInterests(swipes)
+    }
   }
 
   const shuffle = (sessions: Array<Info<Session>>) => {

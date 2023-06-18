@@ -764,6 +764,35 @@ export class EmergenceStore {
         ])
     }
   }
+
+  async setSessionInterests(interests: Array<[ActionHash, SessionInterestBit]>) {
+    console.log("Setting Sense", interests)
+    const me = decodeHashFromBase64(setCharAt(this.myPubKeyBase64,3,'E'))
+    const relations = interests.map(([sessionHash, interest])=> {
+        return {   src: sessionHash,
+            dst: me,
+            content:  {
+                path: "session.interest",
+                data: JSON.stringify(interest)
+            }
+        }}
+    )
+
+    // if (FULL_FEED) {
+    //     relations.push(
+    //     {   src: sessionHash, // should be agent key
+    //         dst: sessionHash,
+    //         content:  {
+    //             path: `feed.${FeedType.SessionSetInterest}`,
+    //             data: JSON.stringify(interest)
+    //         }
+    //     })
+    // }
+    await this.client.createRelations(relations)
+    this.fetchSessions()
+  }
+
+
   async setSessionInterest(sessionHash: ActionHash, interest: SessionInterest) {
 
     const me = decodeHashFromBase64(setCharAt(this.myPubKeyBase64,3,'E'))
