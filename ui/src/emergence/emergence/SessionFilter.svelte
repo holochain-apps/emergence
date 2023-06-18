@@ -60,17 +60,13 @@
     style="background-color:white;justify-content: space-between;border-bottom: 1px solid;"
   >
     <h3>Filters</h3>
-    <div style="display: flex; flex-direction: row; margin-bottom: 16px; ">
-      <sl-button
-        style="align-self:flex-end; margin-left: 8px; "
-        on:click={() => {
+    <div style="display: flex; flex-direction: row; margin-bottom: 16px; align-items:center;">
+      
+      <div style="font-size:95%; margin-left: 8px; " class="pill-button"  on:click={() => {
           filter = defaultSessionsFilter();
           dispatch("update-filter", filter);
-        }}
-        circle
-      >
-        <Fa icon={faArrowRotateBack} />
-      </sl-button>
+      }} >Clear Filters</div>
+      
       <sl-button
         style="margin-left: 8px; "
         on:click={() => {
