@@ -10,10 +10,11 @@
   },
   "dependencies": {
     "@holochain/client15": "npm:@holochain/client@^0.15.0",
-    "@holochain-open-dev/profiles": "^0.14.3",
+    "@holochain-open-dev/profiles": "^0.15.0",
+    "@holochain-open-dev/elements": "^0.6.0",
     "@holochain-open-dev/stores": "^0.4.0",
     "@holochain-open-dev/utils": "^0.12.2",
-    "@holochain-open-dev/file-storage": "0.4.3",
+    "@holochain-open-dev/file-storage": "0.5.0",
     "@scoped-elements/dropzone": "0.2.6",
     "@shoelace-style/shoelace": "^2.3.0",
     "@material/mwc-snackbar": "^0.27.0",
