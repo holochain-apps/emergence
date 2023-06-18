@@ -13,6 +13,7 @@
     import '@shoelace-style/shoelace/dist/components/option/option.js';
     import SenseResults from "./SenseResults.svelte";
     import type { HoloHashMap } from "@holochain-open-dev/utils";
+  import { toPromise } from "@holochain-open-dev/stores";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -105,6 +106,15 @@
             proxyAgents.push(proxyAgentEntry)
         }
 
+        const agents = []
+        for (const [agentKey, profile] of await toPromise(store.profilesStore.allProfiles)) { 
+            agents.push({
+                pubKey: encodeHashToBase64(agentKey), 
+                nickname:profile.nickname, 
+                bio: profile.fields.bio, 
+                location:profile.fields.location})
+        }
+
         exportJSON= JSON.stringify(
             {
                 spaces,
@@ -112,6 +122,7 @@
                 notes,
                 windows: get(store.timeWindows),
                 maps,
+                agents,
                 proxyAgents
             }
         )
@@ -236,7 +247,7 @@
         }
         await store.sync(undefined)
     }
-
+$: allProfiles =  store.profilesStore.allProfiles
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
 
@@ -249,6 +260,7 @@
     </div>
   </div>
 <div class="pane-content">
+
     <div class="admin-controls">
         <!-- <sl-button style="margin: 8px;"  on:click={async () => { throw("error!")} }>
             Error!
@@ -304,8 +316,12 @@
     {/if}
 
     </div>
-
+  
     <div class="game-status">
+        {#if $allProfiles.status == "complete"}
+        <h3>Total Attendees: {$allProfiles.value.size}</h3>
+        {/if}
+
         <h3> Sensemaking game is {#if $settings.game_active}Active{:else}Inactive{/if}</h3>
         <SenseResults></SenseResults>
     </div>
