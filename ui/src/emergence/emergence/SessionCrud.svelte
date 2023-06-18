@@ -58,8 +58,8 @@ export const open = (ses) => {
   }
   if (sesTypeSelect)
     sesTypeSelect.value = sesType
-  console.log("SLOT", slot)
   slotSelect.setSlot(slot)
+  dialogShow = true
   dialog.show()
 }
 let slotSelect
@@ -144,11 +144,16 @@ function deleteLeader(index: number) {
   leaders = leaders
 }
 let dialog
-
+let titleInput
+let dialogShow
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
 <sl-dialog
+  on:sl-after-show={()=> {if (dialogShow) {
+    titleInput.focus();
+    dialogShow = false;
+  }}}
   on:sl-request-close={(event)=>{
     if (event.detail.source === 'overlay') {
       event.preventDefault();    
@@ -179,6 +184,7 @@ let dialog
   {/if}
   <div id="title-textfield" style="margin-bottom: 16px">
     <sl-input
+      bind:this={titleInput}
       label=Title
       autocomplete="off"
       maxlength={60}
