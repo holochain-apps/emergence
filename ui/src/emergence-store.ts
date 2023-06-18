@@ -35,6 +35,7 @@ Marked.setOptions
 
 TimeAgo.addDefaultLocale(en)
 const LIKELY_TO_ATTEND_PERCENT = .8
+const FULL_FEED = false
 
 class HolochainError extends Error {
     constructor(name: string, message: string) {
@@ -436,14 +437,19 @@ export class EmergenceStore {
                 data: ""
             }
         },
-        {   src: sessionHash, // should be agent key
-            dst: sessionHash,
-            content:  {
-                path: `feed.${FeedType.SlotSession}`,
-                data: JSON.stringify({space:undefined, window: undefined})
-            }
-        },
     ]
+    if (FULL_FEED) {
+        relations.push(        
+            {   src: sessionHash, // should be agent key
+                dst: sessionHash,
+                content:  {
+                    path: `feed.${FeedType.SlotSession}`,
+                    data: JSON.stringify({space:undefined, window: undefined})
+                }
+            },
+        )
+    }
+
     if (sessionSlot.space) {
         relations.push(        
             {   src: sessionSlot.space,
@@ -472,14 +478,19 @@ export class EmergenceStore {
                 data: JSON.stringify(slot.window)
             }
         },
-        {   src: session, // should be agent key
-            dst: session,
-            content:  {
-                path: `feed.${FeedType.SlotSession}`,
-                data: JSON.stringify({space:space ? space.record.entry.name : "<none>", window: slot.window})
-            }
-        },
     ]
+
+    if (FULL_FEED) {
+        relations.push(        
+            {   src: session, // should be agent key
+                dst: session,
+                content:  {
+                    path: `feed.${FeedType.SlotSession}`,
+                    data: JSON.stringify({space:space ? space.record.entry.name : "<none>", window: slot.window})
+                }
+            },
+        )
+    }
     if (space) {
         relations.push({   src: slot.space,
             dst: session,
@@ -505,15 +516,16 @@ export class EmergenceStore {
         tags,
       };
     const actionHash = await this.client.createTimeWindow(timeWindow)
-    await this.client.createRelations([
-        {   src: actionHash, // should be agent key
-            dst: actionHash,
-            content:  {
-                path: `feed.${FeedType.TimeWindowNew}`,
-                data: JSON.stringify(timeWindow)
-            }
-        },
-    ])
+    if (FULL_FEED)
+        await this.client.createRelations([
+            {   src: actionHash, // should be agent key
+                dst: actionHash,
+                content:  {
+                    path: `feed.${FeedType.TimeWindowNew}`,
+                    data: JSON.stringify(timeWindow)
+                }
+            },
+        ])
     this.fetchTimeWindows()
     return actionHash
   }
@@ -694,15 +706,16 @@ export class EmergenceStore {
 
         if (changes.length > 0) {
             const record = await this.client.updateSession(update)
-            relations.push(
-                {   src: record.actionHash, // should be agent key
-                    dst: record.actionHash,
-                    content:  {
-                        path: `feed.${FeedType.SessionUpdate}`,
-                        data: JSON.stringify({title: sessionEntry.title, changes})
-                    }
-                },
-            )
+            if (FULL_FEED)
+                relations.push(
+                    {   src: record.actionHash, // should be agent key
+                        dst: record.actionHash,
+                        content:  {
+                            path: `feed.${FeedType.SessionUpdate}`,
+                            data: JSON.stringify({title: sessionEntry.title, changes})
+                        }
+                    },
+                )
             await this.client.createRelations(relations)
             if (relationsToDelete.length>0) {
                 await this.client.deleteRelations(relationsToDelete)
@@ -754,22 +767,27 @@ export class EmergenceStore {
   async setSessionInterest(sessionHash: ActionHash, interest: SessionInterest) {
 
     const me = decodeHashFromBase64(setCharAt(this.myPubKeyBase64,3,'E'))
-    await this.client.createRelations([
-        {   src: sessionHash,
-            dst: me,
-            content:  {
-                path: "session.interest",
-                data: JSON.stringify(interest)
-            }
-        },
+    const relations =
+        [
+            {   src: sessionHash,
+                dst: me,
+                content:  {
+                    path: "session.interest",
+                    data: JSON.stringify(interest)
+                }
+            },
+        ]        
+    if (FULL_FEED) {
+        relations.push(
         {   src: sessionHash, // should be agent key
             dst: sessionHash,
             content:  {
                 path: `feed.${FeedType.SessionSetInterest}`,
                 data: JSON.stringify(interest)
             }
-        },
-    ])
+        })
+    }
+    await this.client.createRelations(relations)
     this.fetchSession([sessionHash])
   }
 
@@ -1153,7 +1171,7 @@ export class EmergenceStore {
 
   async createSpace(key:string, name: string, description: string, stewards:Array<AgentPubKey>, capacity: number, amenities: number, tags: Array<string>, pic: EntryHash | undefined, siteLocation: undefined | SiteLocation): Promise<EntryRecord<Space>> {
     const record = await this.client.createSpace(key, name, description, stewards, capacity, amenities, tags, pic)
-    const relations = [
+    const relations = FULL_FEED ? [
         {   src: record.actionHash, // should be agent key
             dst: record.actionHash,
             content:  {
@@ -1161,7 +1179,7 @@ export class EmergenceStore {
                 data: JSON.stringify(name)
             }
         },
-    ]
+    ] : []
     if (siteLocation) {
         relations.push({   
             src: record.actionHash,
@@ -1264,7 +1282,7 @@ export class EmergenceStore {
         }
         if (changes.length > 0) {
             const record = await this.client.updateSpace(update)
-            const relations = [
+            const relations = FULL_FEED ? [
                 {   src: record.actionHash, // should be agent key
                     dst: record.actionHash,
                     content:  {
@@ -1272,7 +1290,7 @@ export class EmergenceStore {
                         data: JSON.stringify({name: spaceEntry.name, changes})
                     }
                 },
-            ]
+            ] : []
             if (location) {
                 relations.push({   
                     src: space.original_hash,
@@ -1314,15 +1332,16 @@ export class EmergenceStore {
             spaces.splice(idx, 1);
             return spaces
         })
-        this.client.createRelations([
-            {   src: space.original_hash, // should be agent key
-                dst: space.original_hash,
-                content:  {
-                    path: `feed.${FeedType.SpaceDelete}`,
-                    data: JSON.stringify(space.record.entry.name)
-                }
-            },
-        ])
+        if (FULL_FEED)
+            this.client.createRelations([
+                {   src: space.original_hash, // should be agent key
+                    dst: space.original_hash,
+                    content:  {
+                        path: `feed.${FeedType.SpaceDelete}`,
+                        data: JSON.stringify(space.record.entry.name)
+                    }
+                },
+            ])
     }
   }
 
@@ -1336,14 +1355,18 @@ export class EmergenceStore {
                 data: ""
             }
         },
-        {   src: record.actionHash, // should be agent key
-            dst: record.actionHash,
-            content:  {
-                path: `feed.${FeedType.NoteNew}`,
-                data: JSON.stringify("")
-            }
-        },
     ]
+    if (FULL_FEED) {
+        relations.push(        
+            {   src: record.actionHash, // should be agent key
+                dst: record.actionHash,
+                content:  {
+                    path: `feed.${FeedType.NoteNew}`,
+                    data: JSON.stringify("")
+                }
+            }
+        )
+    }
     tags.forEach(tag=>relations.push(
         {   src: sessionHash,
             dst: record.actionHash,
@@ -1389,6 +1412,7 @@ export class EmergenceStore {
         }
         if (changes.length > 0) {
             const record = await this.client.updateNote(updatedNote)
+            if (FULL_FEED)
             this.client.createRelations([
                 {   src: record.actionHash, // should be agent key
                     dst: record.actionHash,
@@ -1437,6 +1461,7 @@ export class EmergenceStore {
             await this.client.deleteRelations(relations)
             this.fetchSession([session.original_hash])
         }
+        if (FULL_FEED)
         this.client.createRelations([
             {   src: record.actionHash, // should be agent key
                 dst: record.actionHash,
@@ -1451,16 +1476,18 @@ export class EmergenceStore {
 
   async createSiteMap(text: string, pic: EntryHash, tags: Array<string>): Promise<EntryRecord<SiteMap>> {
     const record = await this.client.createSiteMap(text, pic, tags)
-    const relations = [
-        {   src: record.actionHash, // should be agent key
-            dst: record.actionHash,
-            content:  {
-                path: `feed.${FeedType.SiteMapNew}`,
-                data: JSON.stringify("")
-            }
-        },
-    ]
-    await this.client.createRelations(relations)
+    if (FULL_FEED) {
+        const relations = [
+            {   src: record.actionHash, // should be agent key
+                dst: record.actionHash,
+                content:  {
+                    path: `feed.${FeedType.SiteMapNew}`,
+                    data: JSON.stringify("")
+                }
+            },
+        ]
+        await this.client.createRelations(relations)
+    }
     this.fetchSiteMaps()
     return record
   }
@@ -1489,6 +1516,7 @@ export class EmergenceStore {
         }
         if (changes.length > 0) {
             const record = await this.client.updateSiteMap(updatedSiteMap)
+            if (FULL_FEED)
             this.client.createRelations([
                 {   src: record.actionHash, // should be agent key
                     dst: record.actionHash,
@@ -1521,15 +1549,16 @@ export class EmergenceStore {
             maps.splice(idx, 1);
             return maps
         })
-        this.client.createRelations([
-            {   src: map.original_hash, // should be agent key
-                dst: map.original_hash,
-                content:  {
-                    path: `feed.${FeedType.SiteMapDelete}`,
-                    data: JSON.stringify("")
-                }
-            },
-        ])
+        if (FULL_FEED)
+            this.client.createRelations([
+                {   src: map.original_hash, // should be agent key
+                    dst: map.original_hash,
+                    content:  {
+                        path: `feed.${FeedType.SiteMapDelete}`,
+                        data: JSON.stringify("")
+                    }
+                },
+            ])
     }
   }
 
@@ -1547,16 +1576,18 @@ export class EmergenceStore {
 
   async createProxyAgent(nickname: string, bio: string, location: string,  pic: EntryHash | undefined): Promise<EntryRecord<ProxyAgent>> {
     const record = await this.client.createProxyAgent(nickname, bio, location, pic)
-    const relations = [
-        {   src: record.actionHash, // should be agent key
-            dst: record.actionHash,
-            content:  {
-                path: `feed.${FeedType.ProxyAgentNew}`,
-                data: JSON.stringify(nickname)
-            }
-        },
-    ]
-    await this.client.createRelations(relations)
+    if (FULL_FEED) {
+        const relations = [
+            {   src: record.actionHash, // should be agent key
+                dst: record.actionHash,
+                content:  {
+                    path: `feed.${FeedType.ProxyAgentNew}`,
+                    data: JSON.stringify(nickname)
+                }
+            },
+        ]
+        await this.client.createRelations(relations)
+    }
     this.fetchProxyAgents()
     return record
   }
@@ -1592,15 +1623,16 @@ export class EmergenceStore {
         }
         if (changes.length > 0) {
             const record = await this.client.updateProxyAgent(updatedProxyAgent)
-            this.client.createRelations([
-                {   src: record.actionHash, // should be agent key
-                    dst: record.actionHash,
-                    content:  {
-                        path: `feed.${FeedType.ProxyAgentUpdate}`,
-                        data: JSON.stringify({changes})
-                    }
-                },
-            ])
+            if (FULL_FEED)
+                this.client.createRelations([
+                    {   src: record.actionHash, // should be agent key
+                        dst: record.actionHash,
+                        content:  {
+                            path: `feed.${FeedType.ProxyAgentUpdate}`,
+                            data: JSON.stringify({changes})
+                        }
+                    },
+                ])
             this.proxyAgents.update((agents) => {
                 agents[idx].record = record
                 return agents
@@ -1624,15 +1656,16 @@ export class EmergenceStore {
             agents.splice(idx, 1);
             return agents
         })
-        this.client.createRelations([
-            {   src: agent.original_hash, // should be agent key
-                dst: agent.original_hash,
-                content:  {
-                    path: `feed.${FeedType.ProxyAgentDelete}`,
-                    data: JSON.stringify("")
-                }
-            },
-        ])
+        if (FULL_FEED)
+            this.client.createRelations([
+                {   src: agent.original_hash, // should be agent key
+                    dst: agent.original_hash,
+                    content:  {
+                        path: `feed.${FeedType.ProxyAgentDelete}`,
+                        data: JSON.stringify("")
+                    }
+                },
+            ])
     }
   }
 

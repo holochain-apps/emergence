@@ -77,9 +77,7 @@ on:session-created={() => {} }
 
 <div class="pane-header">
   <div class="header-content">
-    {#if $uiProps.amSteward || (store.getCurrentSiteMap() && store.getCurrentSiteMap().record.entry.tags.includes("emergent"))}
     <div id="create-button" class="pill-button"  on:click={() => {createSessionDialog.open(undefined)} } ><span>+</span> Create</div>
-    {/if}
       <div class="section-controls">
         <div class="center-row search-bar">
           <sl-button class="search-icon"  
