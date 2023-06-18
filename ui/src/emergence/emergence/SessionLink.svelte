@@ -23,7 +23,7 @@
     if (session) {
       return session.record.entry.title
     }
-    return "<deleted session>"
+    return "<unknown session>"
   }
 </script>
 

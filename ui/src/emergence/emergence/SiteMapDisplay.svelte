@@ -254,8 +254,8 @@ on:space-created={() => {} }
     padding-top: 3px;
     font-weight: normal;
     cursor: pointer;
-    background: linear-gradient(129.46deg, #4ED27A 8.45%, #00FFC2 93.81%);
-    box-shadow: 0 5px 5px rgba(0,0,0,.2);
+    background: linear-gradient(129.46deg, #2F87D8 30%, #00D1FF 90%);
+    box-shadow: 0 5px 5px rgba(0,0,0,.3);
 }
 
 .details {

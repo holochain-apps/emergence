@@ -75,7 +75,7 @@ let gameActive = false
   >
   <h3>Today is Tomorrow</h3>
   <strong>{peopleCount} people proposed {$original.filter(s=>s.record.entry.session_type==0 && !s.record.entry.trashed).length} sessions for Tomorrow!</strong>
-  <p>Help figure out what gets scheduled where by quickly setting your interest on proposed sessions. Sessions with most interest will get scheduled first.</p>
+  <p>Help figure out what gets scheduled where by quickly setting your interest on proposed sessions. Sessions with most interest will get scheduled in larger venues.</p>
   <div class="begin-button"  on:click={() => { instructionsVisible = false; gameActive = true  }}>Begin</div>
 </div>
 <div class="sense">
