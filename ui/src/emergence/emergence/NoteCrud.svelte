@@ -154,7 +154,7 @@ $: acting
   </div>
 
   <div style="display: flex; flex-direction: row; align-items:center">
-    {#if acting}<div style="margin-right:10px"> <Fa icon={faSync}></Fa></div>{/if}
+    {#if acting}<div class="spinning" style="margin-right:10px"> <Fa icon={faSync}></Fa></div>{/if}
     {#if note}
       <div id="cancel-button">
         <sl-button
@@ -230,7 +230,7 @@ $: acting
         }}
       ></upload-files>
       <div style="display:flex;flex-direction: row; align-items:center">
-        {#if acting}<div style="margin-right:10px"> <Fa icon={faSync}></Fa></div>{/if}
+        {#if acting}<div class="spinning" style="margin-right:10px"> <Fa icon={faSync}></Fa></div>{/if}
       {#if note}
           <div style="display: flex; flex-direction: row">
             <div id="cancel-button">
@@ -244,7 +244,7 @@ $: acting
               <sl-button 
               style="flex: 1;"
               on:click={() => updateNote()}
-              disabled={!isNoteValid}
+              disabled={!isNoteValid || acting}
               variant=primary>Save</sl-button>
             </div>
           </div>
@@ -253,7 +253,7 @@ $: acting
             <sl-button 
               style="flex: 1;"
               on:click={() => createNote()}
-              disabled={!isNoteValid}
+              disabled={!isNoteValid || acting}
               variant=primary>Create Note</sl-button>
             </div>
         {/if}
