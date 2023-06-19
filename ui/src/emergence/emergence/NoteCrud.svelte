@@ -17,7 +17,10 @@ import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/c
 import { encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client15';
 import MultiSelect from 'svelte-multiselect'
 import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
-  import { errorText } from './utils';
+import { errorText } from './utils';
+import Fa from 'svelte-fa';
+import {faSync } from '@fortawesome/free-solid-svg-icons';
+
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -72,8 +75,9 @@ export const clear = () =>{
 async function updateNote() {
   if (note) {
     const pic = uploadFiles.value
-
+    acting = true
     const updateRecord = await store.updateNote(note.original_hash, text, tags, pic)
+    acting = false
     if (updateRecord) {
       dispatch('note-updated', { actionHash: updateRecord.actionHash });
     } 
@@ -85,10 +89,12 @@ async function updateNote() {
 async function createNote() {  
   try {
     const pic = uploadFiles.value
-
+    acting = true
     const record = await store.createNote(sessionHash, text, tags, pic)
+    acting = false
     dispatch('note-created', { note: record });
   } catch (e) {
+    acting = false
     console.log("CREATE NOTE ERROR", e)
     errorSnackbar.labelText = `Error creating the note: ${errorText(e)}`;
     errorSnackbar.show();
@@ -99,6 +105,8 @@ async function createNote() {
 }
 
 let dialog
+let acting = false
+$: acting
 
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -145,8 +153,9 @@ let dialog
   ></upload-files>
   </div>
 
-  {#if note}
-    <div style="display: flex; flex-direction: row">
+  <div style="display: flex; flex-direction: row; align-items:center">
+    {#if acting}<div style="margin-right:10px"> <Fa icon={faSync}></Fa></div>{/if}
+    {#if note}
       <div id="cancel-button">
         <sl-button
         id="cancel-button"
@@ -159,24 +168,22 @@ let dialog
         <sl-button 
           style="flex: 1;"
           on:click={() => updateNote()}
-          disabled={!isNoteValid}
+          disabled={!isNoteValid|| acting}
           variant=primary>Save</sl-button>
       </div>
-    </div>
-  {:else}
-  <div style="display: flex; flex-direction: row">
-    <sl-button
-    id="cancel-button"
-    label="Cancel"
-    on:click={() => dialog.hide()}
-    style="flex: 1; margin-right: 16px"
-    >Cancel</sl-button>
-    <sl-button 
-    on:click={() => createNote()}
-    disabled={!isNoteValid}
-    variant=primary>Create Note</sl-button>
-    </div>
-  {/if}
+    {:else}
+      <sl-button
+      id="cancel-button"
+      label="Cancel"
+      on:click={() => dialog.hide()}
+      style="flex: 1; margin-right: 16px"
+      >Cancel</sl-button>
+      <sl-button 
+      on:click={() => createNote()}
+      disabled={!isNoteValid || acting}
+      variant=primary>Create Note</sl-button>
+    {/if}
+  </div>
 
 </div>
 </sl-dialog>
@@ -222,7 +229,8 @@ let dialog
           pic = e.detail.file.hash;
         }}
       ></upload-files>
-      <div>
+      <div style="display:flex;flex-direction: row; align-items:center">
+        {#if acting}<div style="margin-right:10px"> <Fa icon={faSync}></Fa></div>{/if}
       {#if note}
           <div style="display: flex; flex-direction: row">
             <div id="cancel-button">
@@ -247,7 +255,7 @@ let dialog
               on:click={() => createNote()}
               disabled={!isNoteValid}
               variant=primary>Create Note</sl-button>
-          </div>
+            </div>
         {/if}
       </div>
 

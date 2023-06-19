@@ -9,7 +9,7 @@
   import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
-  import { faMap, faUser, faGear, faCalendar, faPlus, faHome, faSync, faArrowRightFromBracket, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons';
+  import { faMap, faUser, faGear, faCalendar, faHome, faSync, faArrowRightFromBracket, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons';
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
