@@ -129,12 +129,7 @@
           </div>
         </div>
       {/if}
-      <div class="pill-button" style="display: flex; width: 75px; margin-left:20px" on:click={() => {
-        slot = undefined
-        updateSelects()
-        }} >
-        Reset
-      </div>
+
     </div>
     <sl-select bind:this={spaceSelect}
       style="width:320px;"
@@ -150,3 +145,11 @@
   </div>
 
 </div>
+<style>
+  sl-select::part(form-control-label){
+    text-transform: uppercase;
+    font-weight: normal;
+    font-size: 12px;
+    opacity: .7;
+  }
+</style>

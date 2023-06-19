@@ -16,7 +16,7 @@ import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
 import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile, type SessionType, type SessionTypeID, NULL_HASHB64, NULL_HASH, SessionListMode, type GetFeedInput } from './emergence/emergence/types.js';
-import type { AsyncReadable, AsyncStatus } from '@holochain-open-dev/stores';
+import { toPromise, type AsyncReadable, type AsyncStatus } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
 import { elapsed, filterTime, sessionHasTags } from './emergence/emergence/utils.js';
@@ -103,6 +103,7 @@ export class EmergenceStore {
   agentNotes: Writable<HoloHashMap<AgentPubKey, Array<ActionHash>>> = writable(new HoloHashMap())
   agentSessions: Writable<HoloHashMap<AgentPubKey,HoloHashMap<ActionHash,SessionInterest>>> = writable(new HoloHashMap())
   files: HoloHashMap<AgentPubKey,DownloadedFile> = new HoloHashMap()
+  proxyAgentNicknames: HoloHashMap<ActionHash, string> = new HoloHashMap()
   neededStuff: GetStuffInput = {}
   myPubKeyBase64: string
   loader = undefined
@@ -764,12 +765,21 @@ export class EmergenceStore {
     this.fetchSession([sessionHash])
   }
 
-  sessionInterestProjection(sessions: Array<Info<Session>>) : Projection  {
+  async fetchAgents() {
+    toPromise(this.profilesStore.allProfiles)
+  }
+
+  peopleCount() : number {
     const allProfiles = get(this.profilesStore.allProfiles)
     const peopleCount = allProfiles.status=== "complete" ? Array.from(allProfiles.value.keys()).length : 0
+    return peopleCount
+  }
+
+  sessionInterestProjection(sessions: Array<Info<Session>>) : Projection  {
+    const peopleCount = this.peopleCount()
 
     let totalAssesments = 0
-    let interestData = sessions.filter(s=> (!s.record.entry.trashed)).map(session=>{
+    let interestData = sessions.filter(s=> (s.record.entry.session_type==0 && !s.record.entry.trashed)).map(session=>{
         const relData = this.getSessionReleationData(session)
         const interests = Array.from(relData.interest)
         const assesments = interests.length
@@ -793,6 +803,7 @@ export class EmergenceStore {
     }).sort((a,b)=>b.estimatedAttendance- a.estimatedAttendance)
     const est = interestData.map(p=>p.estimatedAttendance)
     return {
+        sessionCount: interestData.length,
         totalAssesments,
         peopleCount,
         likelyCount,
@@ -1025,6 +1036,23 @@ export class EmergenceStore {
       }
     return []
   }
+
+  sessionLeaderNameIncludes = (session:Info<Session>, word:string):boolean => {
+    for (const l of session.record.entry.leaders) {
+        if (l.type=="ProxyAgent") {
+            const nick = this.proxyAgentNicknames.get(l.hash)
+            if (nick && nick.toLowerCase().search(word) >= 0) return true
+        } else {
+            const profile = get(this.profilesStore.profiles.get(l.hash))
+            if (profile.status === "complete"  && profile.value) {
+                const nick = profile.value.nickname
+                if (nick && nick.toLowerCase().search(word) >= 0) return true
+            }
+
+        }
+    }
+    return false
+  }
   
 
   filterSession(session:Info<Session>, filter: SessionsFilter) : boolean {
@@ -1058,7 +1086,9 @@ export class EmergenceStore {
     if (filter.keyword) {
         const word = filter.keyword.toLowerCase() 
         if (session.record.entry.description.toLowerCase().search(word) < 0 &&
-            session.record.entry.title.toLowerCase().search(word) < 0)
+            session.record.entry.title.toLowerCase().search(word) < 0  &&
+            !this.sessionLeaderNameIncludes(session, word)
+            )
             return false
     }
     if (filter.space.length>0) {
@@ -1514,7 +1544,7 @@ export class EmergenceStore {
             dst: record.actionHash,
             content:  {
                 path: `feed.${FeedType.ProxyAgentNew}`,
-                data: JSON.stringify("nickname")
+                data: JSON.stringify(nickname)
             }
         },
     ]
@@ -1603,6 +1633,7 @@ export class EmergenceStore {
     try {
         const proxyAgents = await this.client.getProxyAgents()
         this.proxyAgents.update((n) => {return proxyAgents} )
+        proxyAgents.forEach(p=>this.proxyAgentNicknames.set(p.original_hash,p.record.entry.nickname))
     }
     catch (e) {
         console.log("Error fetching sitemaps", e)
@@ -1770,6 +1801,8 @@ export class EmergenceStore {
   }
   async sync(agent: AgentPubKey | undefined) {
     this.setUIprops({syncing: get(this.uiProps).syncing+1})
+    await this.fetchAgents()
+
     const starTime = performance.now()
     console.log("start sync");
     await this.getSettings()

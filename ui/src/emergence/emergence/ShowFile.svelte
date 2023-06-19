@@ -34,7 +34,7 @@
         {#if file}
         <div >
             {#if file.file.type.startsWith("image/")}
-                <img style="width:100%" bind:this={img} src="data:{file.file.type};base64,{file.data}">
+                <img style="width:100%; border-radius: 5px; box-shadow: 0px 5px 8px rgba(0,0,0,.25);" bind:this={img} src="data:{file.file.type};base64,{file.data}">
             {:else if file.file.type.startsWith("video/")}
                 <video style="width:100%" src="data:{file.file.type};base64,{file.data}" controls></video>
             {:else if file.file.type.startsWith("audio/")}
@@ -46,7 +46,6 @@
             {/if}
         </div>
         {/if}
-        {showFile()}
     </div>
 {/if}
 <style>

@@ -84,7 +84,7 @@
                         ></sl-input>
                       </div> 
               
-                    <sl-button style="box-shadow: none; height: 30px; width: 80px" size=small on:click={() => { showFilter = !showFilter } } >
+                    <sl-button class="filter" on:click={() => { showFilter = !showFilter } } >
                         <Fa icon={faFilter} /> Filter
                     </sl-button>
                 </div>
@@ -117,16 +117,6 @@
         --track-color: white;
         max-width: 100%;
     }
-    
-    .discover.section-controls {
-        justify-content: space-between;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        flex-wrap: wrap;
-        padding-bottom: 15px;
-    }
-
     sl-tab[aria-selected="true"] {
         border: 1px solid red;
     }
@@ -140,6 +130,33 @@
         color: white;
         background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
     }
+
+    sl-tab-group::part(nav) {
+    background: linear-gradient(180deg, rgba(86, 94, 109, 0.05) 0%, rgba(86, 94, 109, 0.26) 100%);
+    border-bottom: none;
+    }
+
+    .section-controls sl-button.filter {
+        width: auto;
+        height: auto;
+        box-shadow: none;
+    }
+
+    .section-controls sl-button.filter::part(base) {
+        box-shadow: none;
+        height: 35px;
+        width: 80px
+    }
+
+    .discover.section-controls {
+        justify-content: space-between;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        padding-bottom: 15px;
+    }
+
     .search-bar {
         max-width: 720px;
         margin: 0 10px 0 0;
@@ -151,13 +168,6 @@
   .search-icon {
     margin-right: 5px;
   }
-
-  sl-tab-group::part(nav) {
-    background: linear-gradient(180deg, rgba(86, 94, 109, 0.05) 0%, rgba(86, 94, 109, 0.26) 100%);
-    border-bottom: none;
-  }
-
-
 @media (min-width: 720px) {
     .pane-content {
         padding-top: 50px;

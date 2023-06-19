@@ -284,7 +284,7 @@ bind:this={updateSessionDialog}
   .leaders {
     position: relative;
     top: -10px;
-    opacity: .6;
+    opacity: .8;
     font-size: 12px;
     display: inline-flex;
     align-items: center;
@@ -295,12 +295,16 @@ bind:this={updateSessionDialog}
   }
   .description {
     padding-bottom: 8px;
-  }
-  .tags {
-    display: block;
-    padding-top: 8px;
+    overflow: hidden;
   }
 
+  .description pre {
+    overflow: scroll;
+  }
+
+  .description p {
+    margin-bottom: 10px;
+  }
   .timeslot {
     display: inline-block;
     padding: 5px 10px;
@@ -314,6 +318,12 @@ bind:this={updateSessionDialog}
     top: -31px;
     left: 0;
   }
+
+  .tags {
+    display: block;
+    padding-top: 8px;
+  }
+
   .tag {
     display: inline;
     border: 1px solid #2F87D840;
@@ -368,6 +378,7 @@ bind:this={updateSessionDialog}
 
   .call-to-action {
     position: sticky;
+    z-index: 20;
     top: 0;
   }
 
@@ -377,6 +388,8 @@ bind:this={updateSessionDialog}
 
   .pane-header {
     padding-top: 20px;
+    position: sticky;
+    top: -10px;
   }
 
   .pane-header h2 {

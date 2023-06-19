@@ -33,9 +33,10 @@ onMount(() => {
   <div class="center-row" style="  justify-content: space-between;border-bottom: 1px solid;">
     <h3>Filters</h3>
     <div class="center-row">
-      <sl-button style="align-self:flex-end; margin-left: 8px; " on:click={() => { filter = defaultFeedFilter(); dispatch('update-filter', filter) } } circle>
-        <Fa icon={faArrowRotateBack} />
-      </sl-button>
+      <div style="font-size:95%; margin-left: 8px; " class="pill-button"  on:click={() => {
+        filter = defaultFeedFilter();
+        dispatch("update-filter", filter);
+    }} >Clear Filters</div>
       <sl-button style="margin-left: 8px; " on:click={() => { dispatch('close-filter') } } circle>
         <Fa icon={faClose} />
       </sl-button>

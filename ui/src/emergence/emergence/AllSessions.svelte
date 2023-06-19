@@ -98,7 +98,7 @@ on:session-created={() => {} }
             <sl-input
               
               value={$uiProps.sessionsFilter.keyword}
-              placeholder="Search by title & description"
+              placeholder="Search title, description & hosts"
               on:input={e => { 
                 const filter = $uiProps.sessionsFilter;
                 filter.keyword = e.target.value
@@ -305,7 +305,10 @@ on:session-created={() => {} }
 }
 
 .spacer {
-  height: 0;
+  height: 0px;
+  margin-bottom: 30px;
+  width: 100%;
+  display: none;
   transition: all .25s ease;
 }
 
@@ -444,6 +447,7 @@ on:session-created={() => {} }
 @media (min-width: 720px) {
   .spacer {
     height: 50px;
+    display: block;
   }
   .background {
     width: 100%;
@@ -463,7 +467,7 @@ on:session-created={() => {} }
   }
 
   .pane-content {
-    padding-top: 20px;
+    padding-top: 15px;
   }
   
   .sensemaking-game {
@@ -477,8 +481,8 @@ on:session-created={() => {} }
 
   .pane-header {
     margin-top: 0;
-    top: 35px;
-    max-width: 740px;
+    top: 40px;
+    max-width: 100%;
     margin-bottom: 0;
   }
 }
