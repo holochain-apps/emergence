@@ -218,8 +218,9 @@
         const sessions = {}
         for (const s of data.sessions) {
             const e = s.entry
-            const leaders = e.leaders.filter(l=> l.type == "ProxyAgent").map(l=>proxyAgents[l.hash])
-
+            const leaders = e.leaders.filter(l=> l.type == "ProxAgent" || data.agents.find(a=>a.pubKey == l.hash))
+                .map(l=>l.type == "ProxyAgent" ? proxyAgents[l.hash] : {type:"Agent", hash: decodeHashFromBase64(l.hash)})
+            console.log("LEAD", leaders)
             const tags = e.tags  ? e.tags : []
             let record
             try {
