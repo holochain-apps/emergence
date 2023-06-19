@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@holochain-open-dev/file-storage": "0.4.3",
+    "@holochain-open-dev/utils": "^0.12.2",
     "@holochain/client": "^0.12.2",
     "@holochain/tryorama": "^0.11.2",
     "@msgpack/msgpack": "^2.7.0",
