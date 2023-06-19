@@ -19,7 +19,7 @@ inputs = {
         perSystem = { config, pkgs, system, ... }: {
             devShells.default = pkgs.mkShell {
                 inputsFrom = [
-                    inputs.holochain-flake.devShells.${system}.holonix
+                    inputs.holochain-flake.devShells.${system}.holochainBinaries
                 ];
                 packages = [
                     pkgs.nodejs-18_x
