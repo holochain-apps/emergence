@@ -11,7 +11,7 @@ const TRYCP_SERVER_PORT = 9000;
 // 172.26.211.71
 // 172.26.206.61
 // 172.26.212.148
-const holoportIps = ["172.26.206.61", "172.26.211.71", "172.26.212.148"];
+const holoportIps = ["172.26.206.61"]; //, "172.26.211.71", "172.26.212.148"];
 const holoportUrls = holoportIps.map((ip) => new URL(`ws://${ip}:${TRYCP_SERVER_PORT}`));
 
 console.log(`Distributed test across ${holoportIps.length} HoloPorts`);
@@ -20,7 +20,7 @@ console.log();
 // **** TEST PARAMETERS ****
 
 const conductorCount = 1;
-const agentsPerConductor = 10;
+const agentsPerConductor = 20;
 
 const testDuration = 1000 * 60 * 1;
 
@@ -46,7 +46,7 @@ const app: { bundle: AppBundle } = {
             name: "emergence",
             roles: [{
                 dna: {
-                    url: 'https://github.com/holochain-apps/emergence/releases/download/pre-alpha-test-2/emergence.dna',
+                    url: 'https://github.com/holochain-apps/emergence/releases/download/pre-alpha-test-6/emergence.dna',
                     modifiers: {
                         network_seed: Date.now().toString()
                     }
@@ -85,6 +85,7 @@ for (let i = 0; i < clientsPlayers.length; i++) {
         const cellId = player.cells[0].cell_id;
         const onSignal = player.conductor.on.bind(player.conductor);
 
+        // @ts-ignore
         const emergenceClient = new EmergenceClient(appWs, cellId);
         const emergenceStore = new EmergenceStore(emergenceClient, onSignal, null, null, cellId[1]);
         emergenceClientsForConductor.push(emergenceClient);
@@ -104,19 +105,18 @@ console.time("sessions");
 const sessionsCount = 1;
 
 for (let x = 0; x < sessionsCount; x++) {
+    const sessionsCreated = [];
     for (let i = 0; i < clientsPlayers.length; i++) {
         console.log("client", i);
-        const sessionsCreated = [];
         const storesForConductor = emergenceStores[i];
         for (let j = 0; j < storesForConductor.length; j++) {
             console.log('player', j);
             const store = storesForConductor[j];
             sessionsCreated.push(store.createSession(x, `session ${x}`, "description", [], 2, 10, 60, 1, null, []));
         }
-        console.log("awaiting");
-        const sessions = await Promise.all(sessionsCreated);
-        console.log('sessions', sessions);
     }
+    const sessions = await Promise.all(sessionsCreated);
+    console.log('sessions', sessions);
 }
 
 console.timeEnd("sessions");
@@ -132,7 +132,7 @@ console.log("Starting test run...");
 
 const startTime = Date.now();
 let totalTimeElapsed: number;
-const createNoteInterval = 1000;
+const createNoteInterval = 100;
 const getFeedInterval = 100;
 
 const isCreatingNotes: boolean[] = new Array(conductorCount).fill(false);

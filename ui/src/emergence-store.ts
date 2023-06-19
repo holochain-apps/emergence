@@ -1728,11 +1728,11 @@ export class EmergenceStore {
   async fetchFeed(filter: GetFeedInput) {
     try {
         const startTime = performance.now();
-        console.log("FETCHING FEED ", filter);
+        // console.log("FETCHING FEED ", filter);
         this.setUIprops({syncing: get(this.uiProps).syncing+1})
 
         const feed = await this.client.getFeed(filter)
-        console.log("FEED ITEMS RETURNED:", feed.length, feed, elapsed(startTime))
+        // console.log("FEED ITEMS RETURNED:", feed.length, feed, elapsed(startTime))
         this.feed.update((n) => {
             feed.forEach(f=>{
                 const fB64 = encodeHashToBase64(f.hash)
@@ -1747,7 +1747,7 @@ export class EmergenceStore {
             })
             return n
         } )
-        console.log("FETCHING FEED COMPLETE AFTER ", elapsed(startTime))
+        // console.log("FETCHING FEED COMPLETE AFTER ", elapsed(startTime))
         this.setUIprops({syncing: get(this.uiProps).syncing-1})
 
     }
