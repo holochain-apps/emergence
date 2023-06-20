@@ -100,7 +100,7 @@
       await setSigningCredentials(cell_id, creds.creds)
     } else {
       let appPort: string = import.meta.env.VITE_APP_PORT
-      url = new URL(`ws://localhost:${appPort}`)
+      url = appPort ? new URL(`ws://localhost:${appPort}`) : ""
       client = await AppAgentWebsocket.connect(url, installed_app_id);
       console.log("Dev mode admin port:", adminPort)
       if (adminPort) {
