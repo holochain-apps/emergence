@@ -217,10 +217,11 @@ let gameActive = false
 
   .bg {
     width: 100%;
-    height: 30px;
+    height: 50px;
     position: absolute;
-    bottom: 0;
+    bottom: auto;
     left: 0;
+    top: 200px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%);
   }
 
