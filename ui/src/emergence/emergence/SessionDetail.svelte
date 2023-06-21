@@ -386,8 +386,12 @@ bind:this={updateSessionDialog}
     padding-bottom: 15px;
   }
 
+  .pane-content {
+    padding-top: 0;
+  }
+
   .pane-header {
-    padding-top: 20px;
+    padding-top: 10px;
     position: sticky;
     top: -10px;
   }

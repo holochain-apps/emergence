@@ -262,7 +262,7 @@ let dialog
 {/if}
 <style>
   upload-files {
-    min-width: 200px;
+    min-width: 170px;
     --placeholder-font-size: 12px;
     --icon-font-size: 50px;
     --message-margin: 0px;
@@ -277,6 +277,9 @@ let dialog
     flex-direction: row;
     width: 100px;
     min-height: 0px;
+    line-height: 13px;
+    padding: 5px;
+    margin-right: 25px;
   }
 
   sl-button::part(base) {
@@ -289,7 +292,7 @@ let dialog
     color: white;
     box-shadow: 0 10px 15px rgba(0,0,0,.35);
     border-radius: 5px;
-    padding: 0 10px;
+    padding: 0 0px;
     margin-right: 10px;
     cursor: pointer;
     font-size: 14px;
