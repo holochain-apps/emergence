@@ -578,7 +578,7 @@ export class EmergenceStore {
 
     await this.client.createRelations(relations)
 
-    this.fetchSession([sessionHash])
+    //this.fetchSession([sessionHash])
     return record
   }
 
@@ -1617,7 +1617,7 @@ export class EmergenceStore {
         ]
         await this.client.createRelations(relations)
     }
-    this.fetchProxyAgents()
+    //this.fetchProxyAgents()
     return record
   }
 
@@ -1706,7 +1706,7 @@ export class EmergenceStore {
         proxyAgents.forEach(p=>this.proxyAgentNicknames.set(p.original_hash,p.record.entry.nickname))
     }
     catch (e) {
-        console.log("Error fetching sitemaps", e)
+        console.log("Error fetching proxyAgents", e)
     }
   }
 
