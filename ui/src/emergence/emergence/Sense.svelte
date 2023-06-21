@@ -381,7 +381,13 @@ let gameActive = false
     justify-content: center;
     z-index: 1;
     left: 0;
+    display: none;
   }
+
+  .game-active .buttons {
+    display: flex;
+  }
+
   .buttons div {
     font-size: 12px;
     color: rgba(255,255,255,.5);

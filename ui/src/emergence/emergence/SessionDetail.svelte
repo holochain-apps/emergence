@@ -278,7 +278,7 @@ bind:this={updateSessionDialog}
     margin-bottom: 15px;
   }
   .title {
-    font-size: 30px;
+    font-size: 24px;
     text-align: left;
   }
   .leaders {
@@ -436,4 +436,9 @@ bind:this={updateSessionDialog}
     background-color: rgb(240, 249, 2244);
   }
 
+  @media (min-width: 720px) {
+    .title {
+      font-size: 32px;
+    }
+  }
 </style>

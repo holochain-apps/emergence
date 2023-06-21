@@ -168,6 +168,7 @@ let dialogShow
       <div>
 
         <sl-select
+          style="width: 290px"
           id="session-type-select"
           bind:this={sesTypeSelect}
           label="Session Type"
@@ -404,6 +405,10 @@ let dialogShow
     margin-right: 10px;
     cursor: pointer;
     font-size: 14px;
+  }
+
+  sl-select {
+    max-width: 280px;
   }
 
 @media (min-width: 720px) {

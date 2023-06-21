@@ -127,12 +127,17 @@ function doHide() {
     border-radius: 50%;
     border: solid 1px rgba(203, 203, 203, .35);
     box-shadow: 0 3px 3px rgba(0, 0, 0, .15);
-    margin-right: 5px;
+    margin-bottom: 5px;
     cursor: pointer;
   }
-@media (min-width: 720px) { 
+  
+@media (min-width: 540px) { 
   .interest {
     flex-direction: row;
+  }
+
+  .interest-button {
+    margin-right: 5px;
   }
 }
 </style>

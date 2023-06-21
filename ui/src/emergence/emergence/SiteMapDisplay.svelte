@@ -236,6 +236,7 @@ on:space-created={() => {} }
     position: relative;
     z-index: 0;
     width: 100%;
+    padding-top:0;
     min-width: 1000px;
     max-height: 100%;
 }
@@ -276,8 +277,8 @@ on:space-created={() => {} }
 }
 
 .spaces-drawer {
-    width: 100%;
-    min-width: 280px;
+    width: 100vw;
+    min-width: 100vw;
     max-width: 320px;
     max-height: 100%;
     overflow-y: scroll;
@@ -291,7 +292,7 @@ on:space-created={() => {} }
 
 .map-controls {
     position: absolute;
-    top: 70px;
+    top: 20px;
     left: 20px;
     transition: all .25s ease;
     z-index: 5;
@@ -339,13 +340,35 @@ sl-tooltip {
 }
 
 .true .map-controls {
-    left: 280px;
+    left: 10px;
+    top: 10px;
 }
 
 
-@media (min-width: 720px) {
-    .true .map-controls {
+@media (min-width: 430px) {
+.spaces-drawer {
+    width: 320px;
+    min-width: 320px;
+    max-width: 320px;
+    max-height: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    padding-top: 60px;
+    transition: all .25s ease;
+}
+
+.true .map-controls {
         left: 340px;
+}
+}
+
+@media (min-width: 720px) {
+    .map-controls {
+        top: 70px;
+    }
+
+    .true .map-controls {
+        top: 70px;
     }
 
     .spaces-container {
