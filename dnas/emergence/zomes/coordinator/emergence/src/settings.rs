@@ -34,7 +34,7 @@ pub fn get_settings(_: ()) -> ExternResult<Settings> {
             current_sitemap:None, 
             session_types:vec![
                 SessionType {name:"Session".into(), color:"white".into(), can_rsvp: true, can_any_time: false, can_leaderless: false},
-                SessionType {name:"Children".into(), color:"#54ded9".into(), can_rsvp: true, can_any_time: false, can_leaderless: false},
+                SessionType {name:"Children Time".into(), color:"#54ded9".into(), can_rsvp: true, can_any_time: false, can_leaderless: false},
                 SessionType {name:"Community Time".into(), color:"#54ded9".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
                 SessionType {name:"Creativity Time".into(), color:"#acfc0d".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
                 SessionType {name:"Dining".into(), color:"#f07567".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
