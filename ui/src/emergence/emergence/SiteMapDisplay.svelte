@@ -376,6 +376,30 @@ sl-tooltip {
     }
 }
 
+
+
+@media (max-aspect-ratio: 14/10) {
+    .map-image {
+        width: auto;
+        max-width: -webkit-fill-available;
+        min-height: 100vh;
+        border: 1px solid red;
+        min-height: initial;
+        min-width: initial;
+        width: initial;
+        height: initial;
+        max-width: initial;
+        height: 100vh;
+    }
+}
+
+
+@media (min-aspect-ratio: 2/1) {
+    .map-image {
+        border: 1px solid blue;
+    }
+}
+
 @media (min-width: 1000px) {
 
 }

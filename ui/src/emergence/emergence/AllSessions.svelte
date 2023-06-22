@@ -447,7 +447,6 @@ on:session-created={() => {} }
     color: white;
   }
 
-
   @media (min-width: 360px) {
 
     sl-select {

@@ -293,6 +293,7 @@ let confirmDialog
     box-shadow: 0 5px 5px rgba(0,0,0,.15);
     width: 30px;
     height: 30px;
+    min-width: 30px;
   }
 
   .space-name {
@@ -305,6 +306,7 @@ let confirmDialog
     width: 100%;
     max-width: 720px;
     margin: 20px auto;
+    padding: 8px;
   }
 
   .amenity {
@@ -333,6 +335,10 @@ let confirmDialog
   @media (min-width: 720px) {
     .space-name {
       font-size: 24px;
+    }
+
+    .space-description {
+      padding: 0;
     }
   }
 </style> 
