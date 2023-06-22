@@ -330,6 +330,8 @@ let confirmDialog
   .amenity img {
     height: 16px;
     margin-right: 3px;
+    position: relative;
+    top: 3px;
   }
 
   @media (min-width: 720px) {

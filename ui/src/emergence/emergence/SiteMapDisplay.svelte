@@ -380,10 +380,6 @@ sl-tooltip {
 
 @media (max-aspect-ratio: 14/10) {
     .map-image {
-        width: auto;
-        max-width: -webkit-fill-available;
-        min-height: 100vh;
-        border: 1px solid red;
         min-height: initial;
         min-width: initial;
         width: initial;
