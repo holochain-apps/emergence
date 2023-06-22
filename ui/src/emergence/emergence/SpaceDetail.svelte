@@ -270,25 +270,35 @@ let confirmDialog
 
   .space-card {
     border-radius: 10px;
-    box-shadow: 0px 10px 10px rgba(0,0,0,.25);
+    box-shadow: 0px 5px 10px rgba(0,0,0,.1);
     background-color: white;
     display: flex;
     padding: 15px;
+    align-items: center;
   }
 
 
   .space-symbol {
+    position: relative;
+    border: 1px solid rgba(33, 179, 95, .5);
+    border-radius: 50%;
+    text-align: center;
+    color: white;
+    font-weight: bold;
+    text-shadow: 1px 1px #0D5E3340;
+    line-height: 30px;
+    font-weight: normal;
+    cursor: pointer;
+    background: linear-gradient(129.46deg, #2F87D8 30%, #00D1FF 90%);
+    box-shadow: 0 5px 5px rgba(0,0,0,.15);
     width: 30px;
     height: 30px;
-    border-radius: 20px;
-    box-shadow: 0 3px 3px rgba(0,0,0,.15);
-    text-align: center;
-    line-height: 30px;
+    min-width: 30px;
   }
 
   .space-name {
     padding: 0 20px 0 10px;
-    font-size: 24px;
+    font-size: 18px;
     font-weight: bold;
   }
 
@@ -296,6 +306,7 @@ let confirmDialog
     width: 100%;
     max-width: 720px;
     margin: 20px auto;
+    padding: 8px;
   }
 
   .amenity {
@@ -319,5 +330,17 @@ let confirmDialog
   .amenity img {
     height: 16px;
     margin-right: 3px;
+    position: relative;
+    top: 3px;
+  }
+
+  @media (min-width: 720px) {
+    .space-name {
+      font-size: 24px;
+    }
+
+    .space-description {
+      padding: 0;
+    }
   }
 </style> 

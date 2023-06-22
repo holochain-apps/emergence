@@ -109,6 +109,10 @@
 </div>
 <style>
 
+    [aria-selected="true"] {
+      border: 1px solid red;
+    }
+
     .pane-content {
         padding-top: 0px;
     }
@@ -117,7 +121,7 @@
         --track-color: white;
         max-width: 100%;
     }
-    sl-tab[aria-selected="true"] {
+    sl-tab-group::part(sl-tab)[aria-selected="true"] {
         border: 1px solid red;
     }
 

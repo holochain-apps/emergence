@@ -152,12 +152,15 @@
           <ProxyAgentAvatar size={170} {proxyAgentHash} />
         </div>
         <div style="display: flex; flex-direction: column; margin-left:10px">
-          <h1>{$proxyAgent.record.entry.nickname}</h1>
+          <h1 style="font-size: 24px;">{$proxyAgent.record.entry.nickname}</h1>
+          
+          <span style="font-size: 12px; opacity: .7; text-transform: uppercase;"
+          >{$proxyAgent.record.entry.location}</span
+        >
           {#if $proxyAgent.record.entry.bio}
             <div
               style="display: flex; flex-direction: row; margin-bottom: 16px"
             >
-              <span style="margin-right: 4px"><strong>Bio:</strong></span>
               <span style="white-proxyAgent: pre-line"
                 >{$proxyAgent.record.entry.bio}</span
               >
@@ -167,10 +170,6 @@
             <div
               style="display: flex; flex-direction: row; margin-bottom: 16px"
             >
-              <span style="margin-right: 4px"><strong>Location:</strong></span>
-              <span style="white-proxyAgent: pre-line"
-                >{$proxyAgent.record.entry.location}</span
-              >
             </div>
           {/if}
         </div>
@@ -204,6 +203,9 @@
 </div>
 
 <style>
+  .pane-content {
+    padding-top: 8px;
+  }
   .details {
     width: 100%;
     padding: 15px;

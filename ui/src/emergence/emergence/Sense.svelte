@@ -223,10 +223,11 @@ let gameActive = false
 
   .bg {
     width: 100%;
-    height: 30px;
+    height: 50px;
     position: absolute;
-    bottom: 0;
+    bottom: auto;
     left: 0;
+    top: 200px;
     background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #FFFFFF 100%);
   }
 
@@ -386,7 +387,13 @@ let gameActive = false
     justify-content: center;
     z-index: 1;
     left: 0;
+    display: none;
   }
+
+  .game-active .buttons {
+    display: flex;
+  }
+
   .buttons div {
     font-size: 12px;
     color: rgba(255,255,255,.5);

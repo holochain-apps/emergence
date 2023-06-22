@@ -87,7 +87,9 @@ on:session-created={() => {} }
                 filter.keyword = ""
                 store.setUIprops({sessionsFilter: filter})
               }
-              store.setUIprops({searchVisible: ! $uiProps.searchVisible}) 
+              store.setUIprops({searchVisible: ! $uiProps.searchVisible})
+              // focus on the search
+              // document.getElementById("input").focus()
               }} circle>
             <Fa icon={faSearch} />
           </sl-button>
@@ -387,6 +389,8 @@ on:session-created={() => {} }
     padding: 10px;
     background-color: white;
     border-radius: 0 0 5px 5px;
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
+    z-index: 10;
   }
 
   .search-input {
@@ -407,7 +411,6 @@ on:session-created={() => {} }
     align-items: center;
     justify-content: center;;
     border-radius: 40px;
-    box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
     z-index: 5;
   }
 
@@ -442,6 +445,35 @@ on:session-created={() => {} }
     color: white;
   }
 
+  @media (min-width: 360px) {
+
+    sl-select {
+      max-width: 120px;
+    }
+  }
+
+
+  @media (min-width: 560px) {
+   .search-bar {
+    flex-direction: row;
+   }
+   .search-bar .search-input {
+      position: relative;
+      top: 0;
+      bottom: 0;
+      bottom: 0;
+      right: 0;
+      box-shadow: none;
+      left: 0;
+      padding: 0;
+    }
+    .search-input sl-input::part(base),  .search-input sl-input::part(form-control),  .search-input sl-input::part(form-control-input) {
+      border-radius: 30px;
+      overflow: hidden;
+    }
+  }
+
+
 @media (min-width: 720px) {
   .spacer {
     height: 50px;
@@ -452,6 +484,11 @@ on:session-created={() => {} }
     height: 100%;
     background: linear-gradient(180deg, rgba(86, 94, 109, 0.05) 0%, rgba(86, 94, 109, 0.26) 100%);
     padding: 100px;
+  }
+
+  .search-bar .search-input {
+    border-radius: 30px;
+    box-shadow: 0px 10px 15px rgba(0, 0, 0, .15);
   }
 
   .section-controls sl-select {

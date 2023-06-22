@@ -278,7 +278,7 @@ bind:this={updateSessionDialog}
     margin-bottom: 15px;
   }
   .title {
-    font-size: 30px;
+    font-size: 24px;
     text-align: left;
   }
   .leaders {
@@ -386,8 +386,12 @@ bind:this={updateSessionDialog}
     padding-bottom: 15px;
   }
 
+  .pane-content {
+    padding-top: 0;
+  }
+
   .pane-header {
-    padding-top: 20px;
+    padding-top: 10px;
     position: sticky;
     top: -10px;
   }
@@ -432,4 +436,9 @@ bind:this={updateSessionDialog}
     background-color: rgb(240, 249, 2244);
   }
 
+  @media (min-width: 720px) {
+    .title {
+      font-size: 32px;
+    }
+  }
 </style>
