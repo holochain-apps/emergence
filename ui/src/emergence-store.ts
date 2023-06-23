@@ -833,7 +833,7 @@ export class EmergenceStore {
   
 
   sessionInterestProjection(sessions: Array<Info<Session>>) : Projection  {
-    const peopleCount = this.peopleCount()
+    const peopleCount = this.peopleCount() || 0
 
     let totalAssesments = 0
     let interestData = sessions.filter(s=> (s.record.entry.session_type==0 && !s.record.entry.trashed)).map(session=>{

@@ -23,7 +23,6 @@
   $: error, senseIdx, fullDescription;
   $: session = sessions ? sessions[senseIdx] : undefined
   $: slot = session ? store.getSessionSlot(session) : undefined
-  $: peopleCount = store.peopleCount() || 0
 
   const SESSIONS_TO_ASSESS = 20
   $: count = 0
@@ -81,7 +80,7 @@ let gameActive = false
   class:close={!instructionsVisible}
   >
   <h3>Today is Tomorrow</h3>
-  <strong>{peopleCount} people proposed {$original.filter(s=>s.record.entry.session_type==0 && !s.record.entry.trashed).length} sessions for Tomorrow!</strong>
+  <strong>{store.peopleCount() || 0} people proposed {$original.filter(s=>s.record.entry.session_type==0 && !s.record.entry.trashed).length} sessions for Tomorrow!</strong>
   <p>Help figure out what gets scheduled where by quickly setting your interest on proposed sessions. Sessions with most interest will get scheduled in larger venues.</p>
   <div class="begin-button"  on:click={() => { instructionsVisible = false; gameActive = true  }}>Begin</div>
 </div>

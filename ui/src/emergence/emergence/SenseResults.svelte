@@ -11,7 +11,6 @@
   $: error;
   $: sessions = store.sessions
   $: uiProps = store.uiProps
-  $: peopleCount = store.peopleCount() || 0
   $: totalAssesments = 0
   $: maxAttendance = 0
   $: minAttendance = 0
