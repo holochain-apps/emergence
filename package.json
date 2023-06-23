@@ -6,6 +6,7 @@
     "tests"
   ],
   "scripts": {
+    "start:ui": "VITE_URL=\"play2.d.dweb.city\" UI_PORT=8888 npm start -w ui",
     "start": "AGENTS=4 npm run network",
     "dev": "VITE_ADMIN_PORT=$(port) VITE_APP_PORT=$(port) UI_PORT=8888 npm run x",
     "x": "hc s clean &&  npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run start:happ\"",

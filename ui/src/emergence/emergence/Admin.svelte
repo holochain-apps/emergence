@@ -252,7 +252,6 @@
         }
         await store.sync(undefined)
     }
-$: allProfiles =  store.profilesStore.allProfiles
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
 
@@ -323,10 +322,8 @@ $: allProfiles =  store.profilesStore.allProfiles
     </div>
   
     <div class="game-status">
-        {#if $allProfiles.status == "complete"}
-        <h3>Total Attendees: {$allProfiles.value.size}</h3>
-        {/if}
-
+        <h3>Total Attendees: {store.peopleCount() || 0}</h3>
+  
         <h3> Sensemaking game is {#if $settings.game_active}Active{:else}Inactive{/if}</h3>
         <SenseResults></SenseResults>
     </div>

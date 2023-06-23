@@ -23,7 +23,7 @@
   $: error, senseIdx, fullDescription;
   $: session = sessions ? sessions[senseIdx] : undefined
   $: slot = session ? store.getSessionSlot(session) : undefined
-  $: peopleCount = store.peopleCount()
+  $: peopleCount = store.peopleCount() || 0
 
   const SESSIONS_TO_ASSESS = 20
   $: count = 0
@@ -31,6 +31,7 @@
   let swipes: Array<[ActionHash, SessionInterestBit]> = []
 
   onMount(async () => {
+    await store.updatePeopleCount()
     const filteredSessions = $original.filter(s=>{
       const relData = store.getSessionReleationData(s)
       const myRecordedInterest = relData.interest.get(store.myPubKey)

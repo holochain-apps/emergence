@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, AppAgentWebsocket, type AppAgentClient, setSigningCredentials } from '@holochain/client15';
+  import { AdminWebsocket, AppAgentWebsocket, type AppAgentClient, setSigningCredentials, type KeyPair, type AgentPubKey } from '@holochain/client15';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
@@ -37,6 +37,9 @@
   import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
   import { getCookie, deleteCookie } from 'svelte-cookie';
   import { Base64 } from 'js-base64'
+  import blake2b from "blake2b";
+import { ed25519 } from "@noble/curves/ed25519";
+import {Buffer} from "buffer"
 
   let client: AppAgentClient | undefined;
   let store: EmergenceStore | undefined;
@@ -65,6 +68,53 @@
     return creds
   };
 
+  const uint8ToBase64 = (arr: Uint8Array) => Buffer.from(arr).toString("base64");
+
+const deriveSigningKeys = async (
+  seed: string
+): Promise<[KeyPair, AgentPubKey]> => {
+  //const interim = Buffer.from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+  //  const privateKey = await blake2b(interim.length).update(Buffer.from(seed)).digest('binary')
+  //  const publicKey = await ed25519.getPublicKeyAsync(privateKey);
+  //  const keyPair = { privateKey, publicKey };
+
+  const interim = Buffer.from([
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0,
+  ]);
+  const privateKey = blake2b(interim.length)
+    .update(Buffer.from(seed))
+    .digest("binary");
+
+  const publicKey = ed25519.getPublicKey(privateKey);
+
+  const signingKey = new Uint8Array(
+    [132, 32, 36].concat(...publicKey).concat(...[0, 0, 0, 0])
+  );
+  return [{ privateKey, publicKey }, signingKey];
+};
+
+  const genCredsForPass = async (regkey: string, password: string) => {
+  const [keyPair, signingKey] = await deriveSigningKeys(
+    `${regkey}-${password}`
+  );
+  const interim = Buffer.from([
+    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0, 0, 0,
+  ]);
+  const regKeyHash = await blake2b(interim.length)
+    .update(Buffer.from(regkey))
+    .digest("binary");
+  const capSecret = Buffer.concat([regKeyHash, regKeyHash]);
+  const creds = {
+    capSecret,
+    keyPair,
+    signingKey,
+  };
+  return creds;
+};
+
+
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
@@ -90,10 +140,25 @@
       }
     }
     let url
+    if (import.meta.env.VITE_URL) {
+      const screds = await genCredsForPass("Funky1","monkey")
+      creds = {
+        installed_app_id:"emergence-Funky1",
+        regkey:"Funky1",
+        appPath: `appWebsocket0`,
+        creds: screds
+        }
+      }
     if (creds) {
       console.log("CREDS", creds)
-      url = new URL(`${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.host}/${creds.appPath}`)
-      client = await AppAgentWebsocket.connect(url, installed_app_id);
+      if (import.meta.env.VITE_URL) {
+        url = `wss://${import.meta.env.VITE_URL}/${creds.appPath}`
+      }
+      else {
+        url = new URL(`${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.host}/${creds.appPath}`)
+      }
+      console.log("URL", url)
+      client = await AppAgentWebsocket.connect(url, creds.installed_app_id);
       const appInfo = await client.appInfo()
       console.log("appInfo", appInfo)
       const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]

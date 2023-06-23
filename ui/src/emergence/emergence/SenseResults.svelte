@@ -9,16 +9,16 @@
 
   let error: any = undefined;
   $: error;
-  $: allProfiles = store.profilesStore.allProfiles
   $: sessions = store.sessions
   $: uiProps = store.uiProps
-  $: peopleCount = $allProfiles.status=== "complete" ? Array.from($allProfiles.value.keys()).length : 0
+  $: peopleCount = store.peopleCount() || 0
   $: totalAssesments = 0
   $: maxAttendance = 0
   $: minAttendance = 0
   $: projection = store.sessionInterestProjection($sessions)
 
   onMount(async () => {
+    await store.updatePeopleCount()
   });
 
 
