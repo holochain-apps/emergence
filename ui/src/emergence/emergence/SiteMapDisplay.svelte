@@ -5,7 +5,7 @@
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
     import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
-    import { type Info, type SiteLocation, type SiteMap, type Space, timeWindowStartToStr, DetailsType } from './types';
+    import { type Info, type SiteLocation, type SiteMap, type Space, timeWindowStartToStr, DetailsType, type DownloadedFile } from './types';
     import { faList } from '@fortawesome/free-solid-svg-icons';
     import Fa from 'svelte-fa';
     import { fromUint8Array } from "js-base64";
@@ -22,8 +22,7 @@
     export let sitemap: Info<SiteMap>;
     let loading = true;
     $: loading, sitemap;
-    let file: File | undefined
-    let picB64: string | undefined
+    let file: DownloadedFile | undefined
     let img: HTMLImageElement | undefined;
     let r = 0
     let markerSize = 30
@@ -31,17 +30,15 @@
     let spacesDrawer = false
     let createSpaceDialog: SpaceCrud
 
-    $: picB64, img, r, spaceDetails
+    $: img, r, spaceDetails
     $: spaces = store.spaces
-    $: locations = $spaces && picB64 && img && (r>-1)? $spaces.map(s=>{return {loc: store.getSpaceSiteLocation(s, sitemap.original_hash), space:s}}) : []
+    $: locations = $spaces && img && (r>-1)? $spaces.map(s=>{return {loc: store.getSpaceSiteLocation(s, sitemap.original_hash), space:s}}) : []
     $: uiProps = store ? store.uiProps : undefined
 
     let mapCanvas
 
     onMount(async () => {
-        file = await store.fileStorageClient.downloadFile(sitemap.record.entry.pic);
-        const data = await file.arrayBuffer();
-        picB64 = fromUint8Array(new Uint8Array(data))
+        file = await store.downloadFile(sitemap.record.entry.pic)
         loading = false
         if (sitemap === undefined) {
             throw new Error(`The sitemap input is required for the SiteMap element`);
@@ -168,7 +165,7 @@ on:space-created={() => {} }
                         {spaceDetails.space.record.entry.name}
                     </div>
                 {/if}
-                {#if file && picB64}
+                {#if file}
                 
                 {#each locations as loc}
                 <sl-tooltip >
@@ -188,7 +185,7 @@ on:space-created={() => {} }
                     </div>
                 </sl-tooltip>
                 {/each}
-                <img class="map-image" bind:this={img} src="data:{file.type};base64,{picB64}">
+                <img class="map-image" bind:this={img} src="data:{file.file.type};base64,{file.data}">
                 {/if}
                 </div>
             </div>
