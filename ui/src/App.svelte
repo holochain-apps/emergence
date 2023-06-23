@@ -202,7 +202,7 @@ const deriveSigningKeys = async (
       else {
         await doSync()
       }
-    }, 10000);
+    }, 30000);
 
     loading = false;
   });

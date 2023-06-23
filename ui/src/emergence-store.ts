@@ -65,7 +65,7 @@ export const neededStuffStore = (client: EmergenceClient) => {
                 neededStuff.notes = undefined
             }
         }}
-    , 1000);
+    , 10000);
     return {
         notes: {
             all: ()=> get(notes),
