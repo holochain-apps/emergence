@@ -164,6 +164,10 @@
       store.setUIprops({amSteward:!amSteward}) 
     }
   }
+  window.addEventListener("beforeunload", function (e) {
+  var confirmationMessage = "You are about to leave Emergence!";
+  return confirmationMessage;
+  });
 </script>
 
 <main>
