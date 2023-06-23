@@ -6,7 +6,7 @@ inputs = {
     holochain-flake = {
       url = "github:holochain/holochain";
       inputs.versions.follows = "versions";
-      inputs.holochain.url = "github:holochain/holochain/holochain-0.1.5";
+      inputs.holochain.url = "github:holochain/holochain/develop-0.1-dweb";
     };
 
     nixpkgs.follows = "holochain-flake/nixpkgs";
