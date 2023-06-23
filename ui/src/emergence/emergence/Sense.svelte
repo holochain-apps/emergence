@@ -173,6 +173,10 @@ let gameActive = false
     display: block;
   }
 
+  .pane-content {
+    padding-bottom: 100px;
+  }
+  
   .begin-button {
     background: linear-gradient(129.46deg, #5833CC 8.45%, #397ED9 93.81%);
     min-height: 30px;
