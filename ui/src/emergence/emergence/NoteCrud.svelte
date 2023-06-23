@@ -270,6 +270,7 @@ $: acting
 {/if}
 <style>
   upload-files {
+    display: none;
     min-width: 170px;
     --placeholder-font-size: 12px;
     --icon-font-size: 50px;

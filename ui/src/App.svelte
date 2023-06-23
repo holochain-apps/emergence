@@ -192,9 +192,9 @@
     </span>
   {/if}
   {#if loading}
-    <div style="display: flex; flex: 1; align-items: center; justify-content: center">
-      <sl-spinner
- />
+    <div class="loading-container">
+      <img src="/images/loading.svg" />
+      <span class="loading-text">Syncing with local holochain...</span>
     </div>
   {:else}
   <profiles-context store="{profilesStore}">
@@ -527,6 +527,17 @@
     max-width: 50vw;
     margin: 0 auto;
     display: block;
+  }
+
+  .loading-container {
+    display: flex; flex: 1; align-items: center; justify-content: center; position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%; flex-direction: column;
+  }
+
+  .loading-text {
+    font-size: 11px;
+    padding-top: 10px;
+    opacity: .6;
   }
   
 @media (min-width: 720px) {
