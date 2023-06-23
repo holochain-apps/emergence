@@ -19,7 +19,7 @@
   import { FileStorageClient } from "@holochain-open-dev/file-storage";
 
   import { clientContext, storeContext } from './contexts';
-  import { EmergenceStore } from './emergence-store';
+  import { DEFAULT_SYNC_TEXT, EmergenceStore } from './emergence-store';
   import { EmergenceClient } from './emergence-client';
   import ScheduleSlotting from './emergence/emergence/ScheduleSlotting.svelte';
   import ScheduleUpcoming from './emergence/emergence/ScheduleUpcoming.svelte';
@@ -55,6 +55,7 @@ import {Buffer} from "buffer"
   $: uiProps = store ? store.uiProps : undefined
   $: pane = store ? $uiProps.pane : "sessions"
   $: sitemaps = store ? store.maps : undefined
+  $: loadingText = store ? store.syncText : undefined
 
 
   const base64ToUint8 = (b64:string)=> Base64.toUint8Array(b64);
@@ -263,7 +264,7 @@ const deriveSigningKeys = async (
   {#if loading}
     <div class="loading-container">
       <img src="/images/loading.svg" />
-      <span class="loading-text">Syncing with local holochain...</span>
+      <span class="loading-text">{loadingText ? $loadingText : DEFAULT_SYNC_TEXT}</span>
     </div>
   {:else}
   <profiles-context store="{profilesStore}">

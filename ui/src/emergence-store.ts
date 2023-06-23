@@ -36,7 +36,7 @@ Marked.setOptions
 TimeAgo.addDefaultLocale(en)
 const LIKELY_TO_ATTEND_PERCENT = .8
 const FULL_FEED = false
-
+export const DEFAULT_SYNC_TEXT = "Syncing with local holochain..."
 class HolochainError extends Error {
     constructor(name: string, message: string) {
       super();
@@ -113,6 +113,7 @@ export class EmergenceStore {
   files: HoloHashMap<AgentPubKey,DownloadedFile> = new HoloHashMap()
   proxyAgentNicknames: HoloHashMap<ActionHash, string> = new HoloHashMap()
   neededStuff: GetStuffInput = {}
+  syncText: Writable<string> = writable(DEFAULT_SYNC_TEXT) 
   myPubKeyBase64: string
   loader = undefined
   neededStuffStore = undefined
@@ -1875,15 +1876,23 @@ export class EmergenceStore {
  
     const starTime = performance.now()
     console.log("start sync");
+    this.syncText.update((n) => {return "Getting Sessions"} )
     await this.getSettings()
+    this.syncText.update((n) => {return "Fetching Tags"} )
     await this.fetchTags()
+    this.syncText.update((n) => {return "Fetching Sessions"} )
     await this.fetchSessions() // fetches spaces and timewindows
+    this.syncText.update((n) => {return "Fetching Agent data"} )
     await this.fetchAgentStuff(!agent ? this.myPubKey: agent)
     if (!agent) {
+        this.syncText.update((n) => {return "Fetching Activity Feed"} )
         await this.fetchFeed({})
     }
+    this.syncText.update((n) => {return "Fetching Site Maps"} )
     await this.fetchSiteMaps()
+    this.syncText.update((n) => {return "Fetching Proxy Agents"} )
     await this.fetchProxyAgents()
+    this.syncText.update((n) => {return "Fetching Complete"} )
     console.log("end sync", elapsed(starTime));
     this.setUIprops({syncing: get(this.uiProps).syncing-1})
   }
