@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import { encodeHashToBase64, type AgentPubKey, type Record } from '@holochain/client';
+  import { encodeHashToBase64, type AgentPubKey, type Record } from '@holochain/client15';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import FeedElemDetail from './FeedElemDetail.svelte';
@@ -16,7 +16,6 @@
   $: agentSessionsb64 = Array.from(sessions ? sessions : []).map((s)=> encodeHashToBase64(s))
   $: fullFeed = store.feed
   $: uiProps = store.uiProps
-  $: agentB64 = forAgent ? encodeHashToBase64(forAgent) : undefined
   $: feed = filteredFeed($fullFeed, $uiProps)
   $: error;
 
@@ -33,7 +32,6 @@
   }
 
   onMount(async () => {
-    await store.fetchFeed();
     if (forAgent)
       await store.fetchAgentStuff(forAgent);
   });
@@ -41,7 +39,7 @@
 </script>
 
 {#if error}
-<span>Error fetching the feed: {error.data.data}.</span>
+<span>Error fetching the feed: {error}.</span>
 {:else if feed.length === 0}
 <span>No Activity</span>
 {:else}
@@ -60,6 +58,7 @@
     width:100%; 
     display: flex;
     justify-content: left;
+    font-size: 12px;
   }
 
   .activity {

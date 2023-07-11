@@ -1,16 +1,17 @@
 <script lang="ts">
 import { createEventDispatcher, getContext, onMount } from 'svelte';
-import type { Record } from '@holochain/client';
+import type { Record } from '@holochain/client15';
 import { storeContext } from '../../contexts';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import '@vaadin/date-time-picker'
 import { faClose, faSave } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import MultiSelect from 'svelte-multiselect'
+import { DateInput } from 'date-picker-svelte'
+  import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -22,8 +23,6 @@ let tags: Array<string> = []
 
 let errorSnackbar: Snackbar;
 
-let datePicker:any
-
 $: duration, start, tags;
 $: isTimeWindowValid = duration > 0 && start;
 
@@ -32,13 +31,13 @@ onMount(() => {
 
 async function createTimeWindow() { 
   try {
-    const actionHash = store.createTimeWindow(new Date(datePicker.value), duration!, tags)
+    const actionHash = store.createTimeWindow(start, duration!, tags)
     start = undefined
     duration = 60
     dispatch('timeWindow-created', { timeWindowHash: actionHash });
     
   } catch (e) {
-    errorSnackbar.labelText = `Error creating the timeWindow: ${e.data.data}`;
+    errorSnackbar.labelText = `Error creating the timeWindow: ${errorText(e)}`;
     errorSnackbar.show();
   }
 }
@@ -48,13 +47,14 @@ const setLen = (l:number) => {
     duration = l
   }
 }
+
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<div style="display: flex; flex-direction: column">
+<div style="display: flex; flex-direction: column; max-width: 500px">
   
   <div style="display: flex; flex-direction: row; justify-content: space-between; margin-bottom: 10px;">
-    <span style="font-size: 18px">Slot Add</span>
+    <span style="font-size: 18px">Create Time Slot</span>
     <div>
       <sl-button circle size=small
         on:click={() => createTimeWindow()}
@@ -66,7 +66,15 @@ const setLen = (l:number) => {
       </sl-button>
     </div>
   </div>
-  <vaadin-date-time-picker bind:this={datePicker} on:change={() => {start = new Date(datePicker.value)}}></vaadin-date-time-picker>
+  <div style="margin-bottom: 16px">
+    <span>Slot Start:</span >
+    <DateInput 
+      format={"yyyy-MM-dd HH:mm"}
+      placeholder="Click to select date"
+      closeOnSelection={true} 
+      bind:value={start} />
+  </div>
+
   <div style="margin-bottom: 16px">
     <sl-input
     label=Duration

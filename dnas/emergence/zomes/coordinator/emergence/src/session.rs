@@ -38,6 +38,7 @@ pub fn get_session(original_session_hash: ActionHash) -> ExternResult<Option<Rec
 pub struct UpdateSessionInput {
     pub original_session_hash: ActionHash,
     pub previous_session_hash: ActionHash,
+    pub updated_type: u32,
     pub updated_title: String,
     pub updated_description: String,
     pub updated_leaders: Vec<AnyAgent>,
@@ -60,6 +61,7 @@ pub fn update_session(input: UpdateSessionInput) -> ExternResult<Record> {
         input.previous_session_hash.clone(),
         &Session {
             key: session.key,
+            session_type: input.updated_type,
             title: input.updated_title,
             description: input.updated_description,
             leaders: input.updated_leaders,

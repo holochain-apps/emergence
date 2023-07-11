@@ -24,15 +24,22 @@
     $: loading, sitemap, location, picB64, file;
 
     onMount(async () => {
-        file = await store.fileStorageClient.downloadFile(sitemap.record.entry.pic);
-        const data = await file.arrayBuffer();
-        picB64 = fromUint8Array(new Uint8Array(data))
+        await loadPic()
         loading = false
+    });
+
+    export const setSitemap = async (map: Info<SiteMap>) => {
+        sitemap = map
+        await loadPic()
+    }
+    const loadPic = async () => {
         if (sitemap === undefined) {
             throw new Error(`The sitemap input is required for the SiteMap element`);
         }
-
-    });
+        file = await store.fileStorageClient.downloadFile(sitemap.record.entry.pic);
+        const data = await file.arrayBuffer();
+        picB64 = fromUint8Array(new Uint8Array(data))
+    }
 
     const handleClick = async (e:MouseEvent) => {
 
@@ -67,7 +74,7 @@ x{x} y{y}
 
 <style>
     img {
-        width: 900px;
+        width: 100%;
     }
 .pic {
     cursor: crosshair;

@@ -4,7 +4,7 @@
   inputs = {
     holochain-nix-versions.url  = "github:holochain/holochain/?dir=versions/0_2";
     holochain-flake = {
-      url = "github:holochain/holochain/";
+      url = "github:holochain/holochain/a92af07552c5cb70436c501b67e0c064ac699157";
       inputs.versions.follows = "holochain-nix-versions";
     };
 

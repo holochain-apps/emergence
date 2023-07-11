@@ -8,11 +8,15 @@ import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/option/option.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
+import type { UploadFiles } from '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
+import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+import MultiSelect from 'svelte-multiselect'
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import { encodeHashToBase64, type EntryHash } from '@holochain/client';
+import { encodeHashToBase64, type EntryHash } from '@holochain/client15';
+  import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -21,6 +25,8 @@ export let sitemap: Info<SiteMap>|undefined = undefined;  // set this if update
 
 let text: string = '';
 let pic: EntryHash | undefined = undefined;
+let uploadFiles: UploadFiles
+let tags: Array<string> = []
 
 let errorSnackbar: Snackbar;
 
@@ -28,48 +34,58 @@ $: text
 $: isSiteMapValid = text !== ""
 
 onMount(() => {
-  store.fetchTags()
+});
+
+export const open = (smap) => {
+  sitemap = smap
   if (sitemap) {
     text = sitemap.record.entry.text
     pic = sitemap.record.entry.pic
+    uploadFiles.defaultValue = pic ? pic : undefined  // can't be null, must be undefined
+    tags = sitemap.record.entry.tags
+  } else {
+    text = ""
+    pic = undefined
+    uploadFiles.defaultValue = undefined
+    tags= []
   }
-});
+  uploadFiles.reset()
+  dialog.show()
+}
 
 async function updateSiteMap() {
   if (sitemap) {
-    const updateRecord = await store.updateSiteMap(sitemap.original_hash, text, pic)
+    const pic = uploadFiles.value
+    const updateRecord = await store.updateSiteMap(sitemap.original_hash, text, pic, tags)
     if (updateRecord) {
       dispatch('sitemap-updated', { actionHash: updateRecord.actionHash });
-    } else {
-      dispatch('edit-canceled')
     }
+    dialog.hide()
   }
 }
 
 async function createSiteMap() {  
   try {
-    const record = await store.createSiteMap(text, pic)
-
-    text = ""
-    pic = undefined
+    const pic = uploadFiles.value
+    const record = await store.createSiteMap(text, pic, tags)
 
     dispatch('sitemap-created', { sitemap: record });
   } catch (e) {
     console.log("CREATE SITEMAP ERROR", e)
-    errorSnackbar.labelText = `Error creating the sitemap: ${e.data.data}`;
+    errorSnackbar.labelText = `Error creating the sitemap: ${errorText(e)}`;
     errorSnackbar.show();
   }
+  dialog.hide()
 }
+
+let dialog
 
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<div style="display: flex; flex-direction: column; z-index:2;">
-  {#if sitemap}
-    <span style="font-size: 18px">Edit SiteMap</span>
-  {:else}
-    <span style="font-size: 18px">Create SiteMap</span>
-  {/if}
+<sl-dialog label={sitemap?"Edit Sitemap":"Create Sitemap"}
+  bind:this={dialog}
+  >
               
   <div style="margin-bottom: 16px">
     <sl-textarea 
@@ -79,9 +95,19 @@ async function createSiteMap() {
   </div>
 
   <div style="margin-bottom: 16px">
+    <span>Slot type:</span >
+    <MultiSelect 
+      bind:selected={tags} 
+      options={store.getSlotTypeTags()}
+      allowUserOptions={true}
+      />
+  </div>
+
+  <div style="margin-bottom: 16px">
     <span>Add a pic (optional):</span >
   
       <upload-files
+        bind:this={uploadFiles}
         one-file
         accepted-files="image/jpeg,image/png,image/gif"
         defaultValue={pic ? encodeHashToBase64(pic) : undefined}
@@ -92,24 +118,23 @@ async function createSiteMap() {
   </div>
 
   {#if sitemap}
-    <div style="display: flex; flex-direction: row">
+    <div style="display: flex; flex-direction: row; justify-content:flex-end;">
       <sl-button
         label="Cancel"
-        on:click={() => dispatch('edit-canceled')}
-        style="flex: 1; margin-right: 16px"
+        on:click={() => dialog.hide()}
+        style="margin-right: 16px"
       >Cancel</sl-button>
       <sl-button 
-        style="flex: 1;"
         on:click={() => updateSiteMap()}
         disabled={!isSiteMapValid}
         variant=primary>Save</sl-button>
     </div>
   {:else}
-  <div style="display: flex; flex-direction: row">
+  <div style="display: flex; flex-direction: row; justify-content:flex-end;">
     <sl-button
     label="Cancel"
-    on:click={() => dispatch('edit-canceled')}
-    style="flex: 1; margin-right: 16px"
+    on:click={() => dialog.hide()}
+    style=" margin-right: 16px"
     >Cancel</sl-button>
     <sl-button 
     on:click={() => createSiteMap()}
@@ -118,4 +143,4 @@ async function createSiteMap() {
     </div>
   {/if}
 
-</div>
+</sl-dialog>

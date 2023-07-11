@@ -12,10 +12,10 @@ import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import SiteMapCrud from './SiteMapCrud.svelte'; 
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
-import { encodeHashToBase64,  } from '@holochain/client';
+import { encodeHashToBase64,  } from '@holochain/client15';
+  import { errorText } from './utils';
 
 const dispatch = createEventDispatcher();
-
 
 export let sitemap: Info<SiteMap>;
 
@@ -24,11 +24,9 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let loading = true;
 let error: any = undefined;
 
-let editing = false;
-
 let errorSnackbar: Snackbar;
   
-$: editing,  error, loading, sitemap;
+$: error, loading, sitemap;
 
 onMount(async () => {
   if (sitemap === undefined) {
@@ -43,44 +41,39 @@ async function deleteSiteMap() {
     //await store.updateSiteMap(sitemap.original_hash, {trashed:true})
     dispatch('sitemap-deleted', { sitemapHash: sitemap.original_hash });
   } catch (e: any) {
-    errorSnackbar.labelText = `Error deleting the sitemap: ${e.data.data}`;
+    errorSnackbar.labelText = `Error deleting the sitemap: ${errorText(e)}`;
     errorSnackbar.show();
   }
 }
 let confirmDialog
+let updateSitemapDialog
+
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
+  <SiteMapCrud
+  bind:this={updateSitemapDialog}
+  sitemap={ sitemap }
+  on:sitemap-updated={async () => {} }
+></SiteMapCrud>
 
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
   <sl-spinner></sl-spinner>
-
 </div>
 {:else if error}
-<span>Error fetching the sitemap: {error.data.data}</span>
-{:else if editing}
-  <div class="modal">
-    <SiteMapCrud
-    sitemap={ sitemap }
-    on:sitemap-updated={async () => {
-      editing = false;
-  //    await fetchSiteMap()
-    } }
-    on:edit-canceled={() => { editing = false; } }
-  ></SiteMapCrud>
-  </div>
+<span>Error fetching the sitemap: {error}</span>
 {:else}
   <Confirm 
     bind:this={confirmDialog}
     message="This will remove this sitemap for everyone!" 
     on:confirm-confirmed={deleteSiteMap}></Confirm>
 
-<div style="display: flex; flex-direction: column">
+<div class="detail">
   <div style="display: flex; flex-direction: row">
     <span style="flex: 1"></span>
-    <sl-button style="margin-left: 8px; " on:click={() => { editing = true; } } circle>
+    <sl-button style="margin-left: 8px; " on:click={() => { updateSitemapDialog.open(sitemap) } } circle>
       <Fa icon={faEdit} />
     </sl-button>
     <sl-button style="margin-left: 8px;" on:click={() => {confirmDialog.open()}} circle>
@@ -92,6 +85,12 @@ let confirmDialog
     <span style="margin-right: 4px"><strong>Name:</strong></span>
     <span style="white-sitemap: pre-line">{ sitemap.record.entry.text }</span>
   </div>
+
+  <div style="display: flex; flex-direction: row; margin-bottom: 16px">
+    <span style="margin-right: 4px"><strong>Slot Type:</strong></span>
+    <span style="white-sitemap: pre-line">{ sitemap.record.entry.tags.join(",") }</span>
+  </div>
+
 
   <div style="display: flex; flex-direction: row; margin-bottom: 16px">
     <span style="margin-right: 4px"><strong>Picture</strong></span>
@@ -107,6 +106,11 @@ let confirmDialog
 {/if}
 
 <style>
+  .detail {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+  }
   .pic {
    max-width: 300px;
   }

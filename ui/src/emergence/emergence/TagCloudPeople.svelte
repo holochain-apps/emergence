@@ -1,8 +1,7 @@
 <script lang="ts">
     import '@shoelace-style/shoelace/dist/components/select/select.js';
     import '@shoelace-style/shoelace/dist/components/option/option.js';
-    import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
-    import { decodeHashFromBase64, encodeHashToBase64, type ActionHash, type EntryHash } from '@holochain/client';
+    import { encodeHashToBase64, type ActionHash } from '@holochain/client15';
     import type { EmergenceStore } from '../../emergence-store';
     import { getContext, onMount } from 'svelte';
     import { storeContext } from '../../contexts';
@@ -33,16 +32,31 @@
 
 </script>
 
-<div class="card" style="padding:10px">
-    <div style="display:flex; flex-direction: column">
+<div class="card" style="padding:10px; width: 100%;">
+    <div style="display:flex; flex-direction: row; align-items: center;">
 
-        <span>People using "{tag}"</span>
+        <span class="tag">#{tag}</span>
         <div style="display:flex;">
         {#each folk as agent}
-            <div style="display:flex;">
+            <div style="display:flex; position: relative; margin-left: 10px;">
                 <Avatar agentPubKey={agent.agentPubKey}></Avatar>
             </div>
         {/each}
         </div>
     </div>
 </div>
+
+<style>
+
+  .tag {
+    display: inline;
+    border: 1px solid #2F87D840;
+    color: #2F87D8;
+    background-color: transparent;
+    margin-bottom: 0;
+    display: inline;
+    font-size: 11px;
+    line-height: 11px;
+    padding: 3px 5px;
+  }
+</style>

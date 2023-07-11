@@ -1,7 +1,7 @@
 <script lang="ts">
 import { getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import { type FeedElem, FeedType, sessionInterestToString, timestampToStr } from './types';
+import { type FeedElem, FeedType, sessionInterestToString, timestampToStr, SessionInterestBit } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
@@ -11,6 +11,7 @@ import NoteSummary from './NoteSummary.svelte';
 import TimeWindowSummary from './TimeWindowSummary.svelte';
 import SessionLink from './SessionLink.svelte';
 import SpaceLink from './SpaceLink.svelte';
+    import { not_equal } from 'svelte/internal';
 
 export let feedElem: FeedElem;
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
@@ -20,35 +21,53 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 <div class="feed-elem">
   {#if feedElem.type !== FeedType.NoteNew}
   <div class="elem-head">
-    <Avatar agentPubKey={feedElem.author} size={30}></Avatar>
-    <span style="margin-left:5px">{timestampToStr(feedElem.timestamp)}</span>
+    <span class="timestamp">{timestampToStr(feedElem.timestamp)}</span>
   </div>
   {/if}
   <div class="elem-body">
     {#if feedElem.type === FeedType.SessionNew}
-      created session: <SessionLink sessionHash={feedElem.about}></SessionLink>
+      <div class="type">
+        <div class="avatar"><Avatar agentPubKey={feedElem.author} size={18}></Avatar></div> created a session</div>
+      <SessionLink sessionHash={feedElem.about}></SessionLink>
     {/if}
     {#if feedElem.type === FeedType.SessionUpdate}
-    updated session: <SessionLink sessionHash={feedElem.about} linkText={feedElem.detail.title}></SessionLink>  changes: {feedElem.detail.changes.join("; ")}
+      <div class="type">Session Updated</div>
+      <SessionLink sessionHash={feedElem.about} linkText={feedElem.detail.title}></SessionLink>  changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SessionDelete}
-    Deleted session: {feedElem.detail}
+      <div class="type">session Deleted</div> 
+      {feedElem.detail}
     {/if}
     {#if feedElem.type === FeedType.SessionSetInterest}
-    set interest in <SessionLink sessionHash={feedElem.about}></SessionLink> to {sessionInterestToString(feedElem.detail)}
+
+      <div class="avatar"><Avatar agentPubKey={feedElem.author} size={18}></Avatar></div>
+      {#if feedElem.detail == SessionInterestBit.Interested}
+        is interested in
+      {:else if feedElem.detail == SessionInterestBit.Going}
+        is going to
+      {:else if feedElem.detail == SessionInterestBit.Hidden}
+        has hidden 
+      {:else}
+        has set their interest to {sessionInterestToString(feedElem.detail)} for
+      {/if}
+      <SessionLink sessionHash={feedElem.about}></SessionLink>
     {/if}
     {#if feedElem.type === FeedType.SpaceNew}
-    created space: <SpaceLink spaceHash={feedElem.about}></SpaceLink>
+      <div class="type">New space</div>
+      <SpaceLink spaceHash={feedElem.about}></SpaceLink>
     {/if}
     {#if feedElem.type === FeedType.SpaceUpdate}
-    updated space <SpaceLink spaceHash={feedElem.about}></SpaceLink>  changes: {feedElem.detail.changes.join("; ")}
+      <div class="type">Space updated</div>
+      <SpaceLink spaceHash={feedElem.about}></SpaceLink> changes: {feedElem.detail.changes.join("; ")}
     {/if}
     {#if feedElem.type === FeedType.SpaceDelete}
-    deleted space {feedElem.detail}
+    <div class="type">Space deleted</div>{feedElem.detail}
     {/if}
     {#if feedElem.type === FeedType.SlotSession}
       {#if feedElem.detail.space}
-        scheduled <SessionLink sessionHash={feedElem.about}></SessionLink> into {feedElem.detail.space} for <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary> 
+        <SessionLink sessionHash={feedElem.about}></SessionLink>
+        <div>will be hosted in {feedElem.detail.space}</div>
+        <TimeWindowSummary timeWindow={feedElem.detail.window}></TimeWindowSummary> 
       {:else}
         unscheduled <SessionLink sessionHash={feedElem.about}></SessionLink>
       {/if}
@@ -63,6 +82,7 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     deleted note: <NoteSummary noteHash={feedElem.about} showAvatar={false} showTimestamp={false}></NoteSummary>
     {/if}
     {#if feedElem.type === FeedType.TimeWindowNew}
+
     created slot:
       <TimeWindowSummary timeWindow={feedElem.detail}></TimeWindowSummary>
     {/if}
@@ -94,17 +114,53 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     display: flex; 
     flex-direction: column; 
     align-items: left;
-    margin: 0 5px 0 10px;
-    padding: 10px;
+    padding: 18px;
     border-radius: 5px;
+    position: relative;
     background-color: white;
     width: 100%;
   }
   .elem-head {
     display: flex; flex-direction: row;
+    font-size: 10px;
+    padding-left: 30px;
+    justify-content: right;
+    position: absolute;
+    top: 4px;
+    right: 4px;
   }
+
+  .avatar {
+    position: relative;
+    top: 5px;
+  }
+
+  .type {
+    display: block;
+  }
+
+  .feed-icon {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 30px
+  }
+
+  .timestamp {
+    opacity: .3;
+  }
+  
   .elem-body {
-    display: flex; flex-direction: row;
+    width: 100%;
+    text-align: left;
+  }
+
+  a {
+    color: rgba(32, 32, 32, 1.0);
+  }
+
+  .elem-body div {
+    display: inline;
   }
   
 </style>

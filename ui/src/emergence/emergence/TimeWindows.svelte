@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, getContext } from 'svelte';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import type { Record } from '@holochain/client';
+  import type { Record } from '@holochain/client15';
   import { storeContext } from '../../contexts';
   import TimeWindowDetail from './TimeWindowDetail.svelte';
   import type { EmergenceStore } from '../../emergence-store';
@@ -27,7 +27,7 @@
   <sl-spinner></sl-spinner>
 </div>
 {:else if error}
-<span>Error fetching the timeWindows: {error.data.data}.</span>
+<span>Error fetching the timeWindows: {error}.</span>
 {:else if $timeWindows.length === 0}
 <span>No timeWindows found.</span>
 {:else}

@@ -1,20 +1,27 @@
 <script lang="ts">
-    import { decodeHashFromBase64, encodeHashToBase64, type EntryHash } from "@holochain/client";
+    import { decodeHashFromBase64, encodeHashToBase64, type ActionHash, type EntryHash } from "@holochain/client15";
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
-    import { sessionSelfTags, type Info } from "./types";
+    import { sessionSelfTags, type Info, type Note } from "./types";
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
     import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
+    import '@shoelace-style/shoelace/dist/components/select/select.js';
+    import '@shoelace-style/shoelace/dist/components/option/option.js';
+    import SenseResults from "./SenseResults.svelte";
+    import type { HoloHashMap } from "@holochain-open-dev/utils";
+  import { toPromise } from "@holochain-open-dev/stores";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
     const dispatch = createEventDispatcher();
     let sensing: SlCheckbox
-    $:settings = store.settings
+    $: sitemaps = store.maps
+    $: settings = store.settings
+
 
     onMount(() => {
     })
@@ -73,29 +80,39 @@
         const sessions = []
         for (const s of get(store.sessions)) {
             const info = await serializeInfo(s, false)
-            info.entry['leaders'] = info.entry['leaders'].map(l => encodeHashToBase64(l))
+            info.entry['leaders'] = info.entry['leaders'].map(l => {return {type:l.type, hash:encodeHashToBase64(l.hash)}})
             info.entry['tags'] = sessionSelfTags(s)
             sessions.push(info)
         }
         const notes = []
-        for (const s of get(store.notes)) {
-            const info = await serializeInfo(s, true)
-            info.entry['session'] = encodeHashToBase64(info.entry['session'])
-            notes.push(info)
+        const n: HoloHashMap<ActionHash, Info<Note>| undefined> = store.neededStuffStore.notes.all()
+        if (n) {
+            for (const s of n.values()) {
+                const info = await serializeInfo(s, true)
+                info.entry['session'] = encodeHashToBase64(info.entry['session'])
+                notes.push(info)
+            }
         }
         
         const maps = []
         for (const s of get(store.maps)) { 
             const mapEntry = await serializeInfo(s, true)
-            mapEntry.entryHash = encodeHashToBase64(s.record.entryHash)
             maps.push(mapEntry)
         }
 
         const proxyAgents = []
         for (const s of get(store.proxyAgents)) { 
             const proxyAgentEntry = await serializeInfo(s, true)
-            proxyAgentEntry.entryHash = encodeHashToBase64(s.record.entryHash)
             proxyAgents.push(proxyAgentEntry)
+        }
+
+        const agents = []
+        for (const [agentKey, profile] of await toPromise(store.profilesStore.allProfiles)) { 
+            agents.push({
+                pubKey: encodeHashToBase64(agentKey), 
+                nickname:profile.nickname, 
+                bio: profile.fields.bio, 
+                location:profile.fields.location})
         }
 
         exportJSON= JSON.stringify(
@@ -105,6 +122,7 @@
                 notes,
                 windows: get(store.timeWindows),
                 maps,
+                agents,
                 proxyAgents
             }
         )
@@ -124,14 +142,17 @@
         reader.readAsText(file);
     };
 
+    let uploadedPics = []
+
     const uploadImportedFile = async (e) : Promise<EntryHash> => {
         let pic = undefined
         if (e.pic_data) {
             const file = new File([toUint8Array(e.pic_data)], e.pic_file.name, {
                     lastModified: e.pic_data.last_modifed,
-                    type: e.pic_data.file_type,
+                    type: e.pic_file.file_type,
                      });
-        pic = await store.fileStorageClient.uploadFile(file);
+            pic = await store.fileStorageClient.uploadFile(file);
+            uploadedPics[e.pic_hash] = pic
         }
         return pic
     }
@@ -140,9 +161,17 @@
         const maps = {}
         for (const s of data.maps) {
             const e = s.entry
-            let pic = await uploadImportedFile(e)
-            const record = await store.createSiteMap(e.text, pic)
-            maps[s.entryHash] = record.entryHash
+            let pic
+            if (e.pic_data) {
+                pic = await uploadImportedFile(e)
+            } else {
+                pic = uploadedPics[e.pic_hash]
+            }
+            if (!e.tags) {
+                e.tags = []
+            }
+            const record = await store.createSiteMap(e.text, pic, e.tags)
+            maps[s.original_hash] = record.actionHash
 
         }
 
@@ -152,7 +181,7 @@
                 const e = s.entry
                 let pic = await uploadImportedFile(e)
                 const record = await store.createProxyAgent(e.nickname, e.bio, e.location, pic)
-                proxyAgents[s.entryHash] = record.entryHash
+                proxyAgents[s.original_hash] = {type: 'ProxyAgent', hash: record.actionHash}
             }
         }
 
@@ -181,27 +210,35 @@
                             path: `space.location`,
                             data: relation.content.data
                         }
-                    }                    
+                    }
                 ])
             }
 
         }
         const sessions = {}
         for (const s of data.sessions) {
-            const leaders = [] // fixme
             const e = s.entry
+            let leaders = e.leaders.filter(l=> l.type == "ProxyAgent" || (data.agents && data.agents.find(a=>a.pubKey == l.hash)))
+                .map(l=>l.type == "ProxyAgent" ? proxyAgents[l.hash] : {type:"Agent", hash: decodeHashFromBase64(l.hash)})
+            console.log("LEAD", leaders, e.title)
+            if (leaders.length == 1 && leaders[0]== undefined) {
+                leaders = []
+            }
             const tags = e.tags  ? e.tags : []
             let record
             try {
-             record = await store.createSession(e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, tags)
-             sessions[s.original_hash] = record.actionHash
+                console.log("CREATING: ",e.title)
+                record = await store.createSession(e.session_type? e.session_type : 0, e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, tags)
+                sessions[s.original_hash] = record.actionHash
             } catch(e) {
                 console.log("Import Error",e)
             }
-            const relation = s.relations.filter(r=>r.content.path === "session.space").sort((a,b) => b.timestamp - a.timestamp)[0]
+            const relation = s.relations.filter(r=>r.content.path === "session.slot").sort((a,b) => b.timestamp - a.timestamp)[0]
             if (relation) {
-                const window = JSON.parse(relation.content.data)
-                await store.slot(record.actionHash, {window, space: spaces[relation.dst]})
+                if (relation.content.data) {
+                    const window = JSON.parse(relation.content.data)
+                    await store.slot(record.actionHash, {window, space: spaces[relation.dst]})
+                }
             }
 
         }
@@ -213,7 +250,7 @@
             }
 
         }
-        store.sync(undefined)
+        await store.sync(undefined)
     }
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
@@ -227,41 +264,69 @@
     </div>
   </div>
 <div class="pane-content">
+
     <div class="admin-controls">
-        <sl-button style="margin: 8px;"  on:click={() => {  dispatch('open-slotting')} }>
-            Manage Schedule
-        </sl-button>
+        <!-- <sl-button style="margin: 8px;"  on:click={async () => { throw("error!")} }>
+            Error!
+        </sl-button> -->
+        <div id="schedule-button">        
+        <sl-button  style="margin: 8px;"  on:click={() => { dispatch('open-slotting')} }>
+            Schedule
+        </sl-button></div>
 
-        <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
+        <div id="sitemaps-button">
+        <sl-button  style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
             Site Maps
-        </sl-button>
-
-        <sl-button style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
+        </sl-button></div>
+        <div id="proxyagents-button">
+        <sl-button  style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
             Proxy Agents
-        </sl-button>
-
-        <sl-button style="margin: 8px;"  on:click={async () => await doExport()}>
+        </sl-button></div>
+        <div id="export-button">
+        <sl-button  style="margin: 8px;"  on:click={async () => await doExport()}>
             Export
-        </sl-button>
-
-        <sl-button style="margin: 8px;" on:click={()=>fileinput.click()}>
+        </sl-button></div>
+        <div id="import-button">
+        <sl-button  style="margin: 8px;" on:click={()=>fileinput.click()}>
             Import
-        </sl-button>
-        <sl-button style="margin: 8px;" on:click={()=> {
+        </sl-button></div>
+        <div id="gameactive-button">
+        <sl-button  style="margin: 8px;" on:click={()=> {
             const s= $settings
             s.game_active = ! s.game_active
             store.setSettings(s)
         }
         }>
             {$settings.game_active ? 'Deactivate Sensing Game' : 'Activate Sensing Game'}
-        </sl-button>
-        
-    </div>
-    <div>
+        </sl-button></div>
+        {#if $sitemaps.length > 0}
+        <div id="sitemmap-select"> 
+        <sl-select
+          value={$settings.current_sitemap ? encodeHashToBase64($settings.current_sitemap) : undefined}
+          style="margin: 8px; position: relative; top: -26px;"
+          label="Current Site Map"
+          on:sl-change={(e) => {
+            const s= $settings
+            const hash = decodeHashFromBase64(e.target.value)
+            s.current_sitemap = hash
+            store.setSettings(s)
+           } }
+        >
+        {#each $sitemaps as map}
+            <sl-option value={encodeHashToBase64(map.original_hash)}>{map.record.entry.text}</sl-option>
+        {/each}
+        </sl-select></div>
+
+    {/if}
 
     </div>
-
-
+  
+    <div class="game-status">
+        <h3>Total Attendees: {store.peopleCount() || 0}</h3>
+  
+        <h3> Sensemaking game is {#if $settings.game_active}Active{:else}Inactive{/if}</h3>
+        <SenseResults></SenseResults>
+    </div>
 
    
 </div>
@@ -271,11 +336,17 @@
         margin-left:15px;
     }
 
+    .game-status {
+        max-width: 720px;
+        margin: 0 auto;
+    }
+    
     .admin-controls {
         display: flex;
-        justify-content: center;
         width: 100%;
-    
+        flex-wrap: wrap;
+        justify-content: center;
+        margin: 0 auto;
     }
 
     .header-content h3 {

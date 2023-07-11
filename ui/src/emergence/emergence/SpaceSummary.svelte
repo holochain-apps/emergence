@@ -12,7 +12,7 @@ import Fa from 'svelte-fa'
 import { faFlag } from '@fortawesome/free-solid-svg-icons';
 import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
-import { encodeHashToBase64 } from '@holochain/client';
+import { encodeHashToBase64 } from '@holochain/client15';
 import {ActionHashMap } from '@holochain-open-dev/utils';
 
 const dispatch = createEventDispatcher();
@@ -65,7 +65,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 
 </div>
 {:else if error}
-<span>Error fetching the space: {error.data.data}</span>
+<span>Error fetching the space: {error}</span>
 {:else}
 
 
@@ -74,17 +74,17 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
  >
   <div class="pic">
     {#if space.record.entry.pic}
-    <show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image>
+      <div style="min-width: 70px; min-height: 70px;"><show-image image-hash={encodeHashToBase64(space.record.entry.pic)}></show-image></div>
     {:else}
-     No Pic
+      <img class="no-pic" src="/images/no-pic.svg">
     {/if}
-    
+    {#if space.record.entry.key} <span class="location">{space.record.entry.key}</span>{/if}
   </div>
   <div class="info">
     <div class="name-row">
       <div class="name">
         <sl-tooltip placement="top-start" content={space.record.entry.description}>
-          <span>{ space.record.entry.name }{#if space.record.entry.key} ({space.record.entry.key}){/if}</span>
+          <span>{ space.record.entry.name }</span>
         </sl-tooltip>
       </div>
       <div class="sessions">
@@ -113,8 +113,10 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 <style>
   .summary {
     display: flex;
+    padding: 10px;
     flex-direction: row;
     width: 100%;
+    cursor: pointer;
   }
   .name-row {
     display: flex;
@@ -139,9 +141,35 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
     flex-direction: row;
   }
 
+  .location {
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    text-shadow: 1px 1px #0D5E3340;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+    font-size: 14px;
+    border: 1px solid rgba(33, 179, 95, .5);
+    border-radius: 50%;
+    color: white;
+    font-weight: bold;
+    font-weight: normal;
+    cursor: pointer;
+    background: linear-gradient(129.46deg, #2F87D8 8.45%, #00D1FF 93.81%);
+    box-shadow: 0 5px 5px rgba(0,0,0,.2);
+  }
+
   .info {
     justify-content: center;
     padding: 0 15px;
+  }
+
+  .card {
+    border-radius: 5px;
   }
 
   .sessions {
@@ -154,10 +182,26 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
   }
   .pic {
     width: 100px;
-    border-radius: 10px 0 0 10px;
+    text-align: center;
+    font-size: 12px;
+    color: rgba(86, 94, 109, .5);
+    border-radius: 5px;
+    overflow: hidden;
+    box-shadow: 0 3px 3px rgba(0,0,0,.15);
+    position: relative;
+    min-height: 32px;
   }
 
   .pic img {
-    border: 1px solid red;
+    border-radius: 10px;
+  }
+
+  img.no-pic {
+    fill: rgba(86, 94, 109, 1.0);
+    opacity: .3;
+    position: absolute;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    left: 50%;
   }
 </style> 

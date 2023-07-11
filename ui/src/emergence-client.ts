@@ -1,21 +1,24 @@
 // import {  } from './types';
 
-import {
-  encodeHashToBase64,
-     type ActionHash,
-     type AgentPubKey,
-     type AppAgentCallZomeRequest,
-     type AppAgentClient,
-     type EntryHash,
-     type HoloHash,
-} from '@holochain/client';
-import type { Session, TimeWindow, Space, Relation, UpdateSessionInput, FeedElem, UpdateSpaceInput, Info, Note, UpdateNoteInput, GetStuffInput, GetStuffOutput, RelationInfo, UpdateSiteMapInput, SiteMap, SessionAgent, TagUse, Settings, ProxyAgent, UpdateProxyAgentInput, AnyAgent } from './emergence/emergence/types';
 import { EntryRecord } from '@holochain-open-dev/utils';
+import type {
+  ActionHash,
+  AgentPubKey,
+  AppAgentCallZomeRequest,
+  AppAgentClient,
+  EntryHash,
+  HoloHash
+} from '@holochain/client15';
+import type { AnyAgent, FeedElem, GetFeedInput, GetStuffInput, GetStuffOutput, Info, Note, ProxyAgent, Relation, RelationInfo, Session, SessionTypeID, Settings, SiteMap, Space, TagUse, TimeWindow, UpdateNoteInput, UpdateProxyAgentInput, UpdateSessionInput, UpdateSiteMapInput, UpdateSpaceInput } from './emergence/emergence/types';
 // import { UnsubscribeFunction } from 'emittery';
 
 
 export class EmergenceClient {
+  reconnecting = false
+
   constructor(
+    public url: string,
+    public installed_app_id,
     public client: AppAgentClient,
     public roleName: string,
     public zomeName = 'emergence'
@@ -35,26 +38,26 @@ export class EmergenceClient {
 //     });
 //   }
 
-
   async createRelations(relations: Array<Relation>) : Promise<ActionHash> {
-    return this.callZome('create_relations', relations)
+    return await this.callZome('create_relations', relations)
   }
 
-  getRelations(hash: HoloHash) : Promise<Array<RelationInfo>> {
-    return this.callZome('get_relations', hash)
+  async getRelations(hash: HoloHash) : Promise<Array<RelationInfo>> {
+    return await this.callZome('get_relations', hash)
   }
 
   async deleteRelations(relations: Array<ActionHash>) {
-    return this.callZome('delete_relations', relations)
+    return await this.callZome('delete_relations', relations)
   }
 
-  async getFeed(agent: AgentPubKey | undefined) : Promise<Array<FeedElem>> {
-    const relations: Array<RelationInfo> = await this.callZome('get_feed', {agent_filter: agent})
+  async getFeed(filter: GetFeedInput) : Promise<Array<FeedElem>> {
+    const relations: Array<RelationInfo> = await this.callZome('get_feed', filter)
     return relations.map(ri => {
       const r = ri.relation
       const author = r.src
       author[1] =32
         return {
+          hash: ri.create_link_hash,
           timestamp: ri.timestamp/1000,
           author,
           about: r.dst,
@@ -64,19 +67,19 @@ export class EmergenceClient {
   }
 
   async getTags() : Promise<Array<TagUse>> {
-    return this.callZome('get_tags', undefined)
+    return await this.callZome('get_tags', undefined)
   }
 
   async createTimeWindow(timeWindow: TimeWindow) : Promise<ActionHash> {
-    return this.callZome('create_time_window', timeWindow)
+    return await this.callZome('create_time_window', timeWindow)
   }
 
-  getTimeWindows() : Promise<Array<TimeWindow>> {
-    return this.callZome('get_time_windows',null)
+  async getTimeWindows() : Promise<Array<TimeWindow>> {
+    return await this.callZome('get_time_windows',null)
   }
 
   async deleteTimeWindow(timeWindow: TimeWindow) : Promise<undefined> {
-    return this.callZome('delete_time_window', timeWindow)
+    return await this.callZome('delete_time_window', timeWindow)
   }
 
   genKey = () => {
@@ -88,10 +91,10 @@ export class EmergenceClient {
     return key
   }
   
-  async createSession(title: string, amenities: number, description: string, leaders:Array<AnyAgent>, smallest: number, largest: number, duration: number) : Promise<EntryRecord<Session>> {
-    console.log("FISH",leaders.map(l=>encodeHashToBase64(l.hash)))
+  async createSession(sessionType: SessionTypeID, title: string, amenities: number, description: string, leaders:Array<AnyAgent>, smallest: number, largest: number, duration: number) : Promise<EntryRecord<Session>> {
     const sessionEntry: Session = { 
         key: this.genKey(),
+        session_type: sessionType,
         title,
         description,
         leaders,
@@ -109,8 +112,8 @@ export class EmergenceClient {
     return new EntryRecord(await this.callZome('update_session', update))
   }
 
-  deleteSession(actionHash: ActionHash) {
-    return this.callZome('delete_session', actionHash)
+  async deleteSession(actionHash: ActionHash) {
+    return await this.callZome('delete_session', actionHash)
   }
 
   async getSessions() : Promise<Array<Info<Session>>> {
@@ -134,11 +137,11 @@ export class EmergenceClient {
   }
 
   async updateSpace(update: UpdateSpaceInput) : Promise<EntryRecord<Space>> {
-    return new EntryRecord(await this.callZome('update_space', update))
+    return await new EntryRecord(await this.callZome('update_space', update))
   }
 
-  deleteSpace(actionHash: ActionHash) {
-    return this.callZome('delete_space', actionHash)
+  async deleteSpace(actionHash: ActionHash) {
+    return await this.callZome('delete_space', actionHash)
   }
 
   async getSpaces() : Promise<Array<Info<Space>>> {
@@ -168,14 +171,15 @@ export class EmergenceClient {
     return new EntryRecord(await this.callZome('update_note', update))
   }
 
-  deleteNote(actionHash: ActionHash) {
-    return this.callZome('delete_note', actionHash)
+  async deleteNote(actionHash: ActionHash) {
+    return await this.callZome('delete_note', actionHash)
   }
 
-  async createSiteMap(text: string, pic: EntryHash | undefined) : Promise<EntryRecord<SiteMap>> {
+  async createSiteMap(text: string, pic: EntryHash | undefined, tags: Array<string>) : Promise<EntryRecord<SiteMap>> {
     const mapEntry: SiteMap = { 
         text,
         pic,
+        tags,
       };
     
     return new EntryRecord(await this.callZome('create_map', mapEntry))
@@ -185,8 +189,8 @@ export class EmergenceClient {
     return new EntryRecord(await this.callZome('update_map', update))
   }
 
-  deleteSiteMap(actionHash: ActionHash) {
-    return this.callZome('delete_map', actionHash)
+  async deleteSiteMap(actionHash: ActionHash) {
+    return await this.callZome('delete_map', actionHash)
   }
 
   async getSiteMaps() : Promise<Array<Info<SiteMap>>> {
@@ -216,8 +220,8 @@ export class EmergenceClient {
     return new EntryRecord(await this.callZome('update_proxy_agent', update))
   }
 
-  deleteProxyAgent(actionHash: ActionHash) {
-    return this.callZome('delete_proxy_agent', actionHash)
+  async deleteProxyAgent(actionHash: ActionHash) {
+    return await this.callZome('delete_proxy_agent', actionHash)
   }
 
   async getProxyAgents() : Promise<Array<Info<ProxyAgent>>> {
@@ -281,14 +285,14 @@ export class EmergenceClient {
     return await this.callZome('get_settings', undefined)
   }
 
-  private callZome(fn_name: string, payload: any) {
+  private async callZome(fn_name: string, payload: any) {
     const req: AppAgentCallZomeRequest = {
       role_name: this.roleName,
       zome_name: this.zomeName,
       fn_name,
       payload,
     };
-    return this.client.callZome(req);
+    return await this.client.callZome(req, 30000);
   }
   /** Scene */
 

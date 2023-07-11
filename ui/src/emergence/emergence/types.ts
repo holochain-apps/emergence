@@ -14,7 +14,11 @@ import {
   type HoloHash,
   encodeHashToBase64,
   decodeHashFromBase64
-} from '@holochain/client';
+} from '@holochain/client15';
+
+
+export const NULL_HASHB64 = "uhCkk______________________"
+export const NULL_HASH = decodeHashFromBase64(NULL_HASHB64)
 
 export type EmergenceSignal = {
   type: 'EntryCreated';
@@ -51,10 +55,23 @@ export type EntryTypes =
 export type AnyAgent = 
 {type: 'ProxyAgent', hash: ActionHash} |
 {type: 'Agent', hash: AgentPubKey}
- 
+
+export type AnyAgentDetailed = 
+{type: 'ProxyAgent', hash: ActionHash, bio:string, location: string, nickname: string, avatarImage: EntryHash} |
+{type: 'Agent', hash: AgentPubKey, bio:string, location: string, nickname: string}
+
+export type SessionTypeID = number
+export type SessionType  = {
+  name: string,
+  color: string,
+  can_rsvp: boolean,
+  can_any_time: boolean,
+  can_leaderless: boolean
+}
 
 export interface Session { 
   key: string;
+  session_type: SessionTypeID,
   title: string;
   description: string;
   leaders: Array<AnyAgent>,
@@ -92,6 +109,7 @@ export interface RawInfo {
 export interface UpdateSessionInput {
   original_session_hash: ActionHash,
   previous_session_hash: ActionHash,
+  updated_type: SessionTypeID,
   updated_title: string,
   updated_description: string;
   updated_leaders: Array<AnyAgent>,
@@ -138,6 +156,7 @@ export interface UpdateNoteInput {
 export interface SiteMap {
   text: string,
   pic: EntryHash,
+  tags: Array<string>,
 }
 
 export interface ProxyAgent {
@@ -160,10 +179,10 @@ export interface UpdateSiteMapInput {
   updated_map: SiteMap,
 }
 
-export interface Slot {
-  space: ActionHash
+export type Slot = {
+  space?: ActionHash
   window: TimeWindow
-}
+} 
 
 export const slotEqual = (slota: Slot| undefined, slotb: Slot|undefined) : boolean => {
   if (slota === undefined && slotb !== undefined) return false
@@ -245,12 +264,11 @@ export const setInterestBit = (interest:SessionInterest, i:SessionInterestBit, v
 }
 
 export const Amenities = [
-  "Electricty",
+  "Electricity",
   "Whiteboard",
   "Table",
-  "Screen/Proj",
+  "Screen",
   "Seating",
-  "Wifi",
   "Indoor",
   "Outdoor",]
 
@@ -280,6 +298,9 @@ export interface SessionRelationData {
 
 export interface GetFeedInput {
   agent_filter?: AgentPubKey
+  newer_than?: Timestamp
+  older_than?: Timestamp
+  count?: number
 }
 
 export enum FeedType {
@@ -306,6 +327,7 @@ export enum FeedType {
 }
 
 export interface FeedElem {
+  hash: ActionHash,
   timestamp: Timestamp,
   author: AgentPubKey,
   about: ActionHash,
@@ -357,7 +379,7 @@ export interface Coordinates {
 }
 
 export interface SiteLocation {
-  imageHash: EntryHash,
+  imageHash: ActionHash,
   location: Coordinates
 }
 
@@ -411,6 +433,11 @@ export enum SessionSortOrder {
   Descending
 }
 
+export enum SpaceSortOrder {
+  Key = "key",
+  Capacity = "cap"
+}
+
 export interface UIProps {
   amSteward: boolean
   debuggingEnabled: boolean
@@ -418,11 +445,24 @@ export interface UIProps {
   discoverPanel: string
   sessionsFilter: SessionsFilter
   feedFilter: FeedFilter
+  peopleFilter: PeopleFilter
   detailsStack: Array<Details>,
-  sessionListMode: boolean,
+  sessionListMode: string,
   pane:string,
-  sessionSort: SessionSortOrder
+  sessionSort: SessionSortOrder,
+  spaceSort: SpaceSortOrder,
+  confirmHide: boolean,
+  searchVisible: boolean,
+  syncing: number,
 }
+
+export enum SessionListMode {
+  List = "",
+  ListDetail = "detail",
+  GridTime = "grid-time",
+  GridSpace = "grid-space",
+}
+
 
 export enum DetailsType {
   Session = 0,
@@ -435,6 +475,17 @@ export interface Details {
   type: DetailsType
   hash: ActionHash
 }
+
+export interface PeopleFilter {
+  keyword: string,
+}
+
+export const defaultPeopleFilter = () : PeopleFilter => {
+  return {
+    keyword: "",
+  }
+}
+
 
 export interface FeedFilter {
   tags: Array<string>,
@@ -470,6 +521,7 @@ export interface SessionsFilter {
   tags: Array<string>,
   space: Array<ActionHash>,
   keyword: string,
+  types: number
 }
 
 export const defaultSessionsFilter = () : SessionsFilter => {
@@ -489,10 +541,48 @@ export const defaultSessionsFilter = () : SessionsFilter => {
     tags: [],
     space: [],
     keyword: "",
+    types: 0,
   }
 }
 
 
 export interface Settings {
   game_active: boolean,
+  current_sitemap?: ActionHash,
+  session_types: Array<SessionType>,
+}
+
+export interface InterestData {
+  session:Info<Session>, 
+  estimatedAttendance:number,
+  percentInterest:number,
+  assesments:number,
+  passCount:number,
+  goingCount:number,
+  bookmarkedCount:number,
+}
+
+export interface Projection {
+  sessionCount: number,
+  totalAssesments: number,
+  peopleCount: number,
+  likelyCount: number,
+  maxAttendance: number,
+  minAttendance: number,
+  interestData: Array<InterestData>
+}
+
+
+export interface DownloadedFile {
+  file: File,
+  data?: string,
+}
+
+export interface PersonData {
+  type: string, 
+  hash: ActionHash, 
+  nickname: string,
+  bio: string,
+  location: string
+  avatarImage: EntryHash,
 }

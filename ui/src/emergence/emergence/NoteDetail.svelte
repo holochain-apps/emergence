@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { encodeHashToBase64, type ActionHash } from '@holochain/client';
+    import { encodeHashToBase64, type ActionHash } from '@holochain/client15';
     import { storeContext } from '../../contexts';
     import type { EmergenceStore  } from '../../emergence-store';
     import { createEventDispatcher, getContext } from 'svelte';
@@ -13,6 +13,7 @@
     import NoteCrud from './NoteCrud.svelte';
     import Confirm from './Confirm.svelte';
     import SessionLink from './SessionLink.svelte';
+    import ShowFile from './ShowFile.svelte';
     import { Marked } from "@ts-stack/markdown";
     import { truncateText } from './utils';
 
@@ -119,12 +120,14 @@
         </div>
         <div class="tags">
           {#each $note.value.record.entry.tags as tag}
-            <div class="tag">{tag}</div>
+            <div class="tag">#{tag}</div>
           {/each}
         </div>
         {#if $note.value.record.entry.pic}
           <div class="post-pic">
-          <show-image image-hash={encodeHashToBase64($note.value.record.entry.pic)}></show-image>
+            <ShowFile fileHash={$note.value.record.entry.pic}></ShowFile>
+<!-- 
+          <show-image image-hash={encodeHashToBase64($note.value.record.entry.pic)}></show-image> -->
           </div>
         {/if}
       {:else}
@@ -141,11 +144,11 @@
     display: none;
   }
   .note-frame {
-    border: 1px solid #e9e9e9;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    border-radius: 3px;
+    border-top: 1px solid #e9e9e9;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
     margin: .5em;
-    padding: .5em;
+    padding: 15px;
   }
   .post-header {
     display: flex;
@@ -165,7 +168,8 @@
     font-weight: bold;
   }
   .post-date {
-    font-size: 0.9em;
+    font-size: 11px;
+    opacity: .4;
   }  
   .avatar {
     font-weight: bold;
@@ -178,35 +182,28 @@
     overflow: hidden;
   }
   
-  :global(.tags) {
-    display: flex;
-    margin-bottom: .25em;
-    font-size: .9em;
-    padding: 0px;
-  }
   .post-pic {
     /*TODO: figure out best way to control content width 
     higher up the dom like at the pane level 
     so that images can take up 100% width of the post*/
-    width: 300px;
+    max-width: 680px;
     margin: 0 auto;
     margin:auto;
   }
-  :global(.tag) {
-    color: white;
-    background-color: gray;
-    border-radius: 7px;
-    padding: 5px;
-    margin-right: 5px;
-    padding-top: 0px;
-    padding-bottom: 0px;
-    font-size: 12px;
-    margin-bottom: .25em;
-    border: 1px solid rgba(243, 243, 245, 1.0);
-    background-color: rgba(243, 243, 245, 1.0);
-    color: rgba(0, 0, 0, .5);
+
+  .tags {
+    display: block;
+    padding-top: 8px;
   }
 
+  .tag {
+    display: inline;
+    border: 1px solid #2F87D840;
+    color: #2F87D8;
+    background-color: transparent;
+    margin-bottom: 0;
+    display: inline;
+  }
 
 
   /*debug*/

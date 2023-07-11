@@ -11,7 +11,7 @@ import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
-import { encodeHashToBase64,  } from '@holochain/client';
+import { encodeHashToBase64,  } from '@holochain/client15';
 import SessionSummary from './SessionSummary.svelte';
 
 const dispatch = createEventDispatcher();
@@ -52,7 +52,7 @@ $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
 
 </div>
 {:else if error}
-<span>Error fetching the space: {error.data.data}</span>
+<span>Error fetching the space: {error}</span>
 {:else}
 <div class="events">
   <div class="summary clickable"

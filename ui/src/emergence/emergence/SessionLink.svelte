@@ -1,5 +1,5 @@
 <script lang="ts">
-   import type { ActionHash } from '@holochain/client';
+   import type { ActionHash } from '@holochain/client15';
   import type { EmergenceStore } from '../../emergence-store';
   import { getContext, onMount } from 'svelte';
   import { storeContext } from '../../contexts';
@@ -14,7 +14,8 @@
   onMount(() => {
   });
 
-  const handleClick = ()=> {
+  const handleClick = (e)=> {
+    e.stopPropagation()
     store.openDetails(DetailsType.Session, sessionHash)
   }
   const sessionTitle = (sessionHash: ActionHash) => {
@@ -22,7 +23,7 @@
     if (session) {
       return session.record.entry.title
     }
-    return "<deleted session>"
+    return "<unknown session>"
   }
 </script>
 
@@ -33,6 +34,10 @@
       margin: 0 5px 0 5px;
       cursor: pointer;
       text-decoration: underline;
-      color: blue;
+      color: rgba(51, 131, 216, 1.0);
+      background: -webkit-linear-gradient(rgba(51, 131, 216, 1.0), rgba(93, 52, 201, 1.0));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: inline;
     }
 </style>

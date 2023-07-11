@@ -1,6 +1,6 @@
 <script lang="ts">
 import { createEventDispatcher, getContext, onMount } from 'svelte';
-import { type EntryHash, type AgentPubKey, encodeHashToBase64 } from '@holochain/client';
+import { type EntryHash, type AgentPubKey, encodeHashToBase64, type ActionHash, decodeHashFromBase64 } from '@holochain/client15';
 import { storeContext } from '../../contexts';
 import { Amenities, type Info, type Space, setAmenity, type SiteMap, type SiteLocation} from './types';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -11,6 +11,9 @@ import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import '@holochain-open-dev/file-storage/dist/elements/upload-files.js';
 import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
 import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+import '@shoelace-style/shoelace/dist/components/select/select.js';
+import '@shoelace-style/shoelace/dist/components/option/option.js';
+
 import type {
   UploadFiles,
 } from "@holochain-open-dev/file-storage/dist/elements/upload-files.js";
@@ -24,6 +27,7 @@ import { faSave, faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import SiteMapLocation from './SiteMapLocation.svelte';
 import MultiSelect from 'svelte-multiselect'
+  import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let amenityElems: Array<SlCheckbox> = []
@@ -40,7 +44,9 @@ let capacity: number = 0;
 let pic: EntryHash | undefined = undefined;
 let tags: Array<string> = []
 let location: SiteLocation | undefined;
-let sitemap: Info<SiteMap> | undefined;
+let sitemap: Info<SiteMap>| undefined;
+$: sitemaps = store.maps
+$: sitemap
 
 let uploadFiles: UploadFiles
 
@@ -55,6 +61,9 @@ onMount(() => {
 export const open = (spc) => {
   space = spc
   sitemap = store.getCurrentSiteMap()
+  if (sitemap && siteMapLocation) {
+    siteMapLocation.setSitemap(sitemap)
+  }
   if (space) {
     key = space.record.entry.key
     name = space.record.entry.name
@@ -64,9 +73,8 @@ export const open = (spc) => {
     capacity = space.record.entry.capacity
     pic = space.record.entry.pic
     tags = space.record.entry.tags
-    location = store.getSpaceSiteLocation(space)
-    uploadFiles.defaultValue = pic
-
+    location = sitemap ? store.getSpaceSiteLocation(space, sitemap.original_hash) : undefined
+    uploadFiles.defaultValue = pic ? pic : undefined  // can't be null, must be undefined
   } else {
     key = ""
     name = ""
@@ -79,12 +87,12 @@ export const open = (spc) => {
     uploadFiles.defaultValue = undefined
   }
   uploadFiles.reset()
-  console.log("RESET")
   dialog.show()
 }
 
 async function updateSpace() {
   if (space) {
+    const pic = uploadFiles.value
     const updateRecord = await store.updateSpace(space.original_hash, {key, name, description, stewards, capacity, amenities, tags, pic, location})
     if (updateRecord) {
       dispatch('space-updated', { actionHash: updateRecord.actionHash });
@@ -95,12 +103,13 @@ async function updateSpace() {
 
 async function createSpace() {  
   try {
+    const pic = uploadFiles.value
     const record = await store.createSpace(key, name, description, stewards, capacity, amenities, tags, pic, location)
 
     dispatch('space-created', { space: record });
   } catch (e) {
     console.log("CREATE SPACE ERROR", e)
-    errorSnackbar.labelText = `Error creating the space: ${e.data.data}`;
+    errorSnackbar.labelText = `Error creating the space: ${errorText(e)}`;
     errorSnackbar.show();
   }
   dialog.hide()
@@ -117,10 +126,11 @@ function deleteSteward(index: number) {
   stewards = stewards
 }
 let dialog
+let siteMapLocation
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<sl-dialog label={space?"Edit Space":"Create Space"}
+<sl-dialog style="--width:100vw;" label={space?"Edit Space":"Create Space"}
   bind:this={dialog}
   >
   {#if space}
@@ -147,31 +157,26 @@ let dialog
 
 
 </div>
+<div style="display:flex; flex-direction:row; justify-content:space-between">
+  <div style="display:flex; flex-direction:column; margin-right: 10px">
+    <div style="margin-bottom: 16px; width: 100px">
+      <sl-input
+      label="Map Symbol"
+      value={key}
+      on:input={e => { key = e.target.value; } }
+    ></sl-input>
+    </div>
 
-  <div style="margin-bottom: 16px; width: 100px">
-    <sl-input
-    label="Map Symbol"
-    value={key}
-    on:input={e => { key = e.target.value; } }
-  ></sl-input>
-  </div>
-
-  <div style="margin-bottom: 16px">
-    <sl-input
-    label=Name
-    value={name}
-    on:input={e => { name = e.target.value; } }
-  ></sl-input>
-  </div>
-
-  <div style="margin-bottom: 16px">
-    <sl-textarea 
-      label=Description 
-      value={ description } on:input={e => { description = e.target.value;} }
-    ></sl-textarea>
+    <div style="margin-bottom: 16px">
+      <sl-input
+      label=Name
+      value={name}
+      on:input={e => { name = e.target.value; } }
+    ></sl-input>
+    </div>
   </div>
   <div style="margin-bottom: 16px">
-    <span style="margin-right: 4px"><strong>Stewards:</strong></span>
+    <span style="margin-right: 4px">Stewards:</span>
     {#each stewards as steward, i}
     <div style="display:flex;">
       <Avatar agentPubKey={steward}></Avatar>
@@ -185,56 +190,84 @@ let dialog
 
     <search-agent field-label="Add Steward" include-myself={true} clear-on-select={true} on:agent-selected={(e)=>addSteward(e.detail.agentPubKey)}></search-agent>
   </div>
+</div>
 
   <div style="margin-bottom: 16px">
-    <sl-input
-    label="Capacity"
-    value={isNaN(capacity)? '' : `${capacity}`}
-    on:input={e => { capacity = parseInt(e.target.value); } }
-    ></sl-input>
+    <sl-textarea 
+      label=Description 
+      value={ description } on:input={e => { description = e.target.value;} }
+    ></sl-textarea>
   </div>
 
-  <div style="margin-bottom: 16px">
-    <div style="font-size: 16px">Amenities Available </div>
-    {#each Amenities as amenity, i}
-      <sl-checkbox 
-        bind:this={amenityElems[i]}
-        checked={(amenities >> i)&1}
-        on:sl-change={e => { amenities = setAmenity(amenities, i, e.target.checked)} }
-      >{amenity}</sl-checkbox>
-    {/each}
-  </div>
-
-  <div style="margin-bottom: 16px">
-    <span>Slot type:</span >
-    <MultiSelect 
-      bind:selected={tags} 
-      options={store.getSlotTypeTags()}
-      allowUserOptions={true}
-      />
-  </div>
-
-  <div style="margin-bottom: 16px">
-    <span>Add a pic (optional):</span >
-      <div class="pic-upload">
-          <upload-files
-          bind:this={uploadFiles}
-          one-file
-          accepted-files="image/jpeg,image/png,image/gif"
-          defaultValue={pic ? encodeHashToBase64(pic) : undefined}
-          on:file-uploaded={(e) => {
-            pic = e.detail.file.hash;
-          }}
-        ></upload-files>
+  <div style="display:flex; flex-direction:row; justify-content:space-between">
+    <div style="display:flex; flex-direction:column; margin-right: 10px">
+      <div style="margin-bottom: 16px">
+        <sl-input
+        label="Capacity"
+        value={isNaN(capacity)? '' : `${capacity}`}
+        on:input={e => { capacity = parseInt(e.target.value); } }
+        ></sl-input>
       </div>
+
+      <div style="margin-bottom: 16px">
+        <div style="font-size: 16px">Amenities Available </div>
+        {#each Amenities as amenity, i}
+          <sl-checkbox 
+            bind:this={amenityElems[i]}
+            checked={(amenities >> i)&1}
+            on:sl-change={e => { amenities = setAmenity(amenities, i, e.target.checked)} }
+          >{amenity}</sl-checkbox>
+        {/each}
+      </div>
+
+      <div style="margin-bottom: 16px">
+        <span>Slot type:</span >
+        <MultiSelect 
+          bind:selected={tags} 
+          options={store.getSlotTypeTags()}
+          allowUserOptions={true}
+          />
+      </div>
+    </div>
+
+    <div style="margin-bottom: 16px">
+      <span>Image (optional):</span >
+        <div class="pic-upload">
+            <upload-files
+            bind:this={uploadFiles}
+            one-file
+            accepted-files="image/jpeg,image/png,image/gif"
+            defaultValue={pic ? encodeHashToBase64(pic) : undefined}
+            on:file-uploaded={(e) => {
+              pic = e.detail.file.hash;
+            }}
+          ></upload-files>
+        </div>
+    </div>
   </div>
   {#if sitemap}
-    <div style="margin-bottom: 16px">
+    <sl-select
+      value={encodeHashToBase64(sitemap.original_hash)}
+      style="margin: 8px;"
+      label="Current Site Map"
+      on:sl-change={(e) => {
+        const hash = decodeHashFromBase64(e.target.value)
+        sitemap = store.getSiteMap(hash)
+        siteMapLocation.setSitemap(sitemap)
+      } }
+    >
+    {#each $sitemaps as map}
+        <sl-option value={encodeHashToBase64(map.original_hash)}>{map.record.entry.text}</sl-option>
+    {/each}
+    </sl-select>
+
+    <div style="margin-bottom: 16px; width:100%">
       Map Location: {location ? JSON.stringify(location.location) : "none"}
       <SiteMapLocation
+        bind:this={siteMapLocation}
         sitemap={sitemap}
-        location={location && encodeHashToBase64(location.imageHash) === encodeHashToBase64(sitemap.record.entryHash) ? location.location : undefined}
-        on:sitemap-locate={(e)=> location = {imageHash: sitemap.record.entryHash, location :e.detail}}
+        location={location && encodeHashToBase64(location.imageHash) === encodeHashToBase64(sitemap.original_hash) ? location.location : undefined}
+        on:sitemap-locate={(e)=> location = {imageHash: sitemap.original_hash, location :e.detail}}
         ></SiteMapLocation>
     </div>
   {/if}
@@ -248,5 +281,17 @@ let dialog
   }
   sl-checkbox {
     margin-right:15px;
+  }
+
+  upload-files {
+    --placeholder-font-size: 14px;
+    --icon-font-size: 50px;
+    --message-margin: 0px;
+    --message-margin-top: 0px;
+  }
+  upload-files::part(dropzone) {
+    height: 200px;
+    width: 100px;
+    min-height: 0px;
   }
 </style> 

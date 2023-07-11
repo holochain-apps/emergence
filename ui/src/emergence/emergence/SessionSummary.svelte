@@ -17,9 +17,13 @@ const dispatch = createEventDispatcher();
 
 export let session: Info<Session>;
 export let allowSetIntention = false;
+export let showDescription = false;
 export let showTags = false;
 export let showAmenities = false;
 export let showSlot = false;
+export let showLeaders = true;
+export let showLeaderAvatar = false;
+export let extra = ""
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -32,6 +36,8 @@ $: loading, session, slot;
 $: tags = sessionTags(session)
 $: slot = store.getSessionSlot(session)
 $: going = Array.from($relData.interest).filter(([_,i])=> i & (SessionInterestBit.Going+SessionInterestBit.Interested))
+$: settings = store.settings
+$: sessionType = $settings.session_types[session.record.entry.session_type]
 
 onMount(async () => {
   loading = false
@@ -39,7 +45,7 @@ onMount(async () => {
     throw new Error(`The session input is required for the SessionSummary element`);
   }
 });
-$:space = slot? store.getSpace(slot.space) : undefined
+$:space = slot && slot.space ? store.getSpace(slot.space) : undefined
 </script>
 {#if loading}
 <div style="display: flex; flex: 1; align-items: center; justify-content: center">
@@ -56,7 +62,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
   }}>
   {#if showSlot}
     <div class="slot">
-      <div class="slot-wrapper">
+      <div class="slot-wrapper" style={`background-color: ${sessionType.color}40; height: 100%;`}>
         {#if slot}
         <div class="date">
           {new Date(slot.window.start).toLocaleString('en-US', { weekday: 'long' })}
@@ -65,7 +71,7 @@ $:space = slot? store.getSpace(slot.space) : undefined
           {new Date(slot.window.start).toTimeString().slice(0,5)}
         </div>
         <div class="space clickable" on:click={(e)=>{e.stopPropagation();store.openDetails(DetailsType.Space, space.original_hash)}}>
-          {space ? space.record.entry.name : "Unknown"}
+          {space ? space.record.entry.name : ""}
         </div>
         {:else}
         <div class="date">
@@ -99,25 +105,41 @@ $:space = slot? store.getSpace(slot.space) : undefined
                   {going.length}
                 </div>
               </sl-tooltip>
+              {#if extra}
+                <div>
+                  {extra}
+                </div>
+              {/if}
+        
               {:else}
                <Fa icon={faUserGroup} /> 0
               {/if}
             </span>
         </div>
-        <div class="leaders">
-            <span>Hosted by</span>
-            {#each session.record.entry.leaders as leader}
-              <AnyAvatar showAvatar={false} agent={leader}></AnyAvatar>
-            {/each}
-        </div>
+        {#if showLeaders}
+          <div class="leaders">
+              <span style="padding-top: 2px">Hosted by:</span>
+              {#each session.record.entry.leaders as leader}
+              <span  style="margin-top: 2px;"><AnyAvatar showAvatar={showLeaderAvatar} size={20} agent={leader}></AnyAvatar></span>
+              {/each}
+          </div>
+        {/if}
       </div>
     </div>
     <div class="bottom-area">
+      {#if showDescription}
+        <div class="description">
+          {session.record.entry.description}
+        </div>
+      {/if}
       {#if showTags}
         <div class="tags">
+          {#if session.record.entry.session_type != 0}
+            <div class="session-type" style={`background-color: ${sessionType.color};`}>{sessionType.name}</div>
+          {/if}
           {#each tags as tag}
           <div class="tag clickable-tag" on:click={(e)=>{e.stopPropagation(); store.filterTag(tag,"sessionsFilter")}}>
-            {tag}
+            #{tag}
           </div>
           {/each}
         </div>
@@ -140,10 +162,18 @@ $:space = slot? store.getSpace(slot.space) : undefined
 
 <style>
 
+  .tags {
+    display: block;
+    text-align: left;
+  }
+
   .tag {
-    border: 1px solid #25bab054;
-    color: #25BAB1;
+    border: 1px solid #2F87D830;
+    color: #2F87D8;
     background-color: transparent;
+    margin-bottom: 0;
+    display: inline;
+    font-size: 11px;
   }
 
   .clickable-tag {
@@ -156,24 +186,33 @@ $:space = slot? store.getSpace(slot.space) : undefined
   }
 
   .time {
-    font-size: 24px;
+    font-size: 16px;
+    color: white;
     margin-top: -3px;
     margin-bottom: -3px;
   }
   .date, .space {
-    font-size: 12px;
-    line-height: 12px;
+    font-size: 9px;
+    line-height: 10px;
     font-weight: normal;
     margin-bottom: 0;
+    color: white;
     opacity: .5;
+  }
+  .space {
+    overflow: hidden;
+    max-height: 20px;
   }
   .slot {
     display: flex;
     align-items: center;
-    background: rgba(206, 205, 206, .25);
-    width: 105px;
+    background: #565E6D;
+    width: 40px;
     text-align: center;
-    border-radius: 10px 0 0 10px;
+    border-radius: 0;
+    color: white;
+    min-width: 55px;
+    box-shadow: inset -20px 0 30px rgba(0, 0, 0, .5);
   }
   .slot-wrapper {
     flex-direction: column;
@@ -186,12 +225,15 @@ $:space = slot? store.getSpace(slot.space) : undefined
     display: flex;
     flex-direction: column;
     padding: 10px 15px;
-    background-color: #fff;
+    justify-content: center;
     width: 100%;
   }
   .top-area, .bottom-area {
     display: flex;
     justify-content: space-between;
+  }
+  .bottom-area {
+    flex-direction: column
   }
   .left-side {
     display: flex;
@@ -207,14 +249,14 @@ $:space = slot? store.getSpace(slot.space) : undefined
   }
 
   .leaders {
-    font-size: 12px;
-    display: inline-flex;
+    font-size: 10px;
     margin-bottom: 5px;
+    text-align: left;
   }
 
   .leaders span {
     display: inline-block;
-    opacity: .5;
+    opacity: .8;
     padding-right: 4px;
   }
 
@@ -225,4 +267,36 @@ $:space = slot? store.getSpace(slot.space) : undefined
   :global(.clickable) {
     cursor: pointer;
   }
+
+  .session-type {
+    margin-bottom: 0;
+    display: inline;
+    border-radius: 7px;
+    padding: 5px;
+    margin-right: 2px;
+    padding-top: 0px;
+    color: white;
+    padding-bottom: 0px;
+    font-size: 11px;
+  }
+
+  @media (min-width: 720px) {
+
+    .leaders {
+      font-size: 12px;
+    }
+
+    .date, .space {
+      font-size: 11px;
+    }
+
+    .time {
+      font-size: 18px;
+    }
+
+  .slot {
+    min-width: 70px;
+    border-radius: 10px 0 0 10px;
+  }
+}
 </style>

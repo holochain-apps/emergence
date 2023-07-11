@@ -1,13 +1,13 @@
 <script lang="ts">
 import { onMount, getContext, createEventDispatcher } from 'svelte';
-import type { Record } from '@holochain/client';
+import type { Record } from '@holochain/client15';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
 import Fa from 'svelte-fa';
-import { faCircleArrowLeft, faSync } from '@fortawesome/free-solid-svg-icons';
+import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import SpaceSummary from './SpaceSummary.svelte';
-import Sync from './Sync.svelte';
 import { DetailsType, type Info, type Space } from './types';
+
 const dispatch = createEventDispatcher();
 
 
@@ -16,35 +16,27 @@ let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 let error: any = undefined;
 let spaceDetail: Info<Space> | undefined
 
-$: spaces = store.spaces
+$: spaces = store.sitemapFilteredSpaces()
 $: error, spaceDetail;
-$: uiProps = store ? store.uiProps : undefined
 
 onMount(async () => {
   store.fetchSpaces();
 });
 
-</script>
-<div class="AllSpaces pane-header">
-  <div class="header-content">
-    <h3>Spaces List</h3>
+ </script>
+<!--
+<div class=" pane-header">
     <div class="section-controls">
-      <sl-button style="margin-left: 8px; " on:click={() => { dispatch('all-spaces-close') } } circle>
+      <sl-button class="close-all-spaces" on:click={() => { dispatch('all-spaces-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
-      {#if $uiProps.amSteward}
-        <div class="pill-button" on:click={() => {createSpaceDialog.open(undefined) } }>
-          <span>+</span> Create
-        </div>
-      {/if}
-    </div>
   </div>
 
-</div>
-<div class="pane-content">
+</div> -->
+<div>
 
   {#if error}
-    <span class="notice">Error fetching the spaces: {error.data.data}.</span>
+    <span class="notice">Error fetching the spaces: {error}.</span>
   {:else if $spaces.length === 0}
     <span class="notice">No spaces found.</span>
   {:else}
@@ -61,6 +53,10 @@ onMount(async () => {
 </div>
 
 <style>
+  .close-all-spaces {
+    display: none;
+  }
+
   .pill-button {
     margin-left: 10px;
   }
