@@ -11,7 +11,7 @@ resolver = "2"
 [workspace.dependencies]
 hdi = "0.3"
 hdk = "0.2"
-serde = "1"
+serde = "=1.0.166"
 
 [workspace.dependencies.emergence]
 path = "dnas/emergence/zomes/coordinator/emergence"
