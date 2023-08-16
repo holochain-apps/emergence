@@ -273,9 +273,9 @@ const deriveSigningKeys = async (
       <div class="event-intro">
         <div class="wrapper">
           <div class="about-event">
-            <img class="dweb-camp" src="/images/dweb-camp.png" 
+            <img class="emergence-welcome" src="/android-chrome-512x512.png" 
             on:click={()=>adminCheck()}/>
-            <p style="color:black">Welcome to camp! Create a profile to discover sessions, find people and take notes {#if $uiProps.amSteward}!{/if}</p>
+            <p style="color:black">Welcome to Emergence! Create a profile to discover sessions, find people and take notes {#if $uiProps.amSteward}!{/if}</p>
           </div>
           {#if $prof.status=="complete" && $prof.value == undefined}
           <div class="create-profile">
@@ -292,7 +292,7 @@ const deriveSigningKeys = async (
         <div class="wrapper">
           <div class="about-event">
 
-            <img class="dweb-camp" src="/images/dweb-camp.png" 
+            <img class="emergence-welcome" src="/android-chrome-512x512.png" 
         on:click={()=>adminCheck()}/>
         <p>Either your node hasn't synchronized yet with the network, or the conference data hasn't yet been set up. Please be patient! </p>
         <div style="display:flex;justify-items:center;width:100%">
@@ -593,8 +593,8 @@ const deriveSigningKeys = async (
     margin-bottom: 0;
   }
 
-  .dweb-camp {
-    max-width: 50vw;
+  .emergence-welcome {
+    width: 300px;
     margin: 0 auto;
     display: block;
   }
