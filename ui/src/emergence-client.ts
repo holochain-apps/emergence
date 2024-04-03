@@ -8,7 +8,7 @@ import type {
   AppAgentClient,
   EntryHash,
   HoloHash
-} from '@holochain/client15';
+} from '@holochain/client';
 import type { AnyAgent, FeedElem, GetFeedInput, GetStuffInput, GetStuffOutput, Info, Note, ProxyAgent, Relation, RelationInfo, Session, SessionTypeID, Settings, SiteMap, Space, TagUse, TimeWindow, UpdateNoteInput, UpdateProxyAgentInput, UpdateSessionInput, UpdateSiteMapInput, UpdateSpaceInput } from './emergence/emergence/types';
 // import { UnsubscribeFunction } from 'emittery';
 

@@ -19,7 +19,8 @@ pub fn create_time_window(input: TimeWindow) -> ExternResult<ActionHash> {
 #[hdk_extern]
 pub fn delete_time_window(input: TimeWindow) -> ExternResult<()> {
     let path = Path::from("all_time_windows");
-    let links = get_links(path.path_entry_hash()?, LinkTypes::TimeWindows, None)?;
+    let get_links_input: GetLinksInput = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::TimeWindows)?.build();
+    let links = get_links(get_links_input)?;
     for link in links {
         let w = convert_time_window_tag(link.tag)?;
         if w == input {
@@ -32,7 +33,8 @@ pub fn delete_time_window(input: TimeWindow) -> ExternResult<()> {
 #[hdk_extern]
 pub fn get_time_windows(_: ()) -> ExternResult<Vec<TimeWindow>> {
     let path = Path::from("all_time_windows");
-    let links = get_links(path.path_entry_hash()?, LinkTypes::TimeWindows, None)?;
+    let input: GetLinksInput = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::TimeWindows)?.build();
+    let links = get_links(input)?;
 
     let mut time_windows: Vec<TimeWindow> = Vec::new();
     for link in links {

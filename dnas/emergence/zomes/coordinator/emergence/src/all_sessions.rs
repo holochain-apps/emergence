@@ -17,7 +17,8 @@ pub struct SessionInfo {
 #[hdk_extern]
 pub fn get_all_sessions(_: ()) -> ExternResult<Vec<SessionInfo>> {
     let path = Path::from("all_sessions");
-    let links = get_links(path.path_entry_hash()?, LinkTypes::AllSessions, None)?;
+    let input: GetLinksInput = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AllSessions)?.build();
+    let links = get_links(input)?;
 
     let mut records: Vec<Record> = Vec::new();
     let mut hashes: HashMap<ActionHash,ActionHash>= HashMap::new();

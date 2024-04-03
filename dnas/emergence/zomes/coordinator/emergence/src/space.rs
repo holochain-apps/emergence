@@ -15,7 +15,8 @@ pub fn create_space(space: Space) -> ExternResult<Record> {
 }
 #[hdk_extern]
 pub fn get_space(original_space_hash: ActionHash) -> ExternResult<Option<Record>> {
-    let links = get_links(original_space_hash.clone(), LinkTypes::SpaceUpdates, None)?;
+    let input: GetLinksInput = GetLinksInputBuilder::try_new(original_space_hash.clone(), LinkTypes::SpaceUpdates)?.build();
+    let links = get_links(input)?;
     let latest_link = links
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));

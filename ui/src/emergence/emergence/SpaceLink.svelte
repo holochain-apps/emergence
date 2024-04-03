@@ -1,5 +1,5 @@
 <script lang="ts">
-   import type { ActionHash } from '@holochain/client15';
+   import type { ActionHash } from '@holochain/client';
   import type { EmergenceStore } from '../../emergence-store';
   import { getContext, onMount } from 'svelte';
   import { storeContext } from '../../contexts';

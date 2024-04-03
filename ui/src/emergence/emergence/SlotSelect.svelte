@@ -3,7 +3,7 @@
   import '@shoelace-style/shoelace/dist/components/option/option.js';
   import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
   import { timeWindowStartToStr, type Slot, timeWindowDurationToStr, type Info, type Space, type TimeWindow, type SiteMap, type SessionType } from './types';
-  import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client15';
+  import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
   import type { EmergenceStore } from '../../emergence-store';
   import { getContext, onMount } from 'svelte';
   import { storeContext } from '../../contexts';

@@ -1,4 +1,4 @@
-import type { Timestamp } from "@holochain/client15"
+import type { Timestamp } from "@holochain/client"
 import type { Info, Session, SessionsFilter, Slot, TimeWindow } from "./types"
 
 // @ts-ignore

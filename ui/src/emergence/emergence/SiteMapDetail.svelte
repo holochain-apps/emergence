@@ -12,7 +12,7 @@ import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import SiteMapCrud from './SiteMapCrud.svelte'; 
 import type { EmergenceStore } from '../../emergence-store';
 import Confirm from './Confirm.svelte';
-import { encodeHashToBase64,  } from '@holochain/client15';
+import { encodeHashToBase64,  } from '@holochain/client';
   import { errorText } from './utils';
 
 const dispatch = createEventDispatcher();

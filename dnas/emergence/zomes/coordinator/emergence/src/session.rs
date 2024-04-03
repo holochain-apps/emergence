@@ -20,11 +20,9 @@ pub fn create_session(session: Session) -> ExternResult<Record> {
 }
 #[hdk_extern]
 pub fn get_session(original_session_hash: ActionHash) -> ExternResult<Option<Record>> {
-    let links = get_links(
-        original_session_hash.clone(),
-        LinkTypes::SessionUpdates,
-        None,
-    )?;
+    let input: GetLinksInput = GetLinksInputBuilder::try_new(original_session_hash.clone(), LinkTypes::SessionUpdates)?.build();
+
+    let links = get_links(input)?;
     let latest_link = links
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));

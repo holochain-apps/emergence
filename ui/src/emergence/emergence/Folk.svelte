@@ -11,7 +11,7 @@
     import Fa from 'svelte-fa'
     import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
-    import type { AgentPubKey } from '@holochain/client15';
+    import type { AgentPubKey } from '@holochain/client';
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import NoteDetail from './NoteDetail.svelte';

@@ -19,7 +19,7 @@ pub fn set_settings(input: Settings) -> ExternResult<ActionHash> {
         // let me = agent_info()?.agent_latest_pubkey;
         //let agents = agents.into_iter().filter(|a| a != &me).collect();
         debug!("agents: {:?}", agents);
-        remote_signal(EmergenceMessage::UpdateSettings(input), agents)?;
+        send_remote_signal(EmergenceMessage::UpdateSettings(input), agents)?;
     }
     Ok(action_hash)
 }
@@ -27,7 +27,8 @@ pub fn set_settings(input: Settings) -> ExternResult<ActionHash> {
 #[hdk_extern]
 pub fn get_settings(_: ()) -> ExternResult<Settings> {
     let path = Path::from("all_settings");
-    let mut links = get_links(path.path_entry_hash()?, LinkTypes::Settings, None)?;
+    let input: GetLinksInput = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::Settings)?.build();
+    let mut links = get_links(input)?;
     if links.len() == 0 {
         return Ok(Settings {
             game_active: false,

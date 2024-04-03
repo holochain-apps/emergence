@@ -14,7 +14,7 @@ import {
   type HoloHash,
   encodeHashToBase64,
   decodeHashFromBase64
-} from '@holochain/client15';
+} from '@holochain/client';
 
 
 export const NULL_HASHB64 = "uhCkk______________________"

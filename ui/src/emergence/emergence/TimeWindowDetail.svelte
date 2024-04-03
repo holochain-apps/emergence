@@ -1,7 +1,7 @@
 <script lang="ts">
 import { createEventDispatcher, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import type { AppAgentClient } from '@holochain/client15';
+import type { AppAgentClient } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import { timeWindowStartToStr, timeWindowDurationToStr, type TimeWindow } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';

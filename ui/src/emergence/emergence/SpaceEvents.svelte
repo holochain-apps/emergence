@@ -11,7 +11,7 @@ import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
 import Avatar from './Avatar.svelte';
-import { encodeHashToBase64,  } from '@holochain/client15';
+import { encodeHashToBase64,  } from '@holochain/client';
 import SessionSummary from './SessionSummary.svelte';
 
 const dispatch = createEventDispatcher();

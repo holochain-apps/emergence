@@ -6,10 +6,11 @@
     "tests"
   ],
   "scripts": {
-    "start:ui": "VITE_URL=\"play2.d.dweb.city\" UI_PORT=8888 npm start -w ui",
-    "start": "AGENTS=2 npm run network",
-    "dev": "VITE_ADMIN_PORT=$(port) VITE_APP_PORT=$(port) SIGNAL_SRV_PORT=$(port) BOOT_SRV_PORT=$(port) UI_PORT=8888 npm run x",
-    "x": "hc s clean &&  npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run start:happ\" \"hc run-local-services -b $BOOT_SRV_PORT -s $SIGNAL_SRV_PORT\"",
+    "start": "AGENTS=2 BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) npm run network",
+    "dev": "VITE_ADMIN_PORT=$(port) VITE_APP_PORT=$(port) SIGNAL_PORT=$(port) BOOTSTRAP_PORT=$(port) UI_PORT=8888 npm run x",
+    "x": "hc s clean &&  npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run start:happ\" \"hc run-local-services -b $BOOTSTRAP_PORT -s $SIGNAL_PORT\"",
+    "tool-dev": " UI_PORT=8888 npm run tool-devy",
+    "tool-devy": "concurrently \"npm start -w ui\" \"sleep 1 && we-dev-cli --agent-idx 1 --dev-config we_dev/config.ts\" \"sleep 10 && we-dev-cli --agent-idx 2 --dev-config we_dev/config.ts\"",
     "network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:happ\" \"holochain-playground\"",
     "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
     "launch:happ": "echo \"pass\" | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/emergence.happ --ui-port $UI_PORT network -b \"http://127.0.0.1:BOOT_SRV_PORT\"  webrtc \"ws://127.0.0.1:$SIGNAL_SRV_PORT\"",
