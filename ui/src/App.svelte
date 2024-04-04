@@ -40,8 +40,12 @@
   import blake2b from "blake2b";
 import { ed25519 } from "@noble/curves/ed25519";
 import {Buffer} from "buffer"
+  import { WeClient, isWeContext } from '@lightningrodlabs/we-applet';
+  import { appletServices } from './we';
 
   let client: AppAgentClient | undefined;
+  let weClient: WeClient
+
   let store: EmergenceStore | undefined;
   let fileStorageClient: FileStorageClient | undefined;
   let loading = true;
@@ -165,7 +169,10 @@ import {Buffer} from "buffer"
     //   const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
     //   await setSigningCredentials(cell_id, creds.creds)
     // } else 
-    {
+
+    let profilesClient
+
+    if (!isWeContext()) {
       let appPort: string = import.meta.env.VITE_APP_PORT
       url = appPort ? new URL(`ws://localhost:${appPort}`) : ""
       client = await AppAgentWebsocket.connect(installed_app_id, {url});
@@ -175,10 +182,14 @@ import {Buffer} from "buffer"
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
+      profilesClient = new ProfilesClient(client, installed_app_id);
+    } else {
+      weClient = await WeClient.connect(appletServices);
+      client = weClient.renderInfo.appletClient;
+      profilesClient = weClient.renderInfo.profilesClient;
     }
   
-
-    profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
+    profilesStore = new ProfilesStore(profilesClient, {
       avatarMode: "avatar-optional",
       minNicknameLength: 3,
       additionalFields: [
