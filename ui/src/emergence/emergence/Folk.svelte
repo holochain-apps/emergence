@@ -56,8 +56,8 @@
           
     <div class="folk-profile">
         <Avatar agentPubKey={agentPubKey} ></Avatar>
-        {#if $profile.value.fields.location}<div class="location">{$profile.value.fields.location}</div>{/if}
-        {#if $profile.value.fields.bio}<div class="bio">{$profile.value.fields.bio}</div>{/if}
+        {#if $profile.value.entry.fields.location}<div class="location">{$profile.value.entry.fields.location}</div>{/if}
+        {#if $profile.value.entry.fields.bio}<div class="bio">{$profile.value.entry.fields.bio}</div>{/if}
     </div>
     <sl-tab-group
         bind:this={tabs}

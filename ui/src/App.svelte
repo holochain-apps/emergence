@@ -40,7 +40,7 @@
   import blake2b from "blake2b";
 import { ed25519 } from "@noble/curves/ed25519";
 import {Buffer} from "buffer"
-  import { WeClient, isWeContext } from '@lightningrodlabs/we-applet';
+  import { WeClient, initializeHotReload, isWeContext } from '@lightningrodlabs/we-applet';
   import { appletServices } from './we';
 
   let client: AppAgentClient | undefined;
@@ -129,6 +129,8 @@ import {Buffer} from "buffer"
     //   creds = jsonToCreds(credsJson)
     //   installed_app_id = creds.installed_app_id
     // }
+
+    console.log("FISHFISH", adminPort)
     window.onunhandledrejection = (e) => {
       if (typeof e.reason == "object") {
         if (e instanceof TypeError) {
@@ -171,6 +173,13 @@ import {Buffer} from "buffer"
     // } else 
 
     let profilesClient
+    if ((import.meta as any).env.DEV) {
+      try {
+        await initializeHotReload();
+      } catch (e) {
+        console.warn("Could not initialize applet hot-reloading. This is only expected to work in a We context in dev mode.")
+      }
+    }
 
     if (!isWeContext()) {
       let appPort: string = import.meta.env.VITE_APP_PORT
@@ -185,7 +194,9 @@ import {Buffer} from "buffer"
       profilesClient = new ProfilesClient(client, installed_app_id);
     } else {
       weClient = await WeClient.connect(appletServices);
+      //@ts-ignore
       client = weClient.renderInfo.appletClient;
+      //@ts-ignore
       profilesClient = weClient.renderInfo.profilesClient;
     }
   
