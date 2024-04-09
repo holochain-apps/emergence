@@ -39,7 +39,7 @@
         <agent-avatar disable-tooltip={true} disable-copy={true} size={size} agent-pub-key="{encodeHashToBase64(agentPubKey)}"></agent-avatar>
     {/if}
     {#if showNickname}
-        <div class="nickname">{ profile ? profile.nickname : encodeHashToBase64(agentPubKey).slice(0,8)+"..." }</div>
+        <div class="nickname">{ profile ? profile.entry.nickname : encodeHashToBase64(agentPubKey).slice(0,8)+"..." }</div>
     {/if}
 </div>
 

@@ -59,6 +59,8 @@ import {Buffer} from "buffer"
   $: uiProps = store ? store.uiProps : undefined
   $: pane = store ? $uiProps.pane : "sessions"
   $: sitemaps = store ? store.maps : undefined
+  $: allWindows = store ? store.timeWindows : undefined
+
   $: loadingText = store ? store.syncText : undefined
 
 
@@ -119,6 +121,9 @@ import {Buffer} from "buffer"
 //   return creds;
 // };
 
+  const isConfigured = (): boolean => {
+    return $sitemaps && $sitemaps.length > 0 && $allWindows && $allWindows.length > 0
+  }
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
@@ -130,7 +135,6 @@ import {Buffer} from "buffer"
     //   installed_app_id = creds.installed_app_id
     // }
 
-    console.log("FISHFISH", adminPort)
     window.onunhandledrejection = (e) => {
       if (typeof e.reason == "object") {
         if (e instanceof TypeError) {
@@ -220,12 +224,20 @@ import {Buffer} from "buffer"
     fileStorageClient = new FileStorageClient(client, 'emergence');
     store = new EmergenceStore(new EmergenceClient(url,installed_app_id, client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
     await store.sync(undefined)
+
+    // for now everyone is a steward
+
+    if (!isConfigured()) {
+      store.setUIprops({amSteward:true})
+      await store.setPane("admin")
+     }
+
     initialSync = setInterval(async ()=>{
-      if ($uiProps.amSteward || ($sitemaps && $sitemaps.length > 0)) {clearInterval(initialSync)}
+      if ($uiProps.amSteward || !isConfigured()) {clearInterval(initialSync)}
       else {
         await doSync()
       }
-    }, 30000);
+    }, 10000);
 
     loading = false;
   });
@@ -297,7 +309,7 @@ import {Buffer} from "buffer"
         <div class="wrapper">
           <div class="about-event">
             <img class="emergence-welcome" src="/android-chrome-512x512.png" 
-            on:click={()=>adminCheck()}/>
+            />
             <p style="color:black">Welcome to Emergence! Create a profile to discover sessions, find people and take notes {#if $uiProps.amSteward}!{/if}</p>
           </div>
           {#if $prof.status=="complete" && $prof.value == undefined}
@@ -316,7 +328,7 @@ import {Buffer} from "buffer"
           <div class="about-event">
 
             <img class="emergence-welcome" src="/android-chrome-512x512.png" 
-        on:click={()=>adminCheck()}/>
+        />
         <p>Either your node hasn't synchronized yet with the network, or the conference data hasn't yet been set up. Please be patient! </p>
         <div style="display:flex;justify-items:center;width:100%">
         <sl-button on:click={() => doSync()}>
@@ -371,8 +383,7 @@ import {Buffer} from "buffer"
             on:dblclick={(e)=>e.stopPropagation()}
             on:click={(e)=>{
               e.stopPropagation()
-              if (pane=="you") adminCheck()
-              else store.setPane('you')
+              if (pane!=="you") store.setPane('you')
               }}
           >
             <Fa class="nav-icon" icon={faUser} size="2x"/>

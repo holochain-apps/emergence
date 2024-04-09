@@ -56,7 +56,7 @@ const setLen = (l:number) => {
   <div style="display: flex; flex-direction: row; justify-content: space-between; margin-bottom: 10px;">
     <span style="font-size: 18px">Create Time Slot</span>
     <div>
-      <sl-button circle size=small
+      <sl-button title="Save" circle size=small
         on:click={() => createTimeWindow()}
         disabled={!isTimeWindowValid}
         variant=primary><Fa icon={faSave} />

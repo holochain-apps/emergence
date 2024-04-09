@@ -382,11 +382,11 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
       <sl-option value={SpaceSortOrder.Capacity}>Capacity</sl-option>
     </sl-select>
     {#if $uiProps.amSteward}
-      <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
+      <sl-button title="Create Time Slot" on:click={() => {creatingTimeWindow = true; } } circle>
         <Fa icon={faCalendarPlus} />
       </sl-button>
     {/if}
-    <sl-button on:click={() => {bySpace = !bySpace } } circle>
+    <sl-button title="Flip Display Axis" on:click={() => {bySpace = !bySpace } } circle>
       <Fa icon={faArrowsUpDownLeftRight} />
     </sl-button>
   </div>

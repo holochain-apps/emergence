@@ -46,22 +46,6 @@
     <update-profile on:cancel-edit-profile={()=>dialog.hide()} on:profile-updated={()=>dialog.hide()}></update-profile>
 </sl-dialog>
 
-
-        <!-- <div style="display: flex; flex-direction: row; align-self:center">
-            <sl-checkbox
-                bind:this={steward}
-                checked={$uiProps.amSteward}
-                on:sl-change={e => { store.setUIprops({amSteward:steward.checked})} }
-                >Steward
-            </sl-checkbox>
-            <sl-checkbox
-                bind:this={debuging}
-                checked={$uiProps.debuggingEnabled}
-                on:sl-change={e => { store.setUIprops({debuggingEnabled:debuging.checked})} }
-                >Enable Debugging
-            </sl-checkbox>
-        </div> -->
-
 <div class="pane-content flex-center">
     
     {#if $myProfile.status === "complete"  && $myProfile.value}
@@ -109,7 +93,20 @@
             </sl-button>
         </sl-tab-panel>
     </sl-tab-group>
-
+    <div style="display: flex; flex-direction: row; justify-content:center;">
+        <sl-checkbox
+            bind:this={steward}
+            checked={$uiProps.amSteward}
+            on:sl-change={e => { store.setUIprops({amSteward:steward.checked})} }
+            >Steward
+        </sl-checkbox>
+        <sl-checkbox
+            bind:this={debuging}
+            checked={$uiProps.debuggingEnabled}
+            on:sl-change={e => { store.setUIprops({debuggingEnabled:debuging.checked})} }
+            >Enable Debugging
+        </sl-checkbox>
+    </div>
 </div>
 
 <style>

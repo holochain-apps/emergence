@@ -104,7 +104,7 @@ export class EmergenceClient {
         amenities,
         trashed: false
       };
-    
+    console.log("NEW SES", sessionEntry)
     return new EntryRecord(await this.callZome('create_session', sessionEntry))
   }
 
