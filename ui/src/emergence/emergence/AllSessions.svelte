@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/components/option/option.js';
 import type SlSelect from '@shoelace-style/shoelace/dist/components/select/select.js';
 
 import { onMount, getContext, createEventDispatcher } from 'svelte';
-import { encodeHashToBase64, type Record } from '@holochain/client15';
+import { encodeHashToBase64, type Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SessionSummary from './SessionSummary.svelte';
 import SessionCrud from './SessionCrud.svelte';
@@ -49,7 +49,7 @@ let createSessionDialog: SessionCrud
 onMount(async () => {
   listModeSelect.value = $uiProps.sessionListMode
 });
-const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
+const sortSessions =(a:InfoSession,b:InfoSession) : number => {
   const slota = store.getSessionSlot(a)
   const slotb = store.getSessionSlot(b)
   let vala =  Number. MAX_SAFE_INTEGER

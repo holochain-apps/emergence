@@ -21,7 +21,7 @@
   import { fly } from "svelte/transition";
   import type { EmergenceStore } from "../../emergence-store";
   import { storeContext } from "../../contexts";
-  import { decodeHashFromBase64, encodeHashToBase64 } from "@holochain/client15";
+  import { decodeHashFromBase64, encodeHashToBase64 } from "@holochain/client";
   import { calcDays, dayToStr } from "./utils";
   import { RecordBag } from "@holochain-open-dev/utils";
 

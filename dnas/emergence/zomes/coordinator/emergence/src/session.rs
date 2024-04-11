@@ -1,5 +1,6 @@
 use hdk::prelude::*;
 use emergence_integrity::*;
+
 #[hdk_extern]
 pub fn create_session(session: Session) -> ExternResult<Record> {
     let session_hash = create_entry(&EntryTypes::Session(session.clone()))?;
@@ -20,16 +21,14 @@ pub fn create_session(session: Session) -> ExternResult<Record> {
 }
 #[hdk_extern]
 pub fn get_session(original_session_hash: ActionHash) -> ExternResult<Option<Record>> {
-    let links = get_links(
-        original_session_hash.clone(),
-        LinkTypes::SessionUpdates,
-        None,
-    )?;
+    let input: GetLinksInput = GetLinksInputBuilder::try_new(original_session_hash.clone(), LinkTypes::SessionUpdates)?.build();
+
+    let links = get_links(input)?;
     let latest_link = links
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
     let latest_session_hash = match latest_link {
-        Some(link) => ActionHash::from(link.target.clone()),
+        Some(link) => ActionHash::try_from(link.target.clone()).map_err(|err| wasm_error!(err))?,
         None => original_session_hash.clone(),
     };
     get(latest_session_hash, GetOptions::default())

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { encodeHashToBase64, type AgentPubKey } from "@holochain/client15";
+  import { encodeHashToBase64, type AgentPubKey } from "@holochain/client";
   import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import { storeContext } from '../../contexts';
@@ -12,8 +12,8 @@
 
   $: agentPubKey
   $: s = store.profilesStore.profiles.get(agentPubKey)
-  $: nickname = $s.status == "complete" ? $s.value?.nickname : "..."
-  $: fields = $s.status == "complete" ? Object.entries($s.value?.fields).filter(([k,_])=>k!="avatar") : undefined
+  $: nickname = $s.status == "complete" ? $s.value?.entry.nickname : "..."
+  $: fields = $s.status == "complete" ? Object.entries($s.value?.entry.fields).filter(([k,_])=>k!="avatar") : undefined
 </script>
 
 {#if $s.status == "complete" && $s.value}

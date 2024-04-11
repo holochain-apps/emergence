@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { decodeHashFromBase64, encodeHashToBase64, type ActionHash, type EntryHash } from "@holochain/client15";
+    import { decodeHashFromBase64, encodeHashToBase64, type ActionHash, type EntryHash } from "@holochain/client";
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
@@ -21,6 +21,7 @@
     let sensing: SlCheckbox
     $: sitemaps = store.maps
     $: settings = store.settings
+    $: allWindows = store.timeWindows
 
 
     onMount(() => {
@@ -110,9 +111,9 @@
         for (const [agentKey, profile] of await toPromise(store.profilesStore.allProfiles)) { 
             agents.push({
                 pubKey: encodeHashToBase64(agentKey), 
-                nickname:profile.nickname, 
-                bio: profile.fields.bio, 
-                location:profile.fields.location})
+                nickname:profile.entry.nickname, 
+                bio: profile.entry.fields.bio, 
+                location:profile.entry.fields.location})
         }
 
         exportJSON= JSON.stringify(
@@ -264,69 +265,130 @@
     </div>
   </div>
 <div class="pane-content">
-
+    <div class="admin-header">
+        <h2>Conference Administration and Configuration</h2>
+        <p>This page is available because you enabled being a conference steward.</p>
+        <p>Use the buttons below to configure and administer the various aspects of your conference.</p>
+    </div>
     <div class="admin-controls">
         <!-- <sl-button style="margin: 8px;"  on:click={async () => { throw("error!")} }>
             Error!
         </sl-button> -->
-        <div id="schedule-button">        
-        <sl-button  style="margin: 8px;"  on:click={() => { dispatch('open-slotting')} }>
-            Schedule
-        </sl-button></div>
+ 
+        <div class="admin-section">
+            <div class="admin-section-desc">
+                <h3>Site-maps</h3>
+                <p>Create site-maps on which spaces will be placed.</p>
+                {#if (!$sitemaps || $sitemaps.length==0) }
+                    <p style="color:red"> Currently there are no site-maps configured.  Please add a site-map.</p>
+                {/if}
+            </div>
 
-        <div id="sitemaps-button">
-        <sl-button  style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
-            Site Maps
-        </sl-button></div>
-        <div id="proxyagents-button">
-        <sl-button  style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
-            Proxy Agents
-        </sl-button></div>
-        <div id="export-button">
-        <sl-button  style="margin: 8px;"  on:click={async () => await doExport()}>
-            Export
-        </sl-button></div>
-        <div id="import-button">
-        <sl-button  style="margin: 8px;" on:click={()=>fileinput.click()}>
-            Import
-        </sl-button></div>
-        <div id="gameactive-button">
-        <sl-button  style="margin: 8px;" on:click={()=> {
-            const s= $settings
-            s.game_active = ! s.game_active
-            store.setSettings(s)
-        }
-        }>
-            {$settings.game_active ? 'Deactivate Sensing Game' : 'Activate Sensing Game'}
-        </sl-button></div>
-        {#if $sitemaps.length > 0}
-        <div id="sitemmap-select"> 
-        <sl-select
-          value={$settings.current_sitemap ? encodeHashToBase64($settings.current_sitemap) : undefined}
-          style="margin: 8px; position: relative; top: -26px;"
-          label="Current Site Map"
-          on:sl-change={(e) => {
-            const s= $settings
-            const hash = decodeHashFromBase64(e.target.value)
-            s.current_sitemap = hash
-            store.setSettings(s)
-           } }
-        >
-        {#each $sitemaps as map}
-            <sl-option value={encodeHashToBase64(map.original_hash)}>{map.record.entry.text}</sl-option>
-        {/each}
-        </sl-select></div>
+            <div class="admin-section-right">
+                <strong>Site-maps</strong>: {$sitemaps.length}
 
-    {/if}
+                <div id="sitemaps-button">
+                <sl-button  style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
+                    Site Maps
+                </sl-button></div>
+                {#if $sitemaps.length > 0}
+                    <div id="sitemmap-select"> 
+                    <sl-select
+                    value={$settings.current_sitemap ? encodeHashToBase64($settings.current_sitemap) : undefined}
+                    style="margin: 8px; position: relative; "
+                    label="Current Site Map"
+                    on:sl-change={(e) => {
+                        const s= $settings
+                        const hash = decodeHashFromBase64(e.target.value)
+                        s.current_sitemap = hash
+                        store.setSettings(s)
+                    } }
+                    >
+                    {#each $sitemaps as map}
+                        <sl-option value={encodeHashToBase64(map.original_hash)}>{map.record.entry.text}</sl-option>
+                    {/each}
+                    </sl-select></div>
+                {/if}
+            </div>
 
+        </div>
+
+        <div class="admin-section">
+            <div class="admin-section-desc">
+                <h3>Scheduling</h3>
+                <p>Set up time-slots and session schedule-grid</p>
+                {#if (!$allWindows || $allWindows.length==0) }
+                <p style="color:red"> Currently there are no time-slots configured.  Please go to the schedule page and add time-slots.</p>
+            {/if}
+
+            </div>
+            <div class="admin-section-right">
+                <strong>Time-slots</strong>: {$allWindows.length}
+                <div id="schedule-button">        
+                <sl-button  style="margin: 8px;"  on:click={() => { dispatch('open-slotting')} }>
+                    Schedule
+                </sl-button></div>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <div class="admin-section-desc">
+                <h3>Proxy Agents</h3>
+                <p>Create participant records for people who will attend but not use the app.</p>
+            </div>
+            <div id="proxyagents-button">
+            <sl-button  style="margin: 8px;" on:click={() => {  dispatch('open-proxyagents')} }>
+                Proxy Agents
+            </sl-button></div>
+        </div>
+
+        <div class="admin-section">
+            <div class="admin-section-desc">
+                <h3>Import/Export</h3>
+            </div>
+            <div style="display:flex; flex-direction: row;">
+
+                <div id="export-button">
+                <sl-button  style="margin: 8px;"  on:click={async () => await doExport()}>
+                    Export
+                </sl-button></div>
+                <div id="import-button">
+                <sl-button  style="margin: 8px;" on:click={()=>fileinput.click()}>
+                    Import
+                </sl-button></div>
+            </div>
+        </div>
+
+        <div class="admin-section" style="flex-direction:column">
+            <div style="flex-direction:row;display:flex; justify-content:space-between">
+                <div class="admin-section-desc">
+                    <h3>Sense-making game</h3>
+                    <p>Use the Sense-making game for large groups that will register interest interactively in real-time</p>
+                </div>
+
+                <div id="gameactive-button">
+                    <sl-button  style="margin: 8px;" on:click={()=> {
+                        const s= $settings
+                        s.game_active = ! s.game_active
+                        store.setSettings(s)
+                    }
+                    }>
+                        {$settings.game_active ? 'Deactivate Sensing Game' : 'Activate Sensing Game'}
+                    </sl-button>
+                </div>
+            </div>
+            <div class="game-status">
+                <h3>Total Attendees: {store.peopleCount() || 0}</h3>
+          
+                <h3> Sensemaking game is {#if $settings.game_active}Active{:else}Inactive{/if}</h3>
+                <SenseResults></SenseResults>
+            </div>
+        
+        </div>
+
+        
     </div>
   
-    <div class="game-status">
-        <h3>Total Attendees: {store.peopleCount() || 0}</h3>
-  
-        <h3> Sensemaking game is {#if $settings.game_active}Active{:else}Inactive{/if}</h3>
-        <SenseResults></SenseResults>
-    </div>
 
    
 </div>
@@ -337,20 +399,37 @@
     }
 
     .game-status {
-        max-width: 720px;
-        margin: 0 auto;
+        border-top: dashed 1px lightblue;
+        margin-top: 10px;
     }
     
     .admin-controls {
         display: flex;
+        flex-direction: column;
         width: 100%;
-        flex-wrap: wrap;
         justify-content: center;
         margin: 0 auto;
+    }
+    .admin-section {
+        display: flex;
+        max-width: 720px;
+        width: 100%;
+        justify-content: space-between;
+        margin: 0 auto;
+        margin-bottom: 20px;
+        border-radius: 10px;
+        border: solid 1px lightblue;
+        padding: 10px;
     }
 
     .header-content h3 {
         text-align: center;
         width: 100%;
     }
+    .admin-header{
+        margin-bottom: 20px;
+        text-align: center;
+        width: 100%;
+    }
+
   </style>

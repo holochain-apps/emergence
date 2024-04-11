@@ -24,7 +24,8 @@
   $: error;
 
   const filteredPeople = (allPeople, proxyAgents: Array<Info<ProxyAgent>>, uiProps) => {
-    const detailedPeople = allPeople.map(([key,profile])=> {
+    const detailedPeople = allPeople.map(([key,profileRecord])=> {
+      const profile = profileRecord.entry
       return {type:'Agent', hash: key, nickname: profile.nickname, bio: profile.fields.bio, location: profile.fields.location}
     })
 

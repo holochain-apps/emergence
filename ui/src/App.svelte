@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, AppAgentWebsocket, type AppAgentClient, setSigningCredentials, type KeyPair, type AgentPubKey } from '@holochain/client15';
+  import { AdminWebsocket, AppAgentWebsocket, type AppAgentClient, setSigningCredentials, type AgentPubKey } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
@@ -40,8 +40,12 @@
   import blake2b from "blake2b";
 import { ed25519 } from "@noble/curves/ed25519";
 import {Buffer} from "buffer"
+  import { WeClient, initializeHotReload, isWeContext } from '@lightningrodlabs/we-applet';
+  import { appletServices } from './we';
 
   let client: AppAgentClient | undefined;
+  let weClient: WeClient
+
   let store: EmergenceStore | undefined;
   let fileStorageClient: FileStorageClient | undefined;
   let loading = true;
@@ -55,76 +59,83 @@ import {Buffer} from "buffer"
   $: uiProps = store ? store.uiProps : undefined
   $: pane = store ? $uiProps.pane : "sessions"
   $: sitemaps = store ? store.maps : undefined
+  $: allWindows = store ? store.timeWindows : undefined
+
   $: loadingText = store ? store.syncText : undefined
 
 
   const base64ToUint8 = (b64:string)=> Base64.toUint8Array(b64);
 
-  const jsonToCreds = (json:string)=> {
-    const creds = JSON.parse(json)
-    creds.creds.capSecret = base64ToUint8(creds.creds.capSecret)
-    creds.creds.keyPair.publicKey = base64ToUint8(creds.creds.keyPair.publicKey)
-    creds.creds.keyPair.privateKey = base64ToUint8(creds.creds.keyPair.privateKey)
-    creds.creds.signingKey = base64ToUint8(creds.creds.signingKey)
-    return creds
-  };
+//   const jsonToCreds = (json:string)=> {
+//     const creds = JSON.parse(json)
+//     creds.creds.capSecret = base64ToUint8(creds.creds.capSecret)
+//     creds.creds.keyPair.publicKey = base64ToUint8(creds.creds.keyPair.publicKey)
+//     creds.creds.keyPair.privateKey = base64ToUint8(creds.creds.keyPair.privateKey)
+//     creds.creds.signingKey = base64ToUint8(creds.creds.signingKey)
+//     return creds
+//   };
 
-  const uint8ToBase64 = (arr: Uint8Array) => Buffer.from(arr).toString("base64");
+//   const uint8ToBase64 = (arr: Uint8Array) => Buffer.from(arr).toString("base64");
 
-const deriveSigningKeys = async (
-  seed: string
-): Promise<[KeyPair, AgentPubKey]> => {
-  //const interim = Buffer.from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
-  //  const privateKey = await blake2b(interim.length).update(Buffer.from(seed)).digest('binary')
-  //  const publicKey = await ed25519.getPublicKeyAsync(privateKey);
-  //  const keyPair = { privateKey, publicKey };
+// const deriveSigningKeys = async (
+//   seed: string
+// ): Promise<[KeyPair, AgentPubKey]> => {
+//   //const interim = Buffer.from([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+//   //  const privateKey = await blake2b(interim.length).update(Buffer.from(seed)).digest('binary')
+//   //  const publicKey = await ed25519.getPublicKeyAsync(privateKey);
+//   //  const keyPair = { privateKey, publicKey };
 
-  const interim = Buffer.from([
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0,
-  ]);
-  const privateKey = blake2b(interim.length)
-    .update(Buffer.from(seed))
-    .digest("binary");
+//   const interim = Buffer.from([
+//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+//     0, 0, 0, 0, 0, 0, 0,
+//   ]);
+//   const privateKey = blake2b(interim.length)
+//     .update(Buffer.from(seed))
+//     .digest("binary");
 
-  const publicKey = ed25519.getPublicKey(privateKey);
+//   const publicKey = ed25519.getPublicKey(privateKey);
 
-  const signingKey = new Uint8Array(
-    [132, 32, 36].concat(...publicKey).concat(...[0, 0, 0, 0])
-  );
-  return [{ privateKey, publicKey }, signingKey];
-};
+//   const signingKey = new Uint8Array(
+//     [132, 32, 36].concat(...publicKey).concat(...[0, 0, 0, 0])
+//   );
+//   return [{ privateKey, publicKey }, signingKey];
+// };
 
-  const genCredsForPass = async (regkey: string, password: string) => {
-  const [keyPair, signingKey] = await deriveSigningKeys(
-    `${regkey}-${password}`
-  );
-  const interim = Buffer.from([
-    0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-    0, 0, 0, 0, 0, 0, 0,
-  ]);
-  const regKeyHash = await blake2b(interim.length)
-    .update(Buffer.from(regkey))
-    .digest("binary");
-  const capSecret = Buffer.concat([regKeyHash, regKeyHash]);
-  const creds = {
-    capSecret,
-    keyPair,
-    signingKey,
-  };
-  return creds;
-};
+//   const genCredsForPass = async (regkey: string, password: string) => {
+//   const [keyPair, signingKey] = await deriveSigningKeys(
+//     `${regkey}-${password}`
+//   );
+//   const interim = Buffer.from([
+//     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+//     0, 0, 0, 0, 0, 0, 0,
+//   ]);
+//   const regKeyHash = await blake2b(interim.length)
+//     .update(Buffer.from(regkey))
+//     .digest("binary");
+//   const capSecret = Buffer.concat([regKeyHash, regKeyHash]);
+//   const creds = {
+//     capSecret,
+//     keyPair,
+//     signingKey,
+//   };
+//   return creds;
+// };
 
+
+  const isConfigured = (): boolean => {
+    return $sitemaps && $sitemaps.length > 0 && $allWindows && $allWindows.length > 0
+  }
 
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
     let installed_app_id = "emergence"
-    const credsJson = getCookie("creds")
-    if (credsJson) {
-      creds = jsonToCreds(credsJson)
-      installed_app_id = creds.installed_app_id
-    }
+    // const credsJson = getCookie("creds")
+    // if (credsJson) {
+    //   creds = jsonToCreds(credsJson)
+    //   installed_app_id = creds.installed_app_id
+    // }
+
     window.onunhandledrejection = (e) => {
       if (typeof e.reason == "object") {
         if (e instanceof TypeError) {
@@ -141,43 +152,60 @@ const deriveSigningKeys = async (
       }
     }
     let url
-    if (import.meta.env.VITE_URL) {
-      const screds = await genCredsForPass("Funky1","monkey")
-      creds = {
-        installed_app_id:"emergence-Funky1",
-        regkey:"Funky1",
-        appPath: `appWebsocket0`,
-        creds: screds
-        }
+    // if (import.meta.env.VITE_URL) {
+    //   const screds = await genCredsForPass("Funky1","monkey")
+    //   creds = {
+    //     installed_app_id:"emergence-Funky1",
+    //     regkey:"Funky1",
+    //     appPath: `appWebsocket0`,
+    //     creds: screds
+    //     }
+    //   }
+    // if (creds) {
+    //   console.log("CREDS", creds)
+    //   if (import.meta.env.VITE_URL) {
+    //     url = `wss://${import.meta.env.VITE_URL}/${creds.appPath}`
+    //   }
+    //   else {
+    //     url = new URL(`${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.host}/${creds.appPath}`)
+    //   }
+    //   console.log("URL", url)
+    //   client = await AppAgentWebsocket.connect(creds.installed_app_id, {url});
+    //   const appInfo = await client.appInfo()
+    //   console.log("appInfo", appInfo)
+    //   const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
+    //   await setSigningCredentials(cell_id, creds.creds)
+    // } else 
+
+    let profilesClient
+    if ((import.meta as any).env.DEV) {
+      try {
+        await initializeHotReload();
+      } catch (e) {
+        console.warn("Could not initialize applet hot-reloading. This is only expected to work in a We context in dev mode.")
       }
-    if (creds) {
-      console.log("CREDS", creds)
-      if (import.meta.env.VITE_URL) {
-        url = `wss://${import.meta.env.VITE_URL}/${creds.appPath}`
-      }
-      else {
-        url = new URL(`${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.host}/${creds.appPath}`)
-      }
-      console.log("URL", url)
-      client = await AppAgentWebsocket.connect(url, creds.installed_app_id);
-      const appInfo = await client.appInfo()
-      console.log("appInfo", appInfo)
-      const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
-      await setSigningCredentials(cell_id, creds.creds)
-    } else {
+    }
+
+    if (!isWeContext()) {
       let appPort: string = import.meta.env.VITE_APP_PORT
       url = appPort ? new URL(`ws://localhost:${appPort}`) : ""
-      client = await AppAgentWebsocket.connect(url, installed_app_id);
+      client = await AppAgentWebsocket.connect(installed_app_id, {url});
       console.log("Dev mode admin port:", adminPort)
       if (adminPort) {
-        const adminWebsocket = await AdminWebsocket.connect(new URL(`ws://localhost:${adminPort}`))
+        const adminWebsocket = await AdminWebsocket.connect({url: new URL(`ws://localhost:${adminPort}`)})
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
+      profilesClient = new ProfilesClient(client, installed_app_id);
+    } else {
+      weClient = await WeClient.connect(appletServices);
+      //@ts-ignore
+      client = weClient.renderInfo.appletClient;
+      //@ts-ignore
+      profilesClient = weClient.renderInfo.profilesClient;
     }
   
-
-    profilesStore = new ProfilesStore(new ProfilesClient(client, 'emergence'), {
+    profilesStore = new ProfilesStore(profilesClient, {
       avatarMode: "avatar-optional",
       minNicknameLength: 3,
       additionalFields: [
@@ -197,12 +225,20 @@ const deriveSigningKeys = async (
     fileStorageClient = new FileStorageClient(client, 'emergence');
     store = new EmergenceStore(new EmergenceClient(url,installed_app_id, client,'emergence'), profilesStore, fileStorageClient, client.myPubKey)
     await store.sync(undefined)
+
+    // for now everyone is a steward
+
+    if (!isConfigured()) {
+      store.setUIprops({amSteward:true})
+      await store.setPane("admin")
+     }
+
     initialSync = setInterval(async ()=>{
-      if ($uiProps.amSteward || ($sitemaps && $sitemaps.length > 0)) {clearInterval(initialSync)}
+      if ($uiProps.amSteward || !isConfigured()) {clearInterval(initialSync)}
       else {
         await doSync()
       }
-    }, 30000);
+    }, 10000);
 
     loading = false;
   });
@@ -273,9 +309,9 @@ const deriveSigningKeys = async (
       <div class="event-intro">
         <div class="wrapper">
           <div class="about-event">
-            <img class="dweb-camp" src="/images/dweb-camp.png" 
-            on:click={()=>adminCheck()}/>
-            <p style="color:black">Welcome to camp! Create a profile to discover sessions, find people and take notes {#if $uiProps.amSteward}!{/if}</p>
+            <img class="emergence-welcome" src="/android-chrome-512x512.png" 
+            />
+            <p style="color:black">Welcome to Emergence! Create a profile to discover sessions, find people and take notes {#if $uiProps.amSteward}!{/if}</p>
           </div>
           {#if $prof.status=="complete" && $prof.value == undefined}
           <div class="create-profile">
@@ -292,8 +328,8 @@ const deriveSigningKeys = async (
         <div class="wrapper">
           <div class="about-event">
 
-            <img class="dweb-camp" src="/images/dweb-camp.png" 
-        on:click={()=>adminCheck()}/>
+            <img class="emergence-welcome" src="/android-chrome-512x512.png" 
+        />
         <p>Either your node hasn't synchronized yet with the network, or the conference data hasn't yet been set up. Please be patient! </p>
         <div style="display:flex;justify-items:center;width:100%">
         <sl-button on:click={() => doSync()}>
@@ -348,8 +384,7 @@ const deriveSigningKeys = async (
             on:dblclick={(e)=>e.stopPropagation()}
             on:click={(e)=>{
               e.stopPropagation()
-              if (pane=="you") adminCheck()
-              else store.setPane('you')
+              if (pane!=="you") store.setPane('you')
               }}
           >
             <Fa class="nav-icon" icon={faUser} size="2x"/>
@@ -593,8 +628,8 @@ const deriveSigningKeys = async (
     margin-bottom: 0;
   }
 
-  .dweb-camp {
-    max-width: 50vw;
+  .emergence-welcome {
+    width: 300px;
     margin: 0 auto;
     display: block;
   }

@@ -1,6 +1,6 @@
 <script lang="ts">
 import { createEventDispatcher, getContext, onMount } from 'svelte';
-import { type EntryHash, type AgentPubKey, encodeHashToBase64, type ActionHash, decodeHashFromBase64 } from '@holochain/client15';
+import { type EntryHash, type AgentPubKey, encodeHashToBase64, type ActionHash, decodeHashFromBase64 } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import { Amenities, type Info, type Space, setAmenity, type SiteMap, type SiteLocation} from './types';
 import '@shoelace-style/shoelace/dist/components/button/button.js';

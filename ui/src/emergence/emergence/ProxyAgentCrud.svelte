@@ -14,7 +14,7 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import { encodeHashToBase64, type EntryHash } from '@holochain/client15';
+import { encodeHashToBase64, type EntryHash } from '@holochain/client';
   import { errorText } from './utils';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();

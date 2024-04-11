@@ -13,9 +13,9 @@ import type SlSelect from '@shoelace-style/shoelace/dist/components/select/selec
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent, type SessionType, timeWindowDurationToStr } from './types';
+import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent, type SessionType, timeWindowDurationToStr, type InfoSession } from './types';
 import SlotSelect from './SlotSelect.svelte';
-import { encodeHashToBase64,  decodeHashFromBase64 } from '@holochain/client15';
+import { encodeHashToBase64,  decodeHashFromBase64 } from '@holochain/client';
 import AnyAvatar from './AnyAvatar.svelte';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
@@ -27,7 +27,7 @@ let amenityElems: Array<SlCheckbox> = []
 $: uiProps = store.uiProps
 const dispatch = createEventDispatcher();
 
-export let session: Info<Session>|undefined = undefined;  // set this if update
+export let session: InfoSession|undefined = undefined;  // set this if update
 export const open = (ses) => {
   if (ses) {
     session = ses

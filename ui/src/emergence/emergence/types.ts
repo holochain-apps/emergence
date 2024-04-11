@@ -14,7 +14,8 @@ import {
   type HoloHash,
   encodeHashToBase64,
   decodeHashFromBase64
-} from '@holochain/client15';
+} from '@holochain/client';
+import { unfixAnyAgent } from '../../emergence-client';
 
 
 export const NULL_HASHB64 = "uhCkk______________________"
@@ -69,6 +70,30 @@ export type SessionType  = {
   can_leaderless: boolean
 }
 
+export interface SessionEntryRecord {
+  entry: Session
+  actionHash: ActionHash
+  record : {
+    entry: Session,
+    actionHash: ActionHash
+  }
+}
+
+export const makeSRec = (record: EntryRecord<Session>): SessionEntryRecord => {
+  let entry = record.entry
+  entry.leaders = entry.leaders.map(l=>unfixAnyAgent(l))
+
+  let sRec: SessionEntryRecord = {
+    entry,
+    actionHash: record.actionHash,
+    record: {
+      entry,
+      actionHash: record.actionHash,
+    }
+  }
+  return sRec
+}
+
 export interface Session { 
   key: string;
   session_type: SessionTypeID,
@@ -96,6 +121,12 @@ export interface Session {
 export interface Info<T> {
   original_hash: ActionHash,
   record: EntryRecord<T>,
+  relations: Array<RelationInfo>,
+}
+
+export interface InfoSession {
+  original_hash: ActionHash,
+  record: SessionEntryRecord,
   relations: Array<RelationInfo>,
 }
 
@@ -368,7 +399,7 @@ export interface GetStuffInput {
 }
 
 export interface GetStuffOutput {
-  sessions?: Array<Info<Session>|undefined>,
+  sessions?: Array<InfoSession|undefined>,
   spaces?: Array<Info<Space>|undefined>,
   notes?: Array<Info<Note>|undefined>,
 }
@@ -391,7 +422,7 @@ export function setCharAt(str:string,index:number,chr:string) {
 }
 
 export interface SlottedSession {
-  session: Info<Session>,
+  session: InfoSession,
   window: TimeWindow,
 }
 
@@ -405,18 +436,18 @@ export interface TagUse {
   session_agents: Array<SessionAgent>,
 }
 
-export const sessionNotes = (session: Info<Session>):Array<ActionHash> => {
+export const sessionNotes = (session: InfoSession):Array<ActionHash> => {
   return session.relations.filter(r=>r.relation.content.path == "session.note").map(r=> r.relation.dst)
 }
 
-export const sessionTags = (session: Info<Session>):Array<string> => {
+export const sessionTags = (session: InfoSession):Array<string> => {
   const tagsMap = {}
   session.relations.filter(r=>r.relation.content.path == "session.tag").forEach(r=> tagsMap[r.relation.content.data] = tagsMap[r.relation.content.data] ? tagsMap[r.relation.content.data] += 1 : 1)
   const tags = Object.keys(tagsMap)
   return tags.sort((a,b)=>tagsMap[a]-tagsMap[b])
 }
 
-export const sessionSelfTags = (session: Info<Session>):Array<string> => {
+export const sessionSelfTags = (session: InfoSession):Array<string> => {
   const hashB64 = encodeHashToBase64(session.original_hash)
   return session.relations.filter(r=>r.relation.content.path == "session.tag"  && 
     encodeHashToBase64(r.relation.dst) === hashB64
@@ -553,7 +584,7 @@ export interface Settings {
 }
 
 export interface InterestData {
-  session:Info<Session>, 
+  session:InfoSession, 
   estimatedAttendance:number,
   percentInterest:number,
   assesments:number,

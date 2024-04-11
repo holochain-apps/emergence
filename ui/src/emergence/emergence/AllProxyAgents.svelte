@@ -1,6 +1,6 @@
 <script lang="ts">
 import { onMount, getContext, createEventDispatcher } from 'svelte';
-import type { Record  } from '@holochain/client15';
+import type { Record  } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import ProxyAgentSummary from './ProxyAgentSummary.svelte';
 import type { EmergenceStore } from '../../emergence-store';

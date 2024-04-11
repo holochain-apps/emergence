@@ -6,7 +6,7 @@
     import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js';
     import '@shoelace-style/shoelace/dist/components/tab/tab.js';
 
-    import type {  Record } from '@holochain/client15';
+    import type {  Record } from '@holochain/client';
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import Feed from './Feed.svelte';

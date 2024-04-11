@@ -57,7 +57,8 @@ pub struct GetFeedInput {
 #[hdk_extern]
 pub fn get_feed(input: GetFeedInput) -> ExternResult<Vec<RelationInfo>> {
     let path = Path::from("feed");
-    let links = get_links(path.path_entry_hash()?,  LinkTypes::Relations, None)?;
+    let get_links_input: GetLinksInput = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::Relations)?.build();
+    let links = get_links(get_links_input)?;
     let mut relations: Vec<RelationInfo> = Vec::new();
     for link in links {
         let relation = Relation 
@@ -123,13 +124,14 @@ pub struct TagUse {
 #[hdk_extern]
 pub fn get_tags(_input: ()) -> ExternResult<Vec<TagUse>> {
     let path = Path::from("tags");
-    let links = get_links(path.path_entry_hash()?,  LinkTypes::Relations, None)?;
+    let input: GetLinksInput = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::Relations)?.build();
+    let links = get_links(input)?;
     let mut tags: HashMap<String,Vec<SessionAgent>> = HashMap::new();
     for link in links {
         let content = convert_relation_tag(link.tag)?;
         let tag = content.data;
         let sa = SessionAgent{
-            session: link.target.try_into()?,
+            session: ActionHash::try_from(link.target).map_err(|err| wasm_error!(err))?,
             agent: link.author
         };
         if let Some(session_agent) = tags.get_mut(&tag) {
@@ -153,7 +155,8 @@ pub struct RelationInfo {
 #[hdk_extern]
 pub fn get_relations(input: AnyLinkableHash) -> ExternResult<Vec<RelationInfo>> {
     let hash = AnyLinkableHash::from(input);
-    let links = get_links(hash.clone(), LinkTypes::Relations, None)?;
+    let input: GetLinksInput = GetLinksInputBuilder::try_new(hash.clone(), LinkTypes::Relations)?.build();
+    let links = get_links(input)?;
 
     let mut relations: Vec<RelationInfo> = Vec::new();
     for link in links {
@@ -176,7 +179,8 @@ pub fn get_relations(input: AnyLinkableHash) -> ExternResult<Vec<RelationInfo>> 
 #[hdk_extern]
 pub fn get_relations_agent(input: AgentPubKey) -> ExternResult<Vec<Relation>> {
     let hash = AnyLinkableHash::from(input);
-    let links = get_links(hash.clone(), LinkTypes::Relations, None)?;
+    let input: GetLinksInput = GetLinksInputBuilder::try_new(hash.clone(), LinkTypes::Relations)?.build();
+    let links = get_links(input)?;
 
     let mut relations: Vec<Relation> = Vec::new();
     for link in links {

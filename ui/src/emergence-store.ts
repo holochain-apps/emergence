@@ -6,7 +6,7 @@ import {
     type AgentPubKey,
     decodeHashFromBase64,
     type EntryHash,
-} from '@holochain/client15';
+} from '@holochain/client';
 
 import type { EmergenceClient } from './emergence-client';
 
@@ -15,7 +15,7 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile, type SessionType, type SessionTypeID, NULL_HASHB64, NULL_HASH, SessionListMode, type GetFeedInput } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile, type SessionType, type SessionTypeID, NULL_HASHB64, NULL_HASH, SessionListMode, type GetFeedInput, type InfoSession, type SessionEntryRecord, makeSRec } from './emergence/emergence/types';
 import { toPromise, type AsyncReadable, type AsyncStatus, asyncDerived } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
@@ -100,7 +100,7 @@ export const neededStuffStore = (client: EmergenceClient) => {
 export class EmergenceStore {
   timeAgo = new TimeAgo('en-US')
   timeWindows: Writable<Array<TimeWindow>> = writable([])
-  sessions: Writable<Array<Info<Session>>> = writable([])
+  sessions: Writable<Array<InfoSession>> = writable([])
   spaces: Writable<Array<Info<Space>>> = writable([])
   notes: Writable<Array<Info<Note>>> = writable([])
   maps: Writable<Array<Info<SiteMap>>> = writable([])
@@ -245,7 +245,7 @@ export class EmergenceStore {
     return sessions.findIndex((s)=> encodeHashToBase64(s.original_hash) === b64)
   }
 
-  getSession(sessionHash: ActionHash) : Info<Session> | undefined {
+  getSession(sessionHash: ActionHash) : InfoSession | undefined {
     const sessionIdx = this.getSessionIdx(sessionHash)
     if (sessionIdx == -1) return undefined
     return get(this.sessions)[sessionIdx]
@@ -261,7 +261,7 @@ export class EmergenceStore {
     return derived(this.timeWindows, $timeWindows => $timeWindows.filter(w=>!sitemap || w.tags.includes(sitemap.record.entry.tags[0])))
   }
 
-  sessionStore(sessionHash) : Readable<Info<Session>|undefined>{
+  sessionStore(sessionHash) : Readable<InfoSession|undefined>{
     return derived(this.sessions, $sessions => $sessions.find(s=>encodeHashToBase64(sessionHash) == encodeHashToBase64(s.original_hash)))
   }
 
@@ -329,7 +329,7 @@ export class EmergenceStore {
     return get(this.proxyAgents)[proxyAgentIdx]
   }
 
-  getSessionSlot(session: Info<Session>) : Slot|undefined {
+  getSessionSlot(session: InfoSession) : Slot|undefined {
     if (!session) return undefined
     const rels = session.relations.filter(r=>r.relation.content.path == "session.slot")
     if (rels.length == 0) return undefined
@@ -358,7 +358,7 @@ export class EmergenceStore {
     }
   }
 
-  getSessionReleationData(session: Info<Session>) : SessionRelationData {
+  getSessionReleationData(session: InfoSession) : SessionRelationData {
     const rel: SessionRelationData = {
         myInterest: SessionInterestDefault,
         interest: new HoloHashMap(),
@@ -393,11 +393,11 @@ export class EmergenceStore {
     return rel
   }
 
-  sessionReleationDataStore(sessionStore: Readable<Info<Session>>) : Readable<SessionRelationData> {
+  sessionReleationDataStore(sessionStore: Readable<InfoSession>) : Readable<SessionRelationData> {
     return derived(sessionStore, $session=> this.getSessionReleationData($session))
   }
 
-  sessionSlotStore(sessionStore: Readable<Info<Session>>) : Readable<Slot|undefined> {
+  sessionSlotStore(sessionStore: Readable<InfoSession>) : Readable<Slot|undefined> {
     return derived(sessionStore, $session=> {
         const slottings = $session.relations.filter(r=>r.relation.content.path == "session.slot")
         if (slottings.length > 0) {
@@ -413,7 +413,7 @@ export class EmergenceStore {
       })
   }
 
-  sessionNoteStore(sessionStore: Readable<Info<Session>>) : Readable<Array<Info<Note>|undefined>> {
+  sessionNoteStore(sessionStore: Readable<InfoSession>) : Readable<Array<Info<Note>|undefined>> {
     return derived(sessionStore, $session=> {
         return $session.relations.filter(r=>r.relation.content.path == "session.note").map(r=> {
             const note = this.getNote(r.relation.dst)
@@ -422,7 +422,7 @@ export class EmergenceStore {
       })})
   }
 
-  getSessionNotes(session: Info<Session>) : Array<Info<Note>> {
+  getSessionNotes(session: InfoSession) : Array<Info<Note>> {
     const notes: Array<Info<Note>> = []
     for (const ri of session.relations) {
         const r = ri.relation
@@ -592,7 +592,7 @@ export class EmergenceStore {
     return record
   }
 
-  async updateSession(sessionHash: ActionHash, props:any): Promise<EntryRecord<Session>> {
+  async updateSession(sessionHash: ActionHash, props:any): Promise<SessionEntryRecord> {
     const sessionIdx = this.getSessionIdx(sessionHash)
     if (sessionIdx >= 0) {
         const session = get(this.sessions)[sessionIdx]
@@ -601,7 +601,7 @@ export class EmergenceStore {
         const changes = []
         const update: UpdateSessionInput = { 
             original_session_hash: session.original_hash,
-            previous_session_hash: session.record.record.signed_action.hashed.hash,
+            previous_session_hash: session.record.record.actionHash,
             updated_type: sessionEntry.session_type,
             updated_title: sessionEntry.title,
             updated_description: sessionEntry.description,
@@ -740,12 +740,12 @@ export class EmergenceStore {
                    await this.unslot(session.original_hash)
                 }
             }
-
+            let sRec = makeSRec(record)
             this.sessions.update((sessions) => {
-                sessions[sessionIdx].record = record
+                sessions[sessionIdx].record = sRec
                 return sessions
             })
-            return record
+            return sRec
         } else {
             console.log("No changes detected ignoring...")
         }
@@ -832,7 +832,7 @@ export class EmergenceStore {
 
   
 
-  sessionInterestProjection(sessions: Array<Info<Session>>) : Projection  {
+  sessionInterestProjection(sessions: Array<InfoSession>) : Projection  {
     const peopleCount = this.peopleCount() || 0
 
     let totalAssesments = 0
@@ -907,7 +907,7 @@ export class EmergenceStore {
     }
   } 
 
-  updateMyInterest(session: Info<Session>) {
+  updateMyInterest(session: InfoSession) {
     session.record.entry.leaders.forEach(l=> 
         {
             if (encodeHashToBase64(l.hash) == this.myPubKeyBase64) {
@@ -1094,7 +1094,7 @@ export class EmergenceStore {
     return []
   }
 
-  sessionLeaderNameIncludes = (session:Info<Session>, word:string):boolean => {
+  sessionLeaderNameIncludes = (session:InfoSession, word:string):boolean => {
     for (const l of session.record.entry.leaders) {
         if (l.type=="ProxyAgent") {
             const nick = this.proxyAgentNicknames.get(l.hash)
@@ -1102,7 +1102,7 @@ export class EmergenceStore {
         } else {
             const profile = get(this.profilesStore.profiles.get(l.hash))
             if (profile.status === "complete"  && profile.value) {
-                const nick = profile.value.nickname
+                const nick = profile.value.entry.nickname
                 if (nick && nick.toLowerCase().search(word) >= 0) return true
             }
 
@@ -1112,7 +1112,7 @@ export class EmergenceStore {
   }
   
 
-  filterSession(session:Info<Session>, filter: SessionsFilter) : boolean {
+  filterSession(session:InfoSession, filter: SessionsFilter) : boolean {
     const slot = this.getSessionSlot(session)
     if (!slot && (filter.timeNow || filter.timeToday ||  filter.timeNext || filter.timePast || filter.timeFuture)) return false
     if (filter.timeUnscheduled && slot) return false
@@ -1185,9 +1185,9 @@ export class EmergenceStore {
     this.setUIprops(props)
   }
 
-  sessionsInSpace = (window: TimeWindow, space: Info<Space>) : Array<Info<Session>> | undefined => {
+  sessionsInSpace = (window: TimeWindow, space: Info<Space>) : Array<InfoSession> | undefined => {
     let rel = space.relations.filter(r=>r.relation.content.path == "space.sessions")
-    const sessions: HoloHashMap<ActionHash, Info<Session>> = new HoloHashMap
+    const sessions: HoloHashMap<ActionHash, InfoSession> = new HoloHashMap
     rel.forEach(r=> {
         const session = this.getSession(r.relation.dst)
         if (session && !session.record.entry.trashed) {

@@ -1,4 +1,4 @@
-import type { Timestamp } from "@holochain/client15"
+import type { Timestamp } from "@holochain/client"
 import type { Info, Session, SessionsFilter, Slot, TimeWindow } from "./types"
 
 // @ts-ignore
@@ -76,7 +76,7 @@ export const truncateText = (text, len) => {
   return `${text.slice(0,len)}...`
 }
 
-export const sessionHasTags = (session: Info<Session>, tags: string[]) : boolean => {
+export const sessionHasTags = (session: InfoSession, tags: string[]) : boolean => {
   let found = false
   for (let tag of tags) {
       tag = tag.toLowerCase()

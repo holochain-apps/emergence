@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, getContext, createEventDispatcher } from 'svelte';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64} from '@holochain/client15';
+  import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64} from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
   import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities, DetailsType, SpaceSortOrder } from './types';
@@ -135,7 +135,7 @@
 
   let draggingHandled = true
   let draggedItemId = ""
-  let draggedSession : Info<Session> | undefined
+  let draggedSession : InfoSession | undefined
   $: draggedAmenitiesCount =  draggedItemId ? amenitiesList(draggedSession.record.entry.amenities).length : 0
   $: draggedSession, draggedItemId
   $: overlappingAmenities = (space: Info<Space>) => {
@@ -382,11 +382,11 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
       <sl-option value={SpaceSortOrder.Capacity}>Capacity</sl-option>
     </sl-select>
     {#if $uiProps.amSteward}
-      <sl-button on:click={() => {creatingTimeWindow = true; } } circle>
+      <sl-button title="Create Time Slot" on:click={() => {creatingTimeWindow = true; } } circle>
         <Fa icon={faCalendarPlus} />
       </sl-button>
     {/if}
-    <sl-button on:click={() => {bySpace = !bySpace } } circle>
+    <sl-button title="Flip Display Axis" on:click={() => {bySpace = !bySpace } } circle>
       <Fa icon={faArrowsUpDownLeftRight} />
     </sl-button>
   </div>

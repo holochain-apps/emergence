@@ -9,12 +9,14 @@
     "package": "rm -f dist.zip && npm run build && cd dist && bestzip ../dist.zip *"
   },
   "dependencies": {
-    "@holochain/client15": "npm:@holochain/client@^0.15.0",
-    "@holochain-open-dev/profiles": "^0.15.0",
-    "@holochain-open-dev/elements": "^0.6.0",
-    "@holochain-open-dev/stores": "^0.4.0",
-    "@holochain-open-dev/utils": "^0.12.2",
-    "@holochain-open-dev/file-storage": "0.5.0",
+    "@holochain-open-dev/file-storage":  "^0.300.0-dev.0",
+    "@holochain-open-dev/elements": "^0.300.0-dev.0",
+    "@holochain-open-dev/profiles": "^0.300.0-dev.0",
+    "@holochain-open-dev/stores": "^0.300.0-dev.0",
+    "@holochain-open-dev/utils": "^0.300.0-dev.0",
+    "@holochain/client": "^0.17.0-dev.7",
+    "@lightningrodlabs/we-applet": "^0.16.1",
+    "@lightningrodlabs/we-elements": "^0.5.0",
     "@scoped-elements/dropzone": "0.2.6",
     "@shoelace-style/shoelace": "^2.3.0",
     "blake2b": "2.1.4",
@@ -38,6 +40,7 @@
     "svelte-cookie": "1.0.1"
   },
   "devDependencies": {
+    "@lightningrodlabs/we-dev-cli": "^0.11.8-dev.2",
     "@sveltejs/vite-plugin-svelte": "^2.0.2",
     "@tsconfig/svelte": "^3.0.0",
     "bestzip": "^2.2.0",

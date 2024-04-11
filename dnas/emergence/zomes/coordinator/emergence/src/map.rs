@@ -16,12 +16,13 @@ pub fn create_map(map: Map) -> ExternResult<Record> {
 }
 #[hdk_extern]
 pub fn get_map(original_map_hash: ActionHash) -> ExternResult<Option<Record>> {
-    let links = get_links(original_map_hash.clone(), LinkTypes::MapUpdates, None)?;
+    let input: GetLinksInput = GetLinksInputBuilder::try_new(original_map_hash.clone(), LinkTypes::MapUpdates)?.build();
+    let links = get_links(input)?;
     let latest_link = links
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
     let latest_map_hash = match latest_link {
-        Some(link) => ActionHash::from(link.target.clone()),
+        Some(link) => ActionHash::try_from(link.target.clone()).map_err(|err| wasm_error!(err))?,
         None => original_map_hash.clone(),
     };
     get(latest_map_hash, GetOptions::default())

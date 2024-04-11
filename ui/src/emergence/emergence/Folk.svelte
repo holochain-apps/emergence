@@ -11,7 +11,7 @@
     import Fa from 'svelte-fa'
     import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
-    import type { AgentPubKey } from '@holochain/client15';
+    import type { AgentPubKey } from '@holochain/client';
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import NoteDetail from './NoteDetail.svelte';
@@ -56,8 +56,8 @@
           
     <div class="folk-profile">
         <Avatar agentPubKey={agentPubKey} ></Avatar>
-        {#if $profile.value.fields.location}<div class="location">{$profile.value.fields.location}</div>{/if}
-        {#if $profile.value.fields.bio}<div class="bio">{$profile.value.fields.bio}</div>{/if}
+        {#if $profile.value.entry.fields.location}<div class="location">{$profile.value.entry.fields.location}</div>{/if}
+        {#if $profile.value.entry.fields.bio}<div class="bio">{$profile.value.entry.fields.bio}</div>{/if}
     </div>
     <sl-tab-group
         bind:this={tabs}

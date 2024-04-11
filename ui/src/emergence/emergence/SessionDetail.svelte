@@ -9,9 +9,9 @@ import { createEventDispatcher, getContext, onMount } from 'svelte';
 import Fa from 'svelte-fa';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
-import { NULL_HASHB64, amenitiesList, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit } from './types';
+import { NULL_HASHB64, amenitiesList, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit, type InfoSession } from './types';
 
-import { encodeHashToBase64, type ActionHash } from '@holochain/client15';
+import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 import Avatar from './Avatar.svelte';
 import AnyAvatar from './AnyAvatar.svelte';
 import Confirm from './Confirm.svelte';
@@ -48,7 +48,7 @@ $: uiProps = store.uiProps
 
 let updateSessionDialog
 
-const sessionSlot = (session: Info<Session>): Slot | undefined => {
+const sessionSlot = (session: InfoSession): Slot | undefined => {
   const slottings = session.relations.filter(r=>r.relation.content.path == "session.slot")
   if (slottings.length > 0) {
     const ri = slottings[slottings.length-1]

@@ -8,10 +8,21 @@ import type {
   AppAgentClient,
   EntryHash,
   HoloHash
-} from '@holochain/client15';
-import type { AnyAgent, FeedElem, GetFeedInput, GetStuffInput, GetStuffOutput, Info, Note, ProxyAgent, Relation, RelationInfo, Session, SessionTypeID, Settings, SiteMap, Space, TagUse, TimeWindow, UpdateNoteInput, UpdateProxyAgentInput, UpdateSessionInput, UpdateSiteMapInput, UpdateSpaceInput } from './emergence/emergence/types';
+} from '@holochain/client';
+import { makeSRec, type AnyAgent, type FeedElem, type GetFeedInput, type GetStuffInput, type GetStuffOutput, type Info, type InfoSession, type Note, type ProxyAgent, type Relation, type RelationInfo, type Session, type SessionTypeID, type Settings, type SiteMap, type Space, type TagUse, type TimeWindow, type UpdateNoteInput, type UpdateProxyAgentInput, type UpdateSessionInput, type UpdateSiteMapInput, type UpdateSpaceInput } from './emergence/emergence/types';
 // import { UnsubscribeFunction } from 'emittery';
 
+export function fixAnyAgent(a:AnyAgent) {
+  const x = {}
+  x[a.type] = null
+  return {type:x, hash:a.hash}
+}
+export function unfixAnyAgent(a:any): AnyAgent {
+  const type = Object.keys(a.type)[0]
+  //@ts-ignore
+  const x:AnyAgent = {type, hash:a.hash}
+  return x
+}
 
 export class EmergenceClient {
   reconnecting = false
@@ -104,11 +115,16 @@ export class EmergenceClient {
         amenities,
         trashed: false
       };
-    
+
+      // @ts-ignore
+      sessionEntry.leaders = sessionEntry.leaders.map(l=>fixAnyAgent(l))
+    console.log("NEW SES", sessionEntry)
     return new EntryRecord(await this.callZome('create_session', sessionEntry))
   }
 
   async updateSession(update: UpdateSessionInput) : Promise<EntryRecord<Session>> {
+    // @ts-ignore
+    update.updated_leaders =  update.updated_leaders.map(l=>fixAnyAgent(l))
     return new EntryRecord(await this.callZome('update_session', update))
   }
 
@@ -116,12 +132,15 @@ export class EmergenceClient {
     return await this.callZome('delete_session', actionHash)
   }
 
-  async getSessions() : Promise<Array<Info<Session>>> {
+  async getSessions() : Promise<Array<InfoSession>> {
     const sessions = await this.callZome('get_all_sessions',null)
     return sessions.map(r => {
-        let info: Info<Session> = {
+        let record:EntryRecord<Session> = new EntryRecord(r.record)
+        let sRec = makeSRec(record)
+ 
+        let info: InfoSession = {
         original_hash: r.original_hash,
-        record: new EntryRecord(r.record), 
+        record:sRec,
         relations: r.relations}
 
         return info
@@ -241,9 +260,11 @@ export class EmergenceClient {
     if (stuff.sessions) {
       stuff.sessions = stuff.sessions.map(s => {
         if (s) {
-          const info: Info<Session> = {
+          const rec:EntryRecord<Session> = new EntryRecord(s.record)
+          const sRec = makeSRec(rec)
+          const info: InfoSession = {
           original_hash: s.original_hash,
-          record: new EntryRecord(s.record), 
+          record: sRec, 
           relations: s.relations}
           return info
           }

@@ -12,7 +12,7 @@
     import { watchResize } from "svelte-watch-resize";
     import  { HoloHashMap } from '@holochain-open-dev/utils';
     import SpaceCrud from './SpaceCrud.svelte';
-    import { encodeHashToBase64, type ActionHash } from '@holochain/client15';
+    import { encodeHashToBase64, type ActionHash } from '@holochain/client';
     import AllSpaces from './AllSpaces.svelte';
 
     const dispatch = createEventDispatcher();
