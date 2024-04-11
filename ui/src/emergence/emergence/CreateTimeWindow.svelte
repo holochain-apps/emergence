@@ -11,7 +11,8 @@ import { faClose, faSave } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import MultiSelect from 'svelte-multiselect'
 import { DateInput } from 'date-picker-svelte'
-  import { errorText } from './utils';
+  import { dayToStr, errorText } from './utils';
+  import type SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 
@@ -29,17 +30,25 @@ $: isTimeWindowValid = duration > 0 && start;
 onMount(() => {
 });
 
+const reset = () => {
+  //start = undefined
+  duration = 60
+  //tags = []
+}
+
 async function createTimeWindow() { 
   try {
     const actionHash = store.createTimeWindow(start, duration!, tags)
-    start = undefined
-    duration = 60
     dispatch('timeWindow-created', { timeWindowHash: actionHash });
-    
+    dialog.hide()
   } catch (e) {
     errorSnackbar.labelText = `Error creating the timeWindow: ${errorText(e)}`;
     errorSnackbar.show();
   }
+}
+export const open = ()=>{
+  reset()
+  dialog.show()
 }
 
 const setLen = (l:number) => {
@@ -47,25 +56,16 @@ const setLen = (l:number) => {
     duration = l
   }
 }
-
+let dialog: SlDialog
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
+<sl-dialog
+bind:this={dialog}
+label="Create Time Slot"
+>
 <div style="display: flex; flex-direction: column; max-width: 500px">
   
-  <div style="display: flex; flex-direction: row; justify-content: space-between; margin-bottom: 10px;">
-    <span style="font-size: 18px">Create Time Slot</span>
-    <div>
-      <sl-button title="Save" circle size=small
-        on:click={() => createTimeWindow()}
-        disabled={!isTimeWindowValid}
-        variant=primary><Fa icon={faSave} />
-      </sl-button>
-      <sl-button style="margin-left: 8px; " on:click={() => { dispatch('close-create-timeWindow') } } circle>
-        <Fa icon={faClose} />
-      </sl-button>
-    </div>
-  </div>
   <div style="margin-bottom: 16px">
     <span>Slot Start:</span >
     <DateInput 
@@ -92,6 +92,19 @@ const setLen = (l:number) => {
 
   </div>
             
+  <div style="display: flex; flex-direction: row; justify-content: flex-end; margin-bottom: 10px;">
+    <div>
+      <sl-button title="Save"
+        on:click={() => createTimeWindow()}
+        disabled={!isTimeWindowValid}
+        variant=primary>Create
+      </sl-button>
+      <sl-button style="margin-left: 8px; " on:click={() => { dispatch('close-create-timeWindow') ; dialog.hide() } }>
+        Cancel
+      </sl-button>
+    </div>
+  </div>
 
 
 </div>
+</sl-dialog>

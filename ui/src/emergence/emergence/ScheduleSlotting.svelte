@@ -4,7 +4,7 @@
   import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64} from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../emergence-store';
-  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities, DetailsType, SpaceSortOrder } from './types';
+  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities, DetailsType, SpaceSortOrder, type InfoSession } from './types';
   import { calcDays, dayToStr, sortSlot, sortWindows, windowsInDay} from './utils'
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
@@ -320,6 +320,7 @@
     await store.mergeSessions(mergeA, mergeB )
   }
   let slotTypeFilterSelect
+  let createTimeWindowDialog
 </script>
 
 <Confirm 
@@ -382,8 +383,8 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
       <sl-option value={SpaceSortOrder.Capacity}>Capacity</sl-option>
     </sl-select>
     {#if $uiProps.amSteward}
-      <sl-button title="Create Time Slot" on:click={() => {creatingTimeWindow = true; } } circle>
-        <Fa icon={faCalendarPlus} />
+      <sl-button title="Create Time Slot" on:click={() => {creatingTimeWindow = true; createTimeWindowDialog.open() } } circle>
+        <Fa icon={faCalendarPlus} color={$allWindows.length == 0 ? "red" :"black"}/>
       </sl-button>
     {/if}
     <sl-button title="Flip Display Axis" on:click={() => {bySpace = !bySpace } } circle>
@@ -394,14 +395,11 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
   <div class="pane-content pane-desktop">
 
 
-    {#if creatingTimeWindow}
-    <div class="modal create-slot">
       <CreateTimeWindow 
+        bind:this={createTimeWindowDialog}
         on:timeWindow-created={()=>creatingTimeWindow=false}
         on:close-create-timeWindow={()=>creatingTimeWindow=false}>
       </CreateTimeWindow>
-    </div>
-    {/if}
 
     <div class="sections">
 
