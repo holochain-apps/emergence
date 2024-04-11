@@ -135,7 +135,7 @@
 
   let draggingHandled = true
   let draggedItemId = ""
-  let draggedSession : Info<Session> | undefined
+  let draggedSession : InfoSession | undefined
   $: draggedAmenitiesCount =  draggedItemId ? amenitiesList(draggedSession.record.entry.amenities).length : 0
   $: draggedSession, draggedItemId
   $: overlappingAmenities = (space: Info<Space>) => {

@@ -1,5 +1,6 @@
 use hdk::prelude::*;
 use emergence_integrity::*;
+
 #[hdk_extern]
 pub fn create_session(session: Session) -> ExternResult<Record> {
     let session_hash = create_entry(&EntryTypes::Session(session.clone()))?;

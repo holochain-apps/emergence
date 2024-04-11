@@ -18,7 +18,7 @@ const dispatch = createEventDispatcher();
 
 
 interface SlottedSession {
-  session: Info<Session>,
+  session: InfoSession,
   window: TimeWindow,
 }
 

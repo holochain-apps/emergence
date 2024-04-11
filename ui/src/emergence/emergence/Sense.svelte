@@ -52,7 +52,7 @@
     }
   }
 
-  const shuffle = (sessions: Array<Info<Session>>) => {
+  const shuffle = (sessions: Array<InfoSession>) => {
     const shuffled = sessions.map(value => ({ value, sort: Math.random() }))
     .sort((a, b) => a.sort - b.sort)
     .map(({ value }) => value)

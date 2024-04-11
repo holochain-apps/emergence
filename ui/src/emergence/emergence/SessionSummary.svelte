@@ -15,7 +15,7 @@ import Fa from 'svelte-fa';
 
 const dispatch = createEventDispatcher();
 
-export let session: Info<Session>;
+export let session: InfoSession;
 export let allowSetIntention = false;
 export let showDescription = false;
 export let showTags = false;

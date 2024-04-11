@@ -27,7 +27,7 @@ let amenityElems: Array<SlCheckbox> = []
 $: uiProps = store.uiProps
 const dispatch = createEventDispatcher();
 
-export let session: Info<Session>|undefined = undefined;  // set this if update
+export let session: InfoSession|undefined = undefined;  // set this if update
 export const open = (ses) => {
   if (ses) {
     session = ses

@@ -49,7 +49,7 @@ let createSessionDialog: SessionCrud
 onMount(async () => {
   listModeSelect.value = $uiProps.sessionListMode
 });
-const sortSessions =(a:Info<Session>,b:Info<Session>) : number => {
+const sortSessions =(a:InfoSession,b:InfoSession) : number => {
   const slota = store.getSessionSlot(a)
   const slotb = store.getSessionSlot(b)
   let vala =  Number. MAX_SAFE_INTEGER

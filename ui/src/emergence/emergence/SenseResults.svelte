@@ -21,7 +21,7 @@
   });
 
 
-// const calcSessionData = (sessions: Array<Info<Session>>): Array<Projection> => {
+// const calcSessionData = (sessions: Array<InfoSession>): Array<Projection> => {
 //   projection = store.sessionInterestProjection(peopleCount, sessions)
 //   totalAssesments = projection.totalAssesments
 //   maxAttendance = projection.maxAttendance
