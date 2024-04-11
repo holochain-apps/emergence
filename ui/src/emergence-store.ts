@@ -35,7 +35,7 @@ Marked.setOptions
 
 TimeAgo.addDefaultLocale(en)
 const LIKELY_TO_ATTEND_PERCENT = .8
-const FULL_FEED = false
+const FULL_FEED = true
 export const DEFAULT_SYNC_TEXT = "Syncing with local holochain..."
 class HolochainError extends Error {
     constructor(name: string, message: string) {
@@ -1795,9 +1795,11 @@ export class EmergenceStore {
   }
 
   async fetchAgentStuff(agentPubKey) {
+    console.log("FETCH AGENT STUFF", agentPubKey)
     try {
         const feed = await this.client.getFeed(
             {agent_filter: agentPubKey})
+        console.log("GOT FEED", feed)
         this.agentNotes.update((n) => {
             n.set(agentPubKey,feed.filter(f=>f.type == FeedType.NoteNew ).map(f=>f.about))
             return n
