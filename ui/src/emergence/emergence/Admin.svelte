@@ -4,7 +4,7 @@
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
-    import { sessionSelfTags, type Info, type Note } from "./types";
+    import { sessionSelfTags, type Info, type Note, type InfoSession } from "./types";
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
@@ -40,7 +40,7 @@
         document.body.removeChild(element);
     }
 
-    const serializeInfo = async (info:Info<any>, hasPic: boolean) : Promise<any> => {
+    const serializeInfo = async (info:Info<any>|InfoSession, hasPic: boolean) : Promise<any> => {
         let entry = info.record.entry
         if (hasPic) {
             if (entry.pic) {
