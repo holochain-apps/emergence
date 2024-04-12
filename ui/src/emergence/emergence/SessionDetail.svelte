@@ -7,7 +7,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import Fa from 'svelte-fa';
-import { storeContext } from '../../contexts';
+import { frameContext, storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
 import { NULL_HASHB64, amenitiesList, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit, type InfoSession, sessionLinks } from './types';
 
@@ -23,8 +23,9 @@ import { slide } from 'svelte/transition';
 import SpaceLink from './SpaceLink.svelte';
 import { Marked } from "@ts-stack/markdown";
   import { errorText } from './utils';
-  import { isWeContext } from '@lightningrodlabs/we-applet';
+  import { isWeContext, type WAL, WeClient} from '@lightningrodlabs/we-applet';
   import AttachmentsList from './AttachmentsList.svelte';
+  import SvgIcon from './SvgIcon.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -32,6 +33,7 @@ export let sessionHash: ActionHash;
 export let opened = false
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
+let frameClient: WeClient = (getContext(frameContext) as any).getFrame();
 
 let loading = false;
 let error: any = undefined;
@@ -92,6 +94,10 @@ async function deleteSession() {
 let createNoteDialog
 let confirmDialog
 
+  const copyWalToPocket = () => {
+    const attachment: WAL = { hrl: [store.dnaHash, $session.original_hash], context: {} }
+    frameClient?.walToPocket(attachment)
+  }
 </script>
 
 <mwc-snackbar bind:this={errorSnackbar} leading>
@@ -103,7 +109,7 @@ let confirmDialog
 
 </div>
 {:else if error}
-<span>Error fetching the session: {error}</span>
+  <span>Error fetching the session: {error}</span>
 {:else}
 
 <SessionCrud
@@ -121,16 +127,23 @@ bind:this={updateSessionDialog}
       <sl-button on:click={() => { dispatch('session-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
-      {#if $uiProps.amSteward || $session.record.entry.leaders.find(l=>encodeHashToBase64(l.hash)==store.myPubKeyBase64)}
-        <div>
-          <sl-button on:click={() => { updateSessionDialog.open($session) } } circle>
-            <Fa icon={faEdit} />
+      <div>
+        {#if isWeContext}
+          <sl-button on:click={() => { copyWalToPocket() } } circle>
+            <SvgIcon icon="addToPocket"></SvgIcon>
           </sl-button>
-          <sl-button on:click={()=>confirmDialog.open()} circle>
-            <Fa icon={faTrash} />
-          </sl-button>
-        </div>
-      {/if}
+        {/if}
+
+        {#if $uiProps.amSteward || $session.record.entry.leaders.find(l=>encodeHashToBase64(l.hash)==store.myPubKeyBase64)}
+            <sl-button on:click={() => { updateSessionDialog.open($session) } } circle>
+              <Fa icon={faEdit} />
+            </sl-button>
+            <sl-button on:click={()=>confirmDialog.open()} circle>
+              <Fa icon={faTrash} />
+            </sl-button>
+        {/if}
+      </div>
+
     </div>
     <span style="flex: 1"></span>
  
@@ -178,7 +191,7 @@ bind:this={updateSessionDialog}
           {@const links = sessionLinks($session)}
           {#if links.length > 0}
             <div style="display: flex; flex-direction: row;margin-top:5px;">
-              <span style="margin-right: 4px"><strong>Links:</strong></span>
+              <span style="margin-right: 4px"><strong>Assets:</strong></span>
 
               <AttachmentsList 
               allowDelete={false} 

@@ -1,4 +1,4 @@
-// import {  } from './types';
+import { ROLE_NAME } from './emergence/emergence/types';
 
 import {
     encodeHashToBase64,
@@ -6,6 +6,7 @@ import {
     type AgentPubKey,
     decodeHashFromBase64,
     type EntryHash,
+    type DnaHash,
 } from '@holochain/client';
 
 import type { EmergenceClient } from './emergence-client';
@@ -19,7 +20,7 @@ import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space
 import { toPromise, type AsyncReadable, type AsyncStatus, asyncDerived } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
-import { elapsed, filterTime, sessionHasTags, type WALUrl } from './emergence/emergence/utils';
+import { elapsed, filterTime, getMyDna, sessionHasTags, type WALUrl } from './emergence/emergence/utils';
 import { fromUint8Array } from 'js-base64';
 import type { WAL } from '@lightningrodlabs/we-applet';
 Marked.setOptions
@@ -99,6 +100,7 @@ export const neededStuffStore = (client: EmergenceClient) => {
 
 
 export class EmergenceStore {
+  dnaHash: DnaHash
   timeAgo = new TimeAgo('en-US')
   timeWindows: Writable<Array<TimeWindow>> = writable([])
   sessions: Writable<Array<InfoSession>> = writable([])
@@ -241,6 +243,7 @@ export class EmergenceStore {
   }
 
   getSessionIdx(sessionHash: ActionHash) : number {
+
     const b64 = encodeHashToBase64(sessionHash)
     const sessions = get(this.sessions)
     return sessions.findIndex((s)=> encodeHashToBase64(s.original_hash) === b64)

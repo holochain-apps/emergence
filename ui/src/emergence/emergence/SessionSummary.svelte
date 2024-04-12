@@ -2,7 +2,7 @@
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore  } from '../../emergence-store';
-import { type Slot, type Session, type Info, amenitiesList, sessionTags, DetailsType, SessionInterestBit } from './types';
+import { type Slot, type Session, type Info, amenitiesList, sessionTags, DetailsType, SessionInterestBit, type InfoSession } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@material/mwc-snackbar';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -12,6 +12,7 @@ import AnyAvatar from './AnyAvatar.svelte';
 import InterestSelect from './InterestSelect.svelte';
 import { faUserGroup } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
+import type {  ActionHash } from '@holochain/client';
 
 const dispatch = createEventDispatcher();
 
@@ -42,7 +43,7 @@ $: sessionType = $settings.session_types[session.record.entry.session_type]
 onMount(async () => {
   loading = false
   if (session === undefined) {
-    throw new Error(`The session input is required for the SessionSummary element`);
+      throw new Error(`The session input is required for the SessionSummary element`);
   }
 });
 $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
@@ -53,7 +54,6 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
 
 </div>
 {:else}
-
 <div class="SessionSummary summary card" on:click={(e)=>{
 
   // @ts-ignore

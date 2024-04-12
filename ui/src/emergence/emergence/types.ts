@@ -21,6 +21,8 @@ import type { WALUrl } from './utils';
 
 export const NULL_HASHB64 = "uhCkk______________________"
 export const NULL_HASH = decodeHashFromBase64(NULL_HASHB64)
+export const ROLE_NAME = "emergence"
+export const ZOME_NAME = "emergence"
 
 export type EmergenceSignal = {
   type: 'EntryCreated';
