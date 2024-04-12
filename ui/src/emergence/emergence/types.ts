@@ -16,6 +16,7 @@ import {
   decodeHashFromBase64
 } from '@holochain/client';
 import { unfixAnyAgent } from '../../emergence-client';
+import type { WALUrl } from './utils';
 
 
 export const NULL_HASHB64 = "uhCkk______________________"
@@ -438,6 +439,10 @@ export interface TagUse {
 
 export const sessionNotes = (session: InfoSession):Array<ActionHash> => {
   return session.relations.filter(r=>r.relation.content.path == "session.note").map(r=> r.relation.dst)
+}
+
+export const sessionLinks = (session: InfoSession):Array<WALUrl> => {
+  return session.relations.filter(r=>r.relation.content.path == "session.link").map(r=> r.relation.content.data)
 }
 
 export const sessionTags = (session: InfoSession):Array<string> => {

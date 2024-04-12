@@ -1,6 +1,6 @@
 <script lang="ts">
 import { createEventDispatcher, getContext, onMount } from 'svelte';
-import { storeContext } from '../../contexts';
+import { frameContext, storeContext } from '../../contexts';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
 import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
@@ -13,16 +13,21 @@ import type SlSelect from '@shoelace-style/shoelace/dist/components/select/selec
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import {  Amenities, setAmenity, type Info, type Session, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent, type SessionType, timeWindowDurationToStr, type InfoSession } from './types';
+import {  Amenities, setAmenity, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent, type SessionType, timeWindowDurationToStr, type InfoSession, sessionLinks } from './types';
 import SlotSelect from './SlotSelect.svelte';
 import { encodeHashToBase64,  decodeHashFromBase64 } from '@holochain/client';
 import AnyAvatar from './AnyAvatar.svelte';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import MultiSelect from 'svelte-multiselect'
-import { errorText } from './utils';
+import { errorText, type WALUrl } from './utils';
+import { isWeContext, WeClient, weaveUrlFromWal } from '@lightningrodlabs/we-applet';
+import AttachmentsList from './AttachmentsList.svelte';
+import SvgIcon from './SvgIcon.svelte';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
+let frameClient: WeClient = (getContext(frameContext) as any).getFrame();
+
 let amenityElems: Array<SlCheckbox> = []
 $: uiProps = store.uiProps
 const dispatch = createEventDispatcher();
@@ -40,6 +45,7 @@ export const open = (ses) => {
     largest = session.record.entry.largest
     duration = session.record.entry.duration
     tags = sessionSelfTags(session)
+    links = sessionLinks(session)
     slot = store.getSessionSlot(session)
   } else {
 
@@ -54,6 +60,7 @@ export const open = (ses) => {
     const sitemap = store.getCurrentSiteMap()
     leaders = sitemap && sitemap.record.entry.tags[0]=="emergent" ? [{type:"Agent", hash:store.myPubKey}] : []
     tags = []
+    links = []
     slot = undefined
   }
   if (sesTypeSelect)
@@ -73,7 +80,8 @@ let duration: number = 60
 let amenities: number = 0;
 let leaders:Array<AnyAgent> = []
 let tags:Array<string> = []
-
+let links:Array<WALUrl> = []
+$: links
 $: proxyAgents = store.proxyAgents
 $: proxyAgentOptions = $proxyAgents.map(a=>{return {label: a.record.entry.nickname, value: encodeHashToBase64(a.original_hash)}})
 let proxyAgentSelect
@@ -100,7 +108,7 @@ onMount(() => {
 async function updateSession() {
   if (session) {
     const sessionType = parseInt(sesType)
-    const updateRecord = await store.updateSession(session.original_hash, {sessionType, title, amenities, slot, description, leaders, smallest, largest, duration, tags})
+    const updateRecord = await store.updateSession(session.original_hash, {sessionType, title, amenities, slot, description, leaders, smallest, largest, duration, tags, links})
     if (updateRecord) {
       dispatch('session-updated', { actionHash: updateRecord.actionHash });
     }
@@ -110,7 +118,7 @@ async function updateSession() {
 
 async function createSession() {    
   try {
-    const record = await store.createSession(parseInt(sesType), title!, description, leaders, smallest, largest, duration, amenities, slot, tags)
+    const record = await store.createSession(parseInt(sesType), title!, description, leaders, smallest, largest, duration, amenities, slot, tags, links)
 
     if (leaders.find(l=>encodeHashToBase64(l.hash) === store.myPubKeyBase64))
       await store.setSessionInterest(record.actionHash, SessionInterestBit.Going )
@@ -142,6 +150,18 @@ function addleader(agent: AnyAgent) {
 function deleteLeader(index: number) {
   leaders.splice(index, 1)
   leaders = leaders
+}
+const addAttachment = async () => {
+    const wal = await frameClient.userSelectWal()
+    if (wal) {
+      links.push(weaveUrlFromWal(wal))
+      links = links
+      console.log("LINKS", links)
+    }
+  }
+const removeAttachment = (idx: number) => {
+  links.splice(idx,1)
+  links=links
 }
 let dialog
 let titleInput
@@ -220,6 +240,17 @@ let dialogShow
       allowUserOptions={true}
       />
   </div>
+  {#if isWeContext()}
+  <span class="form-label">Links:
+    <sl-button size="small" circle on:click={()=>addAttachment()} >          
+      <SvgIcon icon=link/>
+    </sl-button>
+  </span >
+    <AttachmentsList 
+      on:remove-attachment={(e)=>{removeAttachment(e.detail)}}
+      allowDelete={true} 
+      attachments={links} />
+  {/if}
   <div style="margin-bottom: 16px">
     <span style="margin-right: 4px"><strong class="form-label">Leaders:</strong>
       {#if !sessionType.can_leaderless}

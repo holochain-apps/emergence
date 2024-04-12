@@ -9,7 +9,7 @@ import { createEventDispatcher, getContext, onMount } from 'svelte';
 import Fa from 'svelte-fa';
 import { storeContext } from '../../contexts';
 import type { EmergenceStore } from '../../emergence-store';
-import { NULL_HASHB64, amenitiesList, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit, type InfoSession } from './types';
+import { NULL_HASHB64, amenitiesList, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit, type InfoSession, sessionLinks } from './types';
 
 import { encodeHashToBase64, type ActionHash } from '@holochain/client';
 import Avatar from './Avatar.svelte';
@@ -23,6 +23,8 @@ import { slide } from 'svelte/transition';
 import SpaceLink from './SpaceLink.svelte';
 import { Marked } from "@ts-stack/markdown";
   import { errorText } from './utils';
+  import { isWeContext } from '@lightningrodlabs/we-applet';
+  import AttachmentsList from './AttachmentsList.svelte';
 
 const dispatch = createEventDispatcher();
 
@@ -142,7 +144,10 @@ bind:this={updateSessionDialog}
     <div class="properties">
       <div class="general-info">
         {#if slot}
-          <div class="timeslot">{timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}</div>
+          <div class="timeslot">
+            {slot.space && store.getSpace(slot.space) ? store.getSpace(slot.space).record.entry.name : "Unknown"} :
+            {timeWindowStartToStr(slot.window)} for {timeWindowDurationToStr(slot.window)}
+          </div>
         {/if}
         <h3 class="title">{ entry.title }</h3>
         <div class="leaders">
@@ -168,6 +173,19 @@ bind:this={updateSessionDialog}
             </div>
           {/each}
         </div>
+
+        {#if isWeContext()}
+          {@const links = sessionLinks($session)}
+          {#if links.length > 0}
+            <div style="display: flex; flex-direction: row;margin-top:5px;">
+              <span style="margin-right: 4px"><strong>Links:</strong></span>
+
+              <AttachmentsList 
+              allowDelete={false} 
+              attachments={links} />    
+            </div>
+          {/if}
+        {/if}
 
 
 

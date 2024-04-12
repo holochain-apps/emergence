@@ -1,18 +1,15 @@
 <script lang="ts">
 import { createEventDispatcher, getContext, onMount } from 'svelte';
-import type { Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../emergence-store';
-import { faClose, faSave } from '@fortawesome/free-solid-svg-icons';
-import Fa from 'svelte-fa';
 import MultiSelect from 'svelte-multiselect'
 import { DateInput } from 'date-picker-svelte'
-  import { dayToStr, errorText } from './utils';
-  import type SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog';
+import { dayToStr, errorText } from './utils';
+import type SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
 

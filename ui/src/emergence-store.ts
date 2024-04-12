@@ -15,12 +15,13 @@ import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile, type SessionType, type SessionTypeID, NULL_HASHB64, NULL_HASH, SessionListMode, type GetFeedInput, type InfoSession, type SessionEntryRecord, makeSRec } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile, type SessionType, type SessionTypeID, NULL_HASHB64, NULL_HASH, SessionListMode, type GetFeedInput, type InfoSession, type SessionEntryRecord, makeSRec, sessionLinks } from './emergence/emergence/types';
 import { toPromise, type AsyncReadable, type AsyncStatus, asyncDerived } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
-import { elapsed, filterTime, sessionHasTags } from './emergence/emergence/utils';
+import { elapsed, filterTime, sessionHasTags, type WALUrl } from './emergence/emergence/utils';
 import { fromUint8Array } from 'js-base64';
+import type { WAL } from '@lightningrodlabs/we-applet';
 Marked.setOptions
 ({
   renderer: new Renderer,
@@ -560,7 +561,7 @@ export class EmergenceStore {
     return Array.from(tags) as Array<string>
   }
 
-  async createSession(sessionTypeID: SessionTypeID, title: string, description: string, leaders:Array<AnyAgent>,  smallest: number, largest: number, duration: number, amenities: number, slot: Slot|undefined, tags: Array<string>): Promise<EntryRecord<Session>> {
+  async createSession(sessionTypeID: SessionTypeID, title: string, description: string, leaders:Array<AnyAgent>,  smallest: number, largest: number, duration: number, amenities: number, slot: Slot|undefined, tags: Array<string>, links: Array<WALUrl>): Promise<EntryRecord<Session>> {
     const record = await this.client.createSession(sessionTypeID, title, amenities, description, leaders, smallest, largest, duration)
     const sessionHash = record.actionHash
     if (slot) {
@@ -582,6 +583,15 @@ export class EmergenceStore {
             content:  {
                 path: "session.tag",
                 data: tag
+            }
+        },        
+    ))
+    links.forEach(link=>relations.push(
+        {   src: sessionHash,
+            dst: sessionHash,
+            content:  {
+                path: "session.link",
+                data: link
             }
         },        
     ))
@@ -713,6 +723,40 @@ export class EmergenceStore {
                 }
             }
         }
+        if (props.hasOwnProperty("links")) {
+            const links = sessionLinks(session).sort()
+            const updatedLinks = props.links.sort()
+            const updatedLinksJSON = JSON.stringify(updatedLinks)
+
+            if (JSON.stringify(links)!=updatedLinksJSON) {
+                for (const link of updatedLinks) {
+                    if (!links.includes(link)) { 
+                        relations.push({   
+                            src: sessionHash,
+                            dst: sessionHash,
+                            content:  {
+                                path: "session.link",
+                                data: link
+                            }
+                        })
+                    }
+                }
+                const hashB64 = encodeHashToBase64(session.original_hash)
+                for (const link of links) {
+                    if (!updatedLinks.includes(link)) { 
+                        const ri = session.relations.find(ri=>
+                            ri.relation.content.path == "session.link" &&
+                            ri.relation.content.data == link &&
+                            encodeHashToBase64(ri.relation.dst) === hashB64
+                            )
+                        if (ri) {
+                            relationsToDelete.push(ri.create_link_hash)
+                        }
+                    }
+                }
+            }
+
+        }
 
         if (changes.length > 0) {
             const record = await this.client.updateSession(update)
@@ -735,7 +779,7 @@ export class EmergenceStore {
                     console.log("SLOT")
                     await this.slot(session.original_hash, props.slot)
                 } else {
-                    console.log("UNSOLT")
+                    console.log("UNSLOT")
 
                    await this.unslot(session.original_hash)
                 }
@@ -987,7 +1031,13 @@ export class EmergenceStore {
             tags.push(t)
         }
     })
-    const newSession = await this.createSession(sessionA.record.entry.session_type, title,description,leaders,smallest,largest,duration,amenities,slot,tags)
+    const links = sessionLinks(sessionA)
+    sessionLinks(sessionB).forEach(t=> {
+        if (!links.includes(t)) {
+            links.push(t)
+        }
+    })
+    const newSession = await this.createSession(sessionA.record.entry.session_type, title,description,leaders,smallest,largest,duration,amenities,slot,tags,links)
     await this.updateSession(sessionHashA, {trashed: true})
     await this.updateSession(sessionHashB, {trashed: true})
     await this.fetchSession([sessionHashA,sessionHashB,newSession.actionHash])

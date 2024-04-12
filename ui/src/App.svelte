@@ -18,7 +18,7 @@
   import "@holochain-open-dev/file-storage/dist/elements/file-storage-context.js";
   import { FileStorageClient } from "@holochain-open-dev/file-storage";
 
-  import { clientContext, storeContext } from './contexts';
+  import { clientContext, frameContext, storeContext } from './contexts';
   import { DEFAULT_SYNC_TEXT, EmergenceStore } from './emergence-store';
   import { EmergenceClient } from './emergence-client';
   import ScheduleSlotting from './emergence/emergence/ScheduleSlotting.svelte';
@@ -251,6 +251,11 @@ import {Buffer} from "buffer"
   setContext(clientContext, {
     getClient: () => client,
   });
+
+  setContext(frameContext, {
+    getFrame: () => weClient,
+  });
+
   let createSessionDialog: SessionCrud
   let createSpaceDialog: SpaceCrud
 

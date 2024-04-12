@@ -1,5 +1,5 @@
-import type { Timestamp } from "@holochain/client"
-import type { Info, Session, SessionsFilter, Slot, TimeWindow } from "./types"
+import { CellType, type AppAgentClient, type DnaHash, type EntryHash, type Timestamp } from "@holochain/client"
+import type { Info, InfoSession, Session, SessionsFilter, Slot, TimeWindow } from "./types"
 
 // @ts-ignore
 export const sortWindows = (a,b) : number => {return new Date(a.start) - new Date(b.start)}
@@ -112,3 +112,24 @@ export const elapsed = (startTime) => {
   var timeDiff = endTime - startTime; //in ms 
   return Math.round(timeDiff);
 }
+
+
+export type WALUrl = string
+
+export const hashEqual = (a:EntryHash, b:EntryHash) : boolean => {
+  if (!a || !b) {
+    return !a && !b
+  }
+  for (let i = a.length; -1 < i; i -= 1) {
+    if ((a[i] !== b[i])) return false;
+  }
+  return true;
+}
+
+export const getMyDna = async (role:string, client: AppAgentClient) : Promise<DnaHash>  => {
+  const appInfo = await client.appInfo();
+  const dnaHash = (appInfo.cell_info[role][0] as any)[
+    CellType.Provisioned
+  ].cell_id[0];
+  return dnaHash
+} 

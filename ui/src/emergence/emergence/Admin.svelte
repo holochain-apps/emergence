@@ -13,7 +13,7 @@
     import '@shoelace-style/shoelace/dist/components/option/option.js';
     import SenseResults from "./SenseResults.svelte";
     import type { HoloHashMap } from "@holochain-open-dev/utils";
-  import { toPromise } from "@holochain-open-dev/stores";
+    import { toPromise } from "@holochain-open-dev/stores";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -226,10 +226,11 @@
                 leaders = []
             }
             const tags = e.tags  ? e.tags : []
+            const links = e.links ? e.links : []
             let record
             try {
                 console.log("CREATING: ",e.title)
-                record = await store.createSession(e.session_type? e.session_type : 0, e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, tags)
+                record = await store.createSession(e.session_type? e.session_type : 0, e.title, e.description,leaders,e.smallest, e.largest, e.duration, e.amenities, undefined, tags, links)
                 sessions[s.original_hash] = record.actionHash
             } catch(e) {
                 console.log("Import Error",e)
