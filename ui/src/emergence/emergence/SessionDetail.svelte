@@ -128,7 +128,7 @@ bind:this={updateSessionDialog}
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
       <div>
-        {#if isWeContext}
+        {#if isWeContext()}
           <sl-button on:click={() => { copyWalToPocket() } } circle>
             <SvgIcon icon="addToPocket"></SvgIcon>
           </sl-button>

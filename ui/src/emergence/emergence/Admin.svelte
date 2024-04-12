@@ -267,7 +267,7 @@
   </div>
 <div class="pane-content">
     <div class="admin-header">
-        <h2>Conference Administration and Configuration</h2>
+        <h2>Emergence v0.3.3: Administration and Configuration</h2>
         <p>This page is available because you enabled being a conference steward.</p>
         <p>Use the buttons below to configure and administer the various aspects of your conference.</p>
     </div>
