@@ -1,7 +1,7 @@
 <script lang="ts">
 import { createEventDispatcher, getContext } from 'svelte';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-import type { AppAgentClient } from '@holochain/client';
+import type { AppClient } from '@holochain/client';
 import { clientContext } from '../../contexts';
 import { timeWindowStartToStr, timeWindowDurationToStr, type TimeWindow } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
@@ -18,7 +18,7 @@ const dispatch = createEventDispatcher();
 
 export let timeWindow: TimeWindow;
 
-let client: AppAgentClient = (getContext(clientContext) as any).getClient();
+let client: AppClient = (getContext(clientContext) as any).getClient();
 
 async function deleteTimeWindow() {
   try {

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, AppAgentWebsocket, type AppAgentClient, setSigningCredentials, type AgentPubKey } from '@holochain/client';
+  import { AdminWebsocket, AppWebsocket, type AppClient, setSigningCredentials, type AgentPubKey, type AppWebsocketConnectionOptions } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
@@ -45,7 +45,7 @@ import {Buffer} from "buffer"
   import { appletServices } from './we';
   import { getMyDna } from './emergence/emergence/utils';
 
-  let client: AppAgentClient | undefined;
+  let client: AppClient | undefined;
   let weClient: WeClient
 
   let store: EmergenceStore | undefined;
@@ -178,7 +178,7 @@ import {Buffer} from "buffer"
     //     url = new URL(`${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.host}/${creds.appPath}`)
     //   }
     //   console.log("URL", url)
-    //   client = await AppAgentWebsocket.connect(creds.installed_app_id, {url});
+    //   client = await AppWebsocket.connect(creds.installed_app_id, {url});
     //   const appInfo = await client.appInfo()
     //   console.log("appInfo", appInfo)
     //   const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
@@ -194,16 +194,27 @@ import {Buffer} from "buffer"
       }
     }
 
+    let tokenResp;
     if (!isWeContext()) {
       let appPort: string = import.meta.env.VITE_APP_PORT
-      url = appPort ? new URL(`ws://localhost:${appPort}`) : ""
-      client = await AppAgentWebsocket.connect(installed_app_id, {url});
       console.log("Dev mode admin port:", adminPort)
+      url = appPort ? `ws://localhost:${appPort}` : `ws://localhost`
+      console.log("URL", url)
       if (adminPort) {
-        const adminWebsocket = await AdminWebsocket.connect({url: new URL(`ws://localhost:${adminPort}`)})
+        const url = `ws://localhost:${adminPort}`;
+        console.log("connecting to admin port at:", url);
+        const adminWebsocket = await AdminWebsocket.connect({url: new URL(url)})
+        tokenResp = await adminWebsocket.issueAppAuthenticationToken({
+          installed_app_id: installed_app_id,
+        });
+
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
+      const params: AppWebsocketConnectionOptions = { url: new URL(url) };
+      if (tokenResp) params.token = tokenResp.token;
+
+      client = await AppWebsocket.connect(params);
       profilesClient = new ProfilesClient(client, installed_app_id);
     } else {
       weClient = await WeClient.connect(appletServices);

@@ -133,62 +133,38 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
         FlatOp::RegisterUpdate(update_entry) => {
             match update_entry {
                 OpUpdate::Entry {
-                    original_action,
-                    original_app_entry,
                     app_entry,
                     action,
                 } => {
-                    match (app_entry, original_app_entry) {
-                        (EntryTypes::Space(space), EntryTypes::Space(original_space)) => {
+                    match app_entry {
+                        EntryTypes::Space(space) => {
                             validate_update_space(
                                 action,
                                 space,
-                                original_action,
-                                original_space,
                             )
                         }
-                        (
-                            EntryTypes::Session(session),
-                            EntryTypes::Session(original_session),
-                        ) => {
+                        EntryTypes::Session(session) => {
                             validate_update_session(
                                 action,
                                 session,
-                                original_action,
-                                original_session,
                             )
                         }
-                        (
-                            EntryTypes::Note(session),
-                            EntryTypes::Note(original_session),
-                        ) => {
+                        EntryTypes::Note(session) => {
                             validate_update_note(
                                 action,
                                 session,
-                                original_action,
-                                original_session,
                             )
                         }
-                        (
-                            EntryTypes::Map(session),
-                            EntryTypes::Map(original_session),
-                        ) => {
+                        EntryTypes::Map(session) => {
                             validate_update_map(
                                 action,
                                 session,
-                                original_action,
-                                original_session,
                             )
                         }
-                        (
-                            EntryTypes::ProxyAgent(session),
-                            EntryTypes::ProxyAgent(original_session),
-                        ) => {
+                        EntryTypes::ProxyAgent(session) => {
                             validate_update_proxy_agent(
                                 action,
                                 session,
-                                original_action,
-                                original_session,
                             )
                         }
                         _ => {
@@ -206,24 +182,25 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
         }
         FlatOp::RegisterDelete(delete_entry) => {
             match delete_entry {
-                OpDelete::Entry { original_action, original_app_entry, action } => {
-                    match original_app_entry {
-                        EntryTypes::Session(session) => {
-                            validate_delete_session(action, original_action, session)
-                        }
-                        EntryTypes::Space(space) => {
-                            validate_delete_space(action, original_action, space)
-                        }
-                        EntryTypes::Note(note) => {
-                            validate_delete_note(action, original_action, note)
-                        }
-                        EntryTypes::Map(map) => {
-                            validate_delete_map(action, original_action, map)
-                        }
-                        EntryTypes::ProxyAgent(proxy_agent) => {
-                            validate_delete_proxy_agent(action, original_action, proxy_agent)
-                        }
-                    }
+                OpDelete {  action: _ } => {
+                    Ok(ValidateCallbackResult::Valid)
+                    // match original_app_entry {
+                    //     EntryTypes::Session(session) => {
+                    //         validate_delete_session(action, original_action, session)
+                    //     }
+                    //     EntryTypes::Space(space) => {
+                    //         validate_delete_space(action, original_action, space)
+                    //     }
+                    //     EntryTypes::Note(note) => {
+                    //         validate_delete_note(action, original_action, note)
+                    //     }
+                    //     EntryTypes::Map(map) => {
+                    //         validate_delete_map(action, original_action, map)
+                    //     }
+                    //     EntryTypes::ProxyAgent(proxy_agent) => {
+                    //         validate_delete_proxy_agent(action, original_action, proxy_agent)
+                    //     }
+                    // }
                 }
                 _ => Ok(ValidateCallbackResult::Valid),
             }
@@ -534,8 +511,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 validate_update_session(
                                     action,
                                     session,
-                                    original_action,
-                                    original_session,
                                 )
                             } else {
                                 Ok(result)
@@ -565,8 +540,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 validate_update_space(
                                     action,
                                     space,
-                                    original_action,
-                                    original_space,
                                 )
                             } else {
                                 Ok(result)
@@ -596,8 +569,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 validate_update_note(
                                     action,
                                     note,
-                                    original_action,
-                                    original_note,
                                 )
                             } else {
                                 Ok(result)
@@ -627,8 +598,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 validate_update_map(
                                     action,
                                     map,
-                                    original_action,
-                                    original_map,
                                 )
                             } else {
                                 Ok(result)
@@ -658,8 +627,6 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 validate_update_proxy_agent(
                                     action,
                                     proxy_agent,
-                                    original_action,
-                                    original_proxy_agent,
                                 )
                             } else {
                                 Ok(result)

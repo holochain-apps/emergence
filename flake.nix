@@ -1,8 +1,8 @@
 {
-  description = "Flake for Holochain app development";
+  description = "Template for Holochain app development";
 
   inputs = {
-    holochain-nix-versions.url  = "github:holochain/holochain/?dir=versions/weekly";
+    holochain-nix-versions.url  = "github:holochain/holochain/?dir=versions/0_3_rc";
     holochain-flake = {
       url = "github:holochain/holochain";
       inputs.versions.follows = "holochain-nix-versions";
@@ -31,4 +31,4 @@
             };
           };
       };
-}   
+}

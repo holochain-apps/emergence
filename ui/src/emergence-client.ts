@@ -4,8 +4,8 @@ import { EntryRecord } from '@holochain-open-dev/utils';
 import type {
   ActionHash,
   AgentPubKey,
-  AppAgentCallZomeRequest,
-  AppAgentClient,
+  AppCallZomeRequest,
+  AppClient,
   EntryHash,
   HoloHash
 } from '@holochain/client';
@@ -30,7 +30,7 @@ export class EmergenceClient {
   constructor(
     public url: string,
     public installed_app_id,
-    public client: AppAgentClient,
+    public client: AppClient,
     public roleName: string,
     public zomeName = 'emergence'
   ) {}
@@ -307,7 +307,7 @@ export class EmergenceClient {
   }
 
   private async callZome(fn_name: string, payload: any) {
-    const req: AppAgentCallZomeRequest = {
+    const req: AppCallZomeRequest = {
       role_name: this.roleName,
       zome_name: this.zomeName,
       fn_name,

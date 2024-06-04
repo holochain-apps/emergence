@@ -21,8 +21,6 @@ pub fn validate_create_space(
 pub fn validate_update_space(
     _action: Update,
     _space: Space,
-    _original_action: EntryCreationAction,
-    _original_space: Space,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
