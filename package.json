@@ -5,22 +5,26 @@
     "ui",
     "tests"
   ],
-  "scripts": {   
-  "start": "AGENTS=2 BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) npm run network",
-  "spin": "AGENTS=2 npm run spin-network",
-  "dev": "VITE_ADMIN_PORT=$(port) VITE_APP_PORT=$(port) SIGNAL_PORT=$(port) BOOTSTRAP_PORT=$(port) UI_PORT=8888 npm run x",
-  "x": "hc s clean &&  npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run start:happ\" \"hc run-local-services -b $BOOTSTRAP_PORT -s $SIGNAL_PORT\"",
-  "tool-dev": " UI_PORT=8888 npm run tool-devy",
-  "tool-devy": "concurrently \"npm start -w ui\" \"sleep 1 && we-dev-cli --agent-idx 1 --dev-config we_dev/config.ts\" \"sleep 10 && we-dev-cli --agent-idx 2 --dev-config we_dev/config.ts\"",
-  "network": "hc s clean && npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:happ\" \"holochain-playground\"",
-  "spin-network": "hc s clean && npm run build:happ && UI_PORT=1420 concurrently \"npm start -w ui\" \"npm run spin:happ\" \"holochain-playground\"",
-  "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
-  "launch:happ": "concurrently \"hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT\" \"echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/emergence.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:\"$BOOTSTRAP_PORT\" webrtc ws://127.0.0.1:\"$SIGNAL_PORT\"\"",   
-  "spin:happ": "hc-spin -n $AGENTS workdir/emergence.happ --ui-port $UI_PORT ",
-  "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
-  "start:happ": "echo \"starting with admin $VITE_ADMIN_PORT\" && RUST_LOG=warn echo \"pass\" | hc s -f=$VITE_ADMIN_PORT --piped generate workdir/emergence.happ --run=$VITE_APP_PORT -a emergence network -b \"http://127.0.0.1:$BOOTSTRAP_PORT\"  webrtc \"ws://127.0.0.1:$SIGNAL_PORT\"",
-  "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
-  "build:zomes": "RUSTFLAGS='' CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown"
+  "scripts": {
+    "start": "AGENTS=2 npm run network",
+    "spin": "AGENTS=2 npm run spin-network",
+    "dev": "VITE_ADMIN_PORT=$(port) VITE_APP_PORT=$(port) SIGNAL_PORT=$(port) BOOTSTRAP_PORT=$(port) UI_PORT=8888 npm run x",
+    "x": "hc s clean &&  npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run start:happ\" \"hc run-local-services -b $BOOTSTRAP_PORT -s $SIGNAL_PORT\"",
+    "tool-dev": " UI_PORT=8888 npm run tool-devy",
+    "tool-devy": "concurrently \"npm start -w ui\" \"sleep 1 && we-dev-cli --agent-idx 1 --dev-config we_dev/config.ts\" \"sleep 10 && we-dev-cli --agent-idx 2 --dev-config we_dev/config.ts\"",
+    "network": "npm run build:happ && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"npm run local-services\" \"UI_PORT=1420 npm run -w ui start\" \"npm run launch\"",
+    "spin-network": "hc s clean && npm run build:happ && UI_PORT=1420 concurrently \"npm start -w ui\" \"npm run spin:happ\" \"holochain-playground\"",
+    "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
+    "launch:happ": "concurrently \"hc run-local-services --bootstrap-port $BOOTSTRAP_PORT --signal-port $SIGNAL_PORT\" \"echo pass | RUST_LOG=warn hc launch --piped -n $AGENTS workdir/emergence.happ --ui-port $UI_PORT network --bootstrap http://127.0.0.1:\"$BOOTSTRAP_PORT\" webrtc ws://127.0.0.1:\"$SIGNAL_PORT\"\"",
+    "spin:happ": "hc-spin -n $AGENTS workdir/emergence.happ --ui-port $UI_PORT ",
+    "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
+    "start:happ": "echo \"starting with admin $VITE_ADMIN_PORT\" && RUST_LOG=warn echo \"pass\" | hc s -f=$VITE_ADMIN_PORT --piped generate workdir/emergence.happ --run=$VITE_APP_PORT -a emergence network -b \"http://127.0.0.1:$BOOTSTRAP_PORT\"  webrtc \"ws://127.0.0.1:$SIGNAL_PORT\"",
+    "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
+    "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown --workspace --exclude emergenceapp",
+    "local-services": "hc run-local-services --bootstrap-interface $INTERNAL_IP --bootstrap-port $BOOTSTRAP_PORT --signal-interfaces $INTERNAL_IP --signal-port $SIGNAL_PORT",
+    "network:android": "npm run build:happ && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"npm run local-services\" \"UI_PORT=1420 npm run -w ui start\" \"npm run tauri dev\" \"npm run tauri android dev\"",
+    "launch": "concurrently-repeat \"npm run tauri dev\" $AGENTS",
+    "tauri": "tauri"
   },
   "devDependencies": {
     "@holochain-playground/cli": "^0.2.0",
@@ -28,7 +32,7 @@
     "@rollup/plugin-typescript": "^8.0.0",
     "@tsconfig/svelte": "^2.0.0",
     "bestzip": "^2.2.0",
-    "concurrently": "^6.2.1",
+    "concurrently": "^8.2.2",
     "concurrently-repeat": "^0.0.1",
     "cross-env": "^7.0.3",
     "json-parse-better-errors": "^1.0.2",
@@ -37,7 +41,9 @@
     "svelte-check": "^2.0.0",
     "svelte-preprocess": "^4.10.7",
     "tslib": "^2.0.0",
-    "typescript": "^4.0.0"
+    "typescript": "^4.0.0",
+    "@tauri-apps/cli": "^2.0.0-beta.20",
+    "internal-ip-cli": "^2.0.0"
   },
   "engines": {
     "npm": ">=7.0.0"
