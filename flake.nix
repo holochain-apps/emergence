@@ -16,7 +16,7 @@
 
   outputs = inputs@{ flake-parts, holochain-flake, ... }:
     flake-parts.lib.mkFlake {
-      specialArgs.nonWasmCrates = [ "relay" ];
+      specialArgs.nonWasmCrates = [ "emergence" ];
       inherit inputs;
     } {
       systems = builtins.attrNames holochain-flake.devShells;
