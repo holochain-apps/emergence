@@ -4,7 +4,7 @@
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
-    import { sessionSelfTags, type Info, type Note, type InfoSession } from "./types";
+    import { sessionSelfTags, type Info, type Note, type InfoSession, APP_VERSION } from "./types";
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
@@ -267,7 +267,7 @@
   </div>
 <div class="pane-content">
     <div class="admin-header">
-        <h2>Emergence v0.3.3: Administration and Configuration</h2>
+        <h2>Emergence v{APP_VERSION}: Administration and Configuration</h2>
         <p>This page is available because you enabled being a conference steward.</p>
         <p>Use the buttons below to configure and administer the various aspects of your conference.</p>
     </div>

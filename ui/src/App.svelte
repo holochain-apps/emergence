@@ -41,12 +41,12 @@
   import blake2b from "blake2b";
 import { ed25519 } from "@noble/curves/ed25519";
 import {Buffer} from "buffer"
-  import { WeClient, initializeHotReload, isWeContext } from '@lightningrodlabs/we-applet';
+  import { WeaveClient, initializeHotReload, isWeContext } from '@lightningrodlabs/we-applet';
   import { appletServices } from './we';
   import { getMyDna } from './emergence/emergence/utils';
 
   let client: AppClient | undefined;
-  let weClient: WeClient
+  let weClient: WeaveClient
 
   let store: EmergenceStore | undefined;
   let fileStorageClient: FileStorageClient | undefined;
@@ -128,7 +128,6 @@ import {Buffer} from "buffer"
 //   };
 //   return creds;
 // };
-
 
   const isConfigured = (): boolean => {
     return $sitemaps && $sitemaps.length > 0 && $allWindows && $allWindows.length > 0
@@ -217,7 +216,7 @@ import {Buffer} from "buffer"
       client = await AppWebsocket.connect(params);
       profilesClient = new ProfilesClient(client, installed_app_id);
     } else {
-      weClient = await WeClient.connect(appletServices);
+      weClient = await WeaveClient.connect(appletServices);
       switch (weClient.renderInfo.type) {
         case "applet-view":
           switch (weClient.renderInfo.view.type) {
@@ -231,25 +230,25 @@ import {Buffer} from "buffer"
               }
               break;
             case "asset":
-              switch (weClient.renderInfo.view.roleName) {
+              switch (weClient.renderInfo.view.recordInfo.roleName) {
                 case ROLE_NAME:
-                  switch (weClient.renderInfo.view.integrityZomeName) {
+                  switch (weClient.renderInfo.view.recordInfo.integrityZomeName) {
                     case "emergence_integrity":
-                      switch (weClient.renderInfo.view.entryType) {
+                      switch (weClient.renderInfo.view.recordInfo.entryType) {
                         case "session":
                           renderType = RenderType.Session
                           wal = weClient.renderInfo.view.wal
                           break;
                         default:
-                          throw new Error("Unknown entry type:"+weClient.renderInfo.view.entryType);
+                          throw new Error("Unknown entry type:"+weClient.renderInfo.view.recordInfo.entryType);
                       }
                       break;
                     default:
-                      throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.integrityZomeName);
+                      throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.recordInfo.integrityZomeName);
                   }
                   break;
                 default:
-                  throw new Error("Unknown role name:"+weClient.renderInfo.view.roleName);
+                  throw new Error("Unknown role name:"+weClient.renderInfo.view.recordInfo.roleName);
               }
               break;
             // case "creatable":
@@ -312,10 +311,11 @@ import {Buffer} from "buffer"
     // for now everyone is a steward
 
     if (!isConfigured()) {
-      store.setUIprops({amSteward:true})
-      await store.setPane("admin")
-     }
-
+      if (!isWeContext() || (await weClient.myGroupPermissionType()).type === "Steward") {
+        store.setUIprops({amSteward:true})
+        await store.setPane("admin")
+      }
+    }
     initialSync = setInterval(async ()=>{
       if ($uiProps.amSteward || !isConfigured()) {clearInterval(initialSync)}
       else {

@@ -64,7 +64,7 @@ export default defineConfig({
       },
       source: {
         type: 'localhost',
-        happPath: './workdir/emergence.happ',
+        happPath: '/home/eric/code/metacurrency/holochain/emergence/workdir/emergence.happ',
         uiPort: 8888,
       },
     },
@@ -78,7 +78,7 @@ export default defineConfig({
         },
         source: {
           type: "https",
-          url: "https://github.com/holochain-apps/gamez/releases/download/v0.4.2/gamez.webhapp"
+          url: "https://github.com/holochain-apps/gamez/releases/download/v0.5.0/gamez.webhapp"
         },
       },
       {
@@ -91,7 +91,7 @@ export default defineConfig({
       },
       source: {
         type: 'https',
-        url: 'https://github.com/holochain-apps/kando/releases/download/v0.9.5/kando.webhapp',
+        url: 'https://github.com/holochain-apps/kando/releases/download/v0.10.0/kando.webhapp',
       },
     },
   ],

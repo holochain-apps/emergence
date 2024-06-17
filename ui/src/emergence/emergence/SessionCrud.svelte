@@ -21,12 +21,12 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import MultiSelect from 'svelte-multiselect'
 import { errorText, type WALUrl } from './utils';
-import { isWeContext, WeClient, weaveUrlFromWal } from '@lightningrodlabs/we-applet';
+import { isWeContext, WeaveClient, weaveUrlFromWal } from '@lightningrodlabs/we-applet';
 import AttachmentsList from './AttachmentsList.svelte';
 import SvgIcon from './SvgIcon.svelte';
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
-let frameClient: WeClient = (getContext(frameContext) as any).getFrame();
+let frameClient: WeaveClient = (getContext(frameContext) as any).getFrame();
 
 let amenityElems: Array<SlCheckbox> = []
 $: uiProps = store.uiProps

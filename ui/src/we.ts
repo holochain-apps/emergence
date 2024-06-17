@@ -1,4 +1,4 @@
-import type { AppletHash, AppletServices, AssetInfo, WAL, WeServices } from '@lightningrodlabs/we-applet';
+import type { AppletHash, AppletServices, AssetInfo, RecordInfo, WAL, WeaveServices } from '@lightningrodlabs/we-applet';
 import type { AppClient, RoleName, ZomeName } from '@holochain/client';
 import { EmergenceStore } from './emergence-store';
 import { getContext } from 'svelte';
@@ -24,10 +24,8 @@ export const appletServices: AppletServices = {
     },
     getAssetInfo: async (
       appletClient: AppClient,
-      roleName: RoleName,
-      integrityZomeName: ZomeName,
-      entryType: string,
-      wal: WAL
+      wal: WAL,
+      recordInfo: RecordInfo
     ): Promise<AssetInfo | undefined> => {
       if (!store) {
         try {
@@ -36,33 +34,39 @@ export const appletServices: AppletServices = {
           console.log("Error creating store", e)
         }
       }
-      if (entryType == "session") {
-        let name = "Session"
-        if (store) {
-          const sessionHash = wal.hrl[1]
-          try {
-            await store.fetchSession([sessionHash])
-            const session = store.getSession(sessionHash)
-            if (session) {
-              name = session.record.entry.title
-            }
+      if (recordInfo) {
+        const entryType: string = recordInfo.entryType
 
-          }catch(e) {
-            console.log("Error fetching session", e)
+        if (entryType == "session") {
+          let name = "Session"
+          if (store) {
+            const sessionHash = wal.hrl[1]
+            try {
+              await store.fetchSession([sessionHash])
+              const session = store.getSession(sessionHash)
+              if (session) {
+                name = session.record.entry.title
+              }
+
+            }catch(e) {
+              console.log("Error fetching session", e)
+            }
           }
+          return {
+            icon_src: SESSION_ICON_SRC,
+            name,
+          };
+        } else {
+          throw new Error("unknown entry type:"+ entryType)
         }
-        return {
-          icon_src: SESSION_ICON_SRC,
-          name,
-        };
-      } else {
-        throw new Error("unknown entry type:"+ entryType)
+      }else {
+        throw new Error("Null WAL not supported, must supply a recordInfo")
       }
     },
     search: async (
       appletClient: AppClient,
       appletHash: AppletHash,
-      weServices: WeServices,
+      weServices: WeaveServices,
       searchFilter: string
     ): Promise<Array<WAL>> => {
         return []

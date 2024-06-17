@@ -6,7 +6,7 @@
   import SvgIcon from "./SvgIcon.svelte";
   import { hrlToString } from "@holochain-open-dev/utils";
   import '@lightningrodlabs/we-elements/dist/elements/wal-embed.js';
-  import type { WeClient } from '@lightningrodlabs/we-applet';
+  import type { WeaveClient } from '@lightningrodlabs/we-applet';
   import { frameContext } from "../../contexts";
 
   const dispatch = createEventDispatcher()
@@ -15,7 +15,7 @@
   export let allowDelete = true
 
   const { getFrame } :any = getContext(frameContext);
-  let frameClient: WeClient = getFrame();
+  let frameClient: WeaveClient = getFrame();
 
   let embedLink
 
