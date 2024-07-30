@@ -39,8 +39,8 @@
   import { getCookie, deleteCookie } from 'svelte-cookie';
   import { Base64 } from 'js-base64'
   import blake2b from "blake2b";
-import { ed25519 } from "@noble/curves/ed25519";
-import {Buffer} from "buffer"
+  import { ed25519 } from "@noble/curves/ed25519";
+  import {Buffer} from "buffer"
   import { WeaveClient, initializeHotReload, isWeContext } from '@lightningrodlabs/we-applet';
   import { appletServices } from './we';
   import { getMyDna } from './emergence/emergence/utils';

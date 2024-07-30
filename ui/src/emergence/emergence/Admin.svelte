@@ -14,6 +14,7 @@
     import SenseResults from "./SenseResults.svelte";
     import type { HoloHashMap } from "@holochain-open-dev/utils";
     import { toPromise } from "@holochain-open-dev/stores";
+    import DisableForOs from "./DisableForOs.svelte";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -343,23 +344,25 @@
             </sl-button></div>
         </div>
 
-        <div class="admin-section">
-            <div class="admin-section-desc">
-                <h3>Import/Export</h3>
-            </div>
-            <div style="display:flex; flex-direction: row;">
+        <DisableForOs os={["android", "ios"]}>
+            <div class="admin-section">
+                <div class="admin-section-desc">
+                    <h3>Import/Export</h3>
+                </div>
+                <div style="display:flex; flex-direction: row;">
 
-                <div id="export-button">
-                <sl-button  style="margin: 8px;"  on:click={async () => await doExport()}>
-                    Export
-                </sl-button></div>
-                <div id="import-button">
-                <sl-button  style="margin: 8px;" on:click={()=>fileinput.click()}>
-                    Import
-                </sl-button></div>
+                    <div id="export-button">
+                    <sl-button  style="margin: 8px;"  on:click={async () => await doExport()}>
+                        Export
+                    </sl-button></div>
+                    <div id="import-button">
+                    <sl-button  style="margin: 8px;" on:click={()=>fileinput.click()}>
+                        Import
+                    </sl-button></div>
+                </div>
             </div>
-        </div>
-
+        </DisableForOs>
+        
         <div class="admin-section" style="flex-direction:column">
             <div style="flex-direction:row;display:flex; justify-content:space-between">
                 <div class="admin-section-desc">

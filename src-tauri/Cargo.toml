@@ -27,6 +27,7 @@ holochain_client = { version = "0.5" }
 
 log = "0.4"
 tauri-plugin-log = "2.0.0-beta.7"
+tauri-plugin-os = "2.0.0-beta.8"
 url2 = "0.0.6"
 app_dirs2 = "2.5.5"
 tempdir = "0.3.7"
