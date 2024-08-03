@@ -344,12 +344,12 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
 {/if}
 
 <div class="pane-header">
-  <div >
+  <div class="back-button">
     <sl-button style="margin-left: 8px; " on:click={() => { dispatch('slotting-close') } } circle>
       <Fa icon={faCircleArrowLeft} />
     </sl-button>
   </div>
-  <div style="display:flex">
+  <div style="display:flex; flex-wrap: wrap;">
     <SessionFilterCtrls
       showKeywordCancel={true}
       on:toggle-filter={()=>{showFilter = !showFilter;}}
@@ -370,7 +370,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
       {#each store.getSlotTypeTags() as type}
         <sl-option value={type}> {type}</sl-option>
       {/each}
-    </sl-select>
+    </sl-select>    
     <sl-select style="margin-right: 5px;width: 200px;"
     placeholder="Sort Spaces By"
     value={$uiProps.spaceSort}
@@ -731,5 +731,11 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
 }
 .amo-bad {
   background-color: lightcoral;
+}
+
+.back-button {
+  display: flex; 
+  align-items: flex-start; 
+  height: 100%;
 }
 </style>
