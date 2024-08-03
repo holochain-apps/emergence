@@ -134,4 +134,4 @@ export const getMyDna = async (role:string, client: AppClient) : Promise<DnaHash
   return dnaHash
 } 
 
-export const isTauriContext = () => (window as any).__TAURI__ !== undefined;
+export const isTauriContext = () => (window as any).__TAURI_INTERNALS__ !== undefined;
