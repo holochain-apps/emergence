@@ -41,6 +41,7 @@
   import CloneManagerDialog from './emergence/emergence/CloneManagerDialog.svelte';
   import CloneManagerShareDialog from './emergence/emergence/CloneManagerShareDialog.svelte';
   import SvgIcon from './emergence/emergence/SvgIcon.svelte';
+    import CloneManagerActiveButton from './emergence/emergence/CloneManagerActiveButton.svelte';
 
   let client: AppClient | undefined;
   let weClient: WeaveClient
@@ -49,7 +50,6 @@
   let loading = true;
   let error: any = undefined;
   let creds
-  let weaveGroupName
 
   enum RenderType {
     App,
@@ -316,21 +316,11 @@
   return confirmationMessage;
   });
 
-
-  const loadWeaveGroupName = async () => {
-    if(!cloneManagerStore.weaveClient) return;
-
-    const appletInfo = await cloneManagerStore.weaveClient.appletInfo(cloneManagerStore.weaveClient.renderInfo.appletHash);
-    const groupProfile = await cloneManagerStore.weaveClient.groupProfile(appletInfo.groupsHashes[0]);
-    weaveGroupName = groupProfile.name;
-  };
-
   const loadStore = async () => {
     if(!$store) return;
     loading = true;
 
     await $store.sync()
-    await loadWeaveGroupName();
 
     // for now everyone is a steward
 
@@ -447,33 +437,8 @@ let sessionSummary = true
         {:else}
         
         <div class="network-button-overhanging">
-          {#if isWeContext()}
-            <div
-              on:keypress={()=>{cloneManagerShareDialog.open()}}
-              on:click={()=>cloneManagerShareDialog.open()} 
-              style="cursor: pointer; background-color:  #164B9A; padding: 3px 5px; border-radius: 10px;">
-                <div style="display: flex; justify-content: flex-start; align-items: center">
-                    <div style="margin-right: 10px; font-weight: bold; color: #fff">
-                      {weaveGroupName}
-                    </div>
-                    <SvgIcon icon="network" size="20px" color="#fff"/>
-                </div>
-            </div>
-          {:else}
-            <div
-              on:keypress={()=>{cloneManagerDialog.open()}}
-              on:click={()=>cloneManagerDialog.open()} 
-              style="cursor: pointer; background-color: #164B9A; padding: 3px 5px; border-radius: 10px;">
-                <div style="display: flex; justify-content: flex-start; align-items: center">
-                    <div style="margin-right: 10px; font-weight: bold; color: #fff">
-                      {$activeCellInfoNormalized.displayName}
-                    </div>
-                    <SvgIcon icon="network" size="20px" color="#fff"/>
-                </div>
-            </div>
-          {/if}
+          <CloneManagerActiveButton />
         </div>
-
 
         <div class="nav">
           <div class="button-group">
@@ -506,31 +471,7 @@ let sessionSummary = true
           </div>
           <div class="button-group">
             <div class="network-button">
-              {#if isWeContext()}
-                <div
-                  on:keypress={()=>{cloneManagerShareDialog.open()}}
-                  on:click={()=>cloneManagerShareDialog.open()} 
-                  style="cursor: pointer; background-color:  #164B9A; padding: 3px 5px; border-radius: 10px; margin-right: 10px">
-                    <div style="display: flex; justify-content: flex-start; align-items: center">
-                        <div style="margin-right: 10px; font-weight: bold; color: #fff">
-                          {weaveGroupName}
-                        </div>
-                        <SvgIcon icon="network" size="20px" color="#fff"/>
-                    </div>
-                </div>
-              {:else}
-                <div
-                  on:keypress={()=>{cloneManagerDialog.open()}}
-                  on:click={()=>cloneManagerDialog.open()} 
-                  style="cursor: pointer; background-color:  #164B9A; padding: 3px 5px; border-radius: 10px; margin-right: 10px">
-                    <div style="display: flex; justify-content: flex-start; align-items: center">
-                        <div style="margin-right: 10px; font-weight: bold; color: #fff">
-                          {$activeCellInfoNormalized.displayName}
-                        </div>
-                        <SvgIcon icon="network" size="20px" color="#fff"/>
-                    </div>
-                </div>
-              {/if}
+                <CloneManagerActiveButton />
             </div>
 
             {#if $store && $uiProps.amSteward}
@@ -730,12 +671,6 @@ let sessionSummary = true
         </div>
         {/if}
       </div>
-      
-      {#if isWeContext()}
-        <CloneManagerShareDialog bind:this={cloneManagerShareDialog} cell={$activeCellInfoNormalized} name={weaveGroupName} />
-      {:else}
-        <CloneManagerDialog bind:this={cloneManagerDialog} />
-      {/if}
       </file-storage-context>
       {/if}
       {/if}
@@ -822,6 +757,7 @@ let sessionSummary = true
     height: 100%;
     display: flex;
     align-items: center;
+    margin-right: 10px;
   }
 
   .network-button-overhanging {
