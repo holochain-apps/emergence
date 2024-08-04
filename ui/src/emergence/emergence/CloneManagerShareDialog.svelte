@@ -23,7 +23,7 @@
 
 <sl-dialog label="Share Network" bind:this={dialog} width={1000}>
   <div>
-    <p>Share this code with a friend to grant them access to the Kando Network <b>{cellName}</b></p>
+    <p>Share this code with a friend to grant them access to the Network <b>{cellName}</b></p>
     <sl-textarea rows="2" style="margin-top: 10px;" value={joiningCode}></sl-textarea>
     <div style="display: flex; justify-content: flex-end; align-items: center">
       <sl-button style="margin-top: 10px;" on:keydown={copyJoiningCode} on:click={copyJoiningCode}>
