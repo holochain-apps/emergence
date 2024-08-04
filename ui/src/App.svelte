@@ -445,6 +445,36 @@ let sessionSummary = true
           {#if $uiProps && $uiProps.syncing}<span class:spinning={true}> <Fa  icon={faSync} /></span>{/if}
         </div></div></div>
         {:else}
+        
+        <div class="network-button-overhanging">
+          {#if isWeContext()}
+            <div
+              on:keypress={()=>{cloneManagerShareDialog.open()}}
+              on:click={()=>cloneManagerShareDialog.open()} 
+              style="cursor: pointer; background-color:  #164B9A; padding: 3px 5px; border-radius: 10px;">
+                <div style="display: flex; justify-content: flex-start; align-items: center">
+                    <div style="margin-right: 10px; font-weight: bold; color: #fff">
+                      {weaveGroupName}
+                    </div>
+                    <SvgIcon icon="network" size="20px" color="#fff"/>
+                </div>
+            </div>
+          {:else}
+            <div
+              on:keypress={()=>{cloneManagerDialog.open()}}
+              on:click={()=>cloneManagerDialog.open()} 
+              style="cursor: pointer; background-color: #164B9A; padding: 3px 5px; border-radius: 10px;">
+                <div style="display: flex; justify-content: flex-start; align-items: center">
+                    <div style="margin-right: 10px; font-weight: bold; color: #fff">
+                      {$activeCellInfoNormalized.displayName}
+                    </div>
+                    <SvgIcon icon="network" size="20px" color="#fff"/>
+                </div>
+            </div>
+          {/if}
+        </div>
+
+
         <div class="nav">
           <div class="button-group">
             <div id="nav-discover" class="nav-button {pane === "discover" ? "selected":""}"
@@ -475,7 +505,7 @@ let sessionSummary = true
             </div>
           </div>
           <div class="button-group">
-            <div style="display: flex; align-items: center;">
+            <div class="network-button">
               {#if isWeContext()}
                 <div
                   on:keypress={()=>{cloneManagerShareDialog.open()}}
@@ -787,7 +817,42 @@ let sessionSummary = true
     padding-top: 10px;
     opacity: .6;
   }
-  
+
+  .network-button {
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
+
+  .network-button-overhanging {
+    position: absolute;
+    bottom: 70px;
+    right: 7px;
+    z-index: 10;
+    border-radius: 15px;
+    box-shadow: 0px -10px 15px rgba(0, 0, 0, .15);
+  }
+
+@media (min-width: 0px) {
+  .network-button {
+    display: none;
+  }
+
+  .network-button-overhanging {
+    display: inline-block;
+  }
+}
+
+@media (min-width: 480px) {
+  .network-button {
+    display: flex;
+  }
+
+  .network-button-overhanging {
+    display: none;
+  }
+}
+
 @media (min-width: 720px) {
   .event-intro .wrapper {
     display: flex;
