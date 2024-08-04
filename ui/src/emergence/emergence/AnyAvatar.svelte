@@ -1,7 +1,7 @@
 <script lang="ts">
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
   import { storeContext } from '../../contexts';
-  import type { EmergenceStore } from '../../emergence-store';
+  import type { EmergenceStore } from '../../stores/emergence-store';
   import { getContext } from "svelte";
   import { DetailsType, type AnyAgent } from "./types";
   import Avatar from './Avatar.svelte';

@@ -28,8 +28,6 @@ export class EmergenceClient {
   reconnecting = false
 
   constructor(
-    public url: string,
-    public installed_app_id,
     public client: AppClient,
     public roleName: string,
     public zomeName = 'emergence'

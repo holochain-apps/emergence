@@ -3,7 +3,7 @@ import { onMount, getContext, createEventDispatcher } from 'svelte';
 import type { Record  } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import ProxyAgentSummary from './ProxyAgentSummary.svelte';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import ProxyAgentCrud from './ProxyAgentCrud.svelte';

@@ -1,4 +1,4 @@
-import { ROLE_NAME } from './emergence/emergence/types';
+import { ROLE_NAME } from '../emergence/emergence/types';
 
 import {
     encodeHashToBase64,
@@ -9,20 +9,21 @@ import {
     type DnaHash,
 } from '@holochain/client';
 
-import type { EmergenceClient } from './emergence-client';
+import type { EmergenceClient } from '../emergence-client';
 
 import TimeAgo from "javascript-time-ago"
 import en from 'javascript-time-ago/locale/en'
 import type { ProfilesStore } from '@holochain-open-dev/profiles';
 import { derived, get, writable, type Readable, type Writable } from 'svelte/store';
 import { HoloHashMap, type EntryRecord, ActionHashMap } from '@holochain-open-dev/utils';
-import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile, type SessionType, type SessionTypeID, NULL_HASHB64, NULL_HASH, SessionListMode, type GetFeedInput, type InfoSession, type SessionEntryRecord, makeSRec, sessionLinks } from './emergence/emergence/types';
+import { FeedType, type FeedElem, type Info, type Session, type Slot, type Space, type TimeWindow, type UpdateSessionInput, type UpdateSpaceInput, slotEqual, type UpdateNoteInput, type Note, type GetStuffInput, type SessionInterest, type SessionRelationData, type SiteMap, type UpdateSiteMapInput, type SiteLocation, type Coordinates, setCharAt, type SlottedSession, type TagUse, sessionSelfTags, type UIProps, type SessionsFilter, defaultSessionsFilter, defaultFeedFilter, type FeedFilter,  DetailsType, SessionSortOrder, type Settings, SessionInterestDefault, SessionInterestBit, type ProxyAgent, type UpdateProxyAgentInput, type AnyAgent, sessionTags, SpaceSortOrder, defaultPeopleFilter, type PeopleFilter, type AnyAgentDetailed, type Projection, type DownloadedFile, type SessionType, type SessionTypeID, NULL_HASHB64, NULL_HASH, SessionListMode, type GetFeedInput, type InfoSession, type SessionEntryRecord, makeSRec, sessionLinks } from '../emergence/emergence/types';
 import { toPromise, type AsyncReadable, type AsyncStatus, asyncDerived } from '@holochain-open-dev/stores';
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
-import { elapsed, filterTime, getMyDna, sessionHasTags, type WALUrl } from './emergence/emergence/utils';
+import { elapsed, filterTime, getMyDna, sessionHasTags, type WALUrl } from '../emergence/emergence/utils';
 import { fromUint8Array } from 'js-base64';
 import type { WAL } from '@lightningrodlabs/we-applet';
+import { CloneManagerStore } from './clone-manager-store';
 Marked.setOptions
 ({
   renderer: new Renderer,
@@ -100,7 +101,7 @@ export const neededStuffStore = (client: EmergenceClient) => {
 
 
 export class EmergenceStore {
-  dnaHash: DnaHash
+  myPubKey: AgentPubKey
   timeAgo = new TimeAgo('en-US')
   timeWindows: Writable<Array<TimeWindow>> = writable([])
   sessions: Writable<Array<InfoSession>> = writable([])
@@ -215,10 +216,11 @@ export class EmergenceStore {
     return this.neededStuff.notes ? true : false
   }
   
-  constructor(public client: EmergenceClient, public profilesStore: ProfilesStore, public fileStorageClient:FileStorageClient, public myPubKey: AgentPubKey) {
+  constructor(public cloneManager: CloneManagerStore, public client: EmergenceClient, public profilesStore: ProfilesStore, public fileStorageClient:FileStorageClient, public dnaHash: Uint8Array) {
     //this.loader = setInterval(()=>{if(this.stuffIsNeeded()) this.fetchStuff()}, 1000);
     this.neededStuffStore =  neededStuffStore(client)
-    this.myPubKeyBase64 = encodeHashToBase64(myPubKey)
+    this.myPubKey = this.client.client.myPubKey;
+    this.myPubKeyBase64 = encodeHashToBase64(this.client.client.myPubKey)
     client.client.on( 'signal', signal => {
         console.log("SIGNAL",signal)
         // @ts-ignore
@@ -959,7 +961,7 @@ export class EmergenceStore {
         {
             if (encodeHashToBase64(l.hash) == this.myPubKeyBase64) {
                 this.agentSessions.update((n) => {
-                    let si = n.get(this.myPubKey)
+                    let si = n.get(this.client.client.myPubKey)
                     if (!si) {
                         si = new HoloHashMap()
                         n.set(l.hash,si)
@@ -1926,7 +1928,7 @@ export class EmergenceStore {
         console.log("Error fetching tags", e)
     }
   }
-  async sync(agent: AgentPubKey | undefined) {
+  async sync(agent: AgentPubKey | undefined = undefined) {
     this.setUIprops({syncing: get(this.uiProps).syncing+1})
  
     const starTime = performance.now()
@@ -1938,7 +1940,7 @@ export class EmergenceStore {
     this.syncText.update((n) => {return "Fetching Sessions"} )
     await this.fetchSessions() // fetches spaces and timewindows
     this.syncText.update((n) => {return "Fetching Agent data"} )
-    await this.fetchAgentStuff(!agent ? this.myPubKey: agent)
+    await this.fetchAgentStuff(!agent ? this.client.client.myPubKey: agent)
     if (!agent) {
         this.syncText.update((n) => {return "Fetching Activity Feed"} )
         await this.fetchFeed({})

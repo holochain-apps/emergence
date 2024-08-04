@@ -10,7 +10,7 @@ import { faArrowRotateBack, faClose, faMagnifyingGlass, faMap, faTag, faUser } f
 import Fa from 'svelte-fa';
 import { defaultFeedFilter, type FeedFilter } from './types';
 import { fly } from 'svelte/transition';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import { storeContext } from '../../contexts';
 import { decodeHashFromBase64, encodeHashToBase64 } from '@holochain/client';
 import "@holochain-open-dev/profiles/dist/elements/search-agent.js";

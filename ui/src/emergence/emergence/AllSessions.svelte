@@ -8,7 +8,7 @@ import { encodeHashToBase64, type Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
 import SessionSummary from './SessionSummary.svelte';
 import SessionCrud from './SessionCrud.svelte';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import SessionFilter from './SessionFilter.svelte';
 import { faArrowUpShortWide, faArrowDownWideShort, faSearch } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';

@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/components/button/button.js';
 import type SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog';
 import '@shoelace-style/shoelace/dist/components/dialog/dialog';
   import { storeContext } from '../../contexts';
-  import type { EmergenceStore } from '../../emergence-store';
+  import type { EmergenceStore } from '../../stores/emergence-store';
 
 const dispatch = createEventDispatcher();
 

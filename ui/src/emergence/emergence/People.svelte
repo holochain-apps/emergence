@@ -4,7 +4,7 @@
   import '@shoelace-style/shoelace/dist/components/input/input.js';
   import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
   import { storeContext } from '../../contexts';
-  import type { EmergenceStore } from '../../emergence-store';
+  import type { EmergenceStore } from '../../stores/emergence-store';
   import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
   import { DetailsType, type Info, type ProxyAgent } from './types';

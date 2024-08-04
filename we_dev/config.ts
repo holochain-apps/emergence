@@ -64,8 +64,8 @@ export default defineConfig({
       },
       source: {
         type: 'localhost',
-        happPath: '/home/eric/code/metacurrency/holochain/emergence/workdir/emergence.happ',
-        uiPort: 8888,
+        happPath: './workdir/emergence.happ',
+        uiPort: 1420,
       },
     },
     {

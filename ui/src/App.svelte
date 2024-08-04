@@ -6,7 +6,6 @@
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
   import SessionCrud from './emergence/emergence/SessionCrud.svelte';
   import SpaceCrud from './emergence/emergence/SpaceCrud.svelte';
-  import { ProfilesStore, ProfilesClient } from "@holochain-open-dev/profiles";
   import '@shoelace-style/shoelace/dist/themes/light.css';
   import Fa from 'svelte-fa'
   import { faMap, faUser, faGear, faCalendar, faHome, faSync, faArrowRightFromBracket, faArrowRotateBack } from '@fortawesome/free-solid-svg-icons';
@@ -16,11 +15,9 @@
   import "@holochain-open-dev/profiles/dist/elements/my-profile.js";
   import "@holochain-open-dev/profiles/dist/elements/list-profiles.js";
   import "@holochain-open-dev/file-storage/dist/elements/file-storage-context.js";
-  import { FileStorageClient } from "@holochain-open-dev/file-storage";
 
-  import { clientContext, frameContext, storeContext } from './contexts';
-  import { DEFAULT_SYNC_TEXT, EmergenceStore } from './emergence-store';
-  import { EmergenceClient } from './emergence-client';
+  import { clientContext, cloneManagerStoreContext, frameContext, storeContext } from './contexts';
+  import { DEFAULT_SYNC_TEXT } from './stores/emergence-store';
   import ScheduleSlotting from './emergence/emergence/ScheduleSlotting.svelte';
   import ScheduleUpcoming from './emergence/emergence/ScheduleUpcoming.svelte';
   import SessionDetail from './emergence/emergence/SessionDetail.svelte';
@@ -32,28 +29,27 @@
   import Discover from './emergence/emergence/Discover.svelte';
   import Folk from './emergence/emergence/Folk.svelte';
   import SpaceDetail from './emergence/emergence/SpaceDetail.svelte';
-  import { DetailsType, ROLE_NAME, ZOME_NAME } from './emergence/emergence/types';
+  import { APP_ID, DetailsType, ROLE_NAME, ZOME_NAME } from './emergence/emergence/types';
   import ProxyAgentCrud from './emergence/emergence/ProxyAgentCrud.svelte';
   import AllProxyAgents from './emergence/emergence/AllProxyAgents.svelte';
   import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
   import { getCookie, deleteCookie } from 'svelte-cookie';
   import { Base64 } from 'js-base64'
-  import blake2b from "blake2b";
-  import { ed25519 } from "@noble/curves/ed25519";
-  import {Buffer} from "buffer"
   import { WeaveClient, initializeHotReload, isWeContext } from '@lightningrodlabs/we-applet';
   import { appletServices } from './we';
-  import { getMyDna } from './emergence/emergence/utils';
+  import { CloneManagerStore } from './stores/clone-manager-store';
+  import CloneManagerDialog from './emergence/emergence/CloneManagerDialog.svelte';
+  import CloneManagerShareDialog from './emergence/emergence/CloneManagerShareDialog.svelte';
+  import SvgIcon from './emergence/emergence/SvgIcon.svelte';
 
   let client: AppClient | undefined;
   let weClient: WeaveClient
 
-  let store: EmergenceStore | undefined;
-  let fileStorageClient: FileStorageClient | undefined;
+  let cloneManagerStore: CloneManagerStore | undefined;
   let loading = true;
-  let profilesStore: ProfilesStore | undefined
   let error: any = undefined;
   let creds
+  let weaveGroupName
 
   enum RenderType {
     App,
@@ -62,15 +58,15 @@
   let renderType = RenderType.App
   let wal
 
-  $: error
-  $: client, fileStorageClient, store, loading;
-  $: prof = profilesStore ? profilesStore.myProfile : undefined
-  $: uiProps = store ? store.uiProps : undefined
-  $: pane = store ? $uiProps.pane : "sessions"
-  $: sitemaps = store ? store.maps : undefined
-  $: allWindows = store ? store.timeWindows : undefined
+  $: store = cloneManagerStore?.activeStore;
+  $: prof = $store ? $store.profilesStore.myProfile : undefined
+  $: uiProps = $store ? $store.uiProps : undefined
+  $: pane = $store ? $uiProps.pane : "sessions"
+  $: sitemaps = $store ? $store.maps : undefined
+  $: allWindows = $store ? $store.timeWindows : undefined
 
-  $: loadingText = store ? store.syncText : undefined
+  $: loadingText = $store ? $store.syncText : undefined
+  $: activeCellInfoNormalized = cloneManagerStore?.activeCellInfoNormalized;
 
   const base64ToUint8 = (b64:string)=> Base64.toUint8Array(b64);
 
@@ -136,7 +132,6 @@
   onMount(async () => {
     // We pass '' as url because it will dynamically be replaced in launcher environments
     const adminPort : string = import.meta.env.VITE_ADMIN_PORT
-    let installed_app_id = "emergence"
     // const credsJson = getCookie("creds")
     // if (credsJson) {
     //   creds = jsonToCreds(credsJson)
@@ -204,7 +199,7 @@
         console.log("connecting to admin port at:", url);
         const adminWebsocket = await AdminWebsocket.connect({url: new URL(url)})
         tokenResp = await adminWebsocket.issueAppAuthenticationToken({
-          installed_app_id: installed_app_id,
+          installed_app_id: APP_ID,
         });
 
         const cellIds = await adminWebsocket.listCellIds()
@@ -214,7 +209,6 @@
       if (tokenResp) params.token = tokenResp.token;
 
       client = await AppWebsocket.connect(params);
-      profilesClient = new ProfilesClient(client, installed_app_id);
     } else {
       weClient = await WeaveClient.connect(appletServices);
       switch (weClient.renderInfo.type) {
@@ -284,51 +278,21 @@
       //@ts-ignore
       profilesClient = weClient.renderInfo.profilesClient;
     }
-  
-    profilesStore = new ProfilesStore(profilesClient, {
-      avatarMode: "avatar-optional",
-      minNicknameLength: 3,
-      additionalFields: [
-        {
-          name: "location",
-          label: "Location",
-          required: false, 
-        },
-        {
-          name: "bio",
-          label: "Bio",
-          required: false,
-        }
-      ], 
-    });
 
-    fileStorageClient = new FileStorageClient(client, ROLE_NAME);
-    store = new EmergenceStore(new EmergenceClient(url,installed_app_id, client, ROLE_NAME), profilesStore, fileStorageClient, client.myPubKey)
-    store.dnaHash = await getMyDna(ROLE_NAME, client)
-
-    await store.sync(undefined)
-
-    // for now everyone is a steward
-
-    if (!isConfigured()) {
-      if (!isWeContext() || (await weClient.myGroupPermissionType()).type === "Steward") {
-        store.setUIprops({amSteward:true})
-        await store.setPane("admin")
-      }
-    }
-    initialSync = setInterval(async ()=>{
-      if ($uiProps.amSteward || !isConfigured()) {clearInterval(initialSync)}
-      else {
-        await doSync()
-      }
-    }, 10000);
-
-    loading = false;
+    cloneManagerStore = new CloneManagerStore(
+      client,
+      weClient
+    );
+    await cloneManagerStore.activeStore.load();
   });
   let initialSync
 
   setContext(storeContext, {
-    getStore: () => store,
+    getStore: () => $store,
+  });
+
+  setContext(cloneManagerStoreContext, {
+    getStore: () => cloneManagerStore,
   });
 
   setContext(clientContext, {
@@ -341,23 +305,52 @@
 
   let createSessionDialog: SessionCrud
   let createSpaceDialog: SpaceCrud
+  let cloneManagerDialog: CloneManagerDialog
+  let cloneManagerShareDialog: CloneManagerShareDialog
 
   const doSync=async () => {
-        await store.sync(undefined);
-  }
-  let clickCount = 0
-  const adminCheck = () => { 
-    clickCount += 1
-    if (clickCount == 5) {
-      clickCount = 0
-      const amSteward = $uiProps.amSteward
-      store.setUIprops({amSteward:!amSteward}) 
-    }
+        await $store.sync(undefined);
   }
   window.addEventListener("beforeunload", function (e) {
   var confirmationMessage = "You are about to leave Emergence!";
   return confirmationMessage;
   });
+
+
+  const loadWeaveGroupName = async () => {
+    if(!cloneManagerStore.weaveClient) return;
+
+    const appletInfo = await cloneManagerStore.weaveClient.appletInfo(cloneManagerStore.weaveClient.renderInfo.appletHash);
+    const groupProfile = await cloneManagerStore.weaveClient.groupProfile(appletInfo.groupsHashes[0]);
+    weaveGroupName = groupProfile.name;
+  };
+
+  const loadStore = async () => {
+    if(!$store) return;
+    loading = true;
+
+    await $store.sync()
+    await loadWeaveGroupName();
+
+    // for now everyone is a steward
+
+    if (!isConfigured()) {
+      if (!isWeContext() || (await weClient.myGroupPermissionType()).type === "Steward") {
+        $store.setUIprops({amSteward:true})
+        await $store.setPane("admin")
+      }
+    }
+    initialSync = setInterval(async ()=>{
+      if ($uiProps.amSteward || !isConfigured()) {clearInterval(initialSync)}
+      else {
+        await doSync()
+      }
+    }, 10000);
+    
+    loading = false;
+  };
+
+  $: $store, loadStore();
 let sessionSummary = true
 
 </script>
@@ -393,9 +386,9 @@ let sessionSummary = true
       <span class="loading-text">{loadingText ? $loadingText : DEFAULT_SYNC_TEXT}</span>
     </div>
   {:else}
-  <profiles-context store="{profilesStore}">
+  <profiles-context store="{$store.profilesStore}">
     {#if renderType == RenderType.Session}
-      {@const session = store.getSession(wal.hrl[1])}
+      {@const session = $store.getSession(wal.hrl[1])}
       <div style="margin:5px;"
       >
         {#if session}
@@ -456,16 +449,16 @@ let sessionSummary = true
           <div class="button-group">
             <div id="nav-discover" class="nav-button {pane === "discover" ? "selected":""}"
               title="Discover"
-              on:keypress={()=>{store.setPane('discover')}}
-              on:click={()=>{store.setPane('discover')}}
+              on:keypress={()=>{$store.setPane('discover')}}
+              on:click={()=>{$store.setPane('discover')}}
             >
               <Fa class="nav-icon" icon={faHome} size="2x"/>
               <span class="button-title">Discover</span>
             </div>
             <div id="nav-sessions" class="nav-button {pane.startsWith("sessions")?"selected":""}"
               title="Sessions"
-              on:keypress={()=>{store.setPane('sessions')}}
-              on:click={()=>{store.setPane('sessions')}}
+              on:keypress={()=>{$store.setPane('sessions')}}
+              on:click={()=>{$store.setPane('sessions')}}
             >
               <Fa class="nav-icon" icon={faCalendar} size="2x"/>
               <span class="button-title">Sessions</span>
@@ -474,19 +467,47 @@ let sessionSummary = true
       
             <div id="nav-spaces" class="nav-button {pane.startsWith("spaces")?"selected":""}"
               title="Spaces"
-              on:keypress={()=>{store.setPane('spaces')}}
-              on:click={()=>{store.setPane('spaces')}}
+              on:keypress={()=>{$store.setPane('spaces')}}
+              on:click={()=>{$store.setPane('spaces')}}
             >
               <Fa class="nav-icon" icon={faMap} size="2x"/>
             <span class="button-title">Spaces</span>
             </div>
           </div>
-          <div class="button-group settings">
-            {#if store && $uiProps.amSteward}
+          <div class="button-group">
+            <div style="display: flex; align-items: center;">
+              {#if isWeContext()}
+                <div
+                  on:keypress={()=>{cloneManagerShareDialog.open()}}
+                  on:click={()=>cloneManagerShareDialog.open()} 
+                  style="cursor: pointer; background-color:  #164B9A; padding: 3px 5px; border-radius: 10px; margin-right: 10px">
+                    <div style="display: flex; justify-content: flex-start; align-items: center">
+                        <div style="margin-right: 10px; font-weight: bold; color: #fff">
+                          {weaveGroupName}
+                        </div>
+                        <SvgIcon icon="network" size="20px" color="#fff"/>
+                    </div>
+                </div>
+              {:else}
+                <div
+                  on:keypress={()=>{cloneManagerDialog.open()}}
+                  on:click={()=>cloneManagerDialog.open()} 
+                  style="cursor: pointer; background-color:  #164B9A; padding: 3px 5px; border-radius: 10px; margin-right: 10px">
+                    <div style="display: flex; justify-content: flex-start; align-items: center">
+                        <div style="margin-right: 10px; font-weight: bold; color: #fff">
+                          {$activeCellInfoNormalized.displayName}
+                        </div>
+                        <SvgIcon icon="network" size="20px" color="#fff"/>
+                    </div>
+                </div>
+              {/if}
+            </div>
+
+            {#if $store && $uiProps.amSteward}
               <div id="nav-admin" class="nav-button {pane.startsWith("admin")?"selected":""}"
                 title="Admin"
-                on:keypress={()=>{store.setPane('admin')}}
-                on:click={()=>{store.setPane('admin')}}
+                on:keypress={()=>{$store.setPane('admin')}}
+                on:click={()=>{$store.setPane('admin')}}
               >
                 <Fa class="nav-icon" icon={faGear} size="2x"/>
               <span class="button-title settings">Settings</span>
@@ -494,11 +515,11 @@ let sessionSummary = true
             {/if}
             <div id="nav-you" class="nav-button {pane=="you"?"selected":""}"
               title="You"
-              on:keypress={()=>{store.setPane('you')}}
+              on:keypress={()=>{$store.setPane('you')}}
               on:dblclick={(e)=>e.stopPropagation()}
               on:click={(e)=>{
                 e.stopPropagation()
-                if (pane!=="you") store.setPane('you')
+                if (pane!=="you") $store.setPane('you')
                 }}
             >
               <Fa class="nav-icon" icon={faUser} size="2x"/>
@@ -532,37 +553,37 @@ let sessionSummary = true
           </div>
         </div>
 
-        <file-storage-context client={fileStorageClient}>
+        <file-storage-context client={$store.fileStorageClient}>
         {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.ProxyAgent }
         <div class="session-details">
           <ProxyAgentDetail
-            on:proxyagent-deleted={()=>store.closeDetails()}
-            on:proxyagent-close={()=>store.closeDetails()}
+            on:proxyagent-deleted={()=>$store.closeDetails()}
+            on:proxyagent-close={()=>$store.closeDetails()}
             proxyAgentHash={$uiProps.detailsStack[0].hash}>
           </ProxyAgentDetail>
         </div>
         {/if}
-        {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Space }
+        {#if $store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Space }
         <div class="session-details">
           <SpaceDetail
-            on:space-deleted={()=>store.closeDetails()}
-            on:space-close={()=>store.closeDetails()}
-            space={store.getSpace($uiProps.detailsStack[0].hash)}>
+            on:space-deleted={()=>$store.closeDetails()}
+            on:space-close={()=>$store.closeDetails()}
+            space={$store.getSpace($uiProps.detailsStack[0].hash)}>
           </SpaceDetail>
         </div>
         {/if}
-        {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Session }
+        {#if $store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Session }
         <div class="session-details">
           <SessionDetail 
-          on:session-deleted={()=>store.closeDetails()}
-          on:session-close={()=>store.closeDetails()}
+          on:session-deleted={()=>$store.closeDetails()}
+          on:session-close={()=>$store.closeDetails()}
           sessionHash={$uiProps.detailsStack[0].hash}></SessionDetail>
         </div>
       {/if}
-      {#if store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Folk }
+      {#if $store &&  $uiProps.detailsStack[0] && $uiProps.detailsStack[0].type==DetailsType.Folk }
       <div class="session-details">
           <Folk 
-          on:folk-close={()=>store.closeDetails()}
+          on:folk-close={()=>$store.closeDetails()}
           agentPubKey={$uiProps.detailsStack[0].hash}></Folk>
         </div>
       {/if}
@@ -601,7 +622,7 @@ let sessionSummary = true
         {#if pane=="schedule"}
           <div class="pane">
             <ScheduleUpcoming
-              on:open-slotting={()=>store.setPane("schedule.slotting")}
+              on:open-slotting={()=>$store.setPane("schedule.slotting")}
             ></ScheduleUpcoming>
           </div>
         {/if}
@@ -609,7 +630,7 @@ let sessionSummary = true
         {#if pane=="schedule.slotting"}
           <div class="pane">
             <ScheduleSlotting
-              on:slotting-close={()=>store.setPane("admin")}
+              on:slotting-close={()=>$store.setPane("admin")}
 
             ></ScheduleSlotting>
           </div>
@@ -617,10 +638,10 @@ let sessionSummary = true
 
         {#if pane=="spaces"}
         <div class="pane sitemap">
-          {#if store.getCurrentSiteMap()}
+          {#if $store.getCurrentSiteMap()}
             <SiteMapDisplay 
-              sitemap={store.getCurrentSiteMap()}
-              on:show-all-spaces={()=>store.setPane("spaces.list")}
+              sitemap={$store.getCurrentSiteMap()}
+              on:show-all-spaces={()=>$store.setPane("spaces.list")}
               ></SiteMapDisplay>
           {:else}
             <h5>No Sitemap configured yet</h5>
@@ -631,7 +652,7 @@ let sessionSummary = true
         {#if pane=="spaces.list"}
         <div class="pane spaces">
           <AllSpaces
-            on:all-spaces-close={()=>store.setPane("spaces")}
+            on:all-spaces-close={()=>$store.setPane("spaces")}
           ></AllSpaces>
       
             <SpaceCrud
@@ -651,7 +672,7 @@ let sessionSummary = true
           <Admin
             on:open-sitemaps={()=>pane = 'admin.sitemaps'}
             on:open-proxyagents={()=>pane = 'admin.proxyagents'}
-            on:open-slotting={()=>store.setPane("schedule.slotting")}
+            on:open-slotting={()=>$store.setPane("schedule.slotting")}
           ></Admin>
         </div>
         {/if}
@@ -672,12 +693,19 @@ let sessionSummary = true
           on:proxyagents-close={()=>pane = 'admin'}
           ></AllProxyAgents>
         </div>
-        {/if}      {#if pane=="discover"}
+        {/if}      
+        {#if pane=="discover"}
         <div class="pane">
           <Discover></Discover>
         </div>
         {/if}
       </div>
+      
+      {#if isWeContext()}
+        <CloneManagerShareDialog bind:this={cloneManagerShareDialog} cell={$activeCellInfoNormalized} name={weaveGroupName} />
+      {:else}
+        <CloneManagerDialog bind:this={cloneManagerDialog} />
+      {/if}
       </file-storage-context>
       {/if}
       {/if}

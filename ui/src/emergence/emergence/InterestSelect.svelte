@@ -7,7 +7,7 @@ import '@shoelace-style/shoelace/dist/components/menu/menu.js';
 import '@shoelace-style/shoelace/dist/components/menu-item/menu-item.js';
 import { SessionInterestBit, type SessionInterest } from './types';
 import { storeContext } from '../../contexts';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import {  faBookmark, faCheck, faEllipsis, faEyeSlash } from '@fortawesome/free-solid-svg-icons';
 import type{  ActionHash } from '@holochain/client';
 import type { Snackbar } from '@material/mwc-snackbar';

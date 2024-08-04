@@ -2,7 +2,7 @@
     import { decodeHashFromBase64, encodeHashToBase64, type ActionHash, type EntryHash } from "@holochain/client";
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
-    import type { EmergenceStore } from '../../emergence-store';
+    import type { EmergenceStore } from '../../stores/emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
     import { sessionSelfTags, type Info, type Note, type InfoSession, APP_VERSION } from "./types";
     import { get } from "svelte/store";

@@ -9,7 +9,7 @@ import { storeContext } from '../../contexts';
 import {  type Info, type Space,  type Session,  type TimeWindow, DetailsType } from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import Avatar from './Avatar.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
 import SessionSummary from './SessionSummary.svelte';

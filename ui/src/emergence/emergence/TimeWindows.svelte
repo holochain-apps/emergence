@@ -4,7 +4,7 @@
   import type { Record } from '@holochain/client';
   import { storeContext } from '../../contexts';
   import TimeWindowDetail from './TimeWindowDetail.svelte';
-  import type { EmergenceStore } from '../../emergence-store';
+  import type { EmergenceStore } from '../../stores/emergence-store';
 
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();

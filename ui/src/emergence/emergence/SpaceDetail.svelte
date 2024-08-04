@@ -13,7 +13,7 @@ import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
 import { faTrash, faEdit, faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import SpaceCrud from './SpaceCrud.svelte'; 
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import Confirm from './Confirm.svelte';
 import Avatar from './Avatar.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';

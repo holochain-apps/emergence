@@ -1,7 +1,7 @@
 <script lang="ts">
     import '@shoelace-style/shoelace/dist/components/select/select.js';
     import '@shoelace-style/shoelace/dist/components/option/option.js';
-    import type { EmergenceStore } from '../../emergence-store';
+    import type { EmergenceStore } from '../../stores/emergence-store';
     import { getContext, onMount } from 'svelte';
     import { storeContext } from '../../contexts';
     import TagCloudPeople from './TagCloudPeople.svelte';

@@ -1,7 +1,7 @@
 <script lang="ts">
     import { encodeHashToBase64, type ActionHash } from '@holochain/client';
     import { storeContext } from '../../contexts';
-    import type { EmergenceStore  } from '../../emergence-store';
+    import type { EmergenceStore  } from '../../stores/emergence-store';
     import { createEventDispatcher, getContext } from 'svelte';
     import Avatar from './Avatar.svelte';
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';

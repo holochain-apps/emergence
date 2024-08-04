@@ -8,7 +8,7 @@
 
     import type {  Record } from '@holochain/client';
     import { storeContext } from '../../contexts';
-    import type { EmergenceStore } from '../../emergence-store';
+    import type { EmergenceStore } from '../../stores/emergence-store';
     import Feed from './Feed.svelte';
     import TagCloud from './TagCloud.svelte'
     import People from './People.svelte';

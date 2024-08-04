@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { type FeedElem, FeedType, sessionInterestToString, timestampToStr, SessionInterestBit } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { storeContext } from '../../contexts';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import Avatar from './Avatar.svelte';
 import NoteDetail from './NoteDetail.svelte';
 import NoteSummary from './NoteSummary.svelte';
