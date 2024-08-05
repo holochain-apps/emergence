@@ -157,7 +157,7 @@ let siteMapLocation
 
 
 </div>
-<div style="display:flex; flex-direction:row; justify-content:space-between">
+<div style="display:flex; flex-direction:row; justify-content:space-between; flex-wrap: wrap;">
   <div style="display:flex; flex-direction:column; margin-right: 10px">
     <div style="margin-bottom: 16px; width: 100px">
       <sl-input
@@ -199,8 +199,8 @@ let siteMapLocation
     ></sl-textarea>
   </div>
 
-  <div style="display:flex; flex-direction:row; justify-content:space-between">
-    <div style="display:flex; flex-direction:column; margin-right: 10px">
+  <div style="display:flex; flex-direction:row; justify-content:space-between; flex-wrap: wrap;">
+    <div style="display:flex; flex-direction:column; margin-right: 10px;">
       <div style="margin-bottom: 16px">
         <sl-input
         label="Capacity"

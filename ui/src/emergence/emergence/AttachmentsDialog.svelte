@@ -7,12 +7,12 @@
   import AttachmentsList from "./AttachmentsList.svelte";
   import SvgIcon from "./SvgIcon.svelte";
   import { frameContext, storeContext } from '../../contexts';
-  import type { WeClient } from '@lightningrodlabs/we-applet';
+  import type { WeaveClient } from '@lightningrodlabs/we-applet';
   import type { EmergenceStore } from "../../emergence-store";
   import { sessionLinks, type InfoSession } from "./types";
 
   const { getFrame } :any = getContext(frameContext);
-  let frameClient: WeClient = getFrame();
+  let frameClient: WeaveClient = getFrame();
   const { getStore } :any = getContext(storeContext);
   let store: EmergenceStore = getStore();
 

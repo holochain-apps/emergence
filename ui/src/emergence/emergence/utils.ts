@@ -1,4 +1,4 @@
-import { CellType, type AppAgentClient, type DnaHash, type EntryHash, type Timestamp } from "@holochain/client"
+import { CellType, type AppClient, type DnaHash, type EntryHash, type Timestamp } from "@holochain/client"
 import type { Info, InfoSession, Session, SessionsFilter, Slot, TimeWindow } from "./types"
 
 // @ts-ignore
@@ -126,10 +126,12 @@ export const hashEqual = (a:EntryHash, b:EntryHash) : boolean => {
   return true;
 }
 
-export const getMyDna = async (role:string, client: AppAgentClient) : Promise<DnaHash>  => {
+export const getMyDna = async (role:string, client: AppClient) : Promise<DnaHash>  => {
   const appInfo = await client.appInfo();
   const dnaHash = (appInfo.cell_info[role][0] as any)[
     CellType.Provisioned
   ].cell_id[0];
   return dnaHash
 } 
+
+export const isTauriContext = () => (window as any).__TAURI_INTERNALS__ !== undefined;

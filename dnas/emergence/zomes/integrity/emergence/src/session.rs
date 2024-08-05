@@ -30,8 +30,6 @@ pub fn validate_create_session(
 pub fn validate_update_session(
     _action: Update,
     _session: Session,
-    _original_action: EntryCreationAction,
-    _original_session: Session,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }

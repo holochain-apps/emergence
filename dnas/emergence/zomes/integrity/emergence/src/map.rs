@@ -15,8 +15,6 @@ pub fn validate_create_map(
 pub fn validate_update_map(
     _action: Update,
     _map: Map,
-    _original_action: EntryCreationAction,
-    _original_map: Map,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }

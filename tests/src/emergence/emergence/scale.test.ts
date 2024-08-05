@@ -1,7 +1,7 @@
 import { assert, test } from "vitest";
 
 import { runScenario, pause, CallableCell, createConductor, addAllAgentsToAllConductors, cleanAllConductors } from '@holochain/tryorama';
-import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash, EntryHash, AppAgentCallZomeRequest, AppAgentClient } from '@holochain/client';
+import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash, EntryHash, AppCallZomeRequest, AppClient } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
 import { createNote, createSession, createSpace, sampleNote, sampleSession, sampleSpace } from './common.js';
@@ -305,8 +305,8 @@ test('scale testing', async () => {
       }
       await scenario.shareAllAgents();
 
-      const aliceAppAgentWs = players[0].conductor.appAgentWs();
-      const store = new EmergenceStore(new EmergenceClient(aliceAppAgentWs, "emergence"), undefined, undefined, aliceAppAgentWs.myPubKey)
+      const aliceAppWs = players[0].conductor.appAgentWs();
+      const store = new EmergenceStore(new EmergenceClient(aliceAppWs, "emergence"), undefined, undefined, aliceAppWs.myPubKey)
 
       const spaces = []
       // agent 1 creates a bunch of spaces

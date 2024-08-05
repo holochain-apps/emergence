@@ -16,8 +16,6 @@ pub fn validate_create_proxy_agent(
 pub fn validate_update_proxy_agent(
     _action: Update,
     _proxy_agent: ProxyAgent,
-    _original_action: EntryCreationAction,
-    _original_proxy_agent: ProxyAgent,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }

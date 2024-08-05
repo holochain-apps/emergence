@@ -4,7 +4,7 @@
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
-    import { sessionSelfTags, type Info, type Note, type InfoSession } from "./types";
+    import { sessionSelfTags, type Info, type Note, type InfoSession, APP_VERSION } from "./types";
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
@@ -14,6 +14,7 @@
     import SenseResults from "./SenseResults.svelte";
     import type { HoloHashMap } from "@holochain-open-dev/utils";
     import { toPromise } from "@holochain-open-dev/stores";
+    import DisableForOs from "./DisableForOs.svelte";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let exportJSON = ""
@@ -267,7 +268,7 @@
   </div>
 <div class="pane-content">
     <div class="admin-header">
-        <h2>Emergence v0.3.3: Administration and Configuration</h2>
+        <h2>Emergence v{APP_VERSION}: Administration and Configuration</h2>
         <p>This page is available because you enabled being a conference steward.</p>
         <p>Use the buttons below to configure and administer the various aspects of your conference.</p>
     </div>
@@ -343,23 +344,25 @@
             </sl-button></div>
         </div>
 
-        <div class="admin-section">
-            <div class="admin-section-desc">
-                <h3>Import/Export</h3>
-            </div>
-            <div style="display:flex; flex-direction: row;">
+        <DisableForOs os={["android", "ios"]}>
+            <div class="admin-section">
+                <div class="admin-section-desc">
+                    <h3>Import/Export</h3>
+                </div>
+                <div style="display:flex; flex-direction: row;">
 
-                <div id="export-button">
-                <sl-button  style="margin: 8px;"  on:click={async () => await doExport()}>
-                    Export
-                </sl-button></div>
-                <div id="import-button">
-                <sl-button  style="margin: 8px;" on:click={()=>fileinput.click()}>
-                    Import
-                </sl-button></div>
+                    <div id="export-button">
+                    <sl-button  style="margin: 8px;"  on:click={async () => await doExport()}>
+                        Export
+                    </sl-button></div>
+                    <div id="import-button">
+                    <sl-button  style="margin: 8px;" on:click={()=>fileinput.click()}>
+                        Import
+                    </sl-button></div>
+                </div>
             </div>
-        </div>
-
+        </DisableForOs>
+        
         <div class="admin-section" style="flex-direction:column">
             <div style="flex-direction:row;display:flex; justify-content:space-between">
                 <div class="admin-section-desc">

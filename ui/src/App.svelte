@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, AppAgentWebsocket, type AppAgentClient, setSigningCredentials, type AgentPubKey } from '@holochain/client';
+  import { AdminWebsocket, AppWebsocket, type AppClient, setSigningCredentials, type AgentPubKey, type AppWebsocketConnectionOptions } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
@@ -39,14 +39,14 @@
   import { getCookie, deleteCookie } from 'svelte-cookie';
   import { Base64 } from 'js-base64'
   import blake2b from "blake2b";
-import { ed25519 } from "@noble/curves/ed25519";
-import {Buffer} from "buffer"
-  import { WeClient, initializeHotReload, isWeContext } from '@lightningrodlabs/we-applet';
+  import { ed25519 } from "@noble/curves/ed25519";
+  import {Buffer} from "buffer"
+  import { WeaveClient, initializeHotReload, isWeContext } from '@lightningrodlabs/we-applet';
   import { appletServices } from './we';
   import { getMyDna } from './emergence/emergence/utils';
 
-  let client: AppAgentClient | undefined;
-  let weClient: WeClient
+  let client: AppClient | undefined;
+  let weClient: WeaveClient
 
   let store: EmergenceStore | undefined;
   let fileStorageClient: FileStorageClient | undefined;
@@ -129,7 +129,6 @@ import {Buffer} from "buffer"
 //   return creds;
 // };
 
-
   const isConfigured = (): boolean => {
     return $sitemaps && $sitemaps.length > 0 && $allWindows && $allWindows.length > 0
   }
@@ -178,7 +177,7 @@ import {Buffer} from "buffer"
     //     url = new URL(`${window.location.protocol == "https:" ? "wss:" : "ws:"}//${window.location.host}/${creds.appPath}`)
     //   }
     //   console.log("URL", url)
-    //   client = await AppAgentWebsocket.connect(creds.installed_app_id, {url});
+    //   client = await AppWebsocket.connect(creds.installed_app_id, {url});
     //   const appInfo = await client.appInfo()
     //   console.log("appInfo", appInfo)
     //   const { cell_id } = appInfo.cell_info["emergence"][0]["provisioned"]
@@ -194,19 +193,30 @@ import {Buffer} from "buffer"
       }
     }
 
+    let tokenResp;
     if (!isWeContext()) {
       let appPort: string = import.meta.env.VITE_APP_PORT
-      url = appPort ? new URL(`ws://localhost:${appPort}`) : ""
-      client = await AppAgentWebsocket.connect(installed_app_id, {url});
       console.log("Dev mode admin port:", adminPort)
+      url = appPort ? `ws://localhost:${appPort}` : `ws://localhost`
+      console.log("URL", url)
       if (adminPort) {
-        const adminWebsocket = await AdminWebsocket.connect({url: new URL(`ws://localhost:${adminPort}`)})
+        const url = `ws://localhost:${adminPort}`;
+        console.log("connecting to admin port at:", url);
+        const adminWebsocket = await AdminWebsocket.connect({url: new URL(url)})
+        tokenResp = await adminWebsocket.issueAppAuthenticationToken({
+          installed_app_id: installed_app_id,
+        });
+
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
+      const params: AppWebsocketConnectionOptions = { url: new URL(url) };
+      if (tokenResp) params.token = tokenResp.token;
+
+      client = await AppWebsocket.connect(params);
       profilesClient = new ProfilesClient(client, installed_app_id);
     } else {
-      weClient = await WeClient.connect(appletServices);
+      weClient = await WeaveClient.connect(appletServices);
       switch (weClient.renderInfo.type) {
         case "applet-view":
           switch (weClient.renderInfo.view.type) {
@@ -220,25 +230,25 @@ import {Buffer} from "buffer"
               }
               break;
             case "asset":
-              switch (weClient.renderInfo.view.roleName) {
+              switch (weClient.renderInfo.view.recordInfo.roleName) {
                 case ROLE_NAME:
-                  switch (weClient.renderInfo.view.integrityZomeName) {
+                  switch (weClient.renderInfo.view.recordInfo.integrityZomeName) {
                     case "emergence_integrity":
-                      switch (weClient.renderInfo.view.entryType) {
+                      switch (weClient.renderInfo.view.recordInfo.entryType) {
                         case "session":
                           renderType = RenderType.Session
                           wal = weClient.renderInfo.view.wal
                           break;
                         default:
-                          throw new Error("Unknown entry type:"+weClient.renderInfo.view.entryType);
+                          throw new Error("Unknown entry type:"+weClient.renderInfo.view.recordInfo.entryType);
                       }
                       break;
                     default:
-                      throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.integrityZomeName);
+                      throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.recordInfo.integrityZomeName);
                   }
                   break;
                 default:
-                  throw new Error("Unknown role name:"+weClient.renderInfo.view.roleName);
+                  throw new Error("Unknown role name:"+weClient.renderInfo.view.recordInfo.roleName);
               }
               break;
             // case "creatable":
@@ -301,10 +311,11 @@ import {Buffer} from "buffer"
     // for now everyone is a steward
 
     if (!isConfigured()) {
-      store.setUIprops({amSteward:true})
-      await store.setPane("admin")
-     }
-
+      if (!isWeContext() || (await weClient.myGroupPermissionType()).type === "Steward") {
+        store.setUIprops({amSteward:true})
+        await store.setPane("admin")
+      }
+    }
     initialSync = setInterval(async ()=>{
       if ($uiProps.amSteward || !isConfigured()) {clearInterval(initialSync)}
       else {

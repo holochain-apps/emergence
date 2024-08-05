@@ -17,8 +17,6 @@ pub fn validate_create_note(
 pub fn validate_update_note(
     _action: Update,
     _note: Note,
-    _original_action: EntryCreationAction,
-    _original_note: Note,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }

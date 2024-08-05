@@ -18,6 +18,9 @@ import {
 import { unfixAnyAgent } from '../../emergence-client';
 import type { WALUrl } from './utils';
 
+// @ts-ignore because this is magic maid available in the vite.config.ts and I don't
+// know how to get around the error messages
+export const APP_VERSION = __APP_VERSION__
 
 export const NULL_HASHB64 = "uhCkk______________________"
 export const NULL_HASH = decodeHashFromBase64(NULL_HASHB64)

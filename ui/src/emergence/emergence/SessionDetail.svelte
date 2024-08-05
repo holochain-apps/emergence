@@ -23,7 +23,7 @@ import { slide } from 'svelte/transition';
 import SpaceLink from './SpaceLink.svelte';
 import { Marked } from "@ts-stack/markdown";
   import { errorText } from './utils';
-  import { isWeContext, type WAL, WeClient} from '@lightningrodlabs/we-applet';
+  import { isWeContext, type WAL, WeaveClient} from '@lightningrodlabs/we-applet';
   import AttachmentsList from './AttachmentsList.svelte';
   import SvgIcon from './SvgIcon.svelte';
 
@@ -33,7 +33,7 @@ export let sessionHash: ActionHash;
 export let opened = false
 
 let store: EmergenceStore = (getContext(storeContext) as any).getStore();
-let frameClient: WeClient = (getContext(frameContext) as any).getFrame();
+let frameClient: WeaveClient = (getContext(frameContext) as any).getFrame();
 
 let loading = false;
 let error: any = undefined;
