@@ -2,7 +2,7 @@
 import { onMount, getContext, createEventDispatcher } from 'svelte';
 import type { Record } from '@holochain/client';
 import { storeContext } from '../../contexts';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import Fa from 'svelte-fa';
 import { faCircleArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import SpaceSummary from './SpaceSummary.svelte';

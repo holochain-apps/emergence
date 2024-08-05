@@ -12,7 +12,7 @@ import type SlSelect from '@shoelace-style/shoelace/dist/components/select/selec
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import {  Amenities, setAmenity, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent, type SessionType, timeWindowDurationToStr, type InfoSession, sessionLinks } from './types';
 import SlotSelect from './SlotSelect.svelte';
 import { encodeHashToBase64,  decodeHashFromBase64 } from '@holochain/client';

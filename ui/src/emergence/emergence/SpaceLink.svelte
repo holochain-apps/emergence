@@ -1,6 +1,6 @@
 <script lang="ts">
    import type { ActionHash } from '@holochain/client';
-  import type { EmergenceStore } from '../../emergence-store';
+  import type { EmergenceStore } from '../../stores/emergence-store';
   import { getContext, onMount } from 'svelte';
   import { storeContext } from '../../contexts';
   import { DetailsType } from './types';

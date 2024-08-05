@@ -2,7 +2,7 @@
     import '@shoelace-style/shoelace/dist/components/select/select.js';
     import '@shoelace-style/shoelace/dist/components/option/option.js';
     import { encodeHashToBase64, type ActionHash } from '@holochain/client';
-    import type { EmergenceStore } from '../../emergence-store';
+    import type { EmergenceStore } from '../../stores/emergence-store';
     import { getContext, onMount } from 'svelte';
     import { storeContext } from '../../contexts';
     import { dedupHashes, type TagUse } from './types';

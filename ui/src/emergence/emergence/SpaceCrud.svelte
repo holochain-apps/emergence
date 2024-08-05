@@ -20,7 +20,7 @@ import type {
 
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
 import Avatar from './Avatar.svelte';
 import { faSave, faTrash } from '@fortawesome/free-solid-svg-icons';

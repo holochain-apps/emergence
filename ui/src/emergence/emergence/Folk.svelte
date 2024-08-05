@@ -13,7 +13,7 @@
 
     import type { AgentPubKey } from '@holochain/client';
     import { storeContext } from '../../contexts';
-    import type { EmergenceStore } from '../../emergence-store';
+    import type { EmergenceStore } from '../../stores/emergence-store';
     import NoteDetail from './NoteDetail.svelte';
     import SessionSummary from './SessionSummary.svelte';
     import Feed from './Feed.svelte';

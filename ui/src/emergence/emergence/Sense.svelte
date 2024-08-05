@@ -3,7 +3,7 @@
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import { type Record, encodeHashToBase64, type ActionHash } from '@holochain/client';
   import { storeContext } from '../../contexts';
-  import type { EmergenceStore } from '../../emergence-store';
+  import type { EmergenceStore } from '../../stores/emergence-store';
   import { sessionTags, type Info, type Session, SessionInterestBit, type InfoSession } from './types';
   import Fa from 'svelte-fa';
   import { faArrowRight, faBookmark, faClose, faCheck } from '@fortawesome/free-solid-svg-icons';
@@ -33,7 +33,7 @@
     await store.updatePeopleCount()
     const filteredSessions = $original.filter(s=>{
       const relData = store.getSessionReleationData(s)
-      const myRecordedInterest = relData.interest.get(store.myPubKey)
+      const myRecordedInterest = relData.interest.get(store.client.client.myPubKey)
       return s.record.entry.session_type==0 && !s.record.entry.trashed && 
         myRecordedInterest==undefined &&
         !s.record.entry.leaders.find(l=>encodeHashToBase64(l.hash) == store.myPubKeyBase64)

@@ -14,7 +14,7 @@
     faCircleArrowLeft,
   } from "@fortawesome/free-solid-svg-icons";
   import ProxyAgentCrud from "./ProxyAgentCrud.svelte";
-  import type { EmergenceStore } from "../../emergence-store";
+  import type { EmergenceStore } from "../../stores/emergence-store";
   import Confirm from "./Confirm.svelte";
   import { encodeHashToBase64, type ActionHash, type AgentPubKey } from "@holochain/client";
   import { slide } from "svelte/transition";

@@ -8,7 +8,7 @@
   import SvgIcon from "./SvgIcon.svelte";
   import { frameContext, storeContext } from '../../contexts';
   import type { WeaveClient } from '@lightningrodlabs/we-applet';
-  import type { EmergenceStore } from "../../emergence-store";
+  import type { EmergenceStore } from "../../stores/emergence-store";
   import { sessionLinks, type InfoSession } from "./types";
 
   const { getFrame } :any = getContext(frameContext);

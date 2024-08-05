@@ -5,7 +5,7 @@ import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import MultiSelect from 'svelte-multiselect'
 import { DateInput } from 'date-picker-svelte'
 import { dayToStr, errorText } from './utils';

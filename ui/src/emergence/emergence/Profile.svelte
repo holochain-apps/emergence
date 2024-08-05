@@ -3,7 +3,7 @@
   import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import { storeContext } from '../../contexts';
-  import type { EmergenceStore } from '../../emergence-store';
+  import type { EmergenceStore } from '../../stores/emergence-store';
   import { getContext } from "svelte";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();

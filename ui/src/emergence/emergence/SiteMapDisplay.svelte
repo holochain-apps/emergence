@@ -1,6 +1,6 @@
 <script lang="ts">
     import { storeContext } from '../../contexts';
-    import type { EmergenceStore  } from '../../emergence-store';
+    import type { EmergenceStore  } from '../../stores/emergence-store';
     import { onMount, getContext, createEventDispatcher } from 'svelte';
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';

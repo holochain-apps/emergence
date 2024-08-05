@@ -19,7 +19,7 @@
   import Fa from "svelte-fa";
   import { defaultSessionsFilter, type SessionsFilter } from "./types";
   import { fly } from "svelte/transition";
-  import type { EmergenceStore } from "../../emergence-store";
+  import type { EmergenceStore } from "../../stores/emergence-store";
   import { storeContext } from "../../contexts";
   import { decodeHashFromBase64, encodeHashToBase64 } from "@holochain/client";
   import { calcDays, dayToStr } from "./utils";

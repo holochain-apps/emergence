@@ -2,7 +2,7 @@
   import { encodeHashToBase64, type AgentPubKey } from "@holochain/client";
   import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
   import { storeContext } from '../../contexts';
-  import type { EmergenceStore } from '../../emergence-store';
+  import type { EmergenceStore } from '../../stores/emergence-store';
   import { getContext } from "svelte";
   import { DetailsType } from "./types";
     import type { AsyncStatus } from "@holochain-open-dev/stores";

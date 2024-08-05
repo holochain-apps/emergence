@@ -1,7 +1,7 @@
 <script lang="ts">
 import { createEventDispatcher, onMount, getContext } from 'svelte';
 import { storeContext } from '../../contexts';
-import type { EmergenceStore  } from '../../emergence-store';
+import type { EmergenceStore  } from '../../stores/emergence-store';
 import { type Slot, type Session, type Info, amenitiesList, sessionTags, DetailsType, SessionInterestBit, type InfoSession } from './types';
 import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import '@material/mwc-snackbar';

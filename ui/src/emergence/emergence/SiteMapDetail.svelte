@@ -10,7 +10,7 @@ import '@material/mwc-snackbar';
 import Fa from 'svelte-fa'
 import { faTrash, faEdit } from '@fortawesome/free-solid-svg-icons';
 import SiteMapCrud from './SiteMapCrud.svelte'; 
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import Confirm from './Confirm.svelte';
 import { encodeHashToBase64,  } from '@holochain/client';
   import { errorText } from './utils';

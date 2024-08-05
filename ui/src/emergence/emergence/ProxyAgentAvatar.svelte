@@ -3,7 +3,7 @@
   import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
   import "@holochain-open-dev/elements/dist/elements/holo-identicon.js";
   import { storeContext } from '../../contexts';
-  import type { EmergenceStore } from '../../emergence-store';
+  import type { EmergenceStore } from '../../stores/emergence-store';
   import { getContext } from "svelte";
 
   let store: EmergenceStore = (getContext(storeContext) as any).getStore();

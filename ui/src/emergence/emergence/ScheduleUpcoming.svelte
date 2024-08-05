@@ -1,7 +1,7 @@
 <script lang="ts">
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
-    import type { EmergenceStore } from '../../emergence-store';
+    import type { EmergenceStore } from '../../stores/emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
     import Fa from "svelte-fa";
     import { faCalendarTimes } from "@fortawesome/free-solid-svg-icons";

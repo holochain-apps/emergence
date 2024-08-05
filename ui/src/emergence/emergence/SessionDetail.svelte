@@ -8,7 +8,7 @@ import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import Fa from 'svelte-fa';
 import { frameContext, storeContext } from '../../contexts';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import { NULL_HASHB64, amenitiesList, timeWindowDurationToStr, timeWindowStartToStr, type Info, type Session, type Slot, type TimeWindow, sessionNotes, sessionTags, SessionInterestBit, type InfoSession, sessionLinks } from './types';
 
 import { encodeHashToBase64, type ActionHash } from '@holochain/client';

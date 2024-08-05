@@ -2,7 +2,7 @@
     import { onMount, getContext } from 'svelte';
     import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
     import { storeContext } from '../../contexts';
-    import type { EmergenceStore } from '../../emergence-store';
+    import type { EmergenceStore } from '../../stores/emergence-store';
     import type { EntryHash } from '@holochain/client';
     import type { DownloadedFile } from './types';
 

@@ -3,7 +3,7 @@
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64} from '@holochain/client';
   import { storeContext } from '../../contexts';
-  import type { EmergenceStore } from '../../emergence-store';
+  import type { EmergenceStore } from '../../stores/emergence-store';
   import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities, DetailsType, SpaceSortOrder, type InfoSession } from './types';
   import { calcDays, dayToStr, sortSlot, sortWindows, windowsInDay} from './utils'
   import CreateTimeWindow from './CreateTimeWindow.svelte';

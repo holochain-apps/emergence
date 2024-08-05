@@ -7,7 +7,7 @@ import { storeContext } from '../../contexts';
 import {DetailsType, type Info, type ProxyAgent} from './types';
 import type { Snackbar } from '@material/mwc-snackbar';
 import '@material/mwc-snackbar';
-import type { EmergenceStore } from '../../emergence-store';
+import type { EmergenceStore } from '../../stores/emergence-store';
 import ProxyAgentAvatar from "./ProxyAgentAvatar.svelte";
 
 const dispatch = createEventDispatcher();
