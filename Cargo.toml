@@ -5,12 +5,13 @@ opt-level = "z"
 opt-level = "z"
 
 [workspace]
-members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*", "src-tauri"]
+members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
+exclude = ["src-tauri"]
 resolver = "2"
 
 [workspace.dependencies]
-hdi = "0.4.1"
-hdk = "0.3.1"
+hdi = "=0.4.1"
+hdk = "=0.3.1"
 serde = "1"
 
 [workspace.dependencies.emergence]
