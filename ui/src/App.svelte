@@ -205,7 +205,7 @@
         const cellIds = await adminWebsocket.listCellIds()
         await adminWebsocket.authorizeSigningCredentials(cellIds[0])
       }
-      const params: AppWebsocketConnectionOptions = { url: new URL(url) };
+      const params: AppWebsocketConnectionOptions = { url: new URL(url), defaultTimeout: 240000 };
       if (tokenResp) params.token = tokenResp.token;
 
       client = await AppWebsocket.connect(params);
