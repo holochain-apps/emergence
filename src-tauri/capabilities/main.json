@@ -4,13 +4,8 @@
   "description": "Capability for the main window",
   "windows": ["main"],
   "permissions": [
-    "path:default",
-    "event:default",
-    "window:default",
-    "app:default",
-    "resources:default",
-    "menu:default",
-    "tray:default",
-    "window:allow-set-title"
+    "core:app:default",
+    "core:window:allow-set-title",
+    "os:allow-os-type"
   ]
 }
