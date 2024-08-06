@@ -26,7 +26,7 @@
     "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
     "build:happ": "npm run build:zomes && hc app pack workdir --recursive",
     "build:zomes": "CARGO_TARGET_DIR=target cargo build --release --target wasm32-unknown-unknown --workspace --exclude emergence-tauri",
-    "build:android": "npm run package && npm run tauri android build --release",
+    "build:android": "npm run package && npm run tauri android build --apk",
     "local-services": "hc run-local-services --bootstrap-interface $INTERNAL_IP --bootstrap-port $BOOTSTRAP_PORT --signal-interfaces $INTERNAL_IP --signal-port $SIGNAL_PORT",
     "tauri": "tauri"
   },
