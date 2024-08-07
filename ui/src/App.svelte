@@ -347,10 +347,10 @@ let sessionSummary = true
 
 <main>
   {#if error}
-    <span class="notice modal" style="max-width:700px;position:absolute; top:60px; left: 0;right: 0;margin: 0 auto; z-index:1000"
+    <span class="notice modal" style="overflow-y:auto;max-height:1000px;max-width:700px;position:absolute; top:60px; left: 0;right: 0;margin: 0 auto; z-index:1000"
     >
       <h3>I'm sorry to say it, but there has been an error ☹️</h3>
-      <div style="padding:10px; margin:10px; background:lightcoral;border-radius: 10px;">
+      <div style="padding:10px; margin:10px; background:lightcoral;border-radius: 10px;overflow-y:auto;max-height:500px">
         {error}
       </div>
       {#if creds}
