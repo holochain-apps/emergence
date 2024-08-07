@@ -18,6 +18,7 @@ export function fixAnyAgent(a:AnyAgent) {
   return {type:x, hash:a.hash}
 }
 export function unfixAnyAgent(a:any): AnyAgent {
+  console.log("FISHIN ANY AGENT", a)
   const type = Object.keys(a.type)[0]
   //@ts-ignore
   const x:AnyAgent = {type, hash:a.hash}
@@ -114,15 +115,15 @@ export class EmergenceClient {
         trashed: false
       };
 
-      // @ts-ignore
-      sessionEntry.leaders = sessionEntry.leaders.map(l=>fixAnyAgent(l))
+      // // @ts-ignore
+      // sessionEntry.leaders = sessionEntry.leaders.map(l=>fixAnyAgent(l))
     console.log("NEW SES", sessionEntry)
     return new EntryRecord(await this.callZome('create_session', sessionEntry))
   }
 
   async updateSession(update: UpdateSessionInput) : Promise<EntryRecord<Session>> {
-    // @ts-ignore
-    update.updated_leaders =  update.updated_leaders.map(l=>fixAnyAgent(l))
+    // // @ts-ignore
+    // update.updated_leaders =  update.updated_leaders.map(l=>fixAnyAgent(l))
     return new EntryRecord(await this.callZome('update_session', update))
   }
 

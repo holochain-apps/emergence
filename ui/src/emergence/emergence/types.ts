@@ -88,7 +88,8 @@ export interface SessionEntryRecord {
 
 export const makeSRec = (record: EntryRecord<Session>): SessionEntryRecord => {
   let entry = record.entry
-  entry.leaders = entry.leaders.map(l=>unfixAnyAgent(l))
+  // console.log("LEADERS", entry.leaders)
+  // entry.leaders = entry.leaders.map(l=>unfixAnyAgent(l))
 
   let sRec: SessionEntryRecord = {
     entry,

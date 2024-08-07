@@ -19,7 +19,7 @@
 </script>
 {#if agent.type=="Agent"}
     <Avatar size={size} namePosition={namePosition} showAvatar={showAvatar} showNickname={showNickname} agentPubKey={agent.hash}></Avatar>
-{:else}
+{:else if agent.type=="ProxyAgent"}
     <div class="avatar-{namePosition} clickable"
         on:click={(e)=>{
             store.openDetails(DetailsType.ProxyAgent, agent.hash)
@@ -30,13 +30,15 @@
             {#if proxyAgent}
                 <span style="margin-right:5px"><ProxyAgentAvatar size={size} proxyAgentHash={proxyAgent.original_hash}></ProxyAgentAvatar></span>
             {:else}
-                No Agent!
+                <span style="color:red" title="Proxy Agent Missing">(?)</span>
             {/if}
         {/if}
         {#if showNickname}
             <div class="nickname">{proxyAgent ? proxyAgent.record.entry.nickname : "unknown"}</div>
         {/if}
     </div>
+{:else}
+    <span style="color:red" title="Unknown agent type">(?)</span>
 {/if}
 
 <style>

@@ -40,8 +40,8 @@
   $: sessions = $allSessions.filter((s) =>
     s.record.entry.leaders.find(
       (l) =>
-        encodeHashToBase64(l.hash) ==
-        encodeHashToBase64($proxyAgent.original_hash)
+      $proxyAgent.original_hash && (encodeHashToBase64(l.hash) ==
+        encodeHashToBase64($proxyAgent.original_hash))
     )
   );
 
