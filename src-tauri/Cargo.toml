@@ -31,3 +31,10 @@ app_dirs2 = "2.5.5"
 tempdir = "0.3.7"
 anyhow = "1"
 uuid = "1"
+
+[profile.release]
+strip = true
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
