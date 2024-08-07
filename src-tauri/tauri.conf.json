@@ -1,9 +1,8 @@
 {
   "productName": "emergence",
-  "version": "0.0.1",
+  "version": "0.4.3",
   "identifier": "org.holochain.emergence",
   "build": {
-    "beforeBuildCommand": "npm run build -w ui",
     "devUrl": "http://localhost:1420",
     "frontendDist": "../ui/dist"
   },
