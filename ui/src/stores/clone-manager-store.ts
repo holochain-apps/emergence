@@ -7,6 +7,7 @@ import {
   CellType,
   type CellId,
   type ProvisionedCell,
+  type AppInfo,
 } from '@holochain/client';
 import { get, writable, type Writable } from "svelte/store";
 import { ProfilesClient, ProfilesStore } from '@holochain-open-dev/profiles';
@@ -44,17 +45,11 @@ export class CloneManagerStore {
       const appInfo = await this.client.appInfo();
       
       if(!$activeDnaHash) {
-        await this._loadActiveDnaHash();
+        await this._loadActiveDnaHash(appInfo);
         $activeDnaHash = get(this.activeDnaHash);
       }
       
-      const cellInfo = appInfo.cell_info[ROLE_NAME].find((cellInfo: CellInfo) => {
-        if(CellType.Provisioned in cellInfo) {
-          return hashEqual(cellInfo[CellType.Provisioned].cell_id[0], $activeDnaHash);
-        } else if(CellType.Cloned in cellInfo) {
-          return hashEqual(cellInfo[CellType.Cloned].cell_id[0], $activeDnaHash);
-        }
-      });
+      const cellInfo = this._findCellInfoWithDnaHash(appInfo, $activeDnaHash);
       return this._makeCellInfoNormalized(appInfo.cell_info[ROLE_NAME][0][CellType.Provisioned], cellInfo)
     });
     this.activeStore = asyncDerived([this.activeDnaHash, this.activeCellInfoNormalized], async ([$activeDnaHash, $activeCellInfoNormalized]) => {
@@ -82,7 +77,6 @@ export class CloneManagerStore {
 
       return new EmergenceStore(this, emegenceClient, profilesStore, fileStorageClient, $activeDnaHash);
     });
-    this._loadActiveDnaHash();
   }
   
   async list(): Promise<CellInfoNormalized[]> {
@@ -127,21 +121,46 @@ export class CloneManagerStore {
     this.activeDnaHash.set(cellId[0]);
   }
   
-  private async _loadActiveDnaHash() {
-    const dnaHash = localStorage.getItem("activeDnaHash");
-    if(dnaHash !== null && dnaHash !== undefined) {
-      this.activeDnaHash.set(decodeHashFromBase64(dnaHash));
-    } else {
-      const appInfo = await this.client.appInfo();
-      const defaultDnaHash = appInfo.cell_info[ROLE_NAME][0][CellType.Provisioned].cell_id[0];
-      this.activeDnaHash.set(defaultDnaHash);
+  private async _loadActiveDnaHash(appInfo: AppInfo) {
+    // Load active dna hash from local storage
+    const activeDnaHashB64 = localStorage.getItem("activeDnaHash");    
+
+    // Confirm that loaded dna hash is valid and cell exists
+    if(activeDnaHashB64 !== null && activeDnaHashB64 !== undefined) {
+      const activeDnaHash = decodeHashFromBase64(activeDnaHashB64);
+      const matchingCellInfo = this._findCellInfoWithDnaHash(appInfo, activeDnaHash);
+
+      if(matchingCellInfo !== undefined) {
+        this.activeDnaHash.set(activeDnaHash);
+        return;
+      }
     }
+      
+    // Otherwise, set active dna hash to default
+    this._setDefaultActiveDnaHash(appInfo);
+  }
+
+  private _setDefaultActiveDnaHash(appInfo: AppInfo) {
+    const defaultDnaHash = appInfo.cell_info[ROLE_NAME][0][CellType.Provisioned].cell_id[0];
+    this.activeDnaHash.set(defaultDnaHash);
   }
   
   private _saveActiveDnaHash(val: DnaHash) {
     if(val !== undefined && val !== null) {
       localStorage.setItem("activeDnaHash", encodeHashToBase64(val));
     }
+  }
+
+  private _findCellInfoWithDnaHash(appInfo: AppInfo, dnaHash: Uint8Array): CellInfo | undefined {
+    const cellInfo = appInfo.cell_info[ROLE_NAME].find((cellInfo: CellInfo) => {
+      if(CellType.Provisioned in cellInfo) {
+        return hashEqual(cellInfo[CellType.Provisioned].cell_id[0], dnaHash);
+      } else if(CellType.Cloned in cellInfo) {
+        return hashEqual(cellInfo[CellType.Cloned].cell_id[0], dnaHash);
+      }
+    });
+
+    return cellInfo;
   }
 
   private _makeCellInfoNormalized(provisionedCellInfo: ProvisionedCell, cell: CellInfo ) {
