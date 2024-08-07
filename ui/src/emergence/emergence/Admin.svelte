@@ -20,10 +20,15 @@
     let exportJSON = ""
     const dispatch = createEventDispatcher();
     let sensing: SlCheckbox
+
+    const { getStore }: any = getContext('cloneManagerStore');
+    let cloneManagerStore: CloneManagerStore = getStore();
+
     $: sitemaps = store.maps
     $: settings = store.settings
     $: allWindows = store.timeWindows
-
+    $: activeDnaHash = cloneManagerStore.activeDnaHash;
+    $: activeDnaHashB64 = encodeHashToBase64($activeDnaHash);
 
     onMount(() => {
     })
@@ -389,8 +394,15 @@
             </div>
         
         </div>
-
-        
+              
+        <div class="admin-section" style="flex-direction:column">
+            <div style="flex-direction:row;display:flex; justify-content:space-between">
+                <div class="admin-section-desc">
+                    <h3>Active Network DNA Hash</h3>
+                    <p style="font-size: 0.8rem">{activeDnaHashB64}</p>
+                </div>        
+            </div>
+        </div>        
     </div>
   
 
