@@ -363,10 +363,7 @@ let sessionSummary = true
         </sl-button>
         {/if}
         <sl-button style="margin-left: 8px;" on:click={() => error=undefined}>
-          Ignore
-        </sl-button>
-        <sl-button style="margin-left: 8px;" on:click={() => window.location.assign("/")}>
-          <Fa icon={faArrowRotateBack} /> Reload
+          Dismiss
         </sl-button>
     </span>
   {/if}
