@@ -4,7 +4,7 @@ use emergence_integrity::*;
 #[hdk_extern]
 pub fn create_session(session: Session) -> ExternResult<Record> {
     let session_hash = create_entry(&EntryTypes::Session(session.clone()))?;
-    let record = get(session_hash.clone(), GetOptions::default())?
+    let record = get(session_hash.clone(), GetOptions::local())?
         .ok_or(
             wasm_error!(
                 WasmErrorInner::Guest(String::from("Could not find the newly created Session"))
@@ -21,9 +21,13 @@ pub fn create_session(session: Session) -> ExternResult<Record> {
 }
 #[hdk_extern]
 pub fn get_session(original_session_hash: ActionHash) -> ExternResult<Option<Record>> {
-    let input: GetLinksInput = GetLinksInputBuilder::try_new(original_session_hash.clone(), LinkTypes::SessionUpdates)?.build();
-
-    let links = get_links(input)?;
+    let links = get_links(
+        LinkQuery::try_new(
+            original_session_hash.clone(),
+            LinkTypes::SessionUpdates,
+        )?,
+        GetStrategy::Local
+    )?;
     let latest_link = links
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
@@ -31,7 +35,7 @@ pub fn get_session(original_session_hash: ActionHash) -> ExternResult<Option<Rec
         Some(link) => ActionHash::try_from(link.target.clone()).map_err(|err| wasm_error!(err))?,
         None => original_session_hash.clone(),
     };
-    get(latest_session_hash, GetOptions::default())
+    get(latest_session_hash, GetOptions::local())
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateSessionInput {
@@ -77,7 +81,7 @@ pub fn update_session(input: UpdateSessionInput) -> ExternResult<Record> {
         LinkTypes::SessionUpdates,
         (),
     )?;
-    let record = get(updated_session_hash.clone(), GetOptions::default())?
+    let record = get(updated_session_hash.clone(), GetOptions::local())?
         .ok_or(
             wasm_error!(
                 WasmErrorInner::Guest(String::from("Could not find the newly updated Session"))

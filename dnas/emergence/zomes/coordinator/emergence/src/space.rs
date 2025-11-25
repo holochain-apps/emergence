@@ -3,7 +3,7 @@ use emergence_integrity::*;
 #[hdk_extern]
 pub fn create_space(space: Space) -> ExternResult<Record> {
     let space_hash = create_entry(&EntryTypes::Space(space.clone()))?;
-    let record = get(space_hash.clone(), GetOptions::default())?
+    let record = get(space_hash.clone(), GetOptions::local())?
         .ok_or(
             wasm_error!(
                 WasmErrorInner::Guest(String::from("Could not find the newly created Space"))
@@ -15,8 +15,13 @@ pub fn create_space(space: Space) -> ExternResult<Record> {
 }
 #[hdk_extern]
 pub fn get_space(original_space_hash: ActionHash) -> ExternResult<Option<Record>> {
-    let input: GetLinksInput = GetLinksInputBuilder::try_new(original_space_hash.clone(), LinkTypes::SpaceUpdates)?.build();
-    let links = get_links(input)?;
+    let links = get_links(
+        LinkQuery::try_new(
+            original_space_hash.clone(),
+            LinkTypes::SpaceUpdates,
+        )?,
+        GetStrategy::Local
+    )?;
     let latest_link = links
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
@@ -24,7 +29,7 @@ pub fn get_space(original_space_hash: ActionHash) -> ExternResult<Option<Record>
         Some(link) => ActionHash::try_from(link.target.clone()).map_err(|err| wasm_error!(err))?,
         None => original_space_hash.clone(),
     };
-    get(latest_space_hash, GetOptions::default())
+    get(latest_space_hash, GetOptions::local())
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateSpaceInput {
@@ -44,7 +49,7 @@ pub fn update_space(input: UpdateSpaceInput) -> ExternResult<Record> {
         LinkTypes::SpaceUpdates,
         (),
     )?;
-    let record = get(updated_space_hash.clone(), GetOptions::default())?
+    let record = get(updated_space_hash.clone(), GetOptions::local())?
         .ok_or(
             wasm_error!(
                 WasmErrorInner::Guest(String::from("Could not find the newly updated Space"))

@@ -22,11 +22,12 @@ use relation::{get_relations, RelationInfo};
 use session::get_session;
 use space::get_space;
 use messages::*;
+use std::collections::HashSet;
 
 #[hdk_extern]
 pub fn init(_: ()) -> ExternResult<InitCallbackResult> {
 
-    let mut fns = BTreeSet::new();
+    let mut fns = HashSet::new();
     fns.insert((zome_info()?.name, "recv_remote_signal".into()));
     let functions = GrantedFunctions::Listed(fns);
     create_cap_grant(CapGrantEntry {
@@ -73,7 +74,7 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
         Action::DeleteLink(delete_link) => {
             let record = get(
                     delete_link.link_add_address.clone(),
-                    GetOptions::default(),
+                    GetOptions::local(),
                 )?
                 .ok_or(
                     wasm_error!(
@@ -140,7 +141,7 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
     }
 }
 fn get_entry_for_action(action_hash: &ActionHash) -> ExternResult<Option<EntryTypes>> {
-    let record = match get_details(action_hash.clone(), GetOptions::default())? {
+    let record = match get_details(action_hash.clone(), GetOptions::local())? {
         Some(Details::Record(record_details)) => record_details.record,
         _ => {
             return Ok(None);

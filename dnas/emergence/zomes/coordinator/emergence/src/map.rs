@@ -4,7 +4,7 @@ use emergence_integrity::*;
 pub fn create_map(map: Map) -> ExternResult<Record> {
     let map_hash = create_entry(&EntryTypes::Map(map.clone()))?;
 
-    let record = get(map_hash.clone(), GetOptions::default())?
+    let record = get(map_hash.clone(), GetOptions::local())?
         .ok_or(
             wasm_error!(
                 WasmErrorInner::Guest(String::from("Could not find the newly created Map"))
@@ -16,8 +16,13 @@ pub fn create_map(map: Map) -> ExternResult<Record> {
 }
 #[hdk_extern]
 pub fn get_map(original_map_hash: ActionHash) -> ExternResult<Option<Record>> {
-    let input: GetLinksInput = GetLinksInputBuilder::try_new(original_map_hash.clone(), LinkTypes::MapUpdates)?.build();
-    let links = get_links(input)?;
+    let links = get_links(
+        LinkQuery::try_new(
+            original_map_hash.clone(),
+            LinkTypes::MapUpdates,
+        )?,
+        GetStrategy::Local
+    )?;
     let latest_link = links
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
@@ -25,7 +30,7 @@ pub fn get_map(original_map_hash: ActionHash) -> ExternResult<Option<Record>> {
         Some(link) => ActionHash::try_from(link.target.clone()).map_err(|err| wasm_error!(err))?,
         None => original_map_hash.clone(),
     };
-    get(latest_map_hash, GetOptions::default())
+    get(latest_map_hash, GetOptions::local())
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateMapInput {
@@ -45,7 +50,7 @@ pub fn update_map(input: UpdateMapInput) -> ExternResult<Record> {
         LinkTypes::MapUpdates,
         (),
     )?;
-    let record = get(updated_map_hash.clone(), GetOptions::default())?
+    let record = get(updated_map_hash.clone(), GetOptions::local())?
         .ok_or(
             wasm_error!(
                 WasmErrorInner::Guest(String::from("Could not find the newly updated Map"))

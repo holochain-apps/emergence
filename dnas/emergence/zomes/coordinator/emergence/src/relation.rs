@@ -11,7 +11,7 @@ pub fn create_relations(input: Vec<Relation>) -> ExternResult<Vec<ActionHash>> {
         let tag :LinkTag = LinkTag::new(serialized.bytes().clone());
         let is_feed = relation.content.path.starts_with("feed");
         let base = if is_feed {
-            AnyLinkableHash::from(agent_info()?.agent_latest_pubkey)
+            AnyLinkableHash::from(agent_info()?.agent_initial_pubkey)
         } else {
             AnyLinkableHash::from(relation.src.clone())
         };
@@ -41,7 +41,7 @@ pub fn create_relations(input: Vec<Relation>) -> ExternResult<Vec<ActionHash>> {
 #[hdk_extern]
 pub fn delete_relations(input: Vec<ActionHash>) -> ExternResult<()> {
     for relation_hash in input {
-        delete_link(relation_hash)?;
+        delete_link(relation_hash, GetOptions::local())?;
     }
     Ok(())
 }
@@ -57,8 +57,13 @@ pub struct GetFeedInput {
 #[hdk_extern]
 pub fn get_feed(input: GetFeedInput) -> ExternResult<Vec<RelationInfo>> {
     let path = Path::from("feed");
-    let get_links_input: GetLinksInput = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::Relations)?.build();
-    let links = get_links(get_links_input)?;
+    let links = get_links(
+        LinkQuery::try_new(
+            path.path_entry_hash()?,
+            LinkTypes::Relations,
+        )?,
+        GetStrategy::Local
+    )?;
     let mut relations: Vec<RelationInfo> = Vec::new();
     for link in links {
         let relation = Relation 
@@ -124,8 +129,13 @@ pub struct TagUse {
 #[hdk_extern]
 pub fn get_tags(_input: ()) -> ExternResult<Vec<TagUse>> {
     let path = Path::from("tags");
-    let input: GetLinksInput = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::Relations)?.build();
-    let links = get_links(input)?;
+    let links = get_links(
+        LinkQuery::try_new(
+            path.path_entry_hash()?,
+            LinkTypes::Relations,
+        )?,
+        GetStrategy::Local
+    )?;
     let mut tags: HashMap<String,Vec<SessionAgent>> = HashMap::new();
     for link in links {
         let content = convert_relation_tag(link.tag)?;
@@ -155,8 +165,13 @@ pub struct RelationInfo {
 #[hdk_extern]
 pub fn get_relations(input: AnyLinkableHash) -> ExternResult<Vec<RelationInfo>> {
     let hash = AnyLinkableHash::from(input);
-    let input: GetLinksInput = GetLinksInputBuilder::try_new(hash.clone(), LinkTypes::Relations)?.build();
-    let links = get_links(input)?;
+    let links = get_links(
+        LinkQuery::try_new(
+            hash.clone(),
+            LinkTypes::Relations,
+        )?,
+        GetStrategy::Local
+    )?;
 
     let mut relations: Vec<RelationInfo> = Vec::new();
     for link in links {
@@ -179,8 +194,13 @@ pub fn get_relations(input: AnyLinkableHash) -> ExternResult<Vec<RelationInfo>> 
 #[hdk_extern]
 pub fn get_relations_agent(input: AgentPubKey) -> ExternResult<Vec<Relation>> {
     let hash = AnyLinkableHash::from(input);
-    let input: GetLinksInput = GetLinksInputBuilder::try_new(hash.clone(), LinkTypes::Relations)?.build();
-    let links = get_links(input)?;
+    let links = get_links(
+        LinkQuery::try_new(
+            hash.clone(),
+            LinkTypes::Relations,
+        )?,
+        GetStrategy::Local
+    )?;
 
     let mut relations: Vec<Relation> = Vec::new();
     for link in links {

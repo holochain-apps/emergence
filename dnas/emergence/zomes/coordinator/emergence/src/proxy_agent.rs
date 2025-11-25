@@ -4,7 +4,7 @@ use emergence_integrity::*;
 pub fn create_proxy_agent(proxy_agent: ProxyAgent) -> ExternResult<Record> {
     let proxy_agent_hash = create_entry(&EntryTypes::ProxyAgent(proxy_agent.clone()))?;
 
-    let record = get(proxy_agent_hash.clone(), GetOptions::default())?
+    let record = get(proxy_agent_hash.clone(), GetOptions::local())?
         .ok_or(
             wasm_error!(
                 WasmErrorInner::Guest(String::from("Could not find the newly created ProxyAgent"))
@@ -16,8 +16,13 @@ pub fn create_proxy_agent(proxy_agent: ProxyAgent) -> ExternResult<Record> {
 }
 #[hdk_extern]
 pub fn get_proxy_agent(original_proxy_agent_hash: ActionHash) -> ExternResult<Option<Record>> {
-    let input: GetLinksInput = GetLinksInputBuilder::try_new(original_proxy_agent_hash.clone(), LinkTypes::ProxyAgentUpdates)?.build();
-    let links = get_links(input)?;
+    let links = get_links(
+        LinkQuery::try_new(
+            original_proxy_agent_hash.clone(),
+            LinkTypes::ProxyAgentUpdates,
+        )?,
+        GetStrategy::Local
+    )?;
     let latest_link = links
         .into_iter()
         .max_by(|link_a, link_b| link_a.timestamp.cmp(&link_b.timestamp));
@@ -25,7 +30,7 @@ pub fn get_proxy_agent(original_proxy_agent_hash: ActionHash) -> ExternResult<Op
         Some(link) => ActionHash::try_from(link.target.clone()).map_err(|err| wasm_error!(err))?,
         None => original_proxy_agent_hash.clone(),
     };
-    get(latest_proxy_agent_hash, GetOptions::default())
+    get(latest_proxy_agent_hash, GetOptions::local())
 }
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UpdateProxyAgentInput {
@@ -45,7 +50,7 @@ pub fn update_proxy_agent(input: UpdateProxyAgentInput) -> ExternResult<Record> 
         LinkTypes::ProxyAgentUpdates,
         (),
     )?;
-    let record = get(updated_proxy_agent_hash.clone(), GetOptions::default())?
+    let record = get(updated_proxy_agent_hash.clone(), GetOptions::local())?
         .ok_or(
             wasm_error!(
                 WasmErrorInner::Guest(String::from("Could not find the newly updated ProxyAgent"))

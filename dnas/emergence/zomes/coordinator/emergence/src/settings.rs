@@ -27,8 +27,13 @@ pub fn set_settings(input: Settings) -> ExternResult<ActionHash> {
 #[hdk_extern]
 pub fn get_settings(_: ()) -> ExternResult<Settings> {
     let path = Path::from("all_settings");
-    let input: GetLinksInput = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::Settings)?.build();
-    let mut links = get_links(input)?;
+    let mut links = get_links(
+        LinkQuery::try_new(
+            path.path_entry_hash()?,
+            LinkTypes::Settings,
+        )?,
+        GetStrategy::Local
+    )?;
     if links.len() == 0 {
         return Ok(Settings {
             game_active: false,

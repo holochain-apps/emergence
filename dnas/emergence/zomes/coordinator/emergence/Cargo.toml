@@ -9,7 +9,6 @@ name = "emergence"
 
 [dependencies]
 hdk = { workspace = true }
-
 serde = { workspace = true }
-
+holochain_serialized_bytes = { workspace = true }
 emergence_integrity = { workspace = true } 

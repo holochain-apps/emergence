@@ -13,8 +13,13 @@ pub struct SpaceInfo{
 #[hdk_extern]
 pub fn get_all_spaces(_: ()) -> ExternResult<Vec<SpaceInfo>> {
     let path = Path::from("all_spaces");
-    let input: GetLinksInput = GetLinksInputBuilder::try_new(path.path_entry_hash()?, LinkTypes::AllSpaces)?.build();
-    let links = get_links(input)?;
+    let links = get_links(
+        LinkQuery::try_new(
+            path.path_entry_hash()?,
+            LinkTypes::AllSpaces,
+        )?,
+        GetStrategy::Local
+    )?;
 
     let mut records: Vec<Record> = Vec::new();
     let mut hashes: HashMap<ActionHash,ActionHash>= HashMap::new();

@@ -1,5 +1,5 @@
 ---
-manifest_version: "1"
+manifest_version: "0"
 name: emergence
 description: ~
 roles:
@@ -8,11 +8,10 @@ roles:
       strategy: create
       deferred: false
     dna:
-      bundled: "../dnas/emergence/workdir/emergence.dna"
+      path: "../dnas/emergence/workdir/emergence.dna"
       modifiers:
         network_seed: ~
         properties: ~
-        origin_time: ~
         quantum_time: ~
       version: ~
       clone_limit: 5000

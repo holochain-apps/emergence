@@ -2,41 +2,35 @@
   description = "Template for Holochain app development";
 
   inputs = {
-    p2p-shipyard.url = "github:darksoil-studio/p2p-shipyard";
-    holochain-nix-versions.url  = "github:holochain/holochain/?dir=versions/0_3";
-    holochain-flake = {
-      url = "github:holochain/holochain";
-      inputs.versions.follows = "holochain-nix-versions";
-    };
+    holonix.url = "github:holochain/holonix/main-0.6";
+    p2p-shipyard.url = "github:darksoil-studio/tauri-plugin-holochain/main-0.6";
 
-    nixpkgs.follows = "holochain-flake/nixpkgs";
-    flake-parts.follows = "holochain-flake/flake-parts";
+    nixpkgs.follows = "holonix/nixpkgs";
+    scaffolding.url = "github:darksoil-studio/scaffolding/main-0.5";
+    flake-parts.follows = "holonix/flake-parts";
+
   };
 
-  outputs = inputs @ { flake-parts, holochain-flake, ... }:
-    flake-parts.lib.mkFlake
-      {
-        inherit inputs;
-      }
-      {
-        systems = builtins.attrNames holochain-flake.devShells;
-        perSystem =
-          { config
-          , pkgs
-          , system
-          , inputs'
-          , ...
-          }: {
-            devShells.default = pkgs.mkShell {
-              inputsFrom = [
-              inputs'.p2p-shipyard.devShells.holochainTauriDev holochain-flake.devShells.${system}.holonix ];
-              packages = [ pkgs.nodejs-18_x ];
-            };
-            devShells.androidDev = pkgs.mkShell {
-              inputsFrom = [
-              inputs'.p2p-shipyard.devShells.holochainTauriAndroidDev holochain-flake.devShells.${system}.holonix ];
-              packages = [ pkgs.nodejs-18_x ];
-            };
+  outputs = inputs @ { ... }:
+    inputs.holonix.inputs.flake-parts.lib.mkFlake { inherit inputs; }
+    {
+      systems = builtins.attrNames inputs.holonix.devShells;
+
+      perSystem =
+        { inputs', pkgs, system, ...}: {
+          devShells.default = pkgs.mkShell {
+            inputsFrom = [
+              inputs'.p2p-shipyard.devShells.holochainTauriDev
+              inputs'.holonix.devShells.default
+            ];
+
           };
-      };
+          devShells.androidDev = pkgs.mkShell {
+            inputsFrom = [
+              inputs'.p2p-shipyard.devShells.holochainTauriAndroidDev
+              inputs'.holonix.devShells.default
+            ];
+          };
+        };
+    };
 }
