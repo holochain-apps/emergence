@@ -1,6 +1,6 @@
 {
   "productName": "emergence",
-  "version": "0.4.3",
+  "version": "0.5.0",
   "identifier": "org.holochain.emergence",
   "build": {
     "devUrl": "http://localhost:1420",

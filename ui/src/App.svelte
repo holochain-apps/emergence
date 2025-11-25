@@ -50,6 +50,8 @@
   let loading = true;
   let error: any = undefined;
   let creds
+  let connected = false;
+  let initializationError: any = undefined;
 
   enum RenderType {
     App,
@@ -130,30 +132,31 @@
   }
 
   onMount(async () => {
-    // We pass '' as url because it will dynamically be replaced in launcher environments
-    const adminPort : string = import.meta.env.VITE_ADMIN_PORT
-    // const credsJson = getCookie("creds")
-    // if (credsJson) {
-    //   creds = jsonToCreds(credsJson)
-    //   installed_app_id = creds.installed_app_id
-    // }
+    try {
+      // We pass '' as url because it will dynamically be replaced in launcher environments
+      const adminPort : string = import.meta.env.VITE_ADMIN_PORT
+      // const credsJson = getCookie("creds")
+      // if (credsJson) {
+      //   creds = jsonToCreds(credsJson)
+      //   installed_app_id = creds.installed_app_id
+      // }
 
-    window.onunhandledrejection = (e) => {
-      if (typeof e.reason == "object") {
-        if (e instanceof TypeError) {
-          error = e.message
-        } else {
-          if (e.reason.message) {
-            error = e.reason.message
+      window.onunhandledrejection = (e) => {
+        if (typeof e.reason == "object") {
+          if (e instanceof TypeError) {
+            error = e.message
           } else {
-            error = JSON.stringify(e.reason)
+            if (e.reason.message) {
+              error = e.reason.message
+            } else {
+              error = JSON.stringify(e.reason)
+            }
           }
+        } else {
+          error = e.reason
         }
-      } else {
-        error = e.reason
       }
-    }
-    let url
+      let url
     // if (import.meta.env.VITE_URL) {
     //   const screds = await genCredsForPass("Funky1","monkey")
     //   creds = {
@@ -224,25 +227,31 @@
               }
               break;
             case "asset":
-              switch (weClient.renderInfo.view.recordInfo.roleName) {
-                case ROLE_NAME:
-                  switch (weClient.renderInfo.view.recordInfo.integrityZomeName) {
-                    case "emergence_integrity":
-                      switch (weClient.renderInfo.view.recordInfo.entryType) {
-                        case "session":
-                          renderType = RenderType.Session
-                          wal = weClient.renderInfo.view.wal
-                          break;
-                        default:
-                          throw new Error("Unknown entry type:"+weClient.renderInfo.view.recordInfo.entryType);
-                      }
-                      break;
-                    default:
-                      throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.recordInfo.integrityZomeName);
-                  }
-                  break;
-                default:
-                  throw new Error("Unknown role name:"+weClient.renderInfo.view.recordInfo.roleName);
+              if (!weClient.renderInfo.view.recordInfo) {
+                throw new Error(
+                  "Emergence does not implement asset views pointing to DNAs instead of Records."
+                );
+              } else {
+                switch (weClient.renderInfo.view.recordInfo.roleName) {
+                  case ROLE_NAME:
+                    switch (weClient.renderInfo.view.recordInfo.integrityZomeName) {
+                      case "emergence_integrity":
+                        switch (weClient.renderInfo.view.recordInfo.entryType) {
+                          case "session":
+                            renderType = RenderType.Session
+                            wal = weClient.renderInfo.view.wal
+                            break;
+                          default:
+                            throw new Error("Unknown entry type:"+weClient.renderInfo.view.recordInfo.entryType);
+                        }
+                        break;
+                      default:
+                        throw new Error("Unknown integrity zome:"+weClient.renderInfo.view.recordInfo.integrityZomeName);
+                    }
+                    break;
+                  default:
+                    throw new Error("Unknown role name:"+weClient.renderInfo.view.recordInfo.roleName);
+                }
               }
               break;
             // case "creatable":
@@ -256,7 +265,7 @@
               throw new Error("Unsupported applet-view type");
           }
           break;
-        case "cross-applet-view":
+        case "cross-group-view":
           switch (this.weClient.renderInfo.view.type) {
             case "main":
               // here comes your rendering logic for the cross-applet main view
@@ -265,7 +274,7 @@
               //
               //break;
             default:
-              throw new Error("Unknown cross-applet-view render type.")
+              throw new Error("Unknown cross-group-view render type.")
           }
           break;
         default:
@@ -279,11 +288,15 @@
       profilesClient = weClient.renderInfo.profilesClient;
     }
 
-    cloneManagerStore = new CloneManagerStore(
-      client,
-      weClient
-    );
-    await cloneManagerStore.activeStore.load();
+      cloneManagerStore = new CloneManagerStore(
+        client,
+        weClient
+      );
+      await cloneManagerStore.activeStore.load();
+      connected = true;
+    } catch (e) {
+      initializationError = e;
+    }
   });
   let initialSync
 
@@ -346,28 +359,29 @@ let sessionSummary = true
 </script>
 
 <main>
-  {#if error}
-    <span class="notice modal" style="overflow-y:auto;max-height:1000px;max-width:700px;position:absolute; top:60px; left: 0;right: 0;margin: 0 auto; z-index:1000"
-    >
-      <h3>I'm sorry to say it, but there has been an error ☹️</h3>
-      <div style="padding:10px; margin:10px; background:lightcoral;border-radius: 10px;overflow-y:auto;max-height:500px">
-        {error}
-      </div>
-      {#if creds}
-        <div>You are signed in to the holochain multiplexer with reg key: <strong>{creds.regkey}</strong></div>
-        <sl-button style="margin-left: 8px;" on:click={() => {
-          deleteCookie("creds")
-          window.location.assign("/")
-          }}>
-          <Fa icon={faArrowRightFromBracket} /> Logout
-        </sl-button>
-        {/if}
-        <sl-button style="margin-left: 8px;" on:click={() => error=undefined}>
-          Dismiss
-        </sl-button>
-    </span>
-  {/if}
-  {#if loading}
+  {#if connected}
+    {#if error}
+      <span class="notice modal" style="overflow-y:auto;max-height:1000px;max-width:700px;position:absolute; top:60px; left: 0;right: 0;margin: 0 auto; z-index:1000"
+      >
+        <h3>I'm sorry to say it, but there has been an error ☹️</h3>
+        <div style="padding:10px; margin:10px; background:lightcoral;border-radius: 10px;overflow-y:auto;max-height:500px">
+          {error}
+        </div>
+        {#if creds}
+          <div>You are signed in to the holochain multiplexer with reg key: <strong>{creds.regkey}</strong></div>
+          <sl-button style="margin-left: 8px;" on:click={() => {
+            deleteCookie("creds")
+            window.location.assign("/")
+            }}>
+            <Fa icon={faArrowRightFromBracket} /> Logout
+          </sl-button>
+          {/if}
+          <sl-button style="margin-left: 8px;" on:click={() => error=undefined}>
+            Dismiss
+          </sl-button>
+      </span>
+    {/if}
+    {#if loading}
     <div class="loading-container">
       <img src="/images/loading.svg" />
       <span class="loading-text">{loadingText ? $loadingText : DEFAULT_SYNC_TEXT}</span>
@@ -674,6 +688,16 @@ let sessionSummary = true
     {/if}
   </profiles-context>
   {/if}
+  {:else}
+    {#if initializationError}
+      <div class="init-error">
+        <h3>Initialization Error: </h3>
+        {initializationError}
+      </div>
+    {:else}
+      <div class="loading"><div class="loader"></div></div>
+    {/if}
+  {/if}
 </main>
 
 <style>
@@ -794,4 +818,42 @@ let sessionSummary = true
     flex-direction: row;
   }
 }
+
+  .init-error {
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 100px;
+  }
+
+  :global(.loading) {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+  :global(.loader) {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    0% {
+      -webkit-transform: rotate(0deg);
+      transform: rotate(0deg);
+    }
+    100% {
+      -webkit-transform: rotate(360deg);
+      transform: rotate(360deg);
+    }
+  }
 </style>

@@ -1,6 +1,6 @@
 [package]
 name = "emergence-tauri"
-version = "0.4.3"
+version = "0.5.0"
 description = "Emergence"
 authors = ["you"]
 license = ""
