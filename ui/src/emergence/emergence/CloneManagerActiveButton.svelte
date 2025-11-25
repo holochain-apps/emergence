@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { isWeContext } from "@lightningrodlabs/we-applet";
+  import { isWeaveContext } from "@theweave/api";
   import { getContext } from "svelte";
   import { CloneManagerStore } from "../../stores/clone-manager-store";
     import CloneManagerShareDialog from "./CloneManagerShareDialog.svelte";
@@ -25,7 +25,7 @@
   loadWeaveGroupName();
 </script>
 
-{#if isWeContext()}
+{#if isWeaveContext()}
   <div
     on:keypress={()=>{cloneManagerShareDialog.open()}}
     on:click={()=>cloneManagerShareDialog.open()} 
@@ -51,7 +51,7 @@
   </div>
 {/if}
 
-{#if isWeContext()}
+{#if isWeaveContext()}
   <CloneManagerShareDialog bind:this={cloneManagerShareDialog} cell={$activeCellInfoNormalized} name={weaveGroupName} />
 {:else}
   <CloneManagerDialog bind:this={cloneManagerDialog} />

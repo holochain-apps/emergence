@@ -23,7 +23,7 @@ import { slide } from 'svelte/transition';
 import SpaceLink from './SpaceLink.svelte';
 import { Marked } from "@ts-stack/markdown";
   import { errorText } from './utils';
-  import { isWeContext, type WAL, WeaveClient} from '@lightningrodlabs/we-applet';
+  import { isWeaveContext, type WAL, WeaveClient} from '@theweave/api';
   import AttachmentsList from './AttachmentsList.svelte';
   import SvgIcon from './SvgIcon.svelte';
 
@@ -128,7 +128,7 @@ bind:this={updateSessionDialog}
         <Fa icon={faCircleArrowLeft} />
       </sl-button>
       <div>
-        {#if isWeContext()}
+        {#if isWeaveContext()}
           <sl-button on:click={() => { copyWalToPocket() } } circle>
             <SvgIcon icon="addToPocket"></SvgIcon>
           </sl-button>
@@ -187,7 +187,7 @@ bind:this={updateSessionDialog}
           {/each}
         </div>
 
-        {#if isWeContext()}
+        {#if isWeaveContext()}
           {@const links = sessionLinks($session)}
           {#if links.length > 0}
             <div style="display: flex; flex-direction: row;margin-top:5px;">

@@ -11,7 +11,7 @@ import {
 } from '@holochain/client';
 import { get, writable, type Writable } from "svelte/store";
 import { ProfilesClient, ProfilesStore } from '@holochain-open-dev/profiles';
-import type { WeaveClient } from '@lightningrodlabs/we-applet';
+import type { WeaveClient } from '@theweave/api';
 import { v7 as uuidv7 } from "uuid";
 import { asyncDerived, type Loadable } from '@square/svelte-store';
 import { hashEqual } from "../emergence/emergence/utils";

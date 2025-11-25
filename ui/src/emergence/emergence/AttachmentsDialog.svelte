@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type WAL, isWeContext, weaveUrlFromWal } from "@lightningrodlabs/we-applet";
+  import { type WAL, isWeaveContext, weaveUrlFromWal } from "@theweave/api";
   import { createEventDispatcher, getContext } from "svelte";
   import type { WALUrl} from "./utils";
   import '@shoelace-style/shoelace/dist/components/button/button.js';
@@ -7,7 +7,7 @@
   import AttachmentsList from "./AttachmentsList.svelte";
   import SvgIcon from "./SvgIcon.svelte";
   import { frameContext, storeContext } from '../../contexts';
-  import type { WeaveClient } from '@lightningrodlabs/we-applet';
+  import type { WeaveClient } from '@theweave/api';
   import type { EmergenceStore } from "../../stores/emergence-store";
   import { sessionLinks, type InfoSession } from "./types";
 
@@ -59,7 +59,7 @@
 </script>
 
 <sl-dialog label={session? "Session Links":"FIXME"} bind:this={dialog}>
-  {#if isWeContext()}
+  {#if isWeaveContext()}
   <AttachmentsList attachments={attachments}
       on:remove-attachment={(e)=>removeAttachment(e.detail)}/>
 

@@ -22,7 +22,7 @@ import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
 import { elapsed, filterTime, getMyDna, sessionHasTags, type WALUrl } from '../emergence/emergence/utils';
 import { fromUint8Array } from 'js-base64';
-import type { WAL } from '@lightningrodlabs/we-applet';
+import type { WAL } from '@theweave/api';
 import { CloneManagerStore } from './clone-manager-store';
 Marked.setOptions
 ({

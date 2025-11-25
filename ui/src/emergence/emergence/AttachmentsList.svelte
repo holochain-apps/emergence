@@ -2,11 +2,11 @@
   import "@shoelace-style/shoelace/dist/components/skeleton/skeleton.js";
   import { createEventDispatcher, getContext } from "svelte";
   import type {  WALUrl } from "./utils";
-  import { weaveUrlToWAL } from "@lightningrodlabs/we-applet";
+  import { weaveUrlToWAL } from "@theweave/api";
   import SvgIcon from "./SvgIcon.svelte";
   import { hrlToString } from "@holochain-open-dev/utils";
-  import '@lightningrodlabs/we-elements/dist/elements/wal-embed.js';
-  import type { WeaveClient } from '@lightningrodlabs/we-applet';
+  import '@theweave/elements/dist/elements/wal-embed.js';
+  import type { WeaveClient } from '@theweave/api';
   import { frameContext } from "../../contexts";
 
   const dispatch = createEventDispatcher()

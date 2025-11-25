@@ -1,5 +1,5 @@
-import type { AppletHash, AppletServices, AssetInfo, RecordInfo, WAL, WeaveServices } from '@lightningrodlabs/we-applet';
-import { CloneId, type AppClient, type RoleName, type ZomeName } from '@holochain/client';
+import type { AppletHash, AppletServices, AssetInfo, RecordInfo, WAL, WeaveServices } from '@theweave/api';
+import { type AppClient, type RoleName, type ZomeName } from '@holochain/client';
 import { EmergenceStore } from './stores/emergence-store';
 import { EmergenceClient } from './emergence-client';
 import { ROLE_NAME } from './emergence/emergence/types';

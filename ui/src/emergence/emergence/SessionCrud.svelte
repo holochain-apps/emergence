@@ -21,7 +21,7 @@ import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import Fa from 'svelte-fa';
 import MultiSelect from 'svelte-multiselect'
 import { errorText, type WALUrl } from './utils';
-import { isWeContext, WeaveClient, weaveUrlFromWal } from '@lightningrodlabs/we-applet';
+import { isWeaveContext, WeaveClient, weaveUrlFromWal } from '@theweave/api';
 import AttachmentsList from './AttachmentsList.svelte';
 import SvgIcon from './SvgIcon.svelte';
 
@@ -240,7 +240,7 @@ let dialogShow
       allowUserOptions={true}
       />
   </div>
-  {#if isWeContext()}
+  {#if isWeaveContext()}
   <span class="form-label">Links:
     <sl-button size="small" circle on:click={()=>addAttachment()} >          
       <SvgIcon icon=link/>

@@ -35,7 +35,7 @@
   import ProxyAgentDetail from './emergence/emergence/ProxyAgentDetail.svelte';
   import { getCookie, deleteCookie } from 'svelte-cookie';
   import { Base64 } from 'js-base64'
-  import { WeaveClient, initializeHotReload, isWeContext } from '@lightningrodlabs/we-applet';
+  import { WeaveClient, initializeHotReload, isWeaveContext } from '@theweave/api';
   import { appletServices } from './we';
   import { CloneManagerStore } from './stores/clone-manager-store';
   import CloneManagerDialog from './emergence/emergence/CloneManagerDialog.svelte';
@@ -189,7 +189,7 @@
     }
 
     let tokenResp;
-    if (!isWeContext()) {
+      if (!isWeaveContext()) {
       let appPort: string = import.meta.env.VITE_APP_PORT
       console.log("Dev mode admin port:", adminPort)
       url = appPort ? `ws://localhost:${appPort}` : `ws://localhost`
@@ -325,7 +325,7 @@
     // for now everyone is a steward
 
     if (!isConfigured()) {
-      if (!isWeContext() || (await weClient.myGroupPermissionType()).type === "Steward") {
+      if (!isWeaveContext() || (await weClient.myGroupPermissionType()).type === "Steward") {
         $store.setUIprops({amSteward:true})
         await $store.setPane("admin")
       }
