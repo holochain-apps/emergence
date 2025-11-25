@@ -22,5 +22,11 @@ export default defineConfig({
   define: {
     '__APP_VERSION__': JSON.stringify(version)  // Define a global constant
   },
+  optimizeDeps: {
+    include: ['@holochain-open-dev/elements/dist/elements/display-error.js']
+  },
+  resolve: {
+    dedupe: ['@holochain-open-dev/elements']
+  }
 });
 
