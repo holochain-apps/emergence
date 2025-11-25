@@ -19,8 +19,8 @@
     "launch:browser": "echo \"starting with admin $VITE_ADMIN_PORT\" && RUST_LOG=warn echo \"pass\" | hc s -f=$VITE_ADMIN_PORT --piped generate workdir/emergence.happ --run=$VITE_APP_PORT -a emergence network -b \"http://127.0.0.1:$BOOTSTRAP_PORT\"  webrtc \"ws://127.0.0.1:$SIGNAL_PORT\"",
     "dev": "VITE_ADMIN_PORT=$(port) VITE_APP_PORT=$(port) SIGNAL_PORT=$(port) BOOTSTRAP_PORT=$(port) UI_PORT=8888 npm run x",
     "x": "hc s clean &&  npm run build:happ && UI_PORT=8888 concurrently \"npm start -w ui\" \"npm run launch:browser\" \"kitsune2-bootstrap-srv --listen 127.0.0.1:$BOOTSTRAP_PORT\"",
-    "tool-dev": " UI_PORT=8888 npm run tool-devy",
-    "tool-devy": "concurrently \"npm start -w ui\" \"sleep 1 && weave --agent-idx 1 --dev-config we_dev/config.ts\" \"sleep 15 && weave --agent-idx 2 --dev-config we_dev/config.ts\"",
+    "start:moss": " UI_PORT=8888 npm run launch:moss",
+    "launch:moss": "concurrently \"npm start -w ui\" \"sleep 1 && weave --agent-idx 1 --dev-config we_dev/config.ts\" \"sleep 10 && weave --agent-idx 2 --dev-config we_dev/config.ts\"",
     "network": "npm run build:happ && BOOTSTRAP_PORT=$(port) SIGNAL_PORT=$(port) INTERNAL_IP=$(internal-ip --ipv4) concurrently -k \"npm run local-services\" \"UI_PORT=1420 npm run -w ui start\" \"npm run launch\"",
     "test": "npm run build:zomes && hc app pack workdir --recursive && npm t -w tests",
     "package": "npm run build:happ && npm run package -w ui && hc web-app pack workdir --recursive",
@@ -31,7 +31,7 @@
     "tauri": "tauri"
   },
   "devDependencies": {
-    "@holochain-playground/cli": "^0.2.0",
+    "@holochain-playground/cli": "^0.3.0",
     "@holochain/hc-spin": "^0.600.0",
     "@theweave/cli": "0.15.5",
     "@rollup/plugin-typescript": "^8.0.0",
