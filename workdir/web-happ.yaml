@@ -1,7 +1,7 @@
 ---
-manifest_version: "1"
+manifest_version: "0"
 name: emergence
 ui:
-  bundled: "../ui/dist.zip"
-happ_manifest:
-  bundled: "./emergence.happ"
+  path: "../ui/dist.zip"
+happ:
+  path: "./emergence.happ"
