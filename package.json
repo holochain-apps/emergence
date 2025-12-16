@@ -32,9 +32,8 @@
     "tauri": "tauri"
   },
   "devDependencies": {
-    "@holochain-playground/cli": "^0.3.0",
     "@holochain/hc-spin": "^0.600.0",
-    "@theweave/cli": "0.15.5",
+    "@theweave/cli": "0.15.9",
     "@rollup/plugin-typescript": "^8.0.0",
     "@tauri-apps/cli": "^2.0.0-beta.20",
     "@tsconfig/svelte": "^2.0.0",

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, AppWebsocket, type AppClient, setSigningCredentials, type AgentPubKey, type AppWebsocketConnectionOptions } from '@holochain/client';
+  import { AdminWebsocket, AppWebsocket, type AppClient, setSigningCredentials, type AgentPubKey, type AppWebsocketConnectionOptions, encodeHashToBase64 } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
@@ -338,7 +338,27 @@
     // for now everyone is a steward
 
     if (!isConfigured()) {
-      if (!isWeaveContext() || (await weClient.myGroupPermissionType()).type === "Steward") {
+      let isSteward = false
+      if (!isWeaveContext()) {
+        isSteward = true
+      } else {
+        if (weClient.renderInfo.type === 'applet-view') {
+          const appletInfo = await weClient.appletInfo(weClient.renderInfo.appletHash);
+          const groupHash = appletInfo.groupsHashes[0]
+                      console.log("appletInfo.groupsHashes",appletInfo.groupsHashes)
+
+          if (appletInfo) { 
+            const toolInstaller = await weClient.toolInstaller(weClient.renderInfo.appletHash, groupHash);
+            console.log("toolInstaller",toolInstaller)
+            if (toolInstaller && encodeHashToBase64(toolInstaller)=== this.client.myPubkey) {
+              isSteward = true
+            }
+          }
+        }
+        const accountabilities = await weClient.myAccountabilitiesPerGroup()
+        console.log("accountabilities",accountabilities )
+      } 
+      if (isSteward) {
         $store.setUIprops({amSteward:true})
         await $store.setPane("admin")
       }
