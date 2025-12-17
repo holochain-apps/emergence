@@ -16,7 +16,7 @@
     "@holochain-open-dev/stores": "^0.600.0",
     "@holochain-open-dev/utils": "^0.600.0",
     "@holochain/client": "^0.20.0",
-    "@theweave/api": "^0.6.2",
+    "@theweave/api": "^0.6.3",
     "@theweave/elements": "^0.6.1",
     "@material/mwc-snackbar": "^0.27.0",
     "@msgpack/msgpack": "^2.7.2",

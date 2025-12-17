@@ -343,16 +343,9 @@
         isSteward = true
       } else {
         if (weClient.renderInfo.type === 'applet-view') {
-          const appletInfo = await weClient.appletInfo(weClient.renderInfo.appletHash);
-          const groupHash = appletInfo.groupsHashes[0]
-                      console.log("appletInfo.groupsHashes",appletInfo.groupsHashes)
-
-          if (appletInfo) { 
-            const toolInstaller = await weClient.toolInstaller(weClient.renderInfo.appletHash, groupHash);
-            console.log("toolInstaller",toolInstaller)
-            if (toolInstaller && encodeHashToBase64(toolInstaller)=== this.client.myPubkey) {
-              isSteward = true
-            }
+          const toolInstaller = await weClient.toolInstaller(weClient.renderInfo.appletHash);
+          if (toolInstaller && encodeHashToBase64(toolInstaller)=== encodeHashToBase64(weClient.renderInfo.appletClient.myPubKey)) {
+            isSteward = true
           }
         }
         const accountabilities = await weClient.myAccountabilitiesPerGroup()
