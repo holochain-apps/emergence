@@ -44,6 +44,12 @@ export default defineConfig({
           registeringAgent: 1,
           joiningAgents: [2],
         },
+        {
+          name: 'Emergence',
+          instanceName: 'Emergence',
+          registeringAgent: 1,
+          joiningAgents: [2],
+        },
         // {
         //   name: 'gamez',
         //   instanceName: 'gamez',
@@ -72,6 +78,19 @@ export default defineConfig({
         type: 'localhost',
         happPath: './workdir/emergence.happ',
         uiPort: 1420,
+      },
+    },
+    {
+      name: 'Emergence',
+      subtitle: 'Emergence!',
+      description: 'Emergence indeed!',
+      icon: {
+        type: 'filesystem',
+        path: './we_dev/emergence_icon.png',
+      },
+      source: {
+        type: 'filesystem',
+        path: './workdir/emergence.webhapp',
       },
     },
     // {
