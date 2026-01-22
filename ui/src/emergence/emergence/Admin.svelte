@@ -15,8 +15,10 @@
     import type { HoloHashMap } from "@holochain-open-dev/utils";
     import { toPromise } from "@holochain-open-dev/stores";
     import DisableForOs from "./DisableForOs.svelte";
+    import TemplateSelector from "./TemplateSelector.svelte";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
+    let templateSelector: TemplateSelector;
     let exportJSON = ""
     const dispatch = createEventDispatcher();
     let sensing: SlCheckbox
@@ -260,6 +262,10 @@
         }
         await store.sync(undefined)
     }
+
+    const handleApplyTemplate = async (e) => {
+        await doImport(e.detail);
+    };
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
 
@@ -281,7 +287,21 @@
         <!-- <sl-button style="margin: 8px;"  on:click={async () => { throw("error!")} }>
             Error!
         </sl-button> -->
- 
+
+        {#if (!$sitemaps || $sitemaps.length==0) && (!$allWindows || $allWindows.length==0)}
+        <div class="admin-section">
+            <div class="admin-section-desc">
+                <h3>Quick Setup</h3>
+                <p>Get started quickly by selecting an event template.</p>
+            </div>
+            <div class="admin-section-right">
+                <sl-button variant="primary" on:click={() => templateSelector.open()}>
+                    Choose Template
+                </sl-button>
+            </div>
+        </div>
+        {/if}
+
         <div class="admin-section">
             <div class="admin-section-desc">
                 <h3>Site-maps</h3>
@@ -408,6 +428,7 @@
 
    
 </div>
+<TemplateSelector bind:this={templateSelector} on:apply-template={handleApplyTemplate} />
   <style>
     sl-checkbox {
         margin-right:15px;
