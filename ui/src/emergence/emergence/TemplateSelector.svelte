@@ -91,7 +91,7 @@ const applyTemplate = () => {
     display: flex;
     flex-direction: column;
     gap: 16px;
-    min-width: 400px;
+    min-width: 128px;
   }
 
   .templates-list {
