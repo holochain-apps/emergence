@@ -13,6 +13,9 @@ export default defineConfig({
       protocol: "ws",
       host: internalIpV4Sync(),
       port: 1421,
+    },
+    watch: {
+      ignored: ['**/node_modules/**', '**/dist/**', '**/.git/**'],
     }
   },
   plugins: [svelte()],

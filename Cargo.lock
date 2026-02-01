@@ -398,8 +398,8 @@ checksum = "e5274423e17b7c9fc20b6e7e208532f9b19825d82dfd615708b70edd83df41f1"
 
 [[package]]
 name = "hc_zome_file_storage_coordinator"
-version = "0.4.0-dev.0"
-source = "git+https://github.com/holochain-open-dev/file-storage?branch=main-0.6#cde7f68632b188f79da8adf5dc4aeacd15f0d0c3"
+version = "0.4.0"
+source = "git+https://github.com/holochain-open-dev/file-storage?branch=main-0.6#5bd7b171956c06671b201a0050c7e737719633db"
 dependencies = [
  "hc_zome_file_storage_integrity",
  "hdk",
@@ -408,8 +408,8 @@ dependencies = [
 
 [[package]]
 name = "hc_zome_file_storage_integrity"
-version = "0.4.0-dev.0"
-source = "git+https://github.com/holochain-open-dev/file-storage?branch=main-0.6#cde7f68632b188f79da8adf5dc4aeacd15f0d0c3"
+version = "0.4.0"
+source = "git+https://github.com/holochain-open-dev/file-storage?branch=main-0.6#5bd7b171956c06671b201a0050c7e737719633db"
 dependencies = [
  "hdi",
  "holochain_serialized_bytes",
