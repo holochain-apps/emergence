@@ -2,6 +2,13 @@ use emergence_integrity::*;
 use hdk::prelude::*;
 use crate::messages::EmergenceMessage;
 
+// Compatible struct for calling profiles zome functions
+#[derive(Serialize, Deserialize, Debug, Clone)]
+struct ZomeFnInput<T> {
+    input: T,
+    local: Option<bool>,
+}
+
 #[hdk_extern]
 pub fn set_settings(input: Settings) -> ExternResult<ActionHash> {
     let path = Path::from("all_settings");
@@ -14,7 +21,7 @@ pub fn set_settings(input: Settings) -> ExternResult<ActionHash> {
         LinkTypes::Settings,
         tag,
     )?;
-    if let ZomeCallResponse::Ok(response) = call(CallTargetCell::Local,"profiles",FunctionName::new("get_agents_with_profile"), None, ())? {
+    if let ZomeCallResponse::Ok(response) = call(CallTargetCell::Local,"profiles",FunctionName::new("get_agents_with_profile"), None, ZomeFnInput { input: (), local: Some(true) })? {
         let agents : Vec<AgentPubKey> = response.decode().map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not decode profiles agent list"))))?;
         // let me = agent_info()?.agent_latest_pubkey;
         //let agents = agents.into_iter().filter(|a| a != &me).collect();

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, getContext, createEventDispatcher } from 'svelte';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
-  import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64} from '@holochain/client';
+  import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64, HoloHashMap} from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../stores/emergence-store';
   import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities, DetailsType, SpaceSortOrder, type InfoSession } from './types';
@@ -11,8 +11,7 @@
   import { faCalendarPlus, faTrash, faCircleArrowLeft, faArrowsUpDownLeftRight } from '@fortawesome/free-solid-svg-icons';
   import "@holochain-open-dev/file-storage/dist/elements/show-image.js";
   import SessionSummary from './SessionSummary.svelte';
-  import { HoloHashMap } from '@holochain-open-dev/utils';
-  import '@shoelace-style/shoelace/dist/components/select/select.js';
+    import '@shoelace-style/shoelace/dist/components/select/select.js';
   import '@shoelace-style/shoelace/dist/components/option/option.js';
   import SessionFilterCtrls from './SessionFilterCtrls.svelte';
   import SessionFilter from './SessionFilter.svelte';

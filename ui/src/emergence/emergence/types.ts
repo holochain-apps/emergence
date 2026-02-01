@@ -1,4 +1,5 @@
-import type { EntryRecord, HoloHashMap } from '@holochain-open-dev/utils';
+import type { EntryRecord } from '@holochain-open-dev/utils';
+import type { HoloHashMap } from '@holochain/client';
 import { 
   type Record, 
   type ActionHash,

@@ -10,9 +10,8 @@
     import Fa from 'svelte-fa';
     import { fromUint8Array } from "js-base64";
     import { watchResize } from "svelte-watch-resize";
-    import  { HoloHashMap } from '@holochain-open-dev/utils';
-    import SpaceCrud from './SpaceCrud.svelte';
-    import { encodeHashToBase64, type ActionHash } from '@holochain/client';
+        import SpaceCrud from './SpaceCrud.svelte';
+    import { encodeHashToBase64, type ActionHash, HoloHashMap } from '@holochain/client';
     import AllSpaces from './AllSpaces.svelte';
 
     const dispatch = createEventDispatcher();

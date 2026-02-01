@@ -12,8 +12,7 @@ import Fa from 'svelte-fa'
 import { faFlag } from '@fortawesome/free-solid-svg-icons';
 import type { EmergenceStore } from '../../stores/emergence-store';
 import Avatar from './Avatar.svelte';
-import { encodeHashToBase64 } from '@holochain/client';
-import {ActionHashMap } from '@holochain-open-dev/utils';
+import { encodeHashToBase64, ActionHashMap } from '@holochain/client';
 
 const dispatch = createEventDispatcher();
 

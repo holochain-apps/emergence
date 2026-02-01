@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { decodeHashFromBase64, encodeHashToBase64, type ActionHash, type EntryHash } from "@holochain/client";
+    import { decodeHashFromBase64, encodeHashToBase64, type ActionHash, type EntryHash, type HoloHashMap } from "@holochain/client";
     import "@holochain-open-dev/profiles/dist/elements/agent-avatar.js";
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../stores/emergence-store';
@@ -12,8 +12,7 @@
     import '@shoelace-style/shoelace/dist/components/select/select.js';
     import '@shoelace-style/shoelace/dist/components/option/option.js';
     import SenseResults from "./SenseResults.svelte";
-    import type { HoloHashMap } from "@holochain-open-dev/utils";
-    import { toPromise } from "@holochain-open-dev/stores";
+        import { toPromise } from "@holochain-open-dev/stores";
     import DisableForOs from "./DisableForOs.svelte";
     import TemplateSelector from "./TemplateSelector.svelte";
 
