@@ -31,6 +31,7 @@
     "build:android:aarch64": "npm run package && npm run tauri android build -- --apk --target aarch64",
     "local-services": "kitsune2-bootstrap-srv --listen 127.0.0.1:$BOOTSTRAP_PORT",
     "tauri": "tauri",
+    "clean:tauri-dev": "rm -rf ~/.cache/emergence/holochain-*",
     "release:happ": "HAPP_VER=$(node -p \"require('./ui/package.json').dnaVersion\") && git tag happ-v$HAPP_VER && git push origin happ-v$HAPP_VER",
     "release:runtimes": "APP_VER=$(node -p \"require('./ui/package.json').version\") && git tag v$APP_VER && git push origin v$APP_VER"
   },

@@ -1,7 +1,7 @@
 import { internalIpV4Sync } from "internal-ip";
 import { defineConfig } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
-import { version } from './package.json';  // Import version from package.json
+import { version, dnaVersion } from './package.json';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -23,7 +23,8 @@ export default defineConfig({
     minify: false
   },
   define: {
-    '__APP_VERSION__': JSON.stringify(version)  // Define a global constant
+    '__APP_VERSION__': JSON.stringify(version),
+    '__DNA_VERSION__': JSON.stringify(dnaVersion)
   },
   optimizeDeps: {
     include: ['@holochain-open-dev/elements/dist/elements/display-error.js']

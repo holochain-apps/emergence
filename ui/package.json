@@ -1,6 +1,7 @@
 {
   "name": "ui",
-  "version": "0.5.1",
+  "version": "0.6.0",
+  "dnaVersion": "0.6.0",
   "scripts": {
     "start": "vite --clearScreen false",
     "build": "vite build",
