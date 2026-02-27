@@ -1,0 +1,33 @@
+name: "release-happ"
+on:
+  push:
+    tags:
+      - 'happ-v*'
+
+jobs:
+  publish-happ:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = flakes nix-command
+
+      - uses: cachix/cachix-action@v15
+        with:
+          name: holochain-ci
+
+      - name: Build happ
+        run: |
+          nix develop --no-update-lock-file --accept-flake-config --command bash -c "npm i && npm run build:happ"
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "workdir/emergence.happ"
+          draft: true
+          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}

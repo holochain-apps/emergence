@@ -1,72 +1,96 @@
-use holochain_types::prelude::AppBundle; use lair_keystore::dependencies::sodoken::{BufRead, BufWrite};
-use std::collections::HashMap;
+use holochain_types::prelude::AppBundle;
 use std::path::PathBuf;
-use tauri_plugin_holochain::{HolochainPluginConfig, HolochainExt};
+use tauri_plugin_holochain::{HolochainPluginConfig, HolochainExt, NetworkConfig, vec_to_locked};
 use url2::Url2;
-use tauri::AppHandle;
+use tauri::{AppHandle, Listener, Manager};
 
 const APP_ID: &'static str = "emergence";
-const PRODUCTION_SIGNAL_URL: &'static str = "wss://signal.holo.host";
-const PRODUCTION_BOOTSTRAP_URL: &'static str = "https://bootstrap.holo.host";
+pub const HAPP_BUNDLE_BYTES: &'static [u8] = include_bytes!("../../workdir/emergence.happ");
 
-pub fn happ_bundle() -> AppBundle {
-    let bytes = include_bytes!("../../workdir/emergence.happ");
-    AppBundle::decode(bytes).expect("Failed to decode emergence happ")
+pub fn happ_bundle() -> anyhow::Result<AppBundle> {
+    AppBundle::unpack(HAPP_BUNDLE_BYTES).map_err(|e| anyhow::anyhow!(e))
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let mut context = tauri::generate_context!();
-    if tauri::is_dev() {
-        // Avoids collisions from having two instances of the same app running
-        let identifier = context.config().identifier.clone();
-        context.config_mut().identifier = format!("{}{}", identifier, uuid::Uuid::new_v4());
-    }
-
     tauri::Builder::default()
         .plugin(
             tauri_plugin_log::Builder::default()
                 .level(log::LevelFilter::Warn)
                 .build(),
         )
+        .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_holochain::init(
-            vec_to_locked(vec![]).expect("Can't build passphrase"),
-            HolochainPluginConfig {
-                signal_url: signal_url(),
-                bootstrap_url: bootstrap_url(),
-                holochain_dir: holochain_dir(),
-            },
+        .plugin(tauri_plugin_holochain::async_init(
+            vec_to_locked(vec![]),
+            HolochainPluginConfig::new(holochain_dir(), network_config())
         ))
         .setup(|app| {
             let handle = app.handle().clone();
-            let result: anyhow::Result<()> = tauri::async_runtime::block_on(async move {
-                setup(handle).await?;
+            let handle_fail = app.handle().clone();
+            app.handle()
+                .listen("holochain://setup-failed", move |_event| {
+                    handle_fail.exit(1);
+                });
+            app.handle()
+                .listen("holochain://setup-completed", move |_event| {
+                    let handle = handle.clone();
+                    tauri::async_runtime::spawn(async move {
+                        if let Err(e) = setup(handle.clone()).await {
+                            eprintln!("Failed to setup: {:?}", e);
+                            return;
+                        }
 
-                // After set up we can be sure our app is installed and up to date, so we can just open it
-                app.holochain()?
-                    .main_window_builder(String::from("main"), false, Some(String::from("emergence")), None).await?
-                    .build()?;
+                        let main_window = async {
+                            let mut window = handle
+                                .holochain()
+                                .map_err(|e| anyhow::anyhow!("{e:?}"))?
+                                .main_window_builder(
+                                    String::from("main"),
+                                    false,
+                                    Some(String::from("emergence")),
+                                    None,
+                                )
+                                .await
+                                .map_err(|e| anyhow::anyhow!("{e:?}"))?;
 
-                Ok(())
-            });
+                            #[cfg(desktop)]
+                            {
+                                window = window.title(String::from("Emergence"));
+                            }
 
-            result?;
+                            window.build().map_err(|e| anyhow::anyhow!("{e:?}"))?;
+                            Ok::<(), anyhow::Error>(())
+                        }.await;
+
+                        match main_window {
+                            Ok(()) => {
+                                #[cfg(desktop)]
+                                {
+                                    if let Some(splashscreen) = handle.get_webview_window("splashscreen") {
+                                        let _ = splashscreen.close();
+                                    }
+                                }
+                            }
+                            Err(e) => {
+                                eprintln!("Failed to open main window: {:?}", e);
+                            }
+                        }
+                    });
+                });
 
             Ok(())
         })
-        .run(context)
+        .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
 // Very simple setup for now:
 // - On app start, list installed apps:
-//   - If there are no apps installed, this is the first time the app is opened: install our hApp
-//   - If there **are** apps:
+//   - If our hApp is not installed, this is the first time the app is opened: install our hApp
+//   - If our hApp **is** installed:
 //     - Check if it's necessary to update the coordinators for our hApp
 //       - And do so if it is
-//
-// You can modify this function to suit your needs if they become more complex
 async fn setup(handle: AppHandle) -> anyhow::Result<()> {
     let admin_ws = handle.holochain()?.admin_websocket().await?;
 
@@ -75,107 +99,86 @@ async fn setup(handle: AppHandle) -> anyhow::Result<()> {
         .await
         .map_err(|err| tauri_plugin_holochain::Error::ConductorApiError(err))?;
 
-    if installed_apps.len() == 0 {
+    if installed_apps
+        .iter()
+        .find(|app| app.installed_app_id.as_str().eq(APP_ID))
+        .is_none()
+    {
         handle
             .holochain()?
             .install_app(
                 String::from(APP_ID),
-                happ_bundle(),
-                HashMap::new(),
+                happ_bundle()?,
+                None,
                 None,
                 None,
             )
             .await?;
-
-        Ok(())
     } else {
         handle.holochain()?.update_app_if_necessary(
             String::from(APP_ID),
-            happ_bundle()
+            happ_bundle()?
         ).await?;
-
-        Ok(())
     }
+
+    Ok(())
 }
 
-fn internal_ip() -> String {
-    std::option_env!("INTERNAL_IP")
-        .expect("Environment variable INTERNAL_IP was not set")
-        .to_string()
-}
+fn network_config() -> NetworkConfig {
+    let mut network_config = NetworkConfig::default();
 
-fn bootstrap_url() -> Url2 {
-    // Resolved at compile time to be able to point to local services
+    // In dev mode, use the local bootstrap server started by npm scripts
     if tauri::is_dev() {
-        let internal_ip = internal_ip();
-        let port = std::option_env!("BOOTSTRAP_PORT")
-            .expect("Environment variable BOOTSTRAP_PORT was not set");
-        url2::url2!("http://{internal_ip}:{port}")
-    } else {
-        url2::url2!("{}", PRODUCTION_BOOTSTRAP_URL)
+        let port = std::env::var("BOOTSTRAP_PORT").unwrap_or_else(|_| "8888".to_string());
+        network_config.bootstrap_url = Url2::parse(format!("http://127.0.0.1:{}", port));
     }
-}
 
-fn signal_url() -> Url2 {
-    // Resolved at compile time to be able to point to local services
-    if tauri::is_dev() {
-        let internal_ip = internal_ip();
-        let signal_port =
-            std::option_env!("SIGNAL_PORT").expect("Environment variable INTERNAL_IP was not set");
-        url2::url2!("ws://{internal_ip}:{signal_port}")
-    } else {
-        url2::url2!("{}", PRODUCTION_SIGNAL_URL)
+    // Don't hold any slice of the DHT in mobile
+    if cfg!(mobile) {
+        network_config.target_arc_factor = 0;
     }
+
+    network_config
 }
 
 fn holochain_dir() -> PathBuf {
-    if tauri::is_dev() {
-        #[cfg(target_os = "android")]
-        {
-            app_dirs2::app_root(
-                app_dirs2::AppDataType::UserCache,
-                &app_dirs2::AppInfo {
-                    name: "emergence",
-                    author: std::env!("CARGO_PKG_AUTHORS"),
-                },
-            ).expect("Could not get the UserCache directory")
-        }
-        #[cfg(not(target_os = "android"))]
-        {
-            let tmp_dir =
-                tempdir::TempDir::new("emergence").expect("Could not create temporary directory");
-
-            // Convert `tmp_dir` into a `Path`, destroying the `TempDir`
-            // without deleting the directory.
-            let tmp_path = tmp_dir.into_path();
-            tmp_path
-        }
+    let app_data_type = if tauri::is_dev() {
+        app_dirs2::AppDataType::UserCache
     } else {
-        app_dirs2::app_root(
-            app_dirs2::AppDataType::UserData,
-            &app_dirs2::AppInfo {
-                name: "emergence",
-                author: std::env!("CARGO_PKG_AUTHORS"),
-            },
-        )
-        .expect("Could not get app root")
-        .join("holochain")
-    }
-}
+        app_dirs2::AppDataType::UserData
+    };
 
-fn vec_to_locked(mut pass_tmp: Vec<u8>) -> std::io::Result<BufRead> {
-    match BufWrite::new_mem_locked(pass_tmp.len()) {
-        Err(e) => {
-            pass_tmp.fill(0);
-            Err(e.into())
-        }
-        Ok(p) => {
-            {
-                let mut lock = p.write_lock();
-                lock.copy_from_slice(&pass_tmp);
-                pass_tmp.fill(0);
+    let base = app_dirs2::app_root(
+        app_data_type,
+        &app_dirs2::AppInfo {
+            name: APP_ID,
+            author: std::env!("CARGO_PKG_AUTHORS"),
+        },
+    )
+    .expect("Could not get app root");
+
+    if tauri::is_dev() {
+        // Each dev instance gets its own numbered directory (0, 1, 2, ...)
+        // determined by which lock files are already held by running instances
+        use fs2::FileExt;
+        for i in 0..10 {
+            let dir = base.join(format!("holochain-{}", i));
+            let lock_path = dir.join(".lock");
+            std::fs::create_dir_all(&dir).expect("Could not create holochain dir");
+            let lock_file = std::fs::OpenOptions::new()
+                .write(true)
+                .create(true)
+                .open(&lock_path)
+                .expect("Could not open lock file");
+            if lock_file.try_lock_exclusive().is_ok() {
+                // Keep the lock file handle alive for the lifetime of the process
+                std::mem::forget(lock_file);
+                return dir;
             }
-            Ok(p.to_read())
         }
+        // Fallback if all slots taken
+        base.join("holochain")
+    } else {
+        base.join("holochain")
     }
 }

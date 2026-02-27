@@ -39,7 +39,8 @@
     "svelte-fa": "3.0.3",
     "svelte-multiselect": "^8.6.0",
     "svelte-watch-resize": "1.0.3",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "@tauri-apps/plugin-os": "^2.2.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",

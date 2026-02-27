@@ -1,86 +1,100 @@
 name: "release-tauri-app"
 on:
-  push: 
+  push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
 jobs:
-  publish-happ:
-    permissions:
-      contents: write
-    runs-on: ubuntu-22.04
+  create-release:
+    runs-on: ubuntu-latest
     outputs:
-      releaseId: ${{ steps.create-release.outputs.id }}
-      appVersion: ${{ steps.version.outputs.APP_VERSION }}
+      releaseId: ${{ steps.create_release.outputs.id }}
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      # Checks out a copy of your repository on the ubuntu-latest machine
+      - uses: actions/checkout@v3
+
+      - name: Create release
+        id: create_release
+        uses: ncipollo/release-action@v1
+        with:
+          name: "Emergence ${{ github.ref_name }}"
+          body: "See assets below to download and install this version."
+          draft: true
+          prerelease: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-app-artifacts:
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
       - uses: actions/checkout@v3
 
       - name: Install nix
-        uses: cachix/install-nix-action@v25
+        uses: cachix/install-nix-action@v27
         with:
-          nix_path: nixpkgs=channel:nixos-unstable
+          extra_nix_config: |
+            experimental-features = flakes nix-command
 
-      - uses: cachix/cachix-action@v12
+      - uses: cachix/cachix-action@v15
         with:
           name: holochain-ci
 
-      - uses: cachix/cachix-action@v12
-        with:
-          name: holochain-open-dev
-
-      - uses: cachix/cachix-action@v12
-        with:
-          name: darksoil-studio
-
-      - name: Install and test
+      - name: Download happ from happ release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          nix-store --gc
-          nix develop --accept-flake-config --command bash -c "npm install && npm run build:happ"
+          HAPP_TAG=$(cat .happ-version | tr -d '[:space:]')
+          echo "Downloading happ from release: $HAPP_TAG"
+          gh release download "$HAPP_TAG" -p emergence.happ -D workdir
 
-      - name: Retrieve version
+      - name: Build webhapp and weave-hash
         run: |
-          echo "APP_VERSION=$(cat src-tauri/tauri.conf.json | grep -oP '(?<="version": ")[^"]*')" >> $GITHUB_OUTPUT
-        id: version
+          nix develop --no-update-lock-file --accept-flake-config --command bash -c "
+            npm i
+            npm run package -w ui
+            hc web-app pack workdir --recursive
+            APP_VER=\$(node -p \"require('./ui/package.json').version\")
+            weave hash-webhapp \$APP_VER ./workdir/emergence.webhapp > weave-hash.txt
+          "
 
-      - id: create-release
-        uses: ncipollo/release-action@v1
+      - name: Upload happ artifact
+        uses: actions/upload-artifact@v4
         with:
-          allowUpdates: true
-          artifacts: "workdir/emergence.happ"
-          body: "See assets below to download and install this version."
-          name: Emergence v${{ steps.version.outputs.APP_VERSION }}
-          tag: v${{ steps.version.outputs.APP_VERSION }}
-          prerelease: true
-          draft: true
+          name: emergence-happ
+          path: workdir/emergence.happ
 
-  release-tauri-app:
-    needs: publish-happ
+      - name: Upload webhapp artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: emergence-webhapp
+          path: workdir/emergence.webhapp
+
+      - name: Upload weave-hash artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: weave-hash
+          path: weave-hash.txt
+
+  release-desktop:
+    needs: [create-release, build-app-artifacts]
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - platform: 'macos-latest' # for Arm based macs (M1 and above).
-            args: '--target aarch64-apple-darwin'
-          - platform: 'macos-latest' # for Intel based macs.
-            args: '--target x86_64-apple-darwin'
-          - platform: 'ubuntu-22.04' # for Tauri v1 you could replace this with ubuntu-20.04.
-            args: ''
-          - platform: 'windows-latest'
-            args: ''
+        platform: [windows-2019, macos-11, ubuntu-22.04]
     env:
       MACOSX_DEPLOYMENT_TARGET: 10.13
-
     runs-on: ${{ matrix.platform }}
     steps:
       - name: Support longpaths
         if: matrix.platform != 'ubuntu-22.04'
         run: git config --system core.longpaths true
 
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      # Checks out a copy of your repository on the ubuntu-latest machine
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+
+      - name: Download happ artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: emergence-happ
+          path: workdir
 
       - name: setup node
         uses: actions/setup-node@v1
@@ -92,10 +106,6 @@ jobs:
         with:
           override: true
           toolchain: stable
-    
-      - name: install x86_64 target
-        if: matrix.args == '--target x86_64-apple-darwin'
-        run: rustup target add x86_64-apple-darwin
 
       - name: install Go stable
         uses: actions/setup-go@v4
@@ -123,22 +133,90 @@ jobs:
         run: |
           npm install
 
-      - name: Download release of the .happ
-        uses: robinraju/release-downloader@v1.10
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with: 
-          token: ${{ secrets.GITHUB_TOKEN }}
-          releaseId: ${{ needs.publish-happ.outputs.releaseId }}
-          fileName: 'emergence.happ'
-          out-file-path: 'workdir/'
-
       - name: build the app
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          releaseId: ${{ needs.publish-happ.outputs.releaseId }}
-          releaseDraft: true
-          prerelease: true
-          args: ${{ matrix.args }}
+          projectPath: src-tauri
+          releaseId: ${{ needs.create-release.outputs.releaseId }}
+
+  release-android:
+    needs: [create-release, build-app-artifacts]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Download happ artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: emergence-happ
+          path: workdir
+
+      - name: Install nix
+        uses: cachix/install-nix-action@v27
+        with:
+          extra_nix_config: |
+            experimental-features = flakes nix-command
+
+      - uses: cachix/cachix-action@v15
+        with:
+          name: holochain-ci
+
+      - name: Setup Android signing
+        env:
+          ANDROID_KEY_BASE64: ${{ secrets.ANDROID_KEY_BASE64 }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          cd src-tauri/gen/android
+          printf '%s' "$ANDROID_KEY_BASE64" | base64 -d > key.jks
+          echo "keyAlias=$ANDROID_KEY_ALIAS" > key.properties
+          echo "keyPassword=$ANDROID_KEY_PASSWORD" >> key.properties
+          echo "storeFile=../key.jks" >> key.properties
+          echo "storePassword=$ANDROID_KEY_PASSWORD" >> key.properties
+
+      - name: Build Android APK
+        run: |
+          nix develop .#androidDev --no-update-lock-file --accept-flake-config --command bash -c "
+            npm i
+            npx tauri android build --apk --target aarch64
+          "
+
+      - name: Prepare APK for upload
+        run: |
+          APK_PATH=$(find src-tauri/gen/android/app/build/outputs/apk -name "*.apk" -type f | head -1)
+          cp "$APK_PATH" emergence-aarch64.apk
+
+      - name: Upload APK to release
+        uses: AButler/upload-release-assets@v3.0
+        with:
+          files: "emergence-aarch64.apk"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-id: ${{ needs.create-release.outputs.releaseId }}
+
+  release-web-artifacts:
+    needs: [create-release, build-app-artifacts]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download happ artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: emergence-happ
+
+      - name: Download webhapp artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: emergence-webhapp
+
+      - name: Download weave-hash artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: weave-hash
+
+      - name: Upload artifacts to release
+        uses: AButler/upload-release-assets@v3.0
+        with:
+          files: "emergence.happ;emergence.webhapp;weave-hash.txt"
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          release-id: ${{ needs.create-release.outputs.releaseId }}

@@ -1935,23 +1935,27 @@ export class EmergenceStore {
  
     const starTime = performance.now()
     console.log("start sync");
-    this.syncText.update((n) => {return "Getting Sessions"} )
-    await this.getSettings()
-    this.syncText.update((n) => {return "Fetching Tags"} )
-    await this.fetchTags()
-    this.syncText.update((n) => {return "Fetching Sessions"} )
-    await this.fetchSessions() // fetches spaces and timewindows
-    this.syncText.update((n) => {return "Fetching Agent data"} )
-    await this.fetchAgentStuff(!agent ? this.client.client.myPubKey: agent)
-    if (!agent) {
-        this.syncText.update((n) => {return "Fetching Activity Feed"} )
-        await this.fetchFeed({})
+
+    const tryStep = async (label: string, fn: () => Promise<void>) => {
+      this.syncText.update(() => label)
+      try {
+        await fn()
+      } catch (e) {
+        console.error(`Sync step "${label}" failed:`, e)
+      }
     }
-    this.syncText.update((n) => {return "Fetching Site Maps"} )
-    await this.fetchSiteMaps()
-    this.syncText.update((n) => {return "Fetching Proxy Agents"} )
-    await this.fetchProxyAgents()
-    this.syncText.update((n) => {return "Fetching Complete"} )
+
+    await tryStep("Getting Settings", () => this.getSettings())
+    await tryStep("Fetching Tags", () => this.fetchTags())
+    await tryStep("Fetching Sessions", () => this.fetchSessions())
+    await tryStep("Fetching Agent data", () => this.fetchAgentStuff(!agent ? this.client.client.myPubKey: agent))
+    if (!agent) {
+      await tryStep("Fetching Activity Feed", () => this.fetchFeed({}))
+    }
+    await tryStep("Fetching Site Maps", () => this.fetchSiteMaps())
+    await tryStep("Fetching Proxy Agents", () => this.fetchProxyAgents())
+
+    this.syncText.update(() => "Fetching Complete")
     console.log("end sync", elapsed(starTime));
     this.setUIprops({syncing: get(this.uiProps).syncing-1})
   }

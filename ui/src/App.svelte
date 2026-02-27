@@ -12,6 +12,7 @@
 
   import "@holochain-open-dev/profiles/dist/elements/profiles-context.js";
   import "@holochain-open-dev/profiles/dist/elements/profile-prompt.js";
+  import "@holochain-open-dev/profiles/dist/elements/create-profile.js";
   import "@holochain-open-dev/profiles/dist/elements/my-profile.js";
   import "@holochain-open-dev/profiles/dist/elements/list-profiles.js";
   import "@holochain-open-dev/file-storage/dist/elements/file-storage-context.js";
@@ -322,7 +323,11 @@
   let cloneManagerShareDialog: CloneManagerShareDialog
 
   const doSync=async () => {
-        await $store.sync(undefined);
+    try {
+      await $store.sync(undefined);
+    } catch (e) {
+      console.error("Sync failed, will retry:", e)
+    }
   }
   window.addEventListener("beforeunload", function (e) {
   var confirmationMessage = "You are about to leave Emergence!";
@@ -333,7 +338,11 @@
     if(!$store) return;
     loading = true;
 
-    await $store.sync()
+    try {
+      await $store.sync()
+    } catch (e) {
+      console.error("Initial sync failed, continuing:", e)
+    }
 
     // for now everyone is a steward
 
