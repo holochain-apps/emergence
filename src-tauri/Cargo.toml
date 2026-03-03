@@ -19,7 +19,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2.2.0", default-features = false , features = [] }
 
 [dependencies]
-tauri = { version = "2.5.1", features = [] }
+tauri = { version = "2.5.1", features = ["devtools"] }
 tauri-plugin-holochain = { git = "https://github.com/darksoil-studio/tauri-plugin-holochain", branch = "main-0.6.1"}
 holochain = { version = "0.6.1-rc.0", default-features = false, features = ["sqlite-encrypted", "wasmer_sys", "transport-iroh"] }
 holochain_types = { version = "0.6.1-rc.0" }

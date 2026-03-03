@@ -161,11 +161,6 @@ fn network_config() -> NetworkConfig {
         }
     }
 
-    // Don't hold any slice of the DHT in mobile
-    if cfg!(mobile) {
-        network_config.target_arc_factor = 0;
-    }
-
     network_config
 }
 
