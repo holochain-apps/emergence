@@ -4,6 +4,9 @@ on:
     tags:
       - 'happ-v*'
 
+permissions:
+  contents: write
+
 jobs:
   publish-happ:
     runs-on: ubuntu-latest

@@ -17,14 +17,16 @@
     "@holochain-open-dev/stores": "^0.601.0",
     "@holochain-open-dev/utils": "^0.601.0",
     "@holochain/client": "^0.20.4-rc.0",
-    "@theweave/api": "^0.6.4",
-    "@theweave/elements": "^0.6.2",
     "@material/mwc-snackbar": "^0.27.0",
     "@msgpack/msgpack": "^2.7.2",
     "@noble/curves": "^1.1.0",
     "@scoped-elements/dropzone": "0.2.7",
     "@shoelace-style/shoelace": "^2.3.0",
     "@square/svelte-store": "^1.0.18",
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/plugin-os": "^2.2.0",
+    "@theweave/api": "^0.6.4",
+    "@theweave/elements": "^0.6.2",
     "@ts-stack/markdown": "^1.4.0",
     "@types/blake2b": "2.1.0",
     "@types/javascript-time-ago": "^2.0.3",
@@ -40,8 +42,7 @@
     "svelte-fa": "3.0.3",
     "svelte-multiselect": "^8.6.0",
     "svelte-watch-resize": "1.0.3",
-    "uuid": "^10.0.0",
-    "@tauri-apps/plugin-os": "^2.2.0"
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",

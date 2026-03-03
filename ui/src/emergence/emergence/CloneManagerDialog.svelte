@@ -10,6 +10,7 @@
   import CloneManagerCreateDialog from "./CloneManagerCreateDialog.svelte";
   import CloneManagerShareDialog from "./CloneManagerShareDialog.svelte";
   import CloneManagerJoinDialog from "./CloneManagerJoinDialog.svelte";
+  import { loadDefaultProfile } from "./defaultProfile";
   
   let dialog;
   let newCloneDialog;
@@ -35,7 +36,12 @@
     loading = false;
   }
   
-  const activate = (cellId: CellId) => cloneManagerStore.activate(cellId);
+  const activate = async (cellId: CellId) => {
+    dialog.hide();
+    cloneManagerStore.activate(cellId);
+    await cloneManagerStore.activeCellInfoNormalized.load();
+    await cloneManagerStore.activeStore.load();
+  };
   const disable = async (cellId: CellId) => {
     await cloneManagerStore.disable(cellId);
     listInstances();
@@ -44,18 +50,45 @@
     await cloneManagerStore.enable(cellId);
     listInstances();
   };
-  const create = async (name: string) => {
-    await cloneManagerStore.create(name);
-    listInstances();
+  const create = async (name: string, useDefaultProfile: boolean) => {
+    dialog.hide();
+    const cloneCell = await cloneManagerStore.create(name);
+    cloneManagerStore.activate(cloneCell.cell_id);
+    await cloneManagerStore.activeCellInfoNormalized.load();
+    await cloneManagerStore.activeStore.load();
+    if (useDefaultProfile) {
+      await applyDefaultProfile();
+    }
   };
   const share = (instance: CellInfoNormalized) => {
     shareInstance = instance;
     shareCloneDialog.open();
   };
-  const join = async (joiningCode: DnaJoiningInfo) => {
-    await cloneManagerStore.join(joiningCode.name, joiningCode.networkSeed);
-    listInstances();
+  const join = async (joiningCode: DnaJoiningInfo, useDefaultProfile: boolean) => {
+    dialog.hide();
+    const cloneCell = await cloneManagerStore.join(joiningCode.name, joiningCode.networkSeed);
+    cloneManagerStore.activate(cloneCell.cell_id);
+    await cloneManagerStore.activeCellInfoNormalized.load();
+    await cloneManagerStore.activeStore.load();
+    if (useDefaultProfile) {
+      await applyDefaultProfile();
+    }
   };
+
+  async function applyDefaultProfile() {
+    const dp = loadDefaultProfile();
+    if (!dp) return;
+    const store = get(cloneManagerStore.activeStore);
+    if (!store) return;
+    try {
+      await store.profilesStore.client.createProfile({
+        nickname: dp.nickname,
+        fields: {},
+      });
+    } catch (e) {
+      console.error("Failed to apply default profile:", e);
+    }
+  }
   const isInstanceActive = (instance: CellInfoNormalized) => hashEqual(get(cloneManagerStore.activeDnaHash), instance.cellId[0]);
   
   listInstances();
@@ -74,22 +107,22 @@
       <div class="button-container">
         {#if isInstanceActive(instance)}
         <div style="width: 30px; height: 30px; margin-left: 10px"></div>
-        {:else if instance.cellInfo[CellType.Cloned]?.enabled ||  instance.cellInfo[CellType.Provisioned]}
-        <div class="details-button" title="Switch to this Network" on:click={activate(instance.cellId)}>
+        {:else if instance.cellInfo.type === CellType.Provisioned || (instance.cellInfo.type === CellType.Cloned && instance.cellInfo.value.enabled)}
+        <div class="details-button" title="Switch to this Network" on:click={() => activate(instance.cellId)}>
           <SvgIcon icon="faToggleOff" size="16px"/>
         </div>
         {/if}
-        
-        <div class="details-button" title="Share Joining Code" on:click={share(instance)}>
+
+        <div class="details-button" title="Share Joining Code" on:click={() => share(instance)}>
           <SvgIcon icon="faShare" size="16px"/>
         </div>
-        
-        {#if !isInstanceActive(instance) && instance.cellInfo[CellType.Cloned]?.enabled}
-        <div class="details-button" title="Disable Network" on:click={disable(instance.cellId)}>
+
+        {#if !isInstanceActive(instance) && instance.cellInfo.type === CellType.Cloned && instance.cellInfo.value.enabled}
+        <div class="details-button" title="Disable Network" on:click={() => disable(instance.cellId)}>
           <SvgIcon icon="faStopCircle" size="16px"/>
         </div>
-        {:else if instance.cellInfo[CellType.Cloned]?.enabled === false}
-        <div class="details-button" title="Enable Network" on:click={enable(instance.cellId)}>
+        {:else if instance.cellInfo.type === CellType.Cloned && instance.cellInfo.value.enabled === false}
+        <div class="details-button" title="Enable Network" on:click={() => enable(instance.cellId)}>
           <SvgIcon icon="faPlayCircle" size="16px"/>
         </div>
         {:else}
@@ -97,15 +130,15 @@
         {/if}
       </div>
     </div>
-    {/each}          
-    
+    {/each}
+    {:else if error}
+    Error: {error}
+    {/if}
+
     <div style="margin-top: 20px; width: 100%; display: flex; justify-content: space-between; align-items: center;">
       <div class="new-clone" on:click={()=>newCloneDialog.open()} on:keydown={()=>newCloneDialog.open()} title="New Network"><SvgIcon color="white" size="25px" icon="faSquarePlus" style="margin-left: 15px;"/><span>New Network</span></div>
       <div class="new-clone" on:click={()=>joinCloneDialog.open()} on:keydown={()=>joinCloneDialog.open()} title="Join Network"><SvgIcon color="white" size="25px" icon="personMail" style="margin-left: 15px;"/><span>Join Network</span></div>
     </div>
-    {:else if error}
-    Error: {error}
-    {/if}
   </div>
   
 </sl-dialog>

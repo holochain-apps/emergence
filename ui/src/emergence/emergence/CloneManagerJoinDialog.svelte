@@ -1,13 +1,18 @@
 <script lang="ts">
   import '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
+  import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
   import { decodeDnaJoiningInfo } from "./dnaJoiningInfo";
   import SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
   import SvgIcon from './SvgIcon.svelte';
-  
+  import { loadDefaultProfile } from './defaultProfile';
+
   let dialog: SlDialog;
   let saving = false;
   let joiningCode = "";
+  let useDefaultProfile = true;
   let error;
+
+  $: hasDefaultProfile = loadDefaultProfile() !== null;
   
   export let handleJoin;
   export const open = ()=> {
@@ -21,7 +26,7 @@
   const join = async () => {
     saving = true
     try {
-      await handleJoin(decodeDnaJoiningInfo(joiningCode));
+      await handleJoin(decodeDnaJoiningInfo(joiningCode), useDefaultProfile && hasDefaultProfile);
       close();
     } catch (e) {
       error = e;
@@ -51,6 +56,12 @@ on:sl-request-close={(event)=>{
       <div class="title-text">Joining Code</div> <sl-input class='textarea' value={joiningCode}  on:input={e=> joiningCode = e.target.value}></sl-input>
     </div>
     
+    {#if hasDefaultProfile}
+      <sl-checkbox checked={useDefaultProfile} on:sl-change={e => useDefaultProfile = e.target.checked} style="margin-bottom: 10px;">
+        Use default profile
+      </sl-checkbox>
+    {/if}
+
     <div class='controls'>
       <sl-button on:click={close} class="board-control">
         Cancel

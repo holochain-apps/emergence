@@ -42,7 +42,9 @@
   import CloneManagerDialog from './emergence/emergence/CloneManagerDialog.svelte';
   import CloneManagerShareDialog from './emergence/emergence/CloneManagerShareDialog.svelte';
   import SvgIcon from './emergence/emergence/SvgIcon.svelte';
-    import CloneManagerActiveButton from './emergence/emergence/CloneManagerActiveButton.svelte';
+  import CloneManagerActiveButton from './emergence/emergence/CloneManagerActiveButton.svelte';
+  import NetworkOnboarding from './emergence/emergence/NetworkOnboarding.svelte';
+  import { saveDefaultProfile, clearDefaultProfile } from './emergence/emergence/defaultProfile';
 
   let client: AppClient | undefined;
   let weClient: WeaveClient
@@ -60,7 +62,9 @@
   }
   let renderType = RenderType.App
   let wal
+  let appPhase: 'loading' | 'onboarding' | 'ready' = 'loading';
 
+  $: needsOnboarding = cloneManagerStore?.needsOnboarding;
   $: store = cloneManagerStore?.activeStore;
   $: prof = $store ? $store.profilesStore.myProfile : undefined
   $: uiProps = $store ? $store.uiProps : undefined
@@ -293,7 +297,22 @@
         client,
         weClient
       );
+
+      // In non-Weave mode, check if we need onboarding (no clone cells yet)
+      if (!isWeaveContext()) {
+        const hasClones = await cloneManagerStore.hasClones();
+        if (!hasClones) {
+          // Clear stale data from any previous (wiped) session
+          clearDefaultProfile();
+          localStorage.removeItem("activeDnaHash");
+          appPhase = 'onboarding';
+          connected = true;
+          return;
+        }
+      }
+
       await cloneManagerStore.activeStore.load();
+      appPhase = 'ready';
       connected = true;
     } catch (e) {
       initializationError = e;
@@ -376,12 +395,28 @@
   };
 
   $: $store, loadStore();
+
+  async function onOnboardingComplete() {
+    try {
+      await cloneManagerStore.activeCellInfoNormalized.load();
+      await cloneManagerStore.activeStore.load();
+    } catch (err) {
+      console.error("Error completing onboarding:", err);
+    }
+    appPhase = 'ready';
+  }
+
 let sessionSummary = true
 
 </script>
 
 <main>
-  {#if connected}
+  {#if connected && appPhase === 'onboarding'}
+    <NetworkOnboarding
+      cloneManagerStore={cloneManagerStore}
+      on:complete={onOnboardingComplete}
+    />
+  {:else if connected}
     {#if error}
       <span class="notice modal" style="overflow-y:auto;max-height:1000px;max-width:700px;position:absolute; top:60px; left: 0;right: 0;margin: 0 auto; z-index:1000"
       >
@@ -446,7 +481,14 @@ let sessionSummary = true
             {#if $prof.status=="complete" && $prof.value == undefined}
             <div class="create-profile">
               <create-profile
-                on:profile-created={()=>{}}
+                on:profile-created={(e) => {
+                  if (e.detail?.profile) {
+                    saveDefaultProfile({
+                      nickname: e.detail.profile.nickname,
+                      avatar: e.detail.profile.fields?.avatar,
+                    });
+                  }
+                }}
               ></create-profile>
             </div>
             {/if}

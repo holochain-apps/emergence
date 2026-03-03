@@ -11,10 +11,13 @@
     import type SlCheckbox from '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
     import '@shoelace-style/shoelace/dist/components/select/select.js';
     import '@shoelace-style/shoelace/dist/components/option/option.js';
+    import '@shoelace-style/shoelace/dist/components/details/details.js';
     import SenseResults from "./SenseResults.svelte";
         import { toPromise } from "@holochain-open-dev/stores";
     import DisableForOs from "./DisableForOs.svelte";
     import TemplateSelector from "./TemplateSelector.svelte";
+    import { isTauriContext } from "./utils";
+    import SvgIcon from "./SvgIcon.svelte";
 
     let store: EmergenceStore = (getContext(storeContext) as any).getStore();
     let templateSelector: TemplateSelector;
@@ -31,7 +34,50 @@
     $: activeDnaHash = cloneManagerStore.activeDnaHash;
     $: activeDnaHashB64 = encodeHashToBase64($activeDnaHash);
 
+    // --- Network server config (tauri only) ---
+    let bootstrapUrl = "";
+    let relayUrl = "";
+    let networkConfigLoaded = false;
+
+    async function loadNetworkConfig() {
+        if (!isTauriContext()) return;
+        try {
+            const { invoke } = await import("@tauri-apps/api/core");
+            let config = await invoke("get_user_network_config");
+            if (!config) {
+                config = await invoke("default_user_network_config");
+            }
+            bootstrapUrl = config.bootstrapUrl || "";
+            relayUrl = config.relayUrl || "";
+            networkConfigLoaded = true;
+        } catch (e) {
+            console.error("Failed to load network config:", e);
+        }
+    }
+
+    async function saveNetworkConfig() {
+        try {
+            const { invoke } = await import("@tauri-apps/api/core");
+            await invoke("set_user_network_config", { bootstrapUrl, relayUrl });
+        } catch (e) {
+            console.error("Failed to save network config:", e);
+        }
+    }
+
+    async function resetNetworkDefaults() {
+        try {
+            const { invoke } = await import("@tauri-apps/api/core");
+            const defaults = await invoke("default_user_network_config");
+            bootstrapUrl = defaults.bootstrapUrl || "";
+            relayUrl = defaults.relayUrl || "";
+            await invoke("set_user_network_config", { bootstrapUrl, relayUrl });
+        } catch (e) {
+            console.error("Failed to reset network config:", e);
+        }
+    }
+
     onMount(() => {
+        loadNetworkConfig();
     })
 
     const download = (filename: string, text: string) => {
@@ -419,9 +465,48 @@
                 <div class="admin-section-desc">
                     <h3>Active Network DNA Hash</h3>
                     <p style="font-size: 0.8rem">{activeDnaHashB64}</p>
-                </div>        
+                </div>
             </div>
-        </div>        
+        </div>
+
+        {#if isTauriContext()}
+        <div class="admin-section" style="flex-direction:column">
+            <sl-details summary="Advanced Network Options">
+                <p style="font-size:12px;color:#666;margin-top:0;">Configure bootstrap and relay servers. Changes require an app restart.</p>
+                {#if networkConfigLoaded}
+                    <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:10px;">
+                        <div>
+                            <label style="font-weight:bold;font-size:14px;">Bootstrap URL:</label>
+                            <sl-input
+                                value={bootstrapUrl}
+                                placeholder="https://..."
+                                on:input={e => bootstrapUrl = e.target.value}
+                            ></sl-input>
+                        </div>
+                        <div>
+                            <label style="font-weight:bold;font-size:14px;">Relay URL:</label>
+                            <sl-input
+                                value={relayUrl}
+                                placeholder="https://..."
+                                on:input={e => relayUrl = e.target.value}
+                            ></sl-input>
+                        </div>
+                    </div>
+                    <div style="display:flex;gap:10px;align-items:center;">
+                        <sl-button size="small" variant="primary"
+                            disabled={bootstrapUrl.length === 0 || relayUrl.length === 0}
+                            on:click={saveNetworkConfig}
+                        >Save & Restart</sl-button>
+                        <sl-button size="small" variant="text"
+                            on:click={resetNetworkDefaults}
+                        >Reset to Defaults</sl-button>
+                    </div>
+                {:else}
+                    <div class="spinning" style="display:inline-block"><SvgIcon icon="faSpinner" color="black"></SvgIcon></div>
+                {/if}
+            </sl-details>
+        </div>
+        {/if}
     </div>
   
 

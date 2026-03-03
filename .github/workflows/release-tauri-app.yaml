@@ -4,6 +4,9 @@ on:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+'
 
+permissions:
+  contents: write
+
 jobs:
   create-release:
     runs-on: ubuntu-latest
@@ -46,14 +49,12 @@ jobs:
           echo "Downloading happ from release: $HAPP_TAG"
           gh release download "$HAPP_TAG" -p emergence.happ -D workdir
 
-      - name: Build webhapp and weave-hash
+      - name: Build webhapp
         run: |
           nix develop --no-update-lock-file --accept-flake-config --command bash -c "
             npm i
             npm run package -w ui
-            hc web-app pack workdir --recursive
-            APP_VER=\$(node -p \"require('./ui/package.json').version\")
-            weave hash-webhapp \$APP_VER ./workdir/emergence.webhapp > weave-hash.txt
+            hc web-app pack workdir
           "
 
       - name: Upload happ artifact
@@ -68,18 +69,12 @@ jobs:
           name: emergence-webhapp
           path: workdir/emergence.webhapp
 
-      - name: Upload weave-hash artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: weave-hash
-          path: weave-hash.txt
-
   release-desktop:
     needs: [create-release, build-app-artifacts]
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-2019, macos-11, ubuntu-22.04]
+        platform: [windows-2022, macos-15, ubuntu-22.04]
     env:
       MACOSX_DEPLOYMENT_TARGET: 10.13
     runs-on: ${{ matrix.platform }}
@@ -101,11 +96,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: install Rust stable
+      - name: install Rust
         uses: actions-rs/toolchain@v1
         with:
           override: true
-          toolchain: stable
+          toolchain: "1.88.0"
 
       - name: install Go stable
         uses: actions/setup-go@v4
@@ -209,14 +204,9 @@ jobs:
         with:
           name: emergence-webhapp
 
-      - name: Download weave-hash artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: weave-hash
-
       - name: Upload artifacts to release
         uses: AButler/upload-release-assets@v3.0
         with:
-          files: "emergence.happ;emergence.webhapp;weave-hash.txt"
+          files: "emergence.happ;emergence.webhapp"
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           release-id: ${{ needs.create-release.outputs.releaseId }}

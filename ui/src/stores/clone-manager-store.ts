@@ -34,31 +34,38 @@ export class CloneManagerStore {
   activeDnaHash: Writable<DnaHash>;
   activeCellInfoNormalized: Loadable<CellInfoNormalized>;
   activeStore: Loadable<EmergenceStore>;
-  
+  needsOnboarding: Writable<boolean>;
+
   constructor(
     public client: AppClient,
     public weaveClient?: WeaveClient,
   ) {
+    this.needsOnboarding = writable(false);
     this.activeDnaHash = writable<DnaHash>();
     this.activeDnaHash.subscribe(this._saveActiveDnaHash);
     this.activeCellInfoNormalized = asyncDerived(this.activeDnaHash, async ($activeDnaHash) => {
       const appInfo = await this.client.appInfo();
-      
+
       if(!$activeDnaHash) {
         await this._loadActiveDnaHash(appInfo);
         $activeDnaHash = get(this.activeDnaHash);
       }
-      
-      const cellInfo = this._findCellInfoWithDnaHash(appInfo, $activeDnaHash);
-      if (appInfo.cell_info[ROLE_NAME][0].type !== CellType.Provisioned) {
-        throw new Error("incorrect cell type, must be provisioned");
+      if (!$activeDnaHash) {
+        return undefined;
       }
+
+      const cellInfo = this._findCellInfoWithDnaHash(appInfo, $activeDnaHash);
       return this._makeCellInfoNormalized(appInfo.cell_info[ROLE_NAME][0].value as ProvisionedCell, cellInfo)
     });
     this.activeStore = asyncDerived([this.activeDnaHash, this.activeCellInfoNormalized], async ([$activeDnaHash, $activeCellInfoNormalized]) => {
+      if (!$activeDnaHash || !$activeCellInfoNormalized) {
+        return undefined;
+      }
       await this.activeCellInfoNormalized.load();
-      
-      const profilesClient = this.weaveClient !== undefined ? weaveClient.renderInfo.profilesClient : new ProfilesClient(this.client, $activeCellInfoNormalized.roleName);
+
+      const roleName = $activeCellInfoNormalized.roleName;
+
+      const profilesClient = this.weaveClient !== undefined ? weaveClient.renderInfo.profilesClient : new ProfilesClient(this.client, roleName);
       const profilesStore = new ProfilesStore(profilesClient, {
         avatarMode: "avatar-optional",
         minNicknameLength: 3,
@@ -66,32 +73,55 @@ export class CloneManagerStore {
           {
             name: "location",
             label: "Location",
-            required: false, 
+            required: false,
           },
           {
             name: "bio",
             label: "Bio",
             required: false,
           }
-        ], 
+        ],
       });
-      const fileStorageClient = new FileStorageClient(this.client, ROLE_NAME);
-      const emegenceClient = new EmergenceClient(this.client, ROLE_NAME, ZOME_NAME);
+      const fileStorageClient = new FileStorageClient(this.client, roleName);
+      const emegenceClient = new EmergenceClient(this.client, roleName, ZOME_NAME);
 
       return new EmergenceStore(this, emegenceClient, profilesStore, fileStorageClient, $activeDnaHash);
     });
   }
   
+  async hasClones(): Promise<boolean> {
+    const appInfo = await this.client.appInfo();
+    const cells = appInfo.cell_info[ROLE_NAME];
+    return cells.some((cell) => cell.type === CellType.Cloned);
+  }
+
+  async listEnabledClones(): Promise<CellInfoNormalized[]> {
+    const appInfo = await this.client.appInfo();
+    const cells = appInfo.cell_info[ROLE_NAME];
+    const provisioned = appInfo.cell_info[ROLE_NAME][0].value as ProvisionedCell;
+
+    return cells
+      .filter((cell) => cell.type === CellType.Cloned && cell.value.enabled)
+      .map((cell) => this._makeCellInfoNormalized(provisioned, cell))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
   async list(): Promise<CellInfoNormalized[]> {
     const appInfo = await this.client.appInfo();
     const cells = appInfo.cell_info[ROLE_NAME];
-    
+
     if (appInfo.cell_info[ROLE_NAME][0].type !== CellType.Provisioned) {
       throw new Error("incorrect cell type, must be provisioned");
     }
-    let cellsNormalized =  cells.map((cell) => this._makeCellInfoNormalized(appInfo.cell_info[ROLE_NAME][0].value as ProvisionedCell, cell));
+    let cellsNormalized = cells.map((cell) => this._makeCellInfoNormalized(appInfo.cell_info[ROLE_NAME][0].value as ProvisionedCell, cell));
+
+    // In non-Weave mode, filter out the provisioned cell
+    if (this.weaveClient === undefined) {
+      cellsNormalized = cellsNormalized.filter((cell) => cell.cellInfo.type !== CellType.Provisioned);
+    }
+
     cellsNormalized.sort((a,b) => a.networkSeed < b.networkSeed ? -1 : 1);
-    
+
     return cellsNormalized;
   }
   
@@ -137,8 +167,13 @@ export class CloneManagerStore {
       const matchingCellInfo = this._findCellInfoWithDnaHash(appInfo, activeDnaHash);
 
       if(matchingCellInfo !== undefined) {
-        this.activeDnaHash.set(activeDnaHash);
-        return;
+        // In non-Weave mode, reject if this points to the provisioned cell
+        if (this.weaveClient === undefined && matchingCellInfo.type === CellType.Provisioned) {
+          // Fall through to _setDefaultActiveDnaHash
+        } else {
+          this.activeDnaHash.set(activeDnaHash);
+          return;
+        }
       }
     }
       
@@ -147,11 +182,26 @@ export class CloneManagerStore {
   }
 
   private _setDefaultActiveDnaHash(appInfo: AppInfo) {
-    if (appInfo.cell_info[ROLE_NAME][0].type !== CellType.Provisioned) {
-      throw new Error("incorrect cell type, must be provisioned");
+    // In Weave mode, always use the provisioned cell
+    if (this.weaveClient !== undefined) {
+      if (appInfo.cell_info[ROLE_NAME][0].type !== CellType.Provisioned) {
+        throw new Error("incorrect cell type, must be provisioned");
+      }
+      const defaultDnaHash = appInfo.cell_info[ROLE_NAME][0].value.cell_id[0];
+      this.activeDnaHash.set(defaultDnaHash);
+      return;
     }
-    const defaultDnaHash = appInfo.cell_info[ROLE_NAME][0].value.cell_id[0];
-    this.activeDnaHash.set(defaultDnaHash);
+
+    // In non-Weave mode, find first enabled clone
+    const clones = appInfo.cell_info[ROLE_NAME].filter(
+      (c: CellInfo) => c.type === CellType.Cloned && c.value.enabled
+    );
+    if (clones.length > 0) {
+      this.activeDnaHash.set(clones[0].value.cell_id[0]);
+    } else {
+      // No clones available - signal onboarding needed
+      this.needsOnboarding.set(true);
+    }
   }
   
   private _saveActiveDnaHash(val: DnaHash) {

@@ -1,11 +1,19 @@
 use holochain_types::prelude::AppBundle;
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
-use tauri_plugin_holochain::{HolochainPluginConfig, HolochainExt, NetworkConfig, vec_to_locked};
+use tauri::{AppHandle, Listener, Manager, Runtime};
+use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig, NetworkConfig, vec_to_locked};
 use url2::Url2;
-use tauri::{AppHandle, Listener, Manager};
 
-const APP_ID: &'static str = "emergence";
-pub const HAPP_BUNDLE_BYTES: &'static [u8] = include_bytes!("../../workdir/emergence.happ");
+const APP_ID: &str = "emergence";
+pub const HAPP_BUNDLE_BYTES: &[u8] = include_bytes!("../../workdir/emergence.happ");
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct UserNetworkConfig {
+    bootstrap_url: Option<Url2>,
+    relay_url: Option<Url2>,
+}
 
 pub fn happ_bundle() -> anyhow::Result<AppBundle> {
     AppBundle::unpack(HAPP_BUNDLE_BYTES).map_err(|e| anyhow::anyhow!(e))
@@ -14,6 +22,11 @@ pub fn happ_bundle() -> anyhow::Result<AppBundle> {
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![
+            get_user_network_config,
+            default_user_network_config,
+            set_user_network_config,
+        ])
         .plugin(
             tauri_plugin_log::Builder::default()
                 .level(log::LevelFilter::Warn)
@@ -56,7 +69,9 @@ pub fn run() {
 
                             #[cfg(desktop)]
                             {
-                                window = window.title(String::from("Emergence"));
+                                window = window
+                                    .title(String::from("Emergence"))
+                                    .inner_size(1200.0, 880.0);
                             }
 
                             window.build().map_err(|e| anyhow::anyhow!("{e:?}"))?;
@@ -127,10 +142,23 @@ async fn setup(handle: AppHandle) -> anyhow::Result<()> {
 fn network_config() -> NetworkConfig {
     let mut network_config = NetworkConfig::default();
 
-    // In dev mode, use the local bootstrap server started by npm scripts
+    let user_config = read_user_network_config().ok().flatten();
+
+    // In dev mode, default to local bootstrap server started by npm scripts
+    // (user config can still override this below)
     if tauri::is_dev() {
         let port = std::env::var("BOOTSTRAP_PORT").unwrap_or_else(|_| "8888".to_string());
         network_config.bootstrap_url = Url2::parse(format!("http://127.0.0.1:{}", port));
+    }
+
+    // User-persisted config takes highest priority
+    if let Some(user_config) = user_config {
+        if let Some(bootstrap_url) = user_config.bootstrap_url {
+            network_config.bootstrap_url = bootstrap_url;
+        }
+        if let Some(relay_url) = user_config.relay_url {
+            network_config.relay_url = relay_url;
+        }
     }
 
     // Don't hold any slice of the DHT in mobile
@@ -141,7 +169,82 @@ fn network_config() -> NetworkConfig {
     network_config
 }
 
+// --- User Network Config ---
+
+fn user_network_config_path() -> PathBuf {
+    // In dev mode, store config alongside the per-instance holochain dir;
+    // in production, store in the shared UserData dir.
+    if tauri::is_dev() {
+        holochain_dir().join("user-network-config.json")
+    } else {
+        app_dirs2::app_root(
+            app_dirs2::AppDataType::UserData,
+            &app_dirs2::AppInfo {
+                name: APP_ID,
+                author: std::env!("CARGO_PKG_AUTHORS"),
+            },
+        )
+        .expect("Could not get app root")
+        .join("user-network-config.json")
+    }
+}
+
+fn read_user_network_config() -> anyhow::Result<Option<UserNetworkConfig>> {
+    let path = user_network_config_path();
+    if !path.exists() {
+        return Ok(None);
+    }
+    let contents = std::fs::read_to_string(path)?;
+    let config: UserNetworkConfig = serde_json::from_str(&contents)?;
+    Ok(Some(config))
+}
+
+fn write_user_network_config(config: &UserNetworkConfig) -> anyhow::Result<()> {
+    let path = user_network_config_path();
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)?;
+    }
+    let contents = serde_json::to_string(config)?;
+    std::fs::write(path, contents)?;
+    Ok(())
+}
+
+#[tauri::command]
+fn get_user_network_config() -> Result<Option<UserNetworkConfig>, String> {
+    read_user_network_config().map_err(|e| e.to_string())
+}
+
+#[tauri::command]
+fn default_user_network_config() -> UserNetworkConfig {
+    let defaults = NetworkConfig::default();
+    UserNetworkConfig {
+        bootstrap_url: Some(defaults.bootstrap_url),
+        relay_url: Some(defaults.relay_url),
+    }
+}
+
+#[tauri::command]
+fn set_user_network_config<R: Runtime>(
+    app: AppHandle<R>,
+    bootstrap_url: Url2,
+    relay_url: Url2,
+) -> Result<(), String> {
+    let config = UserNetworkConfig {
+        bootstrap_url: Some(bootstrap_url),
+        relay_url: Some(relay_url),
+    };
+    write_user_network_config(&config).map_err(|e| e.to_string())?;
+    app.restart();
+}
+
+// --- Holochain Directory ---
+
 fn holochain_dir() -> PathBuf {
+    static DIR: std::sync::OnceLock<PathBuf> = std::sync::OnceLock::new();
+    DIR.get_or_init(holochain_dir_inner).clone()
+}
+
+fn holochain_dir_inner() -> PathBuf {
     let app_data_type = if tauri::is_dev() {
         app_dirs2::AppDataType::UserCache
     } else {
