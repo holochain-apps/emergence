@@ -1,6 +1,6 @@
 import { assert, test } from "vitest";
 
-import { runScenario, pause, CallableCell } from '@holochain/tryorama';
+import { runScenario, pause, dhtSync, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
@@ -13,7 +13,7 @@ test('create a Session and get all sessions', async () => {
     const testAppPath = process.cwd() + '/../workdir/emergence.happ';
 
     // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    const appSource = { appBundleSource: { type: "path", value: testAppPath } };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -47,7 +47,7 @@ test('create a Session and get all sessions', async () => {
     }
     const _actionHashes = await createRelations(alice.cells[0], [createdRelation]);
 
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     
     // Bob gets all sessions again
     collectionOutput = await bob.cells[0].callZome({
@@ -56,14 +56,17 @@ test('create a Session and get all sessions', async () => {
       payload: null
     });
     assert.equal(collectionOutput.length, 1);
-    const sessionInfo: any = {original_hash: originalActionHash, record:createdRecord, relations:[createdRelation]}
-    assert.deepEqual(sessionInfo, collectionOutput[0]);
+    assert.deepEqual(originalActionHash, collectionOutput[0].original_hash);
+    assert.deepEqual(createdRecord, collectionOutput[0].record);
+    assert.equal(collectionOutput[0].relations.length, 1);
+    assert.deepEqual(createdRelation, collectionOutput[0].relations[0].relation);
 
     // Alice updates the session
     let updatedTitle = "title2";
     let updateInput = {
       original_session_hash: originalActionHash,
       previous_session_hash: originalActionHash,
+      updated_type: sessionRecord.session_type,
       updated_title: updatedTitle,
       updated_amenities: 1,
       updated_description: sessionRecord.description,
@@ -81,8 +84,8 @@ test('create a Session and get all sessions', async () => {
     });
     assert.ok(updatedRecord);
 
-    await pause(1200);
-    
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
+
     // Bob gets all sessions again
     collectionOutput = await bob.cells[0].callZome({
       zome_name: "emergence",
@@ -90,8 +93,10 @@ test('create a Session and get all sessions', async () => {
       payload: null
     });
     assert.equal(collectionOutput.length, 1);
-    const sessionInfo2: any = {original_hash: originalActionHash, record:updatedRecord, relations:[createdRelation]}
-    assert.deepEqual(sessionInfo2, collectionOutput[0]);
+    assert.deepEqual(originalActionHash, collectionOutput[0].original_hash);
+    assert.deepEqual(updatedRecord, collectionOutput[0].record);
+    assert.equal(collectionOutput[0].relations.length, 1);
+    assert.deepEqual(createdRelation, collectionOutput[0].relations[0].relation);
 
 
   });

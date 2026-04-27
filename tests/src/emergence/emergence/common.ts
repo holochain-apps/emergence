@@ -7,11 +7,12 @@ export async function sampleSession(cell: CallableCell, partialSession = {}) {
 	  key: "ABCD",
 	  title: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
     description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
-    leaders: [cell.cell_id[1]],
+    leaders: [{ type: "Agent", hash: cell.cell_id[1] }],
     smallest: 2,
     largest: 50,
     duration: 60,
     amenities: 1,
+    session_type: 0,
     trashed: false,
           },
         ...partialSession
@@ -58,8 +59,10 @@ export async function sampleNote(cell: CallableCell, partialNote = {}) {
   return {
       ...{
   text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+  session: await fakeActionHash(),
   tags: [],
   pic: null,
+  trashed: false,
       },
       ...partialNote
   };

@@ -1,6 +1,6 @@
 import { assert, test } from "vitest";
 
-import { runScenario, pause, CallableCell } from '@holochain/tryorama';
+import { runScenario, pause, dhtSync, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource, fakeDnaHash, fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
@@ -13,7 +13,7 @@ test('create Session', async () => {
     const testAppPath = process.cwd() + '/../workdir/emergence.happ';
 
     // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    const appSource = { appBundleSource: { type: "path", value: testAppPath } };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -36,7 +36,7 @@ test('create and read Session', async () => {
     const testAppPath = process.cwd() + '/../workdir/emergence.happ';
 
     // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    const appSource = { appBundleSource: { type: "path", value: testAppPath } };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -53,7 +53,7 @@ test('create and read Session', async () => {
     assert.ok(record);
 
     // Wait for the created entry to be propagated to the other node.
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
     // Bob gets the created Session
     const createReadOutput: Record = await bob.cells[0].callZome({
@@ -72,7 +72,7 @@ test('create and update Session', async () => {
     const testAppPath = process.cwd() + '/../workdir/emergence.happ';
 
     // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    const appSource = { appBundleSource: { type: "path", value: testAppPath } };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -95,6 +95,7 @@ test('create and update Session', async () => {
     let updateInput = {
       original_session_hash: originalActionHash,
       previous_session_hash: originalActionHash,
+      updated_type: sessionRecord.session_type,
       updated_title: updatedTitle,
       updated_amenities: updatedAmenities,
       updated_description: sessionRecord.description,
@@ -113,7 +114,7 @@ test('create and update Session', async () => {
     assert.ok(updatedRecord);
 
     // Wait for the updated entry to be propagated to the other node.
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
         
     // Bob gets the updated Session
     const readUpdatedOutput0: Record = await bob.cells[0].callZome({
@@ -128,9 +129,10 @@ test('create and update Session', async () => {
     // Alice updates the Session again
     updatedTitle = "title3";
     updatedAmenities = 10;
-    updateInput = { 
+    updateInput = {
       original_session_hash: originalActionHash,
       previous_session_hash: updatedRecord.signed_action.hashed.hash,
+      updated_type: sessionRecord.session_type,
       updated_title: updatedTitle,
       updated_amenities: updatedAmenities,
       updated_description: sessionRecord.description,
@@ -149,7 +151,7 @@ test('create and update Session', async () => {
     assert.ok(updatedRecord);
 
     // Wait for the updated entry to be propagated to the other node.
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
         
     // Bob gets the updated Session
     const readUpdatedOutput1: Record = await bob.cells[0].callZome({
@@ -170,7 +172,7 @@ test('create and delete Session', async () => {
     const testAppPath = process.cwd() + '/../workdir/emergence.happ';
 
     // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    const appSource = { appBundleSource: { type: "path", value: testAppPath } };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -193,7 +195,7 @@ test('create and delete Session', async () => {
     assert.ok(deleteActionHash);
 
     // Wait for the entry deletion to be propagated to the other node.
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
         
     // Bob tries to get the deleted Session
     const readDeletedOutput = await bob.cells[0].callZome({

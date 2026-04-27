@@ -280,7 +280,7 @@ test('scale testing', async () => {
       const testAppPath = process.cwd() + '/../workdir/emergence.happ';
 
       // Set up the app to be installed 
-      const appSource = { appBundleSource: { path: testAppPath } };
+      const appSource = { appBundleSource: { type: "path", value: testAppPath } };
       const appSources = []
       for (let x=0; x< conductorCount; x=x+1) {
         appSources.push(appSource)

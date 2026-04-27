@@ -1,5 +1,5 @@
 import { assert, test } from "vitest";
-import { runScenario, pause, CallableCell } from '@holochain/tryorama';
+import { runScenario, pause, dhtSync, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
@@ -12,7 +12,7 @@ test('create a timeWindow and get all timeWindows', async () => {
     const testAppPath = process.cwd() + '/../workdir/emergence.happ';
 
     // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    const appSource = { appBundleSource: { type: "path", value: testAppPath } };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -35,7 +35,7 @@ test('create a timeWindow and get all timeWindows', async () => {
     const actionHash = await createTimeWindow(alice.cells[0]);
     assert.ok(createdTimeWindow);
     
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     
     // Bob gets all timeWindows again
     collectionOutput = await bob.cells[0].callZome({

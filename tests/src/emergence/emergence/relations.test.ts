@@ -1,5 +1,5 @@
 import { assert, test } from "vitest";
-import { runScenario, pause, CallableCell } from '@holochain/tryorama';
+import { runScenario, pause, dhtSync, CallableCell } from '@holochain/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 
@@ -12,7 +12,7 @@ test('create a relation and get all relations', async () => {
     const testAppPath = process.cwd() + '/../workdir/emergence.happ';
 
     // Set up the app to be installed 
-    const appSource = { appBundleSource: { path: testAppPath } };
+    const appSource = { appBundleSource: { type: "path", value: testAppPath } };
 
     // Add 2 players with the test app to the Scenario. The returned players
     // can be destructured.
@@ -36,7 +36,7 @@ test('create a relation and get all relations', async () => {
     const actions = await createRelations(alice.cells[0], [createdRelation]);
     assert.ok(actions);
     
-    await pause(1200);
+    await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
     
     // Bob gets all relations again
     collectionOutput = await bob.cells[0].callZome({
@@ -45,7 +45,7 @@ test('create a relation and get all relations', async () => {
       payload: createdRelation.src
     });
     assert.equal(collectionOutput.length, 1);
-    assert.deepEqual(createdRelation, collectionOutput[0]);   
+    assert.deepEqual(createdRelation, collectionOutput[0].relation);
 
     // const agentRelation = await sampleRelationAgent(bob.cells[0])
     // const actionHash2 = await createRelation(bob.cells[0], agentRelation);
@@ -70,7 +70,7 @@ test('create a tag relation and get tags', async () => {
       const testAppPath = process.cwd() + '/../workdir/emergence.happ';
   
       // Set up the app to be installed 
-      const appSource = { appBundleSource: { path: testAppPath } };
+      const appSource = { appBundleSource: { type: "path", value: testAppPath } };
   
       // Add 2 players with the test app to the Scenario. The returned players
       // can be destructured.
@@ -95,7 +95,7 @@ test('create a tag relation and get tags', async () => {
       const actionsBob = await createRelations(bob.cells[0], [tagRelation]);
       assert.ok(actions);
 
-      await pause(1200);
+      await dhtSync([alice, bob], alice.cells[0].cell_id[0]);
 
       // Bob gets all relations again and should show just one tag.
       collectionOutput = await bob.cells[0].callZome({
@@ -104,7 +104,7 @@ test('create a tag relation and get tags', async () => {
         payload: null
       });
       assert.equal(collectionOutput.length, 1);
-      assert.deepEqual(tagRelation.content.data, collectionOutput[0]);   
+      assert.equal(tagRelation.content.data, (collectionOutput[0] as any).tag);
 
 
     });
