@@ -89,13 +89,13 @@
     <div class="choices">
       <div class="choice-card" on:click={() => mode = 'create'} on:keydown={() => mode = 'create'}>
         <SvgIcon icon="faSquarePlus" size="32px" color="#fff"/>
-        <h3>Create a Network</h3>
-        <p>Start a new collaboration space</p>
+        <h3>Create</h3>
+        <p>Start a new Holochain network for your conference.</p>
       </div>
       <div class="choice-card" on:click={() => mode = 'join'} on:keydown={() => mode = 'join'}>
         <SvgIcon icon="personMail" size="32px" color="#fff"/>
-        <h3>Join a Network</h3>
-        <p>Enter a joining code from someone else</p>
+        <h3>Join</h3>
+        <p>Enter a joining code to access an existing conference network.</p>
       </div>
     </div>
 

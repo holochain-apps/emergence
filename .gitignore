@@ -13,3 +13,4 @@
 .running
 *.code-workspace
 .kitsune2_bootstrap_srv
+.claude/

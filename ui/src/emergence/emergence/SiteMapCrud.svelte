@@ -31,7 +31,8 @@ let tags: Array<string> = []
 let errorSnackbar: Snackbar;
 
 $: text
-$: isSiteMapValid = text !== ""
+$: pic
+$: isSiteMapValid = text !== "" && pic !== undefined
 
 onMount(() => {
 });
@@ -104,7 +105,7 @@ let dialog
   </div>
 
   <div style="margin-bottom: 16px">
-    <span>Add a pic (optional):</span >
+    <span>Add a pic:</span >
   
       <upload-files
         bind:this={uploadFiles}

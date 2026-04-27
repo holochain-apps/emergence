@@ -34,6 +34,10 @@
     $: activeDnaHash = cloneManagerStore.activeDnaHash;
     $: activeDnaHashB64 = encodeHashToBase64($activeDnaHash);
 
+    let manualConfig = false
+    $: unconfigured = (!$sitemaps || $sitemaps.length==0) && (!$allWindows || $allWindows.length==0)
+    $: showInitialSetup = unconfigured && !manualConfig
+
     // --- Network server config (tauri only) ---
     let bootstrapUrl = "";
     let relayUrl = "";
@@ -310,6 +314,12 @@
 
     const handleApplyTemplate = async (e) => {
         await doImport(e.detail);
+        const maps = get(store.maps)
+        if (maps && maps.length > 0) {
+            const s = get(store.settings)
+            s.current_sitemap = maps[maps.length - 1].original_hash
+            await store.setSettings(s)
+        }
     };
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
@@ -324,26 +334,39 @@
   </div>
 <div class="pane-content">
     <div class="admin-header">
-        <h2>Emergence v{APP_VERSION} (DNA {DNA_VERSION}): Administration and Configuration</h2>
-        <p>This page is available because you enabled being a conference steward.</p>
-        <p>Use the buttons below to configure and administer the various aspects of your conference.</p>
+        <h2>Emergence: Administration and Configuration</h2> 
+        <p>Version: {APP_VERSION} (DNA {DNA_VERSION})</p>
     </div>
     <div class="admin-controls">
         <!-- <sl-button style="margin: 8px;"  on:click={async () => { throw("error!")} }>
             Error!
         </sl-button> -->
 
-        {#if (!$sitemaps || $sitemaps.length==0) && (!$allWindows || $allWindows.length==0)}
+        {#if showInitialSetup}
         <div class="admin-section">
             <div class="admin-section-desc">
-                <h3>Quick Setup</h3>
-                <p>Get started quickly by selecting an event template.</p>
+                <h3>Get Started</h3>
+                <p>Configure Emergence by choosing how to begin.</p>
             </div>
             <div class="admin-section-right">
-                <sl-button variant="primary" on:click={() => templateSelector.open()}>
-                    Choose Template
+                <sl-button variant="primary" style="margin: 8px;" on:click={() => templateSelector.open()}>
+                    Quick Setup
+                </sl-button>
+                <sl-button style="margin: 8px;" on:click={() => fileinput.click()}>
+                    Import a Setup
+                </sl-button>
+                <sl-button style="margin: 8px;" on:click={() => manualConfig = true}>
+                    Manual Config
                 </sl-button>
             </div>
+        </div>
+        {:else}
+
+        {#if unconfigured && manualConfig}
+        <div style="text-align:right; margin-bottom:8px;">
+            <sl-button size="small" variant="text" on:click={() => manualConfig = false}>
+                ← Back to Quick Setup
+            </sl-button>
         </div>
         {/if}
 
@@ -506,6 +529,7 @@
                 {/if}
             </sl-details>
         </div>
+        {/if}
         {/if}
     </div>
   
