@@ -133,16 +133,41 @@ sections (Site-maps, Scheduling, Proxy Agents, etc.) take over.
 
 ## Resetting
 
-When something is wrong and you want a clean slate:
+`stop:hwc` deliberately leaves `/tmp/emergence-local-dev` intact so
+you can post-mortem the logs (`linker.log`, `conductor.log`,
+`bootstrap.log`, `progenitor.log`, `joining.log`) after a failed
+session. When you actually want a clean slate:
 
 ```bash
 npm run stop:hwc
-rm -rf /tmp/emergence-local-dev
+npm run clean:hwc      # wipes /tmp/emergence-local-dev + ui/public/emergence.happ
 ```
+
+`clean:hwc` refuses to run while any tracked process is alive, so
+you'll always stop first.
 
 Then in the HWC extension popup, click "Wipe Storage" (or remove and
 re-add the extension). This clears the cached agent key + linker
 selection so the next visit goes through a fresh `joinAndInstall`.
+Skipping the browser-side wipe leaves orphan agents on the
+background conductor whose private keys are gone — kitsune2 will
+keep trying to refresh their bootstrap entries forever (`Public key
+not found in keystore` in `linker.log`), which can wedge gossip.
+
+### Three k2 nodes — what each log covers
+
+The local stack runs three separate kitsune2 nodes that all peer up
+through the bootstrap+relay at `127.0.0.1:$BOOTSTRAP_PORT`:
+
+| Process | Log file | Role of its k2 |
+| --- | --- | --- |
+| `h2hc-linker` | `linker.log` | linker's own k2 for browser-agent DHT participation; also has the WebSocket route the browser talks to |
+| `hc sandbox` background conductor | `conductor.log` | the conductor whose admin port the linker uses for `installApp` (`H2HC_LINKER_CONDUCTOR_URL`); as a peer it's just another k2 node on the DHT |
+| `hc-spin` progenitor | `progenitor.log` | the progenitor window's conductor (separate process tree, separate sandbox under `/tmp/nix-shell.*`) |
+
+When peer discovery is broken, look at `iroh::magicsock` lines — each
+node logs its own `me=<short-id>` and connects to `remote=<short-id>`
+peers. All three short-ids should show up as remotes of each other.
 
 ## Status
 

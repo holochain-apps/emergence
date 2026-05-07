@@ -18,12 +18,22 @@
 #
 # When done, `npm run stop:hwc` tears everything down.
 #
+# The stack runs THREE separate kitsune2 nodes that gossip on the
+# same DHT via the local bootstrap+relay:
+#   1. h2hc-linker's own k2     (browser-agent DHT participation)
+#   2. the "background conductor" started by `hc sandbox generate`
+#      here  (linker's H2HC_LINKER_CONDUCTOR_URL points at its admin
+#      port for installApp; as a peer it's just another k2 node)
+#   3. the progenitor's hc-spin conductor                (the
+#      "progenitor window")
+#
 # Usage:
 #   ./deploy/local-dev.sh              Start bootstrap + conductor + linker (foreground, no joining service)
 #   ./deploy/local-dev.sh joining      Also start local joining service
 #   ./deploy/local-dev.sh progenitor   Run hc-spin as progenitor against an already-running stack
-#   ./deploy/local-dev.sh stop         Stop all local services
+#   ./deploy/local-dev.sh stop         Stop all local services (preserves $SANDBOX_DIR for forensics)
 #   ./deploy/local-dev.sh status       Show component status
+#   ./deploy/local-dev.sh clean        Wipe $SANDBOX_DIR (logs + conductor state + repacked .happ)
 #
 # Env (all have defaults):
 #   NETWORK_SEED           shared by every conductor + hc-spin   (default: emergence-local-dev)
@@ -91,15 +101,30 @@ check_prereqs() {
         ok=false
     fi
 
-    if [ ! -f "$LINKER_BINARY" ]; then
-        log_info "Building h2hc-linker..."
-        (cd "$H2HC_LINKER_DIR" && cargo build --release) || {
-            log_error "Failed to build linker"; ok=false;
-        }
-    elif ! "$LINKER_BINARY" --help >/dev/null 2>&1; then
-        # Stale nix-store interpreter from a previous build.
-        log_warn "Linker binary present but won't run (stale interpreter); rebuilding..."
-        (cd "$H2HC_LINKER_DIR" && cargo build --release) || {
+    # Always run `cargo build --release` against the local linker checkout
+    # so source edits in ../h2hc-linker get picked up on the next start
+    # without a manual rebuild step. Cargo's own incremental check
+    # short-circuits when nothing has changed (sub-second), and the prior
+    # presence-only guard silently shipped stale binaries when the source
+    # was edited between runs.
+    if [ ! -d "$H2HC_LINKER_DIR" ]; then
+        log_error "h2hc-linker checkout not found at $H2HC_LINKER_DIR"
+        ok=false
+    else
+        log_info "Building h2hc-linker (cargo skips if up to date)..."
+        if ! (cd "$H2HC_LINKER_DIR" && cargo build --release) >/dev/null 2>&1; then
+            log_error "Failed to build linker. Re-run with verbose output:"
+            log_error "  (cd $H2HC_LINKER_DIR && cargo build --release)"
+            ok=false
+        fi
+    fi
+    # Guard against the rare nix-store-interpreter staleness that survives
+    # a successful build (e.g. cached binary from a previous nix develop).
+    if [ "$ok" = true ] && [ -f "$LINKER_BINARY" ] \
+        && ! "$LINKER_BINARY" --help >/dev/null 2>&1; then
+        log_warn "Linker binary won't run (stale interpreter); forcing rebuild..."
+        (cd "$H2HC_LINKER_DIR" && cargo clean -p h2hc-linker --release \
+            && cargo build --release) || {
             log_error "Failed to rebuild linker"; ok=false;
         }
     fi
@@ -454,7 +479,7 @@ JSONEOF
 
 # --- Progenitor (hc-spin) ---
 # Run a separate full-arc agent via hc-spin, joined to the same
-# bootstrap+relay+network-seed as the linker's conductor. The first agent
+# bootstrap+relay+network-seed as the background conductor. The first agent
 # to complete the initial-config wizard (Quick Setup / Manual Config) on
 # the Admin pane becomes the de-facto progenitor; emergence's dna.yaml
 # does not bake in a progenitor_pubkey, so all integrity validation runs
@@ -614,6 +639,44 @@ cmd_stop() {
     fi
 }
 
+# --- Clean ---
+# Wipe $SANDBOX_DIR (logs, conductor state, repacked .happ, stamped
+# joining config). Refuses to run while any tracked process is still
+# alive — call `stop` first. We deliberately do NOT clean on `stop`
+# itself: leaving the sandbox dir intact is what makes post-mortem
+# `tail .../linker.log` etc. useful when debugging gossip stalls or
+# zombie agents.
+cmd_clean() {
+    local alive=()
+    for name in bootstrap conductor linker joining progenitor; do
+        local F="$SANDBOX_DIR/${name}.pid"
+        [ -f "$F" ] && kill -0 "$(cat "$F")" 2>/dev/null && alive+=("$name")
+    done
+    if [ ${#alive[@]} -gt 0 ]; then
+        log_error "Cannot clean while running: ${alive[*]}"
+        log_error "Run './deploy/local-dev.sh stop' first."
+        exit 1
+    fi
+
+    if [ ! -d "$SANDBOX_DIR" ]; then
+        log_info "Sandbox dir $SANDBOX_DIR does not exist; nothing to clean."
+        return 0
+    fi
+
+    log_info "Wiping sandbox dir $SANDBOX_DIR..."
+    rm -rf "$SANDBOX_DIR"
+
+    # Also remove the staged .happ. Vite serves it from ui/public/ to
+    # the HWC extension; if the seed in the worktree's dna.yaml has
+    # diverged from the staged bundle, wiping forces start to repack.
+    if [ -f "$PROJECT_DIR/ui/public/emergence.happ" ]; then
+        rm -f "$PROJECT_DIR/ui/public/emergence.happ"
+        log_info "Removed staged ui/public/emergence.happ"
+    fi
+
+    log_info "Clean complete."
+}
+
 # --- Status ---
 cmd_status() {
     echo ""
@@ -717,5 +780,6 @@ case "${1:-start}" in
     progenitor)  cmd_progenitor ;;
     stop)        cmd_stop ;;
     status)      cmd_status ;;
-    *)           echo "Usage: $0 [start|joining|progenitor|stop|status]"; exit 1 ;;
+    clean)       cmd_clean ;;
+    *)           echo "Usage: $0 [start|joining|progenitor|stop|status|clean]"; exit 1 ;;
 esac
