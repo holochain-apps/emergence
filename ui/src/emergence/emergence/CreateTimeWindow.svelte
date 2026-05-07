@@ -21,6 +21,8 @@ let tags: Array<string> = []
 
 let errorSnackbar: Snackbar;
 
+$: settings = store.settings;
+$: t = store.terms;
 $: duration, start, tags;
 $: isTimeWindowValid = duration > 0 && start;
 
@@ -78,14 +80,16 @@ label="Create Time Slot"
     value={duration}
     on:input={e=>setLen(parseInt(e.target.value))}
   ></sl-input>
+  {#if $settings.sections_active}
   <div style="margin-bottom: 16px">
-    <span>Slot type:</span >
-    <MultiSelect 
-      bind:selected={tags} 
-      options={store.getSlotTypeTags()} 
+    <span>{$t.section.S}:</span >
+    <MultiSelect
+      bind:selected={tags}
+      options={store.getSectionTags()}
       allowUserOptions={true}
       />
   </div>
+  {/if}
 
   </div>
             

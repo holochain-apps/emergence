@@ -5,7 +5,7 @@
     import type { EmergenceStore } from '../../stores/emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
     import { sessionSelfTags, type Info, type Note, type InfoSession, APP_VERSION, DNA_VERSION, type SessionType, type Amenity } from "./types";
-    import { DEFAULT_SPACE_TERM, DEFAULT_SITEMAP_TERM } from "./terms";
+    import { DEFAULT_SPACE_TERM, DEFAULT_SITEMAP_TERM, DEFAULT_SECTION_TERM } from "./terms";
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
@@ -14,6 +14,7 @@
     import '@shoelace-style/shoelace/dist/components/option/option.js';
     import '@shoelace-style/shoelace/dist/components/details/details.js';
     import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
+    import '@shoelace-style/shoelace/dist/components/switch/switch.js';
     import SenseResults from "./SenseResults.svelte";
         import { toPromise } from "@holochain-open-dev/stores";
     import DisableForOs from "./DisableForOs.svelte";
@@ -410,10 +411,23 @@
         await store.setSettings(s)
     }
 
-    const updateTerm = async (key: "space_term" | "sitemap_term", value: string) => {
+    const updateTerm = async (key: "space_term" | "sitemap_term" | "section_term", value: string) => {
         const s = get(store.settings)
         const trimmed = value.trim()
         s[key] = trimmed === "" ? undefined : trimmed
+        await store.setSettings(s)
+    }
+
+    const toggleSectionsActive = async () => {
+        const s = get(store.settings)
+        s.sections_active = !s.sections_active
+        await store.setSettings(s)
+    }
+
+    const toggleGameEnabled = async () => {
+        const s = get(store.settings)
+        s.game_enabled = !s.game_enabled
+        if (!s.game_enabled) s.game_active = false
         await store.setSettings(s)
     }
 
@@ -514,6 +528,9 @@
                         <div slot="content" style="text-align:left;">
                             <strong>Space</strong> &mdash; what you call the place where a session happens. A workshop might call it a <em>Room</em>; a restaurant gathering might use <em>Table</em>; a conference might prefer <em>Venue</em> or <em>Location</em>.<br/><br/>
                             <strong>Site Map</strong> &mdash; the visual layout that {DEFAULT_SPACE_TERM.toLowerCase()}s sit on. Could be <em>Building Layout</em>, <em>Venue Guide</em>, <em>Floor Plan</em>, etc.<br/><br/>
+                            {#if $settings.sections_active}
+                            <strong>Section</strong> &mdash; a named partition of the event in time or space. Tag {DEFAULT_SPACE_TERM.toLowerCase()}s, time windows, and {DEFAULT_SITEMAP_TERM.toLowerCase()}s with the same Section to bundle them. Could be <em>Phase</em>, <em>Day</em>, <em>Track</em>, <em>Mode</em>, etc.<br/><br/>
+                            {/if}
                             Enter the <em>singular</em> form. Plural is generated automatically (Room → Rooms). Capitalization is handled per-context.
                         </div>
                         <span class="info-icon" tabindex="0"><SvgIcon icon="faCircleInfo" size="14px" color="#666" /></span>
@@ -536,6 +553,53 @@
                     on:sl-change={(e) => updateTerm("sitemap_term", e.target.value)}
                     style="min-width:220px;"
                 ></sl-input>
+                {#if $settings.sections_active}
+                <sl-input
+                    label="Section term (singular)"
+                    placeholder={DEFAULT_SECTION_TERM}
+                    value={$settings.section_term ?? ""}
+                    on:sl-change={(e) => updateTerm("section_term", e.target.value)}
+                    style="min-width:220px;"
+                ></sl-input>
+                {/if}
+            </div>
+        </div>
+
+        <div class="admin-section" style="flex-direction:column">
+            <div class="admin-section-desc">
+                <h3 style="display:flex; align-items:center; gap:6px;">
+                    Optional Features
+                    <sl-tooltip
+                        placement="bottom"
+                        class="settings-help-tooltip"
+                        style="
+                            --max-width: 460px;
+                            --sl-tooltip-background-color: #ffffff;
+                            --sl-tooltip-color: #111;
+                            --sl-tooltip-border-radius: 14px;
+                            --sl-tooltip-padding: 28px 32px;
+                            --sl-tooltip-font-size: 14px;
+                            --sl-tooltip-line-height: 1.5;
+                            --sl-tooltip-arrow-size: 8px;
+                        ">
+                        <div slot="content" style="text-align:left;">
+                            <strong>Sections</strong> &mdash; partition the event in time or space. Use this when your event has distinct phases where the {DEFAULT_SPACE_TERM.toLowerCase()}s, time windows, or {DEFAULT_SITEMAP_TERM.toLowerCase()} change &mdash; e.g., a main-venue day vs. a field-trip day. When enabled, {DEFAULT_SPACE_TERM.toLowerCase()}s, time windows, and {DEFAULT_SITEMAP_TERM.toLowerCase()}s can be tagged with a Section name; the schedule board can filter to one Section at a time. The label is configurable in Terminology (Section, Phase, Day, Track, Mode, etc.).<br/><br/>
+                            <strong>Sense-making game</strong> &mdash; a swipe-card interest assessment for large groups, used to register interest interactively in real time. When enabled, an admin section appears for activating the live game and viewing attendance projections.
+                        </div>
+                        <span class="info-icon" tabindex="0"><SvgIcon icon="faCircleInfo" size="14px" color="#666" /></span>
+                    </sl-tooltip>
+                </h3>
+                <p>Enable optional features for this event. Off by default; turn on only what you need.</p>
+            </div>
+            <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:8px; align-items:center;">
+                <sl-switch
+                    checked={$settings.sections_active}
+                    on:sl-change={toggleSectionsActive}
+                >Sections</sl-switch>
+                <sl-switch
+                    checked={$settings.game_enabled}
+                    on:sl-change={toggleGameEnabled}
+                >Sense-making game</sl-switch>
             </div>
         </div>
 
@@ -747,6 +811,7 @@
             </div>
         </div>
 
+        {#if $settings.game_enabled}
         <div class="admin-section" style="flex-direction:column">
             <div style="flex-direction:row;display:flex; justify-content:space-between">
                 <div class="admin-section-desc">
@@ -767,12 +832,13 @@
             </div>
             <div class="game-status">
                 <h3>Total Attendees: {store.peopleCount() || 0}</h3>
-          
+
                 <h3> Sensemaking game is {#if $settings.game_active}Active{:else}Inactive{/if}</h3>
                 <SenseResults></SenseResults>
             </div>
-        
+
         </div>
+        {/if}
               
         <div class="admin-section" style="flex-direction:column">
             <div style="flex-direction:row;display:flex; justify-content:space-between">

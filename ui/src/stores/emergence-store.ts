@@ -142,7 +142,7 @@ export class EmergenceStore {
     searchVisible: false,
     syncing: 0,
   })
-  settings: Writable<Settings> = writable({game_active: false, session_types: [], amenities: []})
+  settings: Writable<Settings> = writable({game_active: false, session_types: [], amenities: [], sections_active: false, game_enabled: false})
   terms = derived(this.settings, termsFromSettings)
   _peopleCount: number
   async downloadFile(fileHash: EntryHash) : Promise< DownloadedFile | undefined> {
@@ -562,7 +562,7 @@ export class EmergenceStore {
     this.timeWindows.update((n) => {return timeWindows} )
   }
 
-  getSlotTypeTags(): Array<string> {
+  getSectionTags(): Array<string> {
     const tags = new Set()
     get(this.timeWindows).forEach(w=> w.tags.forEach(t=>tags.add(t)))
     get(this.spaces).forEach(s=> s.record.entry.tags.forEach(t=>tags.add(t)))

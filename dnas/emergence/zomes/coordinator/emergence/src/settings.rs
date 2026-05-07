@@ -46,6 +46,9 @@ pub fn get_settings(_: ()) -> ExternResult<Settings> {
             amenities: vec![],
             space_term: None,
             sitemap_term: None,
+            sections_active: false,
+            game_enabled: false,
+            section_term: None,
         });
     }
     links.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));

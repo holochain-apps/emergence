@@ -34,6 +34,12 @@ pub struct Settings {
     pub space_term: Option<String>,
     #[serde(default)]
     pub sitemap_term: Option<String>,
+    #[serde(default)]
+    pub sections_active: bool,
+    #[serde(default)]
+    pub game_enabled: bool,
+    #[serde(default)]
+    pub section_term: Option<String>,
 }
 
 pub fn validate_create_settings(

@@ -33,6 +33,7 @@ let errorSnackbar: Snackbar;
 $: text
 $: pic
 $: t = store.terms
+$: settings = store.settings
 $: isSiteMapValid = text !== "" && pic !== undefined
 
 onMount(() => {
@@ -96,14 +97,16 @@ let dialog
     ></sl-textarea>
   </div>
 
+  {#if $settings.sections_active}
   <div style="margin-bottom: 16px">
-    <span>Slot type:</span >
-    <MultiSelect 
-      bind:selected={tags} 
-      options={store.getSlotTypeTags()}
+    <span>{$t.section.S}:</span >
+    <MultiSelect
+      bind:selected={tags}
+      options={store.getSectionTags()}
       allowUserOptions={true}
       />
   </div>
+  {/if}
 
   <div style="margin-bottom: 16px">
     <span>Add a pic:</span >

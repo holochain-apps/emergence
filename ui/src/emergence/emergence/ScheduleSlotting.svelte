@@ -25,17 +25,17 @@
   let loading = true;
   let error: any = undefined;
   let creatingTimeWindow = false
-  let slotType: string 
-  $: slotType
+  let section: string 
+  $: section
   $: uiProps = store.uiProps
 
   $: loading, error, creatingTimeWindow;
   $: allSpaces = store.spaces
-  $: filteredSpaces = filterSpaces($allSpaces, slotType)
+  $: filteredSpaces = filterSpaces($allSpaces, section)
   $: allWindows = store.timeWindows
-  $: filteredWindows = filterWindows($allWindows, slotType)
+  $: filteredWindows = filterWindows($allWindows, section)
 
-  $: days = calcDays(filteredWindows, slotType, $uiProps.sessionsFilter) 
+  $: days = calcDays(filteredWindows, section, $uiProps.sessionsFilter) 
   $: sessions = store.sessions
   $: projection = store.sessionInterestProjection($sessions)
 
@@ -62,8 +62,8 @@
 
   onMount(async () => {
     const currentMap = store.getCurrentSiteMap()
-    if (currentMap && slotTypeFilterSelect) {
-      slotTypeFilterSelect.value = currentMap.record.entry.tags[0]
+    if (currentMap && sectionFilterSelect) {
+      sectionFilterSelect.value = currentMap.record.entry.tags[0]
     }
     loading = false
   });
@@ -283,10 +283,10 @@
 
   
   const windowToolTip = (window) => {
-    return `${timeWindowDurationToStr(window)} ${window.tags.length > 0 ? `slot types: ${window.tags.join(",")}`:""}`
+    return `${timeWindowDurationToStr(window)} ${window.tags.length > 0 ? `${$t.section.p}: ${window.tags.join(",")}`:""}`
   }
   const spaceToolTip = (space) => {
-    return `${space.record.entry.tags.length > 0 ? `slot types: ${space.record.entry.tags.join(",")}`:""}`
+    return `${space.record.entry.tags.length > 0 ? `${$t.section.p}: ${space.record.entry.tags.join(",")}`:""}`
   }
   const isExcluded = (window, space) : boolean => {
     if (window.tags.length === 0 && space.record.entry.tags.length > 0) return true
@@ -320,7 +320,7 @@
   const mergeSession = async () => {
     await store.mergeSessions(mergeA, mergeB )
   }
-  let slotTypeFilterSelect
+  let sectionFilterSelect
   let createTimeWindowDialog
 </script>
 
@@ -356,11 +356,12 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
       on:toggle-filter={()=>{showFilter = !showFilter;}}
     ></SessionFilterCtrls>
 
+    {#if $settings.sections_active}
     <sl-select style="margin-right: 5px;width: 200px;"
-    bind:this={slotTypeFilterSelect}
+    bind:this={sectionFilterSelect}
 
-    placeholder="Filter by Slot Type"
-    on:sl-change={(e) => {slotType = e.target.value 
+    placeholder="Filter by {$t.section.S}"
+    on:sl-change={(e) => {section = e.target.value
 
     }}
     pill
@@ -368,10 +369,12 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
     >
       <sl-option value={undefined}> None</sl-option>
 
-      {#each store.getSlotTypeTags() as type}
+      {#each store.getSectionTags() as type}
         <sl-option value={type}> {type}</sl-option>
       {/each}
-    </sl-select>    
+    </sl-select>
+    {/if}
+
     <sl-select style="margin-right: 5px;width: 200px;"
     placeholder="Sort {$t.space.P} By"
     value={$uiProps.spaceSort}
@@ -465,7 +468,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
             <tr>
               <td class="day" colspan="{filteredSpaces.length+1}" >{day.toDateString()}</td>
             </tr>
-            {#each windowsInDay(filteredWindows, day, slotType).sort(sortWindows) as window}
+            {#each windowsInDay(filteredWindows, day, section).sort(sortWindows) as window}
             <tr>
               <td class="time-title"
                 class:tagged={window.tags.length > 0}
@@ -519,7 +522,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
           <tr>
             <th class="empty"></th>
             {#each days as day}
-            <th style="text-align:left" colspan="{windowsInDay(filteredWindows, day, slotType).length+1}">{dayToStr(day)}</th>
+            <th style="text-align:left" colspan="{windowsInDay(filteredWindows, day, section).length+1}">{dayToStr(day)}</th>
 
             {/each}
           </tr>
@@ -528,7 +531,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
 
           {#each days as day}
             <th style=""></th>
-            {#each windowsInDay(filteredWindows, day, slotType).sort(sortWindows) as window}
+            {#each windowsInDay(filteredWindows, day, section).sort(sortWindows) as window}
               <th class="time-title"
                 class:selected={JSON.stringify(selectedWindow) ==  JSON.stringify(window)}
                 class:tagged={window.tags.length > 0}

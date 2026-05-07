@@ -32,12 +32,12 @@ $: spaces = store.sitemapFilteredSpaces()
 $: windows = store.sitemapFilteredWindows()
 $: error;
 $: uiProps = store.uiProps
-let slotType: string 
-$: slotType
+let section: string 
+$: section
 let listModeSelect: SlSelect;
 
 
-$: _days = calcDays($windows, slotType, $uiProps.sessionsFilter) 
+$: _days = calcDays($windows, section, $uiProps.sessionsFilter) 
 $: days = $uiProps.sessionSort == SessionSortOrder.Ascending ? _days : _days.reverse()
 const windowsInDaySorted = (w: Array<TimeWindow>, day: Date, type): Array<TimeWindow> => {
   let  wid: Array<TimeWindow> = windowsInDay(w, day, type).sort(sortWindows)
@@ -177,7 +177,7 @@ on:session-created={() => {} }
           <tr>
             <th class="left-sticky day-row" colspan={4} >{day.toDateString()}</th>
           </tr>
-          {#each windowsInDaySorted($windows, day, slotType) as window}
+          {#each windowsInDaySorted($windows, day, section) as window}
           <tr>
             <th class="time-title left-sticky"
             >
@@ -211,7 +211,7 @@ on:session-created={() => {} }
           <th class="top-sticky"></th>
           {#each days as day}
           <th class="top-sticky"></th>
-          <th class=" top-sticky" style="text-align:left" colspan="{windowsInDay($windows, day, slotType).length}">{dayToStr(day)}</th>
+          <th class=" top-sticky" style="text-align:left" colspan="{windowsInDay($windows, day, section).length}">{dayToStr(day)}</th>
 
           {/each}
         </tr>
@@ -220,7 +220,7 @@ on:session-created={() => {} }
         {#each days as day}
           <th class="day-col top-sticky">
           </th>
-          {#each windowsInDaySorted($windows, day, slotType) as window}
+          {#each windowsInDaySorted($windows, day, section) as window}
             <th class="time-title top-sticky"
             >
               {new Date(window.start).toTimeString().slice(0,5)}

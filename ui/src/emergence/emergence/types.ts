@@ -625,6 +625,9 @@ export interface Settings {
   amenities: Array<Amenity>,
   space_term?: string | null,
   sitemap_term?: string | null,
+  sections_active: boolean,
+  game_enabled: boolean,
+  section_term?: string | null,
 }
 
 export interface InterestData {

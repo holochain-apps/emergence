@@ -24,8 +24,10 @@ export const buildTerm = (singular: string): Term => {
 
 export const DEFAULT_SPACE_TERM = "Space"
 export const DEFAULT_SITEMAP_TERM = "Site Map"
+export const DEFAULT_SECTION_TERM = "Section"
 
 export const termsFromSettings = (settings: Settings) => ({
     space: buildTerm(settings.space_term?.trim() || DEFAULT_SPACE_TERM),
     sitemap: buildTerm(settings.sitemap_term?.trim() || DEFAULT_SITEMAP_TERM),
+    section: buildTerm(settings.section_term?.trim() || DEFAULT_SECTION_TERM),
 })

@@ -224,14 +224,16 @@ let siteMapLocation
       </div>
       {/if}
 
+      {#if $settings.sections_active}
       <div style="margin-bottom: 16px">
-        <span>Slot type:</span >
-        <MultiSelect 
-          bind:selected={tags} 
-          options={store.getSlotTypeTags()}
+        <span>{$t.section.S}:</span >
+        <MultiSelect
+          bind:selected={tags}
+          options={store.getSectionTags()}
           allowUserOptions={true}
           />
       </div>
+      {/if}
     </div>
 
     <div style="margin-bottom: 16px">
