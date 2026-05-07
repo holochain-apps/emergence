@@ -134,7 +134,7 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
       {/if}
       {#if showTags}
         <div class="tags">
-          {#if session.record.entry.session_type != 0}
+          {#if session.record.entry.session_type != 0 && sessionType}
             <div class="session-type" style={`background-color: ${sessionType.color};`}>{sessionType.name}</div>
           {/if}
           {#each tags as tag}
@@ -145,9 +145,9 @@ $:space = slot && slot.space ? store.getSpace(slot.space) : undefined
         </div>
       {/if}
 
-      {#if showAmenities}
+      {#if showAmenities && amenitiesList(session.record.entry.amenities, $settings.amenities).length > 0}
         <div class="amenities">
-          {amenitiesList(session.record.entry.amenities).join(", ")}
+          {amenitiesList(session.record.entry.amenities, $settings.amenities).join(", ")}
         </div>
       {/if}
     </div>

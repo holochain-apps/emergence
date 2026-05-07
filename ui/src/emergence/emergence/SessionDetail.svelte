@@ -222,22 +222,22 @@ bind:this={updateSessionDialog}
     {/if}
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <span style="margin-right: 4px"><strong>Type:</strong></span>
-      <span style="white-space: pre-line">{ $settings.session_types[entry.session_type].name }</span>
-      <div style={`margin-left:5px;width:20px;height:20px;border-radius:50%;background:${$settings.session_types[entry.session_type].color}`}>&nbsp</div>
+      <span style="white-space: pre-line">{ $settings.session_types[entry.session_type]?.name ?? "" }</span>
+      <div style={`margin-left:5px;width:20px;height:20px;border-radius:50%;background:${$settings.session_types[entry.session_type]?.color ?? "transparent"}`}>&nbsp</div>
     </div>
     <!-- <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <span style="margin-right: 4px"><strong>Smallest Group Size:</strong></span>
       <span style="white-space: pre-line">{ entry.smallest }</span>
     </div> -->
-    {#if $uiProps.amSteward}
+    {#if $uiProps.amSteward && amenitiesList(entry.amenities, $settings.amenities).length > 0}
     <div style="display: flex; flex-direction: row; margin-bottom: 16px">
       <span style="margin-right: 4px"><strong>Required Amenities:</strong></span>
       <span style="white-space: pre-line">
-        {amenitiesList(entry.amenities).join(", ")}
+        {amenitiesList(entry.amenities, $settings.amenities).join(", ")}
       </span>
     </div>
     {/if}
-      {#if $settings.session_types[$session.record.entry.session_type].can_rsvp}
+      {#if $settings.session_types[$session.record.entry.session_type]?.can_rsvp}
         <div class="call-to-action">
           <div class="interest">
             <Fa icon={faUserGroup} /> {$relData.interest.size} attending 

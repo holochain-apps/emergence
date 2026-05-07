@@ -34,6 +34,7 @@ let errorSnackbar: Snackbar;
   
 $: editing,  error, space;
 $: uiProps = store.uiProps
+$: settings = store.settings
 
 onMount(async () => {
 });
@@ -146,7 +147,7 @@ let confirmDialog
 
   <div class="space-detail">
     <div class="amenity"><img src="/images/Capacity.svg"> Up to { space.record.entry.capacity }</div>
-    {#each amenitiesList(space.record.entry.amenities) as amenity}
+    {#each amenitiesList(space.record.entry.amenities, $settings.amenities) as amenity}
       <div class="amenity"><img src="/images/{amenity}.svg"> {amenity}</div>
     {/each}
   </div>

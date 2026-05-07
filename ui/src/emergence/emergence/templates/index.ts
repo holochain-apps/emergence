@@ -1,5 +1,6 @@
 import workshop1day from './workshop-1day.json';
 import unconference2day from './unconference-2day.json';
+import type { Amenity, SessionType } from '../types';
 
 export interface TemplateWindow {
   dayOffset: number;
@@ -34,6 +35,8 @@ export interface Template {
   description: string;
   maps: TemplateMap[];
   windows: TemplateWindow[];
+  sessionTypes?: SessionType[];
+  amenities?: Amenity[];
 }
 
 export const templates: Template[] = [workshop1day, unconference2day] as Template[];

@@ -17,7 +17,7 @@
     faTag,
   } from "@fortawesome/free-solid-svg-icons";
   import Fa from "svelte-fa";
-  import { defaultSessionsFilter, type SessionsFilter } from "./types";
+  import { activeSessionTypeIndices, defaultSessionsFilter, type SessionsFilter } from "./types";
   import { fly } from "svelte/transition";
   import type { EmergenceStore } from "../../stores/emergence-store";
   import { storeContext } from "../../contexts";
@@ -217,7 +217,7 @@
     <span style="margin-right: 10px"><Fa icon={faShapes} /></span>
     <div style="display: flex; flex-direction: column;">
       <div class="wrap-row" style="background-color:white;">
-        {#each $settings.session_types as type, idx}
+        {#each activeSessionTypeIndices($settings.session_types) as idx}
           <sl-checkbox
             checked={filter.types & (1 << idx)}
             on:sl-change={(e) => {
@@ -225,7 +225,7 @@
                 ? filter.types | (1 << idx)
                 : filter.types & ~(1 << idx);
               dispatch("update-filter", filter);
-            }}>{type.name}</sl-checkbox
+            }}>{$settings.session_types[idx].name}</sl-checkbox
           >
         {/each}
       </div>

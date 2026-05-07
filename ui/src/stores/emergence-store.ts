@@ -141,7 +141,7 @@ export class EmergenceStore {
     searchVisible: false,
     syncing: 0,
   })
-  settings: Writable<Settings> = writable({game_active: false, session_types:[]})
+  settings: Writable<Settings> = writable({game_active: false, session_types: [], amenities: []})
   _peopleCount: number
   async downloadFile(fileHash: EntryHash) : Promise< DownloadedFile | undefined> {
     let downloadedFile = this.files.get(fileHash)

@@ -2,7 +2,7 @@
 import { createEventDispatcher, getContext, onMount } from 'svelte';
 import { type EntryHash, type AgentPubKey, encodeHashToBase64, type ActionHash, decodeHashFromBase64 } from '@holochain/client';
 import { storeContext } from '../../contexts';
-import { Amenities, type Info, type Space, setAmenity, type SiteMap, type SiteLocation} from './types';
+import { activeAmenityIndices, type Info, type Space, setAmenity, type SiteMap, type SiteLocation} from './types';
 import '@shoelace-style/shoelace/dist/components/button/button.js';
 import '@shoelace-style/shoelace/dist/components/input/input.js';
 import '@shoelace-style/shoelace/dist/components/textarea/textarea.js';
@@ -47,6 +47,7 @@ let location: SiteLocation | undefined;
 let sitemap: Info<SiteMap>| undefined;
 $: sitemaps = store.maps
 $: sitemap
+$: settings = store.settings
 
 let uploadFiles: UploadFiles
 
@@ -209,16 +210,18 @@ let siteMapLocation
         ></sl-input>
       </div>
 
+      {#if activeAmenityIndices($settings.amenities).length > 0}
       <div style="margin-bottom: 16px">
         <div style="font-size: 16px">Amenities Available </div>
-        {#each Amenities as amenity, i}
-          <sl-checkbox 
+        {#each activeAmenityIndices($settings.amenities) as i}
+          <sl-checkbox
             bind:this={amenityElems[i]}
             checked={(amenities >> i)&1}
             on:sl-change={e => { amenities = setAmenity(amenities, i, e.target.checked)} }
-          >{amenity}</sl-checkbox>
+          >{$settings.amenities[i].name}</sl-checkbox>
         {/each}
       </div>
+      {/if}
 
       <div style="margin-bottom: 16px">
         <span>Slot type:</span >

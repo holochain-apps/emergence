@@ -24,7 +24,8 @@ pub enum EntryTypes {
     Space(Space),
     Note(Note),
     Map(Map),
-    ProxyAgent(ProxyAgent)
+    ProxyAgent(ProxyAgent),
+    Settings(Settings),
 }
 #[derive(Serialize, Deserialize)]
 #[hdk_link_types]
@@ -91,6 +92,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 proxy_agent,
                             )
                         }
+                        EntryTypes::Settings(settings) => {
+                            validate_create_settings(
+                                EntryCreationAction::Create(action),
+                                settings,
+                            )
+                        }
                     }
                 }
                 OpEntry::UpdateEntry { app_entry, action, .. } => {
@@ -123,6 +130,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_create_proxy_agent(
                                 EntryCreationAction::Update(action),
                                 proxy_agent,
+                            )
+                        }
+                        EntryTypes::Settings(settings) => {
+                            validate_create_settings(
+                                EntryCreationAction::Update(action),
+                                settings,
                             )
                         }
                     }
@@ -165,6 +178,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                             validate_update_proxy_agent(
                                 action,
                                 session,
+                            )
+                        }
+                        EntryTypes::Settings(settings) => {
+                            validate_update_settings(
+                                action,
+                                settings,
                             )
                         }
                         _ => {
@@ -464,6 +483,12 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 proxy_agent,
                             )
                         }
+                        EntryTypes::Settings(settings) => {
+                            validate_create_settings(
+                                EntryCreationAction::Create(action),
+                                settings,
+                            )
+                        }
                     }
                 }
                 OpRecord::UpdateEntry {
@@ -632,6 +657,9 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 Ok(result)
                             }
                         }
+                        EntryTypes::Settings(settings) => {
+                            validate_update_settings(action, settings)
+                        }
                     }
                 }
                 OpRecord::DeleteEntry { original_action_hash, action, .. } => {
@@ -719,6 +747,13 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
                                 action,
                                 original_action,
                                 original_proxy_agent,
+                            )
+                        }
+                        EntryTypes::Settings(original_settings) => {
+                            validate_delete_settings(
+                                action,
+                                original_action,
+                                original_settings,
                             )
                         }
                     }

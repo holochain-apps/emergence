@@ -12,19 +12,16 @@ struct ZomeFnInput<T> {
 #[hdk_extern]
 pub fn set_settings(input: Settings) -> ExternResult<ActionHash> {
     let path = Path::from("all_settings");
-    let serialized: SerializedBytes = input.clone().try_into().map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not convert setting"))))?;
     let path_hash = path.path_entry_hash()?;
-    let tag :LinkTag = LinkTag::new(serialized.bytes().clone());
+    let entry_action_hash = create_entry(EntryTypes::Settings(input.clone()))?;
     let action_hash = create_link(
         path_hash.clone(),
-        path_hash,
+        entry_action_hash,
         LinkTypes::Settings,
-        tag,
+        LinkTag::new(Vec::<u8>::new()),
     )?;
     if let ZomeCallResponse::Ok(response) = call(CallTargetCell::Local,"profiles",FunctionName::new("get_agents_with_profile"), None, ZomeFnInput { input: (), local: Some(true) })? {
         let agents : Vec<AgentPubKey> = response.decode().map_err(|_e| wasm_error!(WasmErrorInner::Guest(String::from("could not decode profiles agent list"))))?;
-        // let me = agent_info()?.agent_latest_pubkey;
-        //let agents = agents.into_iter().filter(|a| a != &me).collect();
         debug!("agents: {:?}", agents);
         send_remote_signal(EmergenceMessage::UpdateSettings(input), agents)?;
     }
@@ -41,24 +38,23 @@ pub fn get_settings(_: ()) -> ExternResult<Settings> {
         )?,
         GetStrategy::Local
     )?;
-    if links.len() == 0 {
+    if links.is_empty() {
         return Ok(Settings {
             game_active: false,
-            current_sitemap:None, 
-            session_types:vec![
-                SessionType {name:"Session".into(), color:"white".into(), can_rsvp: true, can_any_time: false, can_leaderless: false},
-                SessionType {name:"Children Time".into(), color:"#54ded9".into(), can_rsvp: true, can_any_time: false, can_leaderless: false},
-                SessionType {name:"Community Time".into(), color:"#54ded9".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
-                SessionType {name:"Creativity Time".into(), color:"#acfc0d".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
-                SessionType {name:"Dining".into(), color:"#f07567".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
-                SessionType {name:"Chill & Relax".into(), color:"#dec2ff".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
-                SessionType {name:"Mind-Body-Nature".into(), color:"#f07567".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
-                SessionType {name:"Panel/Discussion".into(), color:"#b1b1b1".into(), can_rsvp: false, can_any_time: true, can_leaderless: false},
-                SessionType {name:"Prep".into(), color:"#d1d7e0".into(), can_rsvp: false, can_any_time: true, can_leaderless: true},
-                SessionType {name:"Talk".into(), color:"#6292f4".into(), can_rsvp: false, can_any_time: true, can_leaderless: false},
-                SessionType {name:"Workshop".into(), color:"#6292f4".into(), can_rsvp: false, can_any_time: true, can_leaderless: false},
-                ]});
+            current_sitemap: None,
+            session_types: vec![],
+            amenities: vec![],
+        });
     }
-    links.sort_by(|a,b| b.timestamp.cmp(&a.timestamp));
-    Ok(convert_settings_tag(links[0].tag.clone())?)
+    links.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+    let action_hash = ActionHash::try_from(links[0].target.clone())
+        .map_err(|err| wasm_error!(err))?;
+    let record = get(action_hash, GetOptions::local())?
+        .ok_or(wasm_error!(WasmErrorInner::Guest("Settings entry not found".into())))?;
+    let settings: Settings = record
+        .entry()
+        .to_app_option()
+        .map_err(|e| wasm_error!(e))?
+        .ok_or(wasm_error!(WasmErrorInner::Guest("Settings link target was not a Settings entry".into())))?;
+    Ok(settings)
 }

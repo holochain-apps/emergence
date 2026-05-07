@@ -74,7 +74,15 @@ export type SessionType  = {
   color: string,
   can_rsvp: boolean,
   can_any_time: boolean,
-  can_leaderless: boolean
+  can_leaderless: boolean,
+  deleted?: boolean,
+  order?: number,
+}
+
+export type Amenity = {
+  name: string,
+  deleted?: boolean,
+  order?: number,
 }
 
 export interface SessionEntryRecord {
@@ -302,19 +310,16 @@ export const setInterestBit = (interest:SessionInterest, i:SessionInterestBit, v
   return interest
 }
 
-export const Amenities = [
-  "Electricity",
-  "Whiteboard",
-  "Table",
-  "Screen",
-  "Seating",
-  "Indoor",
-  "Outdoor",]
-
-export const amenitiesList = (bits: number) : Array<string> => {
+// Returns the names of amenities whose bit is set in `bits`. The bit index is
+// the amenity's position in `amenities`, NOT its display order. Deleted
+// amenities are still returned by name so existing data stays readable.
+export const amenitiesList = (bits: number, amenities: Array<Amenity>) : Array<string> => {
   const a = []
-  for (let  i=0; i<32; i+=1) {
-    if (bits & 1) a.push(Amenities[i])
+  for (let i=0; i<32; i+=1) {
+    if (bits & 1) {
+      const am = amenities[i]
+      if (am) a.push(am.name)
+    }
     bits = bits >> 1
   }
   return a
@@ -327,6 +332,30 @@ export const setAmenity = (amenities:number, i:number, value:boolean) : number =
     amenities &= ~(1 << i)
   }
   return amenities
+}
+
+// Indices of amenities that are not soft-deleted, sorted by their display
+// order. The returned indices are positions in the original `amenities` array
+// so they remain valid as bitmask offsets.
+export const activeAmenityIndices = (amenities: Array<Amenity>) : Array<number> => {
+  const indices: Array<number> = []
+  for (let i = 0; i < amenities.length; i += 1) {
+    if (!amenities[i].deleted) indices.push(i)
+  }
+  indices.sort((a, b) => (amenities[a].order ?? 0) - (amenities[b].order ?? 0))
+  return indices
+}
+
+// Indices of session types that are not soft-deleted, sorted by display order.
+// As with amenities, indices are positions in the original `session_types`
+// array so existing Session.session_type values keep resolving correctly.
+export const activeSessionTypeIndices = (sessionTypes: Array<SessionType>) : Array<number> => {
+  const indices: Array<number> = []
+  for (let i = 0; i < sessionTypes.length; i += 1) {
+    if (!sessionTypes[i].deleted) indices.push(i)
+  }
+  indices.sort((a, b) => (sessionTypes[a].order ?? 0) - (sessionTypes[b].order ?? 0))
+  return indices
 }
 
 export interface SessionRelationData {
@@ -593,6 +622,7 @@ export interface Settings {
   game_active: boolean,
   current_sitemap?: ActionHash,
   session_types: Array<SessionType>,
+  amenities: Array<Amenity>,
 }
 
 export interface InterestData {

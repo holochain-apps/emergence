@@ -13,7 +13,7 @@ import type SlSelect from '@shoelace-style/shoelace/dist/components/select/selec
 import '@material/mwc-snackbar';
 import type { Snackbar } from '@material/mwc-snackbar';
 import type { EmergenceStore } from '../../stores/emergence-store';
-import {  Amenities, setAmenity, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent, type SessionType, timeWindowDurationToStr, type InfoSession, sessionLinks } from './types';
+import {  activeAmenityIndices, activeSessionTypeIndices, setAmenity, type Slot, sessionSelfTags, SessionInterestBit, type AnyAgent, type SessionType, timeWindowDurationToStr, type InfoSession, sessionLinks } from './types';
 import SlotSelect from './SlotSelect.svelte';
 import { encodeHashToBase64,  decodeHashFromBase64 } from '@holochain/client';
 import AnyAvatar from './AnyAvatar.svelte';
@@ -94,12 +94,12 @@ let sesType = "0"
 let sesTypeSelect: SlSelect;
 
 $: title, description, leaders, smallest, largest, duration, amenities, slot, slotValid, tags;
+$: settings = store.settings
 $: sessionType = $settings.session_types[parseInt(sesType)]
-$: isSessionValid = (leaders.length > 0 || sessionType.can_leaderless) && title !== '' && description !== '' && slotValid && smallest > 0 && largest < MAX_GROUP_SIZE && duration > 0;
+$: isSessionValid = sessionType && (leaders.length > 0 || sessionType.can_leaderless) && title !== '' && description !== '' && slotValid && smallest > 0 && largest < MAX_GROUP_SIZE && duration > 0;
 $: tagUses = store.allTags
 $: allTags = $tagUses.map(t=>t.tag)
-$: settings = store.settings
-$: anyTime = sessionType.can_any_time
+$: anyTime = sessionType && sessionType.can_any_time
 
 onMount(() => {
 });
@@ -179,6 +179,7 @@ let dialogShow
       event.preventDefault();    
   }}}
   style="--width: 80vw;" label={session ? "Edit Session" : "Create Session"} bind:this={dialog}>
+{#if sessionType}
 <div style="display: flex; flex-direction: column">
   {#if session}
     Key: {session.record.entry.key}
@@ -196,8 +197,8 @@ let dialogShow
             sesType = e.target.value
           } }
         >
-          {#each $settings.session_types as type, idx}
-            <sl-option value={idx}>{type.name}</sl-option>
+          {#each activeSessionTypeIndices($settings.session_types) as idx}
+            <sl-option value={idx}>{$settings.session_types[idx].name}</sl-option>
           {/each}
         </sl-select>
       </div>
@@ -310,16 +311,18 @@ let dialogShow
       </div>
     </div> -->
   </div>
+  {#if activeAmenityIndices($settings.amenities).length > 0}
   <div style="margin-bottom: 16px">
     <div id="clear-amentities-button" class="form-label" on:click={()=>amenities = 0}>Required Amenities </div>
-    {#each Amenities as amenity, i}
+    {#each activeAmenityIndices($settings.amenities) as i}
       <sl-checkbox
         bind:this={amenityElems[i]}
         checked={(amenities >> i)&1}
         on:sl-change={e => { amenities = setAmenity(amenities, i, e.target.checked)} }
-      >{amenity}</sl-checkbox>
+      >{$settings.amenities[i].name}</sl-checkbox>
     {/each}
   </div>
+  {/if}
   <div id="slotselect">
     <SlotSelect
       bind:duration={duration}
@@ -373,6 +376,7 @@ let dialogShow
   {/if}
 
 </div>
+{/if}
 </sl-dialog>
 
 <style>

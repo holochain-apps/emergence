@@ -20,5 +20,15 @@
     { "dayOffset": 0, "hour": 11, "minute": 0, "duration": 90, "tags": ["workshop"] },
     { "dayOffset": 0, "hour": 14, "minute": 0, "duration": 90, "tags": ["workshop"] },
     { "dayOffset": 0, "hour": 16, "minute": 0, "duration": 90, "tags": ["workshop"] }
+  ],
+  "sessionTypes": [
+    { "name": "Panel", "color": "#b1b1b1", "can_rsvp": false, "can_any_time": false, "can_leaderless": false, "deleted": false, "order": 0 },
+    { "name": "Talk", "color": "#6292f4", "can_rsvp": false, "can_any_time": false, "can_leaderless": false, "deleted": false, "order": 1 },
+    { "name": "Demo", "color": "#acfc0d", "can_rsvp": false, "can_any_time": false, "can_leaderless": false, "deleted": false, "order": 2 },
+    { "name": "Pop-up", "color": "#dec2ff", "can_rsvp": false, "can_any_time": true, "can_leaderless": true, "deleted": false, "order": 3 }
+  ],
+  "amenities": [
+    { "name": "Whiteboard", "deleted": false, "order": 0 },
+    { "name": "Projector", "deleted": false, "order": 1 }
   ]
 }

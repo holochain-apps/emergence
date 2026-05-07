@@ -4,7 +4,7 @@
   import {  type Record, type ActionHash, encodeHashToBase64, decodeHashFromBase64, HoloHashMap} from '@holochain/client';
   import { storeContext } from '../../contexts';
   import type { EmergenceStore } from '../../stores/emergence-store';
-  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, Amenities, DetailsType, SpaceSortOrder, type InfoSession } from './types';
+  import {type Space, type TimeWindow, type Info, timeWindowDurationToStr, type Session, amenitiesList, DetailsType, SpaceSortOrder, type InfoSession } from './types';
   import { calcDays, dayToStr, sortSlot, sortWindows, windowsInDay} from './utils'
   import CreateTimeWindow from './CreateTimeWindow.svelte';
   import Fa from 'svelte-fa';
@@ -135,12 +135,13 @@
   let draggingHandled = true
   let draggedItemId = ""
   let draggedSession : InfoSession | undefined
-  $: draggedAmenitiesCount =  draggedItemId ? amenitiesList(draggedSession.record.entry.amenities).length : 0
+  $: settings = store.settings
+  $: draggedAmenitiesCount =  draggedItemId ? amenitiesList(draggedSession.record.entry.amenities, $settings.amenities).length : 0
   $: draggedSession, draggedItemId
   $: overlappingAmenities = (space: Info<Space>) => {
     if (!draggedItemId) return undefined
     const overlapping =  draggedItemId && draggedSession.record.entry.amenities & space.record.entry.amenities
-    return amenitiesList(overlapping)
+    return amenitiesList(overlapping, $settings.amenities)
   }
   let dragOn = true
   let dragTarget = ""

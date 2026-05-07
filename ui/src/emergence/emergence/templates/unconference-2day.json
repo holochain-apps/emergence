@@ -24,5 +24,27 @@
     { "dayOffset": 1, "hour": 11, "minute": 15, "duration": 60, "tags": ["openspace"] },
     { "dayOffset": 1, "hour": 14, "minute": 0, "duration": 60, "tags": ["openspace"] },
     { "dayOffset": 1, "hour": 15, "minute": 15, "duration": 60, "tags": ["openspace"] }
+  ],
+  "sessionTypes": [
+    { "name": "Session", "color": "white", "can_rsvp": true, "can_any_time": false, "can_leaderless": false, "deleted": false, "order": 0 },
+    { "name": "Children Time", "color": "#54ded9", "can_rsvp": true, "can_any_time": false, "can_leaderless": false, "deleted": false, "order": 1 },
+    { "name": "Community Time", "color": "#54ded9", "can_rsvp": false, "can_any_time": true, "can_leaderless": true, "deleted": false, "order": 2 },
+    { "name": "Creativity Time", "color": "#acfc0d", "can_rsvp": false, "can_any_time": true, "can_leaderless": true, "deleted": false, "order": 3 },
+    { "name": "Dining", "color": "#f07567", "can_rsvp": false, "can_any_time": true, "can_leaderless": true, "deleted": false, "order": 4 },
+    { "name": "Chill & Relax", "color": "#dec2ff", "can_rsvp": false, "can_any_time": true, "can_leaderless": true, "deleted": false, "order": 5 },
+    { "name": "Mind-Body-Nature", "color": "#f07567", "can_rsvp": false, "can_any_time": true, "can_leaderless": true, "deleted": false, "order": 6 },
+    { "name": "Panel/Discussion", "color": "#b1b1b1", "can_rsvp": false, "can_any_time": true, "can_leaderless": false, "deleted": false, "order": 7 },
+    { "name": "Prep", "color": "#d1d7e0", "can_rsvp": false, "can_any_time": true, "can_leaderless": true, "deleted": false, "order": 8 },
+    { "name": "Talk", "color": "#6292f4", "can_rsvp": false, "can_any_time": true, "can_leaderless": false, "deleted": false, "order": 9 },
+    { "name": "Workshop", "color": "#6292f4", "can_rsvp": false, "can_any_time": true, "can_leaderless": false, "deleted": false, "order": 10 }
+  ],
+  "amenities": [
+    { "name": "Electricity", "deleted": false, "order": 0 },
+    { "name": "Whiteboard", "deleted": false, "order": 1 },
+    { "name": "Table", "deleted": false, "order": 2 },
+    { "name": "Screen", "deleted": false, "order": 3 },
+    { "name": "Seating", "deleted": false, "order": 4 },
+    { "name": "Indoor", "deleted": false, "order": 5 },
+    { "name": "Outdoor", "deleted": false, "order": 6 }
   ]
 }

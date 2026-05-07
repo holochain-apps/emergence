@@ -82,7 +82,7 @@
     }
     valid = false
     if (!slot ||
-      slot.window && (slot.space || sessionType.can_any_time)) {
+      slot.window && (slot.space || sessionType?.can_any_time)) {
       valid = true
     }
   }
@@ -105,7 +105,7 @@
           <sl-option value={JSON.stringify(window)}>{timeWindowStartToStr(window)} {timeWindowDurationToStr(window)}</sl-option>
         {/each}
       </sl-select>
-      {#if sessionType.can_any_time}
+      {#if sessionType?.can_any_time}
         <span style="margin:0 10px 0 10px;">or</span>
         <div style="display:flex; flex-direction:column">
           <DateInput 

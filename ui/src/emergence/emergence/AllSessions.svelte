@@ -150,7 +150,7 @@ on:session-created={() => {} }
             showSlot={true}
             showLeaderAvatar={$uiProps.sessionListMode == "detail"}
             showDescription={$uiProps.sessionListMode == "detail"}
-            allowSetIntention={$settings.session_types[session.record.entry.session_type].can_rsvp} 
+            allowSetIntention={$settings.session_types[session.record.entry.session_type]?.can_rsvp ?? false}
             session={session}>
           </SessionSummary>
         </div>

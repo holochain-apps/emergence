@@ -4,7 +4,7 @@
     import { storeContext } from '../../contexts';
     import type { EmergenceStore } from '../../stores/emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
-    import { sessionSelfTags, type Info, type Note, type InfoSession, APP_VERSION, DNA_VERSION } from "./types";
+    import { sessionSelfTags, type Info, type Note, type InfoSession, APP_VERSION, DNA_VERSION, type SessionType, type Amenity } from "./types";
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
@@ -12,6 +12,7 @@
     import '@shoelace-style/shoelace/dist/components/select/select.js';
     import '@shoelace-style/shoelace/dist/components/option/option.js';
     import '@shoelace-style/shoelace/dist/components/details/details.js';
+    import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js';
     import SenseResults from "./SenseResults.svelte";
         import { toPromise } from "@holochain-open-dev/stores";
     import DisableForOs from "./DisableForOs.svelte";
@@ -312,14 +313,120 @@
         await store.sync(undefined)
     }
 
+    // --- Session-type / amenity admin ---
+    // Selection (storage) is by index in the underlying array. Display order
+    // is driven by the `order` field; a soft-deleted entry stays in place so
+    // existing Session/Space references remain stable.
+    const sortedSessionTypeIndices = (types: Array<SessionType>): Array<number> => {
+        const idx = types.map((_, i) => i)
+        idx.sort((a, b) => (types[a].order ?? 0) - (types[b].order ?? 0))
+        return idx
+    }
+    const sortedAmenityIndices = (amenities: Array<Amenity>): Array<number> => {
+        const idx = amenities.map((_, i) => i)
+        idx.sort((a, b) => (amenities[a].order ?? 0) - (amenities[b].order ?? 0))
+        return idx
+    }
+    const nextOrder = (entries: Array<{order?: number}>): number =>
+        entries.reduce((m, e) => Math.max(m, (e.order ?? 0) + 1), 0)
+
+    const addSessionType = async () => {
+        const s = get(store.settings)
+        s.session_types = [...(s.session_types ?? []), {
+            name: "New Type", color: "#cccccc",
+            can_rsvp: false, can_any_time: false, can_leaderless: false,
+            deleted: false, order: nextOrder(s.session_types ?? []),
+        }]
+        await store.setSettings(s)
+    }
+    const updateSessionType = async (i: number, patch: Partial<SessionType>) => {
+        const s = get(store.settings)
+        s.session_types = s.session_types.map((t, j) => j === i ? { ...t, ...patch } : t)
+        await store.setSettings(s)
+    }
+    let draggedSessionTypeIdx: number | null = null
+    let draggedAmenityIdx: number | null = null
+    let dropTargetSessionTypeIdx: number | null = null
+    let dropTargetAmenityIdx: number | null = null
+    // 'before' draws the indicator above the target row; 'after' draws it below.
+    let dropPosition: "before" | "after" = "before"
+
+    const computeDropPosition = (e: DragEvent): "before" | "after" => {
+        const el = e.currentTarget as HTMLElement
+        const rect = el.getBoundingClientRect()
+        return (e.clientY - rect.top) < rect.height / 2 ? "before" : "after"
+    }
+
+    // Move the dragged storage-index `from` to occupy the display position
+    // currently held by storage-index `to`. We renumber `order` over the
+    // active (non-deleted) entries to keep the sequence stable.
+    const reorderSessionType = async (from: number, to: number, position: "before" | "after") => {
+        if (from === to) return
+        const s = get(store.settings)
+        const visible = sortedSessionTypeIndices(s.session_types).filter(j => !s.session_types[j].deleted)
+        const fromPos = visible.indexOf(from)
+        const toPos = visible.indexOf(to)
+        if (fromPos < 0 || toPos < 0) return
+        const next = [...visible]
+        next.splice(fromPos, 1)
+        const adjustedTo = next.indexOf(to) + (position === "after" ? 1 : 0)
+        next.splice(adjustedTo, 0, from)
+        s.session_types = s.session_types.map((t, j) => {
+            const newPos = next.indexOf(j)
+            return newPos >= 0 ? { ...t, order: newPos } : t
+        })
+        await store.setSettings(s)
+    }
+
+    const addAmenity = async () => {
+        const s = get(store.settings)
+        s.amenities = [...(s.amenities ?? []), {
+            name: "New Amenity", deleted: false, order: nextOrder(s.amenities ?? []),
+        }]
+        await store.setSettings(s)
+    }
+    const updateAmenity = async (i: number, patch: Partial<Amenity>) => {
+        const s = get(store.settings)
+        s.amenities = s.amenities.map((a, j) => j === i ? { ...a, ...patch } : a)
+        await store.setSettings(s)
+    }
+    const reorderAmenity = async (from: number, to: number, position: "before" | "after") => {
+        if (from === to) return
+        const s = get(store.settings)
+        const visible = sortedAmenityIndices(s.amenities).filter(j => !s.amenities[j].deleted)
+        const fromPos = visible.indexOf(from)
+        const toPos = visible.indexOf(to)
+        if (fromPos < 0 || toPos < 0) return
+        const next = [...visible]
+        next.splice(fromPos, 1)
+        const adjustedTo = next.indexOf(to) + (position === "after" ? 1 : 0)
+        next.splice(adjustedTo, 0, from)
+        s.amenities = s.amenities.map((am, j) => {
+            const newPos = next.indexOf(j)
+            return newPos >= 0 ? { ...am, order: newPos } : am
+        })
+        await store.setSettings(s)
+    }
+
     const handleApplyTemplate = async (e) => {
         await doImport(e.detail);
+        const template = e.detail
         const maps = get(store.maps)
+        const s = get(store.settings)
+        let dirty = false
         if (maps && maps.length > 0) {
-            const s = get(store.settings)
             s.current_sitemap = maps[maps.length - 1].original_hash
-            await store.setSettings(s)
+            dirty = true
         }
+        if (template.sessionTypes && template.sessionTypes.length > 0) {
+            s.session_types = template.sessionTypes
+            dirty = true
+        }
+        if (template.amenities && template.amenities.length > 0) {
+            s.amenities = template.amenities
+            dirty = true
+        }
+        if (dirty) await store.setSettings(s)
     };
 </script>
 <input style="display:none" type="file" accept=".json" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >
@@ -457,6 +564,128 @@
         </DisableForOs>
         
         <div class="admin-section" style="flex-direction:column">
+            <div class="admin-section-desc">
+                <h3 style="display:flex; align-items:center; gap:6px;">
+                    Session Types
+                    <sl-tooltip
+                        placement="bottom"
+                        class="settings-help-tooltip"
+                        style="
+                            --max-width: 460px;
+                            --sl-tooltip-background-color: #ffffff;
+                            --sl-tooltip-color: #111;
+                            --sl-tooltip-border-radius: 14px;
+                            --sl-tooltip-padding: 28px 32px;
+                            --sl-tooltip-font-size: 14px;
+                            --sl-tooltip-line-height: 1.5;
+                            --sl-tooltip-arrow-size: 8px;
+                        ">
+                        <div slot="content" style="text-align:left;">
+                            <strong>RSVP</strong> &mdash; sessions of this type show an "I'm going / interested" picker; useful when attendance matters (e.g. a Talk or Workshop).<br/><br/>
+                            <strong>Any time</strong> &mdash; the session doesn't have to fit into the published time-grid. The creator gets a free-form date/time picker instead. Use for things like meals or pop-ups.<br/><br/>
+                            <strong>Leaderless</strong> &mdash; sessions of this type can be created without naming a host or leader. Use for community time, open hangouts, etc.
+                        </div>
+                        <span class="info-icon" tabindex="0"><SvgIcon icon="faCircleInfo" size={14} color="#666" /></span>
+                    </sl-tooltip>
+                </h3>
+                <p>The categories of session that can be created. Sessions reference a type by its position in this list, so deletion is a soft hide; reordering only affects display.</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 8px;">
+                {#each sortedSessionTypeIndices($settings.session_types ?? []) as i (i)}
+                    {@const type = $settings.session_types[i]}
+                    <div class="type-row"
+                        class:deleted-row={type.deleted}
+                        class:drop-before={dropTargetSessionTypeIdx === i && dropPosition === "before"}
+                        class:drop-after={dropTargetSessionTypeIdx === i && dropPosition === "after"}
+                        class:dragging={draggedSessionTypeIdx === i}
+                        draggable={!type.deleted}
+                        on:dragstart={(e) => { draggedSessionTypeIdx = i; if (e.dataTransfer) e.dataTransfer.effectAllowed = "move" }}
+                        on:dragover={(e) => {
+                            if (type.deleted || draggedSessionTypeIdx === null) return
+                            e.preventDefault()
+                            if (e.dataTransfer) e.dataTransfer.dropEffect = "move"
+                            dropTargetSessionTypeIdx = i
+                            dropPosition = computeDropPosition(e)
+                        }}
+                        on:dragleave={() => { if (dropTargetSessionTypeIdx === i) dropTargetSessionTypeIdx = null }}
+                        on:drop={(e) => {
+                            e.preventDefault()
+                            if (draggedSessionTypeIdx !== null && !type.deleted)
+                                reorderSessionType(draggedSessionTypeIdx, i, dropPosition)
+                            draggedSessionTypeIdx = null
+                            dropTargetSessionTypeIdx = null
+                        }}
+                        on:dragend={() => { draggedSessionTypeIdx = null; dropTargetSessionTypeIdx = null }}>
+                        <div class="drag-handle" title="Drag to reorder"><SvgIcon icon="faGripVertical" size={14} color="#888" /></div>
+                        <sl-input size="small" style="flex:2" value={type.name} disabled={type.deleted}
+                            on:sl-change={(e) => updateSessionType(i, { name: e.target.value })}></sl-input>
+                        <input type="color" value={type.color} disabled={type.deleted}
+                            on:change={(e) => updateSessionType(i, { color: e.currentTarget.value })}>
+                        <sl-checkbox checked={type.can_rsvp} disabled={type.deleted}
+                            on:sl-change={(e) => updateSessionType(i, { can_rsvp: e.target.checked })}>RSVP</sl-checkbox>
+                        <sl-checkbox checked={type.can_any_time} disabled={type.deleted}
+                            on:sl-change={(e) => updateSessionType(i, { can_any_time: e.target.checked })}>Any time</sl-checkbox>
+                        <sl-checkbox checked={type.can_leaderless} disabled={type.deleted}
+                            on:sl-change={(e) => updateSessionType(i, { can_leaderless: e.target.checked })}>Leaderless</sl-checkbox>
+                        <sl-button size="small" variant={type.deleted ? "default" : "danger"}
+                            on:click={() => updateSessionType(i, { deleted: !type.deleted })}>
+                            {type.deleted ? "Restore" : "Delete"}
+                        </sl-button>
+                    </div>
+                {/each}
+                <div>
+                    <sl-button size="small" variant="primary" on:click={addSessionType}>+ Add Session Type</sl-button>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-section" style="flex-direction:column">
+            <div class="admin-section-desc">
+                <h3>Amenities</h3>
+                <p>Amenities that can be required by sessions and offered by spaces. Stored as a bitmask by position; deletion is a soft hide and reordering only affects display.</p>
+            </div>
+            <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 8px;">
+                {#each sortedAmenityIndices($settings.amenities ?? []) as i (i)}
+                    {@const am = $settings.amenities[i]}
+                    <div class="type-row"
+                        class:deleted-row={am.deleted}
+                        class:drop-before={dropTargetAmenityIdx === i && dropPosition === "before"}
+                        class:drop-after={dropTargetAmenityIdx === i && dropPosition === "after"}
+                        class:dragging={draggedAmenityIdx === i}
+                        draggable={!am.deleted}
+                        on:dragstart={(e) => { draggedAmenityIdx = i; if (e.dataTransfer) e.dataTransfer.effectAllowed = "move" }}
+                        on:dragover={(e) => {
+                            if (am.deleted || draggedAmenityIdx === null) return
+                            e.preventDefault()
+                            if (e.dataTransfer) e.dataTransfer.dropEffect = "move"
+                            dropTargetAmenityIdx = i
+                            dropPosition = computeDropPosition(e)
+                        }}
+                        on:dragleave={() => { if (dropTargetAmenityIdx === i) dropTargetAmenityIdx = null }}
+                        on:drop={(e) => {
+                            e.preventDefault()
+                            if (draggedAmenityIdx !== null && !am.deleted)
+                                reorderAmenity(draggedAmenityIdx, i, dropPosition)
+                            draggedAmenityIdx = null
+                            dropTargetAmenityIdx = null
+                        }}
+                        on:dragend={() => { draggedAmenityIdx = null; dropTargetAmenityIdx = null }}>
+                        <div class="drag-handle" title="Drag to reorder"><SvgIcon icon="faGripVertical" size={14} color="#888" /></div>
+                        <sl-input size="small" style="flex:2" value={am.name} disabled={am.deleted}
+                            on:sl-change={(e) => updateAmenity(i, { name: e.target.value })}></sl-input>
+                        <sl-button size="small" variant={am.deleted ? "default" : "danger"}
+                            on:click={() => updateAmenity(i, { deleted: !am.deleted })}>
+                            {am.deleted ? "Restore" : "Delete"}
+                        </sl-button>
+                    </div>
+                {/each}
+                <div>
+                    <sl-button size="small" variant="primary" on:click={addAmenity}>+ Add Amenity</sl-button>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-section" style="flex-direction:column">
             <div style="flex-direction:row;display:flex; justify-content:space-between">
                 <div class="admin-section-desc">
                     <h3>Sense-making game</h3>
@@ -541,6 +770,66 @@
     sl-checkbox {
         margin-right:15px;
         margin-left:15px;
+    }
+
+    .type-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        background: #fafafa;
+    }
+    .type-row.deleted-row {
+        opacity: 0.5;
+        background: #f0f0f0;
+    }
+    .type-row sl-checkbox {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    .type-row {
+        position: relative;
+    }
+    .type-row.dragging {
+        opacity: 0.4;
+    }
+    .type-row.drop-before::before,
+    .type-row.drop-after::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #2c7;
+        pointer-events: none;
+    }
+    .type-row.drop-before::before { top: -5px; }
+    .type-row.drop-after::after  { bottom: -5px; }
+
+    .drag-handle {
+        cursor: grab;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        padding: 0 4px;
+    }
+    .info-icon {
+        display: inline-flex;
+        align-items: center;
+        cursor: help;
+        opacity: 0.7;
+    }
+    .info-icon:hover { opacity: 1; }
+
+    :global(.settings-help-tooltip::part(body)) {
+        border: 1px solid #d0d0d0;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    }
+    .type-row[draggable="true"]:active .drag-handle {
+        cursor: grabbing;
     }
 
     .game-status {

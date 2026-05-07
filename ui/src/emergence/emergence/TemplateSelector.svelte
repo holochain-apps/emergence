@@ -36,7 +36,9 @@ const applyTemplate = () => {
     windows: importData.windows,
     spaces: [],
     sessions: [],
-    notes: []
+    notes: [],
+    sessionTypes: selectedTemplate.sessionTypes,
+    amenities: selectedTemplate.amenities,
   };
 
   dispatch('apply-template', data);

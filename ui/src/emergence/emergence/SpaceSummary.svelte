@@ -26,6 +26,7 @@ let error: any = undefined;
 let errorSnackbar: Snackbar;
   
 $: error, loading, space;
+$: settings = store.settings;
 
 onMount(async () => {
   if (space === undefined) {
@@ -101,9 +102,11 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
         </sl-tooltip>
       </div>
     </div>
+    {#if amenitiesList(space.record.entry.amenities, $settings.amenities).length > 0}
     <div class="amenities">
-      {amenitiesList(space.record.entry.amenities).join(", ")}
+      {amenitiesList(space.record.entry.amenities, $settings.amenities).join(", ")}
     </div>
+    {/if}
   </div>
   
 </div>
