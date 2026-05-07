@@ -20,6 +20,7 @@
 
   let spaceSelect: SlSelect;
   let windowSelect: SlSelect;
+  $: t = store.terms
 
   let selectedSpace: string = ""
   let selectedWindow: string = ""
@@ -133,11 +134,11 @@
     </div>
     <sl-select bind:this={spaceSelect}
       style="width:320px;"
-      label="Space"
+      label={$t.space.S}
       value={selectedSpace}
       on:sl-change={(e) => doSelectSpace(e.target.value) }
     >
-    <sl-option value="">No Space Selected</sl-option>
+    <sl-option value="">No {$t.space.S} Selected</sl-option>
     {#each $spaces as space}
     <sl-option value={encodeHashToBase64(space.record.actionHash)}>{space.record.entry.name}{#if space.record.entry.key} ({space.record.entry.key}){/if}</sl-option>
     {/each}

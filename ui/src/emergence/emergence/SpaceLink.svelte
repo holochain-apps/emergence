@@ -2,6 +2,7 @@
    import type { ActionHash } from '@holochain/client';
   import type { EmergenceStore } from '../../stores/emergence-store';
   import { getContext, onMount } from 'svelte';
+  import { get } from 'svelte/store';
   import { storeContext } from '../../contexts';
   import { DetailsType } from './types';
 
@@ -25,7 +26,7 @@
       if (space.record.entry.key) name = `${name} (${space.record.entry.key})`
       return name
     }
-    return "<deleted space>"
+    return `<deleted ${get(store.terms).space.s}>`
   }
 </script>
 

@@ -15,6 +15,7 @@ let error: any = undefined;
 let createSiteMapDialog: SiteMapCrud
 
 $: sitemaps = store.maps
+$: t = store.terms
 $: error;
 
 onMount(async () => {
@@ -31,7 +32,7 @@ onMount(async () => {
 
 <div class="pane-header">
   <div class="header-content">
-    <h3>SiteMaps List</h3>
+    <h3>{$t.sitemap.P} List</h3>
     <div class="section-controls">
       <sl-button style="margin-left: 8px; " on:click={() => { dispatch('sitemaps-close') } } circle>
         <Fa icon={faCircleArrowLeft} />
@@ -45,9 +46,9 @@ onMount(async () => {
 </div>
 <div class="pane-content">
   {#if error}
-    <span>Error fetching the sitemaps: {error}.</span>
+    <span>Error fetching the {$t.sitemap.p}: {error}.</span>
   {:else if $sitemaps.length === 0}
-    <span>No sitemaps found.</span>
+    <span>No {$t.sitemap.p} found.</span>
   {:else}
     {#each $sitemaps as sitemap}
       <div style="margin-bottom: 8px;" class="card">

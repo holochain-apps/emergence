@@ -26,6 +26,7 @@ let error: any = undefined;
 let showDeletedSessions = false
 
 $: settings = store.settings
+$: t = store.terms
 $: sessions = store.sessions
 $: spaces = store.sitemapFilteredSpaces()
 $: windows = store.sitemapFilteredWindows()
@@ -124,7 +125,7 @@ on:session-created={() => {} }
         <sl-option value="">List</sl-option>
         <sl-option value="detail">List: Detail</sl-option>
         <sl-option value="grid-time">Grid: Time</sl-option>
-        <sl-option value="grid-space">Grid: Space</sl-option>
+        <sl-option value="grid-space">Grid: {$t.space.S}</sl-option>
 
         </sl-select>
     </div>

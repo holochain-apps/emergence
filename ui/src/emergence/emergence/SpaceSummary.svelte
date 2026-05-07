@@ -27,6 +27,7 @@ let errorSnackbar: Snackbar;
   
 $: error, loading, space;
 $: settings = store.settings;
+$: t = store.terms;
 
 onMount(async () => {
   if (space === undefined) {
@@ -65,7 +66,7 @@ const slottedSessionSummary = (ss: SlottedSession) : string => {
 
 </div>
 {:else if error}
-<span>Error fetching the space: {error}</span>
+<span>Error fetching the {$t.space.s}: {error}</span>
 {:else}
 
 

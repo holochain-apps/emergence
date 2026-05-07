@@ -23,6 +23,7 @@ const dispatch = createEventDispatcher();
 export let filter: FeedFilter
 
 $: filter
+$: t = store.terms
 $: spaces = store.spaces
 $: uiProps = store.uiProps
 onMount(() => {
@@ -79,7 +80,7 @@ onMount(() => {
     <span style="margin-right: 10px"><Fa icon={faMap} /></span>
     <sl-select style="min-width:100px" multiple clearable
       value={filter.space.map(h=>encodeHashToBase64(h))}
-      placeholder="filter by spaces"
+      placeholder="filter by {$t.space.p}"
       on:sl-change={(e)=>{filter.space = e.target.value.map(h => decodeHashFromBase64(h)); dispatch('update-filter', filter)}}
       >
       {#each $spaces as space}

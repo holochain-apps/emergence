@@ -23,6 +23,7 @@ import { toPromise, type AsyncReadable, type AsyncStatus, asyncDerived } from '@
 import type { FileStorageClient } from '@holochain-open-dev/file-storage';
 import { Marked, Renderer } from "@ts-stack/markdown";
 import { elapsed, filterTime, getMyDna, sessionHasTags, type WALUrl } from '../emergence/emergence/utils';
+import { termsFromSettings } from '../emergence/emergence/terms';
 import { fromUint8Array } from 'js-base64';
 import type { WAL } from '@theweave/api';
 import { CloneManagerStore } from './clone-manager-store';
@@ -142,6 +143,7 @@ export class EmergenceStore {
     syncing: 0,
   })
   settings: Writable<Settings> = writable({game_active: false, session_types: [], amenities: []})
+  terms = derived(this.settings, termsFromSettings)
   _peopleCount: number
   async downloadFile(fileHash: EntryHash) : Promise< DownloadedFile | undefined> {
     let downloadedFile = this.files.get(fileHash)

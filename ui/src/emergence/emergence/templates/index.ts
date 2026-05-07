@@ -29,14 +29,39 @@ export interface TemplateMap {
   relations: any[];
 }
 
+export interface TemplateSpace {
+  original_hash: string;
+  entry: {
+    key: string;
+    name: string;
+    description: string;
+    stewards: string[];
+    capacity: number;
+    amenities: number;
+    trashed: boolean;
+    tags: string[];
+    pic?: string;
+  };
+  relations: Array<{
+    dst: string;
+    timestamp: number;
+    content: { path: string; data: string };
+  }>;
+}
+
 export interface Template {
   id: string;
   name: string;
   description: string;
   maps: TemplateMap[];
   windows: TemplateWindow[];
+  spaces?: TemplateSpace[];
+  sessions?: any[];
+  notes?: any[];
   sessionTypes?: SessionType[];
   amenities?: Amenity[];
+  spaceTerm?: string;
+  sitemapTerm?: string;
 }
 
 export const templates: Template[] = [workshop1day, unconference2day] as Template[];

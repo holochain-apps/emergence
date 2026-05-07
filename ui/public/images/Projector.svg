@@ -1,0 +1,14 @@
+<svg width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Projector body -->
+  <rect x="6" y="18" width="28" height="14" rx="2.5" fill="#7B42D9"/>
+  <!-- Lens -->
+  <circle cx="34" cy="25" r="6" fill="#7B42D9"/>
+  <circle cx="34" cy="25" r="2.8" fill="#f5f1e8"/>
+  <!-- Top vent -->
+  <rect x="9" y="14.5" width="10" height="3.5" rx="1" fill="#7B42D9"/>
+  <!-- Light cone -->
+  <path d="M40 20 L48 14 L48 36 L40 30 Z" fill="#7B42D9" fill-opacity="0.35"/>
+  <!-- Stand -->
+  <rect x="18" y="32" width="4" height="4" fill="#7B42D9"/>
+  <rect x="12" y="35" width="16" height="2.5" rx="1" fill="#7B42D9"/>
+</svg>

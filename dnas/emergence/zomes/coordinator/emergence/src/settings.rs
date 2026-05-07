@@ -44,6 +44,8 @@ pub fn get_settings(_: ()) -> ExternResult<Settings> {
             current_sitemap: None,
             session_types: vec![],
             amenities: vec![],
+            space_term: None,
+            sitemap_term: None,
         });
     }
     links.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));

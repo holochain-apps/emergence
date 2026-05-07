@@ -32,6 +32,7 @@ let errorSnackbar: Snackbar;
 
 $: text
 $: pic
+$: t = store.terms
 $: isSiteMapValid = text !== "" && pic !== undefined
 
 onMount(() => {
@@ -73,7 +74,7 @@ async function createSiteMap() {
     dispatch('sitemap-created', { sitemap: record });
   } catch (e) {
     console.log("CREATE SITEMAP ERROR", e)
-    errorSnackbar.labelText = `Error creating the sitemap: ${errorText(e)}`;
+    errorSnackbar.labelText = `Error creating the ${$t.sitemap.s}: ${errorText(e)}`;
     errorSnackbar.show();
   }
   dialog.hide()
@@ -84,7 +85,7 @@ let dialog
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<sl-dialog label={sitemap?"Edit Sitemap":"Create Sitemap"}
+<sl-dialog label={sitemap ? `Edit ${$t.sitemap.S}` : `Create ${$t.sitemap.S}`}
   bind:this={dialog}
   >
               
@@ -140,7 +141,7 @@ let dialog
     <sl-button 
     on:click={() => createSiteMap()}
     disabled={!isSiteMapValid}
-    variant=primary>Create SiteMap</sl-button>
+    variant=primary>Create {$t.sitemap.S}</sl-button>
     </div>
   {/if}
 

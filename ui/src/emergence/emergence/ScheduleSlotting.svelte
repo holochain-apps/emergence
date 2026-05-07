@@ -136,6 +136,7 @@
   let draggedItemId = ""
   let draggedSession : InfoSession | undefined
   $: settings = store.settings
+  $: t = store.terms
   $: draggedAmenitiesCount =  draggedItemId ? amenitiesList(draggedSession.record.entry.amenities, $settings.amenities).length : 0
   $: draggedSession, draggedItemId
   $: overlappingAmenities = (space: Info<Space>) => {
@@ -372,7 +373,7 @@ filter={$uiProps.sessionsFilter}></SessionFilter>
       {/each}
     </sl-select>    
     <sl-select style="margin-right: 5px;width: 200px;"
-    placeholder="Sort Spaces By"
+    placeholder="Sort {$t.space.P} By"
     value={$uiProps.spaceSort}
     on:sl-change={(e) => {
       store.setUIprops({spaceSort:  e.target.value  })

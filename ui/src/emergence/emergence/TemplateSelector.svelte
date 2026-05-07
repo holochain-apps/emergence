@@ -34,11 +34,13 @@ const applyTemplate = () => {
   const data = {
     maps: importData.maps,
     windows: importData.windows,
-    spaces: [],
-    sessions: [],
-    notes: [],
+    spaces: selectedTemplate.spaces ?? [],
+    sessions: selectedTemplate.sessions ?? [],
+    notes: selectedTemplate.notes ?? [],
     sessionTypes: selectedTemplate.sessionTypes,
     amenities: selectedTemplate.amenities,
+    spaceTerm: selectedTemplate.spaceTerm,
+    sitemapTerm: selectedTemplate.sitemapTerm,
   };
 
   dispatch('apply-template', data);
@@ -48,24 +50,32 @@ const applyTemplate = () => {
 
 <sl-dialog bind:this={dialog} label="Choose Event Template">
   <div class="template-selector">
-    <div class="templates-list">
-      {#each templates as template}
-        <button
-          class="template-card"
-          class:selected={selectedTemplate?.id === template.id}
-          on:click={() => selectTemplate(template)}
-        >
-          <h4>{template.name}</h4>
-          <p>{template.description}</p>
-          <div class="template-details">
-            <span>{template.windows.length} time slots</span>
-            <span>{template.maps.length} site map{template.maps.length !== 1 ? 's' : ''}</span>
-          </div>
-        </button>
-      {/each}
-    </div>
-
-    {#if selectedTemplate}
+    {#if !selectedTemplate}
+      <div class="templates-list">
+        {#each templates as template}
+          <button
+            class="template-card"
+            on:click={() => selectTemplate(template)}
+          >
+            <h4>{template.name}</h4>
+            <p>{template.description}</p>
+            <div class="template-details">
+              <span>{template.windows.length} time slots</span>
+              <span>{template.maps.length} site map{template.maps.length !== 1 ? 's' : ''}</span>
+            </div>
+          </button>
+        {/each}
+      </div>
+    {:else}
+      <button class="template-card selected" on:click={() => selectedTemplate = null}>
+        <h4>{selectedTemplate.name}</h4>
+        <p>{selectedTemplate.description}</p>
+        <div class="template-details">
+          <span>{selectedTemplate.windows.length} time slots</span>
+          <span>{selectedTemplate.maps.length} site map{selectedTemplate.maps.length !== 1 ? 's' : ''}</span>
+          <span class="change-link">Change</span>
+        </div>
+      </button>
       <div class="date-section">
         <label>Event Start Date:</label>
         <DateInput
@@ -140,6 +150,12 @@ const applyTemplate = () => {
     gap: 12px;
     font-size: 11px;
     color: #888;
+  }
+
+  .change-link {
+    margin-left: auto;
+    color: #3b82f6;
+    text-decoration: underline;
   }
 
   .date-section {

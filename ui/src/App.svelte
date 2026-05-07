@@ -71,6 +71,7 @@
   $: pane = $store ? $uiProps.pane : "sessions"
   $: sitemaps = $store ? $store.maps : undefined
   $: allWindows = $store ? $store.timeWindows : undefined
+  $: t = $store ? $store.terms : undefined
 
   $: loadingText = $store ? $store.syncText : undefined
   $: activeCellInfoNormalized = cloneManagerStore?.activeCellInfoNormalized;
@@ -536,12 +537,12 @@ let sessionSummary = true
       
       
             <div id="nav-spaces" class="nav-button {pane.startsWith("spaces")?"selected":""}"
-              title="Spaces"
+              title={$t?.space.P ?? "Spaces"}
               on:keypress={()=>{$store.setPane('spaces')}}
               on:click={()=>{$store.setPane('spaces')}}
             >
               <Fa class="nav-icon" icon={faMap} size="2x"/>
-            <span class="button-title">Spaces</span>
+            <span class="button-title">{$t?.space.P ?? "Spaces"}</span>
             </div>
           </div>
           <div class="button-group">
@@ -690,7 +691,7 @@ let sessionSummary = true
               on:show-all-spaces={()=>$store.setPane("spaces.list")}
               ></SiteMapDisplay>
           {:else}
-            <h5>No Sitemap configured yet</h5>
+            <h5>No {$t?.sitemap.S ?? "Site Map"} configured yet</h5>
           {/if}
         </div>
         {/if}

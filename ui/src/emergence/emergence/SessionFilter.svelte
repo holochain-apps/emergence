@@ -29,6 +29,7 @@
   $: windows = store.timeWindows;
   $: days = calcDays($windows, "", defaultSessionsFilter());
   $: settings = store.settings;
+  $: t = store.terms;
   $: currentSiteMap = store.getCurrentSiteMap()
   $: currentSiteMapType = currentSiteMap ? currentSiteMap.record.entry.tags[0] : undefined
 
@@ -99,7 +100,7 @@
       multiple
       clearable
       value={filter.space.map((h) => encodeHashToBase64(h))}
-      placeholder="filter by spaces"
+      placeholder="filter by {$t.space.p}"
       on:sl-change={(e) => {
         filter.space = e.target.value.map((h) => decodeHashFromBase64(h));
         dispatch("update-filter", filter);

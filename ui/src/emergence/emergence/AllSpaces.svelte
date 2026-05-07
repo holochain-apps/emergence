@@ -17,6 +17,7 @@ let error: any = undefined;
 let spaceDetail: Info<Space> | undefined
 
 $: spaces = store.sitemapFilteredSpaces()
+$: t = store.terms
 $: error, spaceDetail;
 
 onMount(async () => {
@@ -36,9 +37,9 @@ onMount(async () => {
 <div>
 
   {#if error}
-    <span class="notice">Error fetching the spaces: {error}.</span>
+    <span class="notice">Error fetching the {$t.space.p}: {error}.</span>
   {:else if $spaces.length === 0}
-    <span class="notice">No spaces found.</span>
+    <span class="notice">No {$t.space.p} found.</span>
   {:else}
 
     {#each $spaces as space}

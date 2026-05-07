@@ -5,6 +5,7 @@
     import type { EmergenceStore } from '../../stores/emergence-store';
     import { createEventDispatcher, getContext, onMount } from "svelte";
     import { sessionSelfTags, type Info, type Note, type InfoSession, APP_VERSION, DNA_VERSION, type SessionType, type Amenity } from "./types";
+    import { DEFAULT_SPACE_TERM, DEFAULT_SITEMAP_TERM } from "./terms";
     import { get } from "svelte/store";
     import sanitize from "sanitize-filename";
     import { fromUint8Array, toUint8Array } from "js-base64";
@@ -31,6 +32,7 @@
 
     $: sitemaps = store.maps
     $: settings = store.settings
+    $: t = store.terms
     $: allWindows = store.timeWindows
     $: activeDnaHash = cloneManagerStore.activeDnaHash;
     $: activeDnaHashB64 = encodeHashToBase64($activeDnaHash);
@@ -408,6 +410,13 @@
         await store.setSettings(s)
     }
 
+    const updateTerm = async (key: "space_term" | "sitemap_term", value: string) => {
+        const s = get(store.settings)
+        const trimmed = value.trim()
+        s[key] = trimmed === "" ? undefined : trimmed
+        await store.setSettings(s)
+    }
+
     const handleApplyTemplate = async (e) => {
         await doImport(e.detail);
         const template = e.detail
@@ -424,6 +433,14 @@
         }
         if (template.amenities && template.amenities.length > 0) {
             s.amenities = template.amenities
+            dirty = true
+        }
+        if (template.spaceTerm) {
+            s.space_term = template.spaceTerm
+            dirty = true
+        }
+        if (template.sitemapTerm) {
+            s.sitemap_term = template.sitemapTerm
             dirty = true
         }
         if (dirty) await store.setSettings(s)
@@ -477,28 +494,73 @@
         </div>
         {/if}
 
+        <div class="admin-section" style="flex-direction:column">
+            <div class="admin-section-desc">
+                <h3 style="display:flex; align-items:center; gap:6px;">
+                    Terminology
+                    <sl-tooltip
+                        placement="bottom"
+                        class="settings-help-tooltip"
+                        style="
+                            --max-width: 460px;
+                            --sl-tooltip-background-color: #ffffff;
+                            --sl-tooltip-color: #111;
+                            --sl-tooltip-border-radius: 14px;
+                            --sl-tooltip-padding: 28px 32px;
+                            --sl-tooltip-font-size: 14px;
+                            --sl-tooltip-line-height: 1.5;
+                            --sl-tooltip-arrow-size: 8px;
+                        ">
+                        <div slot="content" style="text-align:left;">
+                            <strong>Space</strong> &mdash; what you call the place where a session happens. A workshop might call it a <em>Room</em>; a restaurant gathering might use <em>Table</em>; a conference might prefer <em>Venue</em> or <em>Location</em>.<br/><br/>
+                            <strong>Site Map</strong> &mdash; the visual layout that {DEFAULT_SPACE_TERM.toLowerCase()}s sit on. Could be <em>Building Layout</em>, <em>Venue Guide</em>, <em>Floor Plan</em>, etc.<br/><br/>
+                            Enter the <em>singular</em> form. Plural is generated automatically (Room → Rooms). Capitalization is handled per-context.
+                        </div>
+                        <span class="info-icon" tabindex="0"><SvgIcon icon="faCircleInfo" size="14px" color="#666" /></span>
+                    </sl-tooltip>
+                </h3>
+                <p>Customize the words this app uses to refer to physical places and the layout they live on.</p>
+            </div>
+            <div style="display:flex; gap:24px; flex-wrap:wrap; margin-top:8px;">
+                <sl-input
+                    label="Space term (singular)"
+                    placeholder={DEFAULT_SPACE_TERM}
+                    value={$settings.space_term ?? ""}
+                    on:sl-change={(e) => updateTerm("space_term", e.target.value)}
+                    style="min-width:220px;"
+                ></sl-input>
+                <sl-input
+                    label="Site Map term (singular)"
+                    placeholder={DEFAULT_SITEMAP_TERM}
+                    value={$settings.sitemap_term ?? ""}
+                    on:sl-change={(e) => updateTerm("sitemap_term", e.target.value)}
+                    style="min-width:220px;"
+                ></sl-input>
+            </div>
+        </div>
+
         <div class="admin-section">
             <div class="admin-section-desc">
-                <h3>Site-maps</h3>
-                <p>Create site-maps on which spaces will be placed.</p>
+                <h3>{$t.sitemap.P}</h3>
+                <p>Create {$t.sitemap.p} on which {$t.space.p} will be placed.</p>
                 {#if (!$sitemaps || $sitemaps.length==0) }
-                    <p style="color:red"> Currently there are no site-maps configured.  Please add a site-map.</p>
+                    <p style="color:red"> Currently there are no {$t.sitemap.p} configured.  Please add a {$t.sitemap.s}.</p>
                 {/if}
             </div>
 
             <div class="admin-section-right">
-                <strong>Site-maps</strong>: {$sitemaps.length}
+                <strong>{$t.sitemap.P}</strong>: {$sitemaps.length}
 
                 <div id="sitemaps-button">
                 <sl-button  style="margin: 8px;" on:click={() => {  dispatch('open-sitemaps')} }>
-                    Site Maps
+                    {$t.sitemap.P}
                 </sl-button></div>
                 {#if $sitemaps.length > 0}
-                    <div id="sitemmap-select"> 
+                    <div id="sitemmap-select">
                     <sl-select
                     value={$settings.current_sitemap ? encodeHashToBase64($settings.current_sitemap) : undefined}
                     style="margin: 8px; position: relative; "
-                    label="Current Site Map"
+                    label="Current {$t.sitemap.S}"
                     on:sl-change={(e) => {
                         const s= $settings
                         const hash = decodeHashFromBase64(e.target.value)
@@ -585,7 +647,7 @@
                             <strong>Any time</strong> &mdash; the session doesn't have to fit into the published time-grid. The creator gets a free-form date/time picker instead. Use for things like meals or pop-ups.<br/><br/>
                             <strong>Leaderless</strong> &mdash; sessions of this type can be created without naming a host or leader. Use for community time, open hangouts, etc.
                         </div>
-                        <span class="info-icon" tabindex="0"><SvgIcon icon="faCircleInfo" size={14} color="#666" /></span>
+                        <span class="info-icon" tabindex="0"><SvgIcon icon="faCircleInfo" size="14px" color="#666" /></span>
                     </sl-tooltip>
                 </h3>
                 <p>The categories of session that can be created. Sessions reference a type by its position in this list, so deletion is a soft hide; reordering only affects display.</p>
@@ -616,7 +678,7 @@
                             dropTargetSessionTypeIdx = null
                         }}
                         on:dragend={() => { draggedSessionTypeIdx = null; dropTargetSessionTypeIdx = null }}>
-                        <div class="drag-handle" title="Drag to reorder"><SvgIcon icon="faGripVertical" size={14} color="#888" /></div>
+                        <div class="drag-handle" title="Drag to reorder"><SvgIcon icon="faGripVertical" size="14px" color="#888" /></div>
                         <sl-input size="small" style="flex:2" value={type.name} disabled={type.deleted}
                             on:sl-change={(e) => updateSessionType(i, { name: e.target.value })}></sl-input>
                         <input type="color" value={type.color} disabled={type.deleted}
@@ -642,7 +704,7 @@
         <div class="admin-section" style="flex-direction:column">
             <div class="admin-section-desc">
                 <h3>Amenities</h3>
-                <p>Amenities that can be required by sessions and offered by spaces. Stored as a bitmask by position; deletion is a soft hide and reordering only affects display.</p>
+                <p>Amenities that can be required by sessions and offered by {$t.space.p}. Stored as a bitmask by position; deletion is a soft hide and reordering only affects display.</p>
             </div>
             <div style="display:flex; flex-direction:column; gap: 8px; margin-top: 8px;">
                 {#each sortedAmenityIndices($settings.amenities ?? []) as i (i)}
@@ -670,7 +732,7 @@
                             dropTargetAmenityIdx = null
                         }}
                         on:dragend={() => { draggedAmenityIdx = null; dropTargetAmenityIdx = null }}>
-                        <div class="drag-handle" title="Drag to reorder"><SvgIcon icon="faGripVertical" size={14} color="#888" /></div>
+                        <div class="drag-handle" title="Drag to reorder"><SvgIcon icon="faGripVertical" size="14px" color="#888" /></div>
                         <sl-input size="small" style="flex:2" value={am.name} disabled={am.deleted}
                             on:sl-change={(e) => updateAmenity(i, { name: e.target.value })}></sl-input>
                         <sl-button size="small" variant={am.deleted ? "default" : "danger"}

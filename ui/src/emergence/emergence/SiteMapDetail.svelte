@@ -27,6 +27,7 @@ let error: any = undefined;
 let errorSnackbar: Snackbar;
   
 $: error, loading, sitemap;
+$: t = store.terms;
 
 onMount(async () => {
   if (sitemap === undefined) {
@@ -63,11 +64,11 @@ let updateSitemapDialog
   <sl-spinner></sl-spinner>
 </div>
 {:else if error}
-<span>Error fetching the sitemap: {error}</span>
+<span>Error fetching the {$t.sitemap.s}: {error}</span>
 {:else}
-  <Confirm 
+  <Confirm
     bind:this={confirmDialog}
-    message="This will remove this sitemap for everyone!" 
+    message="This will remove this {$t.sitemap.s} for everyone!"
     on:confirm-confirmed={deleteSiteMap}></Confirm>
 
 <div class="detail">

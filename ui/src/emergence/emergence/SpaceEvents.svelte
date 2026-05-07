@@ -32,6 +32,7 @@ let error: any = undefined;
 let errorSnackbar: Snackbar;
 
 $: error, loading, space;
+$: t = store.terms;
 
 onMount(async () => {
   if (space === undefined) {
@@ -52,7 +53,7 @@ $: slottedSessions = store.getSlottedSessions(space).slice(0, 2)
 
 </div>
 {:else if error}
-<span>Error fetching the space: {error}</span>
+<span>Error fetching the {$t.space.s}: {error}</span>
 {:else}
 <div class="events">
   <div class="summary clickable"

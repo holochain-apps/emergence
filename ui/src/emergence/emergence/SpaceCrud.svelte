@@ -48,6 +48,7 @@ let sitemap: Info<SiteMap>| undefined;
 $: sitemaps = store.maps
 $: sitemap
 $: settings = store.settings
+$: t = store.terms
 
 let uploadFiles: UploadFiles
 
@@ -131,7 +132,7 @@ let siteMapLocation
 </script>
 <mwc-snackbar bind:this={errorSnackbar} leading>
 </mwc-snackbar>
-<sl-dialog style="--width:100vw;" label={space?"Edit Space":"Create Space"}
+<sl-dialog style="--width:100vw;" label={space ? `Edit ${$t.space.S}` : `Create ${$t.space.S}`}
   bind:this={dialog}
   >
   {#if space}
@@ -160,9 +161,9 @@ let siteMapLocation
 </div>
 <div style="display:flex; flex-direction:row; justify-content:space-between; flex-wrap: wrap;">
   <div style="display:flex; flex-direction:column; margin-right: 10px">
-    <div style="margin-bottom: 16px; width: 100px">
+    <div style="margin-bottom: 16px;" class="symbol-input">
       <sl-input
-      label="Map Symbol"
+      label="{$t.sitemap.S} Symbol"
       value={key}
       on:input={e => { key = e.target.value; } }
     ></sl-input>
@@ -252,7 +253,7 @@ let siteMapLocation
     <sl-select
       value={encodeHashToBase64(sitemap.original_hash)}
       style="margin: 8px;"
-      label="Current Site Map"
+      label="Current {$t.sitemap.S}"
       on:sl-change={(e) => {
         const hash = decodeHashFromBase64(e.target.value)
         sitemap = store.getSiteMap(hash)
@@ -297,4 +298,11 @@ let siteMapLocation
     width: 100px;
     min-height: 0px;
   }
-</style> 
+
+  .symbol-input sl-input {
+    width: 100px;
+  }
+  .symbol-input sl-input::part(form-control-label) {
+    white-space: nowrap;
+  }
+</style>

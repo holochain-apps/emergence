@@ -30,6 +30,10 @@ pub struct Settings {
     pub session_types: Vec<SessionType>,
     #[serde(default)]
     pub amenities: Vec<Amenity>,
+    #[serde(default)]
+    pub space_term: Option<String>,
+    #[serde(default)]
+    pub sitemap_term: Option<String>,
 }
 
 pub fn validate_create_settings(

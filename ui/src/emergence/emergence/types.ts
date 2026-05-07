@@ -623,6 +623,8 @@ export interface Settings {
   current_sitemap?: ActionHash,
   session_types: Array<SessionType>,
   amenities: Array<Amenity>,
+  space_term?: string | null,
+  sitemap_term?: string | null,
 }
 
 export interface InterestData {

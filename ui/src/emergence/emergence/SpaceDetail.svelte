@@ -35,6 +35,12 @@ let errorSnackbar: Snackbar;
 $: editing,  error, space;
 $: uiProps = store.uiProps
 $: settings = store.settings
+$: t = store.terms
+
+const hideMissingIcon = (e: Event) => {
+  const img = e.currentTarget as HTMLImageElement
+  img.style.display = "none"
+}
 
 onMount(async () => {
 });
@@ -80,7 +86,7 @@ let confirmDialog
 
 
 {#if error}
-<span>Error fetching the space: {error}</span>
+<span>Error fetching the {$t.space.s}: {error}</span>
 {:else}
 
 <div transition:slide={{ axis: 'x', duration: 400 }}  class="SpaceDetail pane-content">
@@ -107,7 +113,7 @@ let confirmDialog
 
   <Confirm 
     bind:this={confirmDialog}
-    message="This will remove this space for everyone!" 
+    message="This will remove this {$t.space.s} for everyone!"
     on:confirm-confirmed={deleteSpace}>
   </Confirm>
 <div class="space-details">
@@ -148,7 +154,10 @@ let confirmDialog
   <div class="space-detail">
     <div class="amenity"><img src="/images/Capacity.svg"> Up to { space.record.entry.capacity }</div>
     {#each amenitiesList(space.record.entry.amenities, $settings.amenities) as amenity}
-      <div class="amenity"><img src="/images/{amenity}.svg"> {amenity}</div>
+      <div class="amenity">
+        <img src="/images/{amenity}.svg" alt="" on:error={hideMissingIcon}>
+        {amenity}
+      </div>
     {/each}
   </div>
 
