@@ -135,3 +135,21 @@ export const getMyDna = async (role:string, client: AppClient) : Promise<DnaHash
 } 
 
 export const isTauriContext = () => (window as any).__TAURI_INTERNALS__ !== undefined;
+
+// HWC (Holo Web Conductor) runtime detection.
+//
+// Resolution order:
+//   1. ?runtime=hwc — explicit override declared by URL. Lets the UI
+//      enter HWC mode before the extension finishes injecting
+//      window.holochain (matches mewsfeed's runtime-config pattern, but
+//      as a query param so we don't ship a config file with the
+//      .webhapp).
+//   2. window.holochain.isWebConductor — the extension's own marker.
+export const isHwcContext = () => {
+  if (typeof window === "undefined") return false;
+  if (isTauriContext()) return false;
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get("runtime") === "hwc") return true;
+  return !!(window as any).holochain?.isWebConductor;
+};
+

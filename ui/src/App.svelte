@@ -45,6 +45,10 @@
   import CloneManagerActiveButton from './emergence/emergence/CloneManagerActiveButton.svelte';
   import NetworkOnboarding from './emergence/emergence/NetworkOnboarding.svelte';
   import { saveDefaultProfile, clearDefaultProfile } from './emergence/emergence/defaultProfile';
+  import { isHwcContext } from './emergence/emergence/utils';
+  import { WebConductorAppClient, waitForHolochain } from '@holo-host/web-conductor-client';
+  import { bindHwcClient } from './stores/hwc-connection-store';
+  import HwcConnectionStatus from './emergence/emergence/HwcConnectionStatus.svelte';
 
   let client: AppClient | undefined;
   let weClient: WeaveClient
@@ -198,7 +202,52 @@
     }
 
     let tokenResp;
-      if (!isWeaveContext()) {
+      if (isHwcContext()) {
+      // HWC mode (Holo Web Conductor browser extension).
+      //
+      // Resolution order for joiningServiceUrl / linkerUrl matches
+      // unyt's pattern:
+      //   1. ?joiningServiceUrl= / ?linkerUrl= query params (dev/test)
+      //   2. VITE_HWC_JOINING_SERVICE_URL build-time env var
+      //   3. fall through to HWC's .well-known autoDiscover
+      //
+      // happBundlePath defaults to /emergence.happ, which deploy/
+      // local-dev.sh stages into ui/public/ so vite serves it.
+      const urlParams = new URLSearchParams(window.location.search);
+      const joiningServiceUrl =
+        urlParams.get("joiningServiceUrl") ??
+        ((import.meta as any).env.VITE_HWC_JOINING_SERVICE_URL as string | undefined);
+      const linkerUrl =
+        urlParams.get("linkerUrl") ??
+        ((import.meta as any).env.VITE_HWC_LINKER_URL as string | undefined);
+      const happBundlePath =
+        urlParams.get("happBundlePath") ??
+        ((import.meta as any).env.VITE_HWC_HAPP_BUNDLE_PATH as string | undefined) ??
+        "/emergence.happ";
+
+      console.log(
+        `App: HWC context detected; joiningServiceUrl=${joiningServiceUrl ?? "(autoDiscover)"}, linkerUrl=${linkerUrl ?? "(from joining service)"}, happBundlePath=${happBundlePath}`
+      );
+
+      // The extension injects window.holochain asynchronously; wait briefly.
+      await waitForHolochain(5000);
+
+      const hwcClient = await WebConductorAppClient.connect({
+        // emergence's only DNA role. Required so HWC's synthetic
+        // appInfo() keys cell_info by "emergence" — otherwise the
+        // CloneManagerStore can't find the provisioned cell.
+        roleName: ROLE_NAME,
+        ...(linkerUrl ? { linkerUrl } : {}),
+        ...(joiningServiceUrl ? { joiningServiceUrl } : { autoDiscover: true }),
+        happBundlePath,
+        autoReconnect: true,
+      });
+      // Mirror the HWC client's connection-state events into the
+      // hwcConnectionState store so the loading screen can show live
+      // boot diagnostics (HTTP / WS / Auth / Linker / Peers).
+      bindHwcClient(hwcClient);
+      client = hwcClient as unknown as AppClient;
+    } else if (!isWeaveContext()) {
       let appPort: string = import.meta.env.VITE_APP_PORT
       console.log("Dev mode admin port:", adminPort)
       url = appPort ? `ws://localhost:${appPort}` : `ws://localhost`
@@ -296,19 +345,64 @@
 
       cloneManagerStore = new CloneManagerStore(
         client,
-        weClient
+        weClient,
+        isHwcContext()
       );
 
-      // In non-Weave mode, check if we need onboarding (no clone cells yet)
-      if (!isWeaveContext()) {
-        const hasClones = await cloneManagerStore.hasClones();
-        if (!hasClones) {
-          // Clear stale data from any previous (wiped) session
-          clearDefaultProfile();
-          localStorage.removeItem("activeDnaHash");
-          appPhase = 'onboarding';
-          connected = true;
-          return;
+      // VITE_PROGENITOR_NETWORK_SEED stands in for Moss's tool-installer
+      // affordance for non-Weave dev flows (hc-spin under deploy/
+      // start-hwc.sh). When set, this UI session is the progenitor:
+      // skip the create/join wizard, auto-join the clone with the
+      // shared seed, and amSteward will become true below.
+      const progenitorSeed = (import.meta as any).env.VITE_PROGENITOR_NETWORK_SEED as string | undefined;
+
+      // In Weave or HWC, the cell-installer / joining-service flow has
+      // already produced the right cell — nothing to do here. In
+      // Tauri/dev mode, either auto-join via env-var or fall through
+      // to the create/join wizard.
+      if (!isWeaveContext() && !isHwcContext()) {
+        if (progenitorSeed) {
+          console.log(`App: progenitor seed='${progenitorSeed}' from env; bypassing NetworkOnboarding`);
+          // Look for an existing clone with this seed (enabled or
+          // disabled). If we find an enabled match, just activate it.
+          // Otherwise call join() — and if the conductor returns
+          // DuplicateCellId (e.g. hot-reload, or hc-spin previously
+          // baked the seed into the provisioned cell), fall through
+          // to a re-listing pass that picks up the now-existing clone.
+          const enabled = await cloneManagerStore.listEnabledClones();
+          const match = enabled.find((c) => c.networkSeed === progenitorSeed);
+          if (match) {
+            console.log("App: progenitor clone already present; activating");
+            cloneManagerStore.activate(match.cellId);
+          } else {
+            try {
+              console.log("App: creating progenitor clone");
+              const cloneCell = await cloneManagerStore.join("Progenitor", progenitorSeed);
+              cloneManagerStore.activate(cloneCell.cell_id);
+            } catch (e: any) {
+              const msg = `${e?.message ?? e}`;
+              if (msg.includes("DuplicateCellId")) {
+                console.warn("App: DuplicateCellId on join; re-listing clones");
+                const all = await cloneManagerStore.list();
+                const found = all.find((c) => c.networkSeed === progenitorSeed);
+                if (!found) throw e;
+                cloneManagerStore.activate(found.cellId);
+              } else {
+                throw e;
+              }
+            }
+          }
+          cloneManagerStore.needsOnboarding.set(false);
+        } else {
+          const hasClones = await cloneManagerStore.hasClones();
+          if (!hasClones) {
+            // Clear stale data from any previous (wiped) session
+            clearDefaultProfile();
+            localStorage.removeItem("activeDnaHash");
+            appPhase = 'onboarding';
+            connected = true;
+            return;
+          }
         }
       }
 
@@ -368,7 +462,22 @@
 
     if (!isConfigured()) {
       let isSteward = false
-      if (!isWeaveContext()) {
+      // VITE_PROGENITOR_NETWORK_SEED is the non-Moss equivalent of the
+      // Weave tool-installer affordance: when set, this session was
+      // explicitly launched as the progenitor (see deploy/start-hwc.sh)
+      // and gets the Admin pane's initial-config UI right away. Both
+      // hc-spin and HWC-browser tabs see the same baked-in env var
+      // during this dev flow, which is fine — they're both intentional
+      // dev users on the same local network. In production builds the
+      // env var is unset, so HWC browser users do NOT become stewards.
+      const progenitorSeed = (import.meta as any).env.VITE_PROGENITOR_NETWORK_SEED as string | undefined;
+      if (progenitorSeed) {
+        isSteward = true
+      } else if (isHwcContext()) {
+        // Plain HWC browser user without the env var: not a steward.
+        // Wait for the progenitor to configure the network.
+        isSteward = false
+      } else if (!isWeaveContext()) {
         isSteward = true
       } else {
         if (weClient.renderInfo.type === 'applet-view') {
@@ -379,7 +488,7 @@
         }
         const accountabilities = await weClient.myAccountabilitiesPerGroup()
         console.log("accountabilities",accountabilities )
-      } 
+      }
       if (isSteward) {
         $store.setUIprops({amSteward:true})
         await $store.setPane("admin")
@@ -443,6 +552,9 @@ let sessionSummary = true
     <div class="loading-container">
       <img src="/images/loading.svg" />
       <span class="loading-text">{loadingText ? $loadingText : DEFAULT_SYNC_TEXT}</span>
+      {#if isHwcContext()}
+        <HwcConnectionStatus />
+      {/if}
     </div>
   {:else}
   <profiles-context store="{$store.profilesStore}">
@@ -758,9 +870,17 @@ let sessionSummary = true
       <div class="init-error">
         <h3>Initialization Error: </h3>
         {initializationError}
+        {#if isHwcContext()}
+          <HwcConnectionStatus />
+        {/if}
       </div>
     {:else}
-      <div class="loading"><div class="loader"></div></div>
+      <div class="loading" style="flex-direction: column; gap: 18px;">
+        <div class="loader"></div>
+        {#if isHwcContext()}
+          <HwcConnectionStatus />
+        {/if}
+      </div>
     {/if}
   {/if}
 </main>
