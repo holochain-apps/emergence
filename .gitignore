@@ -14,3 +14,5 @@
 *.code-workspace
 .kitsune2_bootstrap_srv
 .claude/
+# h2hc-linker writes its identity keypair to its cwd on first start
+linker-key.ed25519

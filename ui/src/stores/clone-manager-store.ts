@@ -39,6 +39,11 @@ export class CloneManagerStore {
   constructor(
     public client: AppClient,
     public weaveClient?: WeaveClient,
+    // HWC mode: like Weave, the provisioned cell IS the active network
+    // (the joining service handles network identity via dna_modifiers,
+    // not via clones). Cell-selection logic should treat HWC the same
+    // as Weave even though weaveClient is undefined.
+    public isHwc: boolean = false,
   ) {
     this.needsOnboarding = writable(false);
     this.activeDnaHash = writable<DnaHash>();
@@ -167,8 +172,11 @@ export class CloneManagerStore {
       const matchingCellInfo = this._findCellInfoWithDnaHash(appInfo, activeDnaHash);
 
       if(matchingCellInfo !== undefined) {
-        // In non-Weave mode, reject if this points to the provisioned cell
-        if (this.weaveClient === undefined && matchingCellInfo.type === CellType.Provisioned) {
+        // In non-Weave / non-HWC mode, reject if this points to the
+        // provisioned cell (Tauri/dev requires a clone to identify
+        // the active network; the provisioned cell is the empty
+        // template).
+        if (this.weaveClient === undefined && !this.isHwc && matchingCellInfo.type === CellType.Provisioned) {
           // Fall through to _setDefaultActiveDnaHash
         } else {
           this.activeDnaHash.set(activeDnaHash);
@@ -182,8 +190,10 @@ export class CloneManagerStore {
   }
 
   private _setDefaultActiveDnaHash(appInfo: AppInfo) {
-    // In Weave mode, always use the provisioned cell
-    if (this.weaveClient !== undefined) {
+    // In Weave / HWC mode, always use the provisioned cell. (In HWC
+    // the joining service installs the provisioned role with the
+    // network's dna_modifiers; clones aren't part of the model.)
+    if (this.weaveClient !== undefined || this.isHwc) {
       if (appInfo.cell_info[ROLE_NAME][0].type !== CellType.Provisioned) {
         throw new Error("incorrect cell type, must be provisioned");
       }
@@ -192,7 +202,7 @@ export class CloneManagerStore {
       return;
     }
 
-    // In non-Weave mode, find first enabled clone
+    // In Tauri/dev mode, find first enabled clone
     const clones = appInfo.cell_info[ROLE_NAME].filter(
       (c: CellInfo) => c.type === CellType.Cloned && c.value.enabled
     );
