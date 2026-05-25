@@ -1,8 +1,12 @@
-use holochain_types::prelude::AppBundle;
+use holochain::prelude::{AppBundleSource, InstallAppPayload};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use tauri::{AppHandle, Listener, Manager, Runtime};
-use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig, NetworkConfig, vec_to_locked};
+use tauri_plugin_holochain::{
+    vec_to_locked, HolochainExt, HolochainPluginConfig, NetworkConfig, WindowOptions, EVENT_READY,
+    EVENT_SETUP_FAILED,
+};
 use url2::Url2;
 
 const APP_ID: &str = "emergence";
@@ -13,10 +17,6 @@ pub const HAPP_BUNDLE_BYTES: &[u8] = include_bytes!("../../workdir/emergence.hap
 pub struct UserNetworkConfig {
     bootstrap_url: Option<Url2>,
     relay_url: Option<Url2>,
-}
-
-pub fn happ_bundle() -> anyhow::Result<AppBundle> {
-    AppBundle::unpack(HAPP_BUNDLE_BYTES).map_err(|e| anyhow::anyhow!(e))
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -34,7 +34,7 @@ pub fn run() {
         )
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_holochain::async_init(
+        .plugin(tauri_plugin_holochain::init(
             vec_to_locked(vec![]),
             HolochainPluginConfig::new(holochain_dir(), network_config())
         ))
@@ -42,11 +42,11 @@ pub fn run() {
             let handle = app.handle().clone();
             let handle_fail = app.handle().clone();
             app.handle()
-                .listen("holochain://setup-failed", move |_event| {
+                .listen(EVENT_SETUP_FAILED, move |_event| {
                     handle_fail.exit(1);
                 });
             app.handle()
-                .listen("holochain://setup-completed", move |_event| {
+                .listen(EVENT_READY, move |_event| {
                     let handle = handle.clone();
                     tauri::async_runtime::spawn(async move {
                         if let Err(e) = setup(handle.clone()).await {
@@ -60,18 +60,18 @@ pub fn run() {
                                 .map_err(|e| anyhow::anyhow!("{e:?}"))?
                                 .main_window_builder(
                                     String::from("main"),
-                                    false,
-                                    Some(String::from("emergence")),
-                                    None,
+                                    String::from(APP_ID),
+                                    WindowOptions {
+                                        title: Some(String::from("Emergence")),
+                                        ..Default::default()
+                                    },
                                 )
                                 .await
                                 .map_err(|e| anyhow::anyhow!("{e:?}"))?;
 
                             #[cfg(desktop)]
                             {
-                                window = window
-                                    .title(String::from("Emergence"))
-                                    .inner_size(1200.0, 880.0);
+                                window = window.inner_size(1200.0, 880.0);
                             }
 
                             window.build().map_err(|e| anyhow::anyhow!("{e:?}"))?;
@@ -107,34 +107,26 @@ pub fn run() {
 //     - Check if it's necessary to update the coordinators for our hApp
 //       - And do so if it is
 async fn setup(handle: AppHandle) -> anyhow::Result<()> {
-    let admin_ws = handle.holochain()?.admin_websocket().await?;
-
-    let installed_apps = admin_ws
-        .list_apps(None)
-        .await
-        .map_err(|err| tauri_plugin_holochain::Error::ConductorApiError(err))?;
-
-    if installed_apps
-        .iter()
-        .find(|app| app.installed_app_id.as_str().eq(APP_ID))
-        .is_none()
-    {
-        handle
-            .holochain()?
-            .install_app(
-                String::from(APP_ID),
-                happ_bundle()?,
-                None,
-                None,
-                None,
-            )
-            .await?;
-    } else {
-        handle.holochain()?.update_app_if_necessary(
-            String::from(APP_ID),
-            happ_bundle()?
-        ).await?;
-    }
+    // `setup_app` is idempotent: it installs + enables the app only if it is not
+    // already installed, then ensures an app websocket exists for it. Coordinator
+    // updates for an already-installed app are not handled here (the in-process
+    // runtime has no `update_app_if_necessary` yet); wipe the dev data dir to
+    // reinstall after a happ change.
+    handle
+        .holochain()?
+        .runtime()
+        .setup_app(
+            InstallAppPayload {
+                source: AppBundleSource::Bytes(HAPP_BUNDLE_BYTES.to_vec().into()),
+                agent_key: None,
+                installed_app_id: Some(String::from(APP_ID)),
+                network_seed: None,
+                roles_settings: Some(HashMap::new()),
+                ignore_genesis_failure: false,
+            },
+            true,
+        )
+        .await?;
 
     Ok(())
 }

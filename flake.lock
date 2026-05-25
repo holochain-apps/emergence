@@ -1,5 +1,37 @@
 {
   "nodes": {
+    "android-service-runtime": {
+      "inputs": {
+        "flake-parts": [
+          "android-service-runtime",
+          "holonix",
+          "flake-parts"
+        ],
+        "holonix": [
+          "holonix"
+        ],
+        "nixpkgs": [
+          "android-service-runtime",
+          "holonix",
+          "nixpkgs"
+        ],
+        "rust-overlay": [
+          "android-service-runtime",
+          "holonix",
+          "rust-overlay"
+        ]
+      },
+      "locked": {
+        "lastModified": 1779728995,
+        "narHash": "sha256-0RzSqD5g4Qsnx0VqzFGkIbQXtOUZyDxpTdHnphX/des=",
+        "path": "/home/eric/code/metacurrency/holochain/android-service-runtime",
+        "type": "path"
+      },
+      "original": {
+        "path": "/home/eric/code/metacurrency/holochain/android-service-runtime",
+        "type": "path"
+      }
+    },
     "crane": {
       "locked": {
         "lastModified": 1778106249,
@@ -64,46 +96,6 @@
         "owner": "holochain",
         "ref": "holochain-0.6.1",
         "repo": "holochain",
-        "type": "github"
-      }
-    },
-    "holochain-nix-builders": {
-      "inputs": {
-        "crane": [
-          "p2p-shipyard",
-          "holochain-nix-builders",
-          "holonix",
-          "crane"
-        ],
-        "holonix": [
-          "p2p-shipyard",
-          "holonix"
-        ],
-        "nixpkgs": [
-          "p2p-shipyard",
-          "holochain-nix-builders",
-          "holonix",
-          "nixpkgs"
-        ],
-        "rust-overlay": [
-          "p2p-shipyard",
-          "holochain-nix-builders",
-          "holonix",
-          "rust-overlay"
-        ]
-      },
-      "locked": {
-        "lastModified": 1772476964,
-        "narHash": "sha256-EUOhbhQXJD8Ogt4lzYa7lzLap0TPPkRPOeL0Bpx9/WY=",
-        "owner": "darksoil-studio",
-        "repo": "holochain-nix-builders",
-        "rev": "8733730cc9a11bc0a45c92626f8b3622ec3f853f",
-        "type": "github"
-      },
-      "original": {
-        "owner": "darksoil-studio",
-        "ref": "main-0.6",
-        "repo": "holochain-nix-builders",
         "type": "github"
       }
     },
@@ -198,53 +190,14 @@
         "type": "github"
       }
     },
-    "p2p-shipyard": {
-      "inputs": {
-        "crane": [
-          "p2p-shipyard",
-          "holonix",
-          "crane"
-        ],
-        "holochain-nix-builders": "holochain-nix-builders",
-        "holonix": [
-          "holonix"
-        ],
-        "nixpkgs": [
-          "p2p-shipyard",
-          "holonix",
-          "nixpkgs"
-        ],
-        "rust-overlay": [
-          "p2p-shipyard",
-          "holonix",
-          "rust-overlay"
-        ],
-        "scaffolding": "scaffolding",
-        "webkitnixpkgs": "webkitnixpkgs"
-      },
-      "locked": {
-        "lastModified": 1772547543,
-        "narHash": "sha256-YpfUsOiB9ZyDZLqUwiy/oZbzxfLUrOtcT4HFBceARqw=",
-        "owner": "darksoil-studio",
-        "repo": "tauri-plugin-holochain",
-        "rev": "387bf70ca4b7b388fbbaa76b62d3ac7e23e7e651",
-        "type": "github"
-      },
-      "original": {
-        "owner": "darksoil-studio",
-        "ref": "main-0.6.1",
-        "repo": "tauri-plugin-holochain",
-        "type": "github"
-      }
-    },
     "root": {
       "inputs": {
+        "android-service-runtime": "android-service-runtime",
         "holonix": "holonix",
         "nixpkgs": [
           "holonix",
           "nixpkgs"
-        ],
-        "p2p-shipyard": "p2p-shipyard"
+        ]
       }
     },
     "rust-overlay": {
@@ -265,66 +218,6 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "type": "github"
-      }
-    },
-    "scaffolding": {
-      "inputs": {
-        "crane": [
-          "p2p-shipyard",
-          "scaffolding",
-          "holonix",
-          "crane"
-        ],
-        "holochain-nix-builders": [
-          "p2p-shipyard",
-          "holochain-nix-builders"
-        ],
-        "holonix": [
-          "p2p-shipyard",
-          "holonix"
-        ],
-        "nixpkgs": [
-          "p2p-shipyard",
-          "scaffolding",
-          "holonix",
-          "nixpkgs"
-        ],
-        "rust-overlay": [
-          "p2p-shipyard",
-          "scaffolding",
-          "holonix",
-          "rust-overlay"
-        ]
-      },
-      "locked": {
-        "lastModified": 1772476985,
-        "narHash": "sha256-q+wPi8BAH6mo1p8Vn74QvUi4z5Wk3vsdYGjzMf8Xo4M=",
-        "owner": "darksoil-studio",
-        "repo": "scaffolding",
-        "rev": "6c54fbd08ee80e7664139e09c383043723000df1",
-        "type": "github"
-      },
-      "original": {
-        "owner": "darksoil-studio",
-        "ref": "main-0.6",
-        "repo": "scaffolding",
-        "type": "github"
-      }
-    },
-    "webkitnixpkgs": {
-      "locked": {
-        "lastModified": 1709246466,
-        "narHash": "sha256-jN8Y5Zv2tNUKIGuSqhm8yIMn2x6jhMQvNwKYduvKxjU=",
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "ed4db9c6c75079ff3570a9e3eb6806c8f692dc26",
-        "type": "github"
-      },
-      "original": {
-        "owner": "nixos",
-        "repo": "nixpkgs",
-        "rev": "ed4db9c6c75079ff3570a9e3eb6806c8f692dc26",
         "type": "github"
       }
     }

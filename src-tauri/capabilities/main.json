@@ -6,6 +6,7 @@
   "permissions": [
     "core:app:default",
     "core:window:allow-set-title",
-    "os:allow-os-type"
+    "os:allow-os-type",
+    "holochain:default"
   ]
 }

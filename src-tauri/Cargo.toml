@@ -20,10 +20,9 @@ tauri-build = { version = "2.2.0", default-features = false , features = [] }
 
 [dependencies]
 tauri = { version = "2.5.1", features = ["devtools"] }
-tauri-plugin-holochain = { git = "https://github.com/darksoil-studio/tauri-plugin-holochain", branch = "main-0.6.1"}
+tauri-plugin-holochain = { path = "../../android-service-runtime/crates/tauri-plugin-holochain" }
 holochain = { version = "0.6.1", default-features = false, features = ["sqlite-encrypted", "wasmer_sys", "transport-iroh"] }
 holochain_types = { version = "0.6.1" }
-lair_keystore = { version = "0.6.3" }
 
 log = "0.4"
 tauri-plugin-log = "2.4.0"
