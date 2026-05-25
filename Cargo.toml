@@ -10,10 +10,10 @@ exclude = ["src-tauri"]
 resolver = "2"
 
 [workspace.dependencies]
-hdi = "0.7.0"
-hdk = "0.6.0"
+hdi = "0.7.1"
+hdk = "0.6.1"
 serde = "1"
-holochain_serialized_bytes = "0.0.56"
+holochain_serialized_bytes = "0.0.57"
 
 [workspace.dependencies.emergence]
 path = "dnas/emergence/zomes/coordinator/emergence"

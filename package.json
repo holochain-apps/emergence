@@ -36,8 +36,8 @@
     "release:runtimes": "APP_VER=$(node -p \"require('./ui/package.json').version\") && git tag v$APP_VER && git push origin v$APP_VER"
   },
   "devDependencies": {
-    "@theweave/cli": "0.15.16",
-    "@holochain/hc-spin": "^0.600.3-rc.0",
+    "@theweave/cli": "0.15.19",
+    "@holochain/hc-spin": "^0.601.3",
     "@holochain-playground/cli": "^0.300.1",
     "@rollup/plugin-typescript": "^8.0.0",
     "@tsconfig/svelte": "^2.0.0",
@@ -52,7 +52,7 @@
     "svelte-preprocess": "^4.10.7",
     "tslib": "^2.0.0",
     "typescript": "^4.0.0",
-    "@tauri-apps/cli": "^2.0.0-beta.22",
+    "@tauri-apps/cli": "^2.11.2",
     "internal-ip-cli": "^2.0.0"
   },
   "engines": {
@@ -60,5 +60,10 @@
   },
   "dependencies": {
     "update": "^0.7.4"
+  },
+  "overrides": {
+    "@theweave/moss-types": "0.5.4",
+    "@theweave/utils": "0.5.4",
+    "@holochain/client": "0.20.5"
   }
 }
