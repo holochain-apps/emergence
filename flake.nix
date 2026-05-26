@@ -4,15 +4,11 @@
   inputs = {
     holonix.url = "github:holochain/holonix/main-0.6";
 
-    # Dev shell comes from our own android-service-runtime flake (the repo that
-    # also provides the in-process tauri-plugin-holochain this app links against),
-    # not from darksoil's p2p-shipyard. Keep its holonix in lockstep with ours so
-    # there is a single holochain toolchain.
-    #
-    # Absolute path: a relative `path:../...` escapes the git-flake store path and
-    # nix rejects it. This is a local cross-repo dev link (same as the Cargo path
-    # dep) on the test branch, not something to merge to main.
-    android-service-runtime.url = "path:/home/eric/code/metacurrency/holochain/android-service-runtime";
+    # Dev shell composes our own android-service-runtime flake (which also provides
+    # the in-process tauri-plugin-holochain this app links against). That shell
+    # carries the holochain/rust/android toolchain *and* the GTK/webkit runtime +
+    # webkitgtk pin needed for `tauri dev` to render, so we just inherit it here.
+    android-service-runtime.url = "github:holochain/android-service-runtime/feat/holochain-0.6-and-unified-plugin";
 
     nixpkgs.follows = "holonix/nixpkgs";
     android-service-runtime.inputs.holonix.follows = "holonix";
@@ -43,11 +39,6 @@
             '';
           };
 
-          # Android builds use the same shell (it bundles the Android SDK/NDK and
-          # cargo-ndk). NOTE: the ANDROID_HOME / NDK env vars are set by the
-          # android-service-runtime shell's own shellHook, which Nix does not
-          # propagate through `inputsFrom`; for `tauri android` builds, run them
-          # from the android-service-runtime dev shell.
           devShells.androidDev = pkgs.mkShell {
             inputsFrom = [
               inputs'.android-service-runtime.devShells.default

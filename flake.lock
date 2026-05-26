@@ -19,17 +19,22 @@
           "android-service-runtime",
           "holonix",
           "rust-overlay"
-        ]
+        ],
+        "webkitnixpkgs": "webkitnixpkgs"
       },
       "locked": {
-        "lastModified": 1779728995,
-        "narHash": "sha256-0RzSqD5g4Qsnx0VqzFGkIbQXtOUZyDxpTdHnphX/des=",
-        "path": "/home/eric/code/metacurrency/holochain/android-service-runtime",
-        "type": "path"
+        "lastModified": 1779799865,
+        "narHash": "sha256-QieWc7ZIMmQp2m9O5ASAUledAQGyS8a4vl7Dv5oWzG0=",
+        "owner": "holochain",
+        "repo": "android-service-runtime",
+        "rev": "eb15d8da76167f201bc06ad6a9811f23f9334048",
+        "type": "github"
       },
       "original": {
-        "path": "/home/eric/code/metacurrency/holochain/android-service-runtime",
-        "type": "path"
+        "owner": "holochain",
+        "ref": "feat/holochain-0.6-and-unified-plugin",
+        "repo": "android-service-runtime",
+        "type": "github"
       }
     },
     "crane": {
@@ -218,6 +223,22 @@
       "original": {
         "owner": "oxalica",
         "repo": "rust-overlay",
+        "type": "github"
+      }
+    },
+    "webkitnixpkgs": {
+      "locked": {
+        "lastModified": 1709246466,
+        "narHash": "sha256-jN8Y5Zv2tNUKIGuSqhm8yIMn2x6jhMQvNwKYduvKxjU=",
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "ed4db9c6c75079ff3570a9e3eb6806c8f692dc26",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nixos",
+        "repo": "nixpkgs",
+        "rev": "ed4db9c6c75079ff3570a9e3eb6806c8f692dc26",
         "type": "github"
       }
     }

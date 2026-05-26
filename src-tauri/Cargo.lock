@@ -2030,13 +2030,13 @@ dependencies = [
 
 [[package]]
 name = "ed25519"
-version = "3.0.0"
+version = "3.0.0-rc.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29fcf32e6c73d1079f83ab4d782de2d81620346a5f38c6237a86a22f8368980a"
+checksum = "c6e914c7c52decb085cea910552e24c63ac019e3ab8bf001ff736da9a9d9d890"
 dependencies = [
- "pkcs8 0.11.0",
- "serdect",
- "signature 3.0.0",
+ "pkcs8 0.11.0-rc.11",
+ "serde",
+ "signature 3.0.0-rc.10",
 ]
 
 [[package]]
@@ -2061,11 +2061,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ad207ed88a133091f83224265eac21109930db09bedcad05d5252f2af2de20a1"
 dependencies = [
  "curve25519-dalek 5.0.0-pre.1",
- "ed25519 3.0.0",
+ "ed25519 3.0.0-rc.4",
  "rand_core 0.9.5",
  "serde",
  "sha2 0.11.0-rc.2",
- "signature 3.0.0",
+ "signature 3.0.0-rc.10",
  "subtle",
  "zeroize",
 ]
@@ -3410,6 +3410,7 @@ dependencies = [
 [[package]]
 name = "holochain-conductor-runtime"
 version = "0.2.2"
+source = "git+https://github.com/holochain/android-service-runtime?branch=feat/holochain-0.6-and-unified-plugin#5b1db9751078cedfbddcffc2b945680de216ffec"
 dependencies = [
  "holochain",
  "holochain_types",
@@ -3428,6 +3429,7 @@ dependencies = [
 [[package]]
 name = "holochain-conductor-runtime-types-ffi"
 version = "0.2.2"
+source = "git+https://github.com/holochain/android-service-runtime?branch=feat/holochain-0.6-and-unified-plugin#5b1db9751078cedfbddcffc2b945680de216ffec"
 dependencies = [
  "bytes",
  "hc_uniffi",
@@ -4492,7 +4494,7 @@ dependencies = [
  "netwatch",
  "pin-project",
  "pkarr",
- "pkcs8 0.11.0",
+ "pkcs8 0.11.0-rc.11",
  "portmapper",
  "rand 0.9.4",
  "reqwest 0.12.28",
@@ -6527,9 +6529,9 @@ dependencies = [
 
 [[package]]
 name = "pkcs8"
-version = "0.11.0"
+version = "0.11.0-rc.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "451913da69c775a56034ea8d9003d27ee8948e12443eae7c038ba100a4f21cb7"
+checksum = "12922b6296c06eb741b02d7b5161e3aaa22864af38dfa025a1a3ba3f68c84577"
 dependencies = [
  "der 0.8.0",
  "spki 0.8.0",
@@ -8409,9 +8411,9 @@ dependencies = [
 
 [[package]]
 name = "signature"
-version = "3.0.0"
+version = "3.0.0-rc.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28d567dcbaf0049cb8ac2608a76cd95ff9e4412e1899d389ee400918ca7537f5"
+checksum = "7f1880df446116126965eeec169136b2e0251dba37c6223bcc819569550edea3"
 
 [[package]]
 name = "simd-adler32"
@@ -9074,6 +9076,7 @@ dependencies = [
 [[package]]
 name = "tauri-plugin-holochain"
 version = "0.2.2"
+source = "git+https://github.com/holochain/android-service-runtime?branch=feat/holochain-0.6-and-unified-plugin#5b1db9751078cedfbddcffc2b945680de216ffec"
 dependencies = [
  "holochain",
  "holochain-conductor-runtime",
