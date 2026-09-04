@@ -4,8 +4,9 @@
   "description": "Capability for the main window",
   "windows": ["main"],
   "permissions": [
-    "core:app:default",
+    "core:default",
     "core:window:allow-set-title",
-    "os:allow-os-type"
+    "os:allow-os-type",
+    "holochain:default"
   ]
 }

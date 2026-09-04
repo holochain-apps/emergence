@@ -4,7 +4,7 @@ import { EntryRecord } from '@holochain-open-dev/utils';
 import type {
   ActionHash,
   AgentPubKey,
-  AppCallZomeRequest,
+  RoleNameCallZomeRequest,
   AppClient,
   EntryHash,
   HoloHash
@@ -306,13 +306,17 @@ export class EmergenceClient {
   }
 
   private async callZome(fn_name: string, payload: any) {
-    const req: AppCallZomeRequest = {
+    const req: RoleNameCallZomeRequest = {
       role_name: this.roleName,
       zome_name: this.zomeName,
       fn_name,
       payload,
     };
-    return await this.client.callZome(req, 30000);
+    // Cold-start budget: a freshly created/joined cell pays wasm-compile + network
+    // (bootstrap/relay) join latency on the first calls, which can exceed the old
+    // 30s cap and abort the initial sync (forcing a manual reload). 120s lets the
+    // first load complete on a cold conductor; warm calls return immediately.
+    return await this.client.callZome(req, 120000);
   }
   /** Scene */
 

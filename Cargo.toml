@@ -9,9 +9,12 @@ members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
 exclude = ["src-tauri"]
 resolver = "2"
 
+# Pinned to the hdi 0.8.0-dev.13 / hdk 0.7.0-dev.19 / hsb 0.0.57 set, matching the
+# conductor shipped by the ASR plugin (holochain 0.7.0-dev.28). Both profiles and
+# file-storage main-0.7 are on this set (file-storage was bumped to hsb 0.0.57).
 [workspace.dependencies]
-hdi = "0.7.1"
-hdk = "0.6.1"
+hdi = "0.8.0-dev"
+hdk = "0.7.0-dev"
 serde = "1"
 holochain_serialized_bytes = "0.0.57"
 

@@ -35,6 +35,9 @@ export class CloneManagerStore {
   activeCellInfoNormalized: Loadable<CellInfoNormalized>;
   activeStore: Loadable<EmergenceStore>;
   needsOnboarding: Writable<boolean>;
+  // Non-empty while the active cell's init() warmup is running; the UI shows it as
+  // a first-time-setup screen.
+  setupStatus: Writable<string> = writable("");
 
   constructor(
     public client: AppClient,
@@ -84,6 +87,19 @@ export class CloneManagerStore {
       });
       const fileStorageClient = new FileStorageClient(this.client, roleName);
       const emegenceClient = new EmergenceClient(this.client, roleName, ZOME_NAME);
+
+      // Drive the cell's init() to completion with a single awaited call before the
+      // store is exposed. The first zome call to a cold cell runs init() and compiles
+      // all the zome wasms (tens of seconds); doing it alone here keeps the later
+      // parallel fan-out (emergence sync + profiles `myProfile`) from racing init()
+      // and hitting holochain's "init() blocking this zome call >30s, giving up".
+      this.setupStatus.set("Running first-time setup (compiling wasms — this can take a minute)…");
+      try {
+        await emegenceClient.getSettings();
+      } catch (e) {
+        console.warn("init warmup failed (continuing):", e);
+      }
+      this.setupStatus.set("");
 
       return new EmergenceStore(this, emegenceClient, profilesStore, fileStorageClient, $activeDnaHash);
     });
@@ -196,8 +212,9 @@ export class CloneManagerStore {
     const clones = appInfo.cell_info[ROLE_NAME].filter(
       (c: CellInfo) => c.type === CellType.Cloned && c.value.enabled
     );
-    if (clones.length > 0) {
-      this.activeDnaHash.set(clones[0].value.cell_id[0]);
+    const firstClone = clones[0];
+    if (firstClone && firstClone.type === CellType.Cloned) {
+      this.activeDnaHash.set(firstClone.value.cell_id[0]);
     } else {
       // No clones available - signal onboarding needed
       this.needsOnboarding.set(true);
@@ -247,4 +264,39 @@ export class CloneManagerStore {
       };
     }
   }
+}
+
+// --- Steward (creator) tracking ---
+// Mirrors the Moss pattern where only the happ installer gets the setup/steward
+// privilege: here only the agent that *created* a clone is its steward. A joiner
+// (who entered via a joining code) is not, so it waits for the steward's config
+// to gossip in instead of seeing the setup UI on an unconfigured network.
+const STEWARD_CLONES_KEY = "stewardClones";
+
+// Keyed by "<agentPubKey>:<dnaHash>" so the marker is per-agent. In dev, the two
+// `tauri dev` instances share one webview origin (and thus one localStorage), but
+// each conductor has a distinct agent key, so a creator's mark never leaks to the
+// joiner instance.
+function stewardKey(dnaHash: DnaHash, agentPubKey: AgentPubKey): string {
+  return `${encodeHashToBase64(agentPubKey)}:${encodeHashToBase64(dnaHash)}`;
+}
+
+function stewardCloneSet(): Set<string> {
+  try {
+    return new Set<string>(JSON.parse(localStorage.getItem(STEWARD_CLONES_KEY) || "[]"));
+  } catch (_e) {
+    return new Set<string>();
+  }
+}
+
+export function markStewardClone(dnaHash: DnaHash, agentPubKey: AgentPubKey) {
+  if (!dnaHash || !agentPubKey) return;
+  const set = stewardCloneSet();
+  set.add(stewardKey(dnaHash, agentPubKey));
+  localStorage.setItem(STEWARD_CLONES_KEY, JSON.stringify([...set]));
+}
+
+export function isStewardClone(dnaHash: DnaHash | undefined, agentPubKey: AgentPubKey | undefined): boolean {
+  if (!dnaHash || !agentPubKey) return false;
+  return stewardCloneSet().has(stewardKey(dnaHash, agentPubKey));
 }

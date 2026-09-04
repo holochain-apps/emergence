@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
-  import { AdminWebsocket, AppWebsocket, type AppClient, setSigningCredentials, type AgentPubKey, type AppWebsocketConnectionOptions, encodeHashToBase64 } from '@holochain/client';
+  import { AdminWebsocket, AppWebsocket, type AppClient, setSigningCredentials, type AgentPubKey, type AppWebsocketConnectionOptions, encodeHashToBase64, isTauriHolochain } from '@holochain/client';
   import '@shoelace-style/shoelace/dist/components/spinner/spinner.js';
   import AllSessions from './emergence/emergence/AllSessions.svelte';
   import AllSpaces from './emergence/emergence/AllSpaces.svelte';
@@ -38,7 +38,8 @@
   import { Base64 } from 'js-base64'
   import { WeaveClient, initializeHotReload, isWeaveContext } from '@theweave/api';
   import { appletServices } from './we';
-  import { CloneManagerStore } from './stores/clone-manager-store';
+  import { CloneManagerStore, isStewardClone } from './stores/clone-manager-store';
+  import { get } from 'svelte/store';
   import CloneManagerDialog from './emergence/emergence/CloneManagerDialog.svelte';
   import CloneManagerShareDialog from './emergence/emergence/CloneManagerShareDialog.svelte';
   import SvgIcon from './emergence/emergence/SvgIcon.svelte';
@@ -66,6 +67,7 @@
 
   $: needsOnboarding = cloneManagerStore?.needsOnboarding;
   $: store = cloneManagerStore?.activeStore;
+  $: setupStatus = cloneManagerStore?.setupStatus;
   $: prof = $store ? $store.profilesStore.myProfile : undefined
   $: uiProps = $store ? $store.uiProps : undefined
   $: pane = $store ? $uiProps.pane : "sessions"
@@ -199,25 +201,28 @@
 
     let tokenResp;
       if (!isWeaveContext()) {
-      let appPort: string = import.meta.env.VITE_APP_PORT
-      console.log("Dev mode admin port:", adminPort)
-      url = appPort ? `ws://localhost:${appPort}` : `ws://localhost`
-      console.log("URL", url)
-      if (adminPort) {
-        const url = `ws://localhost:${adminPort}`;
-        console.log("connecting to admin port at:", url);
-        const adminWebsocket = await AdminWebsocket.connect({url: new URL(url)})
-        tokenResp = await adminWebsocket.issueAppAuthenticationToken({
-          installed_app_id: APP_ID,
-        });
-
-        const cellIds = await adminWebsocket.listCellIds()
-        await adminWebsocket.authorizeSigningCredentials(cellIds[0])
+      if (isTauriHolochain()) {
+        // Direct Tauri IPC: the ASR plugin injected __HC_TAURI_HOLOCHAIN__ into this
+        // webview, so connect() routes the App API + zome-call signing over Tauri IPC
+        // (no websocket url, token, admin port, or signing-credential setup needed).
+        client = await AppWebsocket.connect({ defaultTimeout: 240000 });
+      } else {
+        // Browser-dev fallback (launch:browser): connect over the app websocket.
+        let appPort: string = import.meta.env.VITE_APP_PORT
+        url = appPort ? `ws://localhost:${appPort}` : `ws://localhost`
+        if (adminPort) {
+          const adminUrl = `ws://localhost:${adminPort}`;
+          const adminWebsocket = await AdminWebsocket.connect({url: new URL(adminUrl)})
+          tokenResp = await adminWebsocket.issueAppAuthenticationToken({
+            installed_app_id: APP_ID,
+          });
+          const cellIds = await adminWebsocket.listCellIds()
+          await adminWebsocket.authorizeSigningCredentials(cellIds[0])
+        }
+        const params: AppWebsocketConnectionOptions = { url: new URL(url), defaultTimeout: 240000 };
+        if (tokenResp) params.token = tokenResp.token;
+        client = await AppWebsocket.connect(params);
       }
-      const params: AppWebsocketConnectionOptions = { url: new URL(url), defaultTimeout: 240000 };
-      if (tokenResp) params.token = tokenResp.token;
-
-      client = await AppWebsocket.connect(params);
     } else {
       weClient = await WeaveClient.connect(appletServices);
       switch (weClient.renderInfo.type) {
@@ -369,7 +374,10 @@
     if (!isConfigured()) {
       let isSteward = false
       if (!isWeaveContext()) {
-        isSteward = true
+        // Standalone (tauri): only the agent that created this clone is its
+        // steward. A joiner is not, so it falls through to the sync-wait below
+        // ("stewards are configuring...") until the steward's config gossips in.
+        isSteward = cloneManagerStore ? isStewardClone(get(cloneManagerStore.activeDnaHash), cloneManagerStore.client.myPubKey) : false
       } else {
         if (weClient.renderInfo.type === 'applet-view') {
           const toolInstaller = await weClient.toolInstaller(weClient.renderInfo.appletHash);
@@ -385,8 +393,10 @@
         await $store.setPane("admin")
       }
     }
+    // Keep polling while a non-steward joiner waits for the steward's config to
+    // gossip in; stop once we're the steward or the network is configured.
     initialSync = setInterval(async ()=>{
-      if ($uiProps.amSteward || !isConfigured()) {clearInterval(initialSync)}
+      if ($uiProps.amSteward || isConfigured()) {clearInterval(initialSync)}
       else {
         await doSync()
       }
@@ -412,7 +422,12 @@ let sessionSummary = true
 </script>
 
 <main>
-  {#if connected && appPhase === 'onboarding'}
+  {#if setupStatus && $setupStatus}
+    <div class="loading-container">
+      <img src="/images/loading.svg" alt="" />
+      <span class="loading-text">{$setupStatus}</span>
+    </div>
+  {:else if connected && appPhase === 'onboarding'}
     <NetworkOnboarding
       cloneManagerStore={cloneManagerStore}
       on:complete={onOnboardingComplete}

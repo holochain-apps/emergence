@@ -1,8 +1,12 @@
-use holochain_types::prelude::AppBundle;
+use holochain::prelude::{AppBundleSource, InstallAppPayload};
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use tauri::{AppHandle, Listener, Manager, Runtime};
-use tauri_plugin_holochain::{HolochainExt, HolochainPluginConfig, NetworkConfig, vec_to_locked};
+use tauri_plugin_holochain::{
+    init, vec_to_locked, HolochainExt, HolochainPluginConfig, NetworkConfig, WindowOptions,
+    EVENT_READY, EVENT_SETUP_FAILED,
+};
 use url2::Url2;
 
 const APP_ID: &str = "emergence";
@@ -13,10 +17,6 @@ pub const HAPP_BUNDLE_BYTES: &[u8] = include_bytes!("../../workdir/emergence.hap
 pub struct UserNetworkConfig {
     bootstrap_url: Option<Url2>,
     relay_url: Option<Url2>,
-}
-
-pub fn happ_bundle() -> anyhow::Result<AppBundle> {
-    AppBundle::unpack(HAPP_BUNDLE_BYTES).map_err(|e| anyhow::anyhow!(e))
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -34,65 +34,24 @@ pub fn run() {
         )
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_os::init())
-        .plugin(tauri_plugin_holochain::async_init(
+        .plugin(init(
             vec_to_locked(vec![]),
-            HolochainPluginConfig::new(holochain_dir(), network_config())
+            HolochainPluginConfig::new(holochain_dir(), network_config()),
         ))
         .setup(|app| {
             let handle = app.handle().clone();
             let handle_fail = app.handle().clone();
-            app.handle()
-                .listen("holochain://setup-failed", move |_event| {
-                    handle_fail.exit(1);
+            app.handle().listen(EVENT_SETUP_FAILED, move |_event| {
+                handle_fail.exit(1);
+            });
+            app.handle().listen(EVENT_READY, move |_event| {
+                let handle = handle.clone();
+                tauri::async_runtime::spawn(async move {
+                    if let Err(e) = setup_and_open(handle).await {
+                        eprintln!("Failed to setup: {:?}", e);
+                    }
                 });
-            app.handle()
-                .listen("holochain://setup-completed", move |_event| {
-                    let handle = handle.clone();
-                    tauri::async_runtime::spawn(async move {
-                        if let Err(e) = setup(handle.clone()).await {
-                            eprintln!("Failed to setup: {:?}", e);
-                            return;
-                        }
-
-                        let main_window = async {
-                            let mut window = handle
-                                .holochain()
-                                .map_err(|e| anyhow::anyhow!("{e:?}"))?
-                                .main_window_builder(
-                                    String::from("main"),
-                                    false,
-                                    Some(String::from("emergence")),
-                                    None,
-                                )
-                                .await
-                                .map_err(|e| anyhow::anyhow!("{e:?}"))?;
-
-                            #[cfg(desktop)]
-                            {
-                                window = window
-                                    .title(String::from("Emergence"))
-                                    .inner_size(1200.0, 880.0);
-                            }
-
-                            window.build().map_err(|e| anyhow::anyhow!("{e:?}"))?;
-                            Ok::<(), anyhow::Error>(())
-                        }.await;
-
-                        match main_window {
-                            Ok(()) => {
-                                #[cfg(desktop)]
-                                {
-                                    if let Some(splashscreen) = handle.get_webview_window("splashscreen") {
-                                        let _ = splashscreen.close();
-                                    }
-                                }
-                            }
-                            Err(e) => {
-                                eprintln!("Failed to open main window: {:?}", e);
-                            }
-                        }
-                    });
-                });
+            });
 
             Ok(())
         })
@@ -100,40 +59,59 @@ pub fn run() {
         .expect("error while running tauri application");
 }
 
-// Very simple setup for now:
-// - On app start, list installed apps:
-//   - If our hApp is not installed, this is the first time the app is opened: install our hApp
-//   - If our hApp **is** installed:
-//     - Check if it's necessary to update the coordinators for our hApp
-//       - And do so if it is
-async fn setup(handle: AppHandle) -> anyhow::Result<()> {
-    let admin_ws = handle.holochain()?.admin_websocket().await?;
+// On EVENT_READY: install + enable the hApp if needed, then open the main window
+// over direct Tauri IPC. With use_app_websocket left at its default (false), the
+// plugin injects __HC_TAURI_HOLOCHAIN__ and routes the App API + zome-call signing
+// over Tauri IPC — so we do NOT need `setup_app`'s `ensure_app_websocket` step
+// (which would attach an unused app-websocket interface); we install/enable
+// directly instead.
+async fn setup_and_open(handle: AppHandle) -> anyhow::Result<()> {
+    let plugin = handle.holochain().map_err(|e| anyhow::anyhow!("{e:?}"))?;
+    let rt = plugin.runtime();
 
-    let installed_apps = admin_ws
-        .list_apps(None)
+    if !rt
+        .is_app_installed(APP_ID.into())
         .await
-        .map_err(|err| tauri_plugin_holochain::Error::ConductorApiError(err))?;
-
-    if installed_apps
-        .iter()
-        .find(|app| app.installed_app_id.as_str().eq(APP_ID))
-        .is_none()
+        .map_err(|e| anyhow::anyhow!("{e:?}"))?
     {
-        handle
-            .holochain()?
-            .install_app(
-                String::from(APP_ID),
-                happ_bundle()?,
-                None,
-                None,
-                None,
-            )
-            .await?;
-    } else {
-        handle.holochain()?.update_app_if_necessary(
-            String::from(APP_ID),
-            happ_bundle()?
-        ).await?;
+        rt.install_app(InstallAppPayload {
+            source: AppBundleSource::Bytes(HAPP_BUNDLE_BYTES.to_vec().into()),
+            agent_key: None,
+            installed_app_id: Some(APP_ID.into()),
+            network_seed: None,
+            roles_settings: Some(HashMap::new()),
+            ignore_genesis_failure: false,
+        })
+        .await
+        .map_err(|e| anyhow::anyhow!("{e:?}"))?;
+
+        rt.enable_app(APP_ID.into())
+            .await
+            .map_err(|e| anyhow::anyhow!("{e:?}"))?;
+    }
+
+    let mut window = plugin
+        .main_window_builder(
+            "main",
+            APP_ID.to_string(),
+            WindowOptions {
+                title: Some("Emergence".into()),
+                ..Default::default()
+            },
+        )
+        .await
+        .map_err(|e| anyhow::anyhow!("{e:?}"))?;
+
+    #[cfg(desktop)]
+    {
+        window = window.inner_size(1200.0, 880.0);
+    }
+
+    window.build().map_err(|e| anyhow::anyhow!("{e:?}"))?;
+
+    #[cfg(desktop)]
+    if let Some(splashscreen) = handle.get_webview_window("splashscreen") {
+        let _ = splashscreen.close();
     }
 
     Ok(())
@@ -144,11 +122,25 @@ fn network_config() -> NetworkConfig {
 
     let user_config = read_user_network_config().ok().flatten();
 
-    // In dev mode, default to local bootstrap server started by npm scripts
-    // (user config can still override this below)
+    // In dev mode, point both the bootstrap server AND the iroh relay at the local
+    // kitsune2-bootstrap-srv started by the npm scripts, so dev never reaches out to
+    // the public bootstrap/relay servers (and doesn't stall startup probing them).
+    // The bootstrap-srv serves bootstrap and the iroh relay on the same address —
+    // this matches hc-spin/moss dev, which parse one host:port and use it for both
+    // `--bootstrap` and the `quic` relay. (User config can still override below.)
     if tauri::is_dev() {
         let port = std::env::var("BOOTSTRAP_PORT").unwrap_or_else(|_| "8888".to_string());
-        network_config.bootstrap_url = Url2::parse(format!("http://127.0.0.1:{}", port));
+        let local = format!("http://127.0.0.1:{}", port);
+        network_config.bootstrap_url = Url2::parse(&local);
+        network_config.relay_url = Url2::parse(&local);
+        // The local kitsune2-bootstrap-srv serves the iroh relay over plaintext
+        // http://; the iroh transport rejects non-TLS relay URLs unless explicitly
+        // allowed. Same opt-in hc sandbox / hc-spin use for local dev.
+        network_config.advanced = Some(serde_json::json!({
+            "irohTransport": {
+                "relayAllowPlainText": true
+            }
+        }));
     }
 
     // User-persisted config takes highest priority
