@@ -118,7 +118,7 @@ fn dispatch_delete_link(
     action: TypedAction<DeleteLinkData>,
     original_action: TypedAction<CreateLinkData>,
 ) -> ExternResult<ValidateCallbackResult> {
-    let base_address = action.data.base_address.clone();
+    let base_address = action.data.base_address.clone(); // deliberate; see NOTE-DELETE-LINK-BASE at the end of this file
     let target_address = original_action.data.target_address.clone();
     let tag = original_action.data.tag.clone();
     match link_type {
@@ -480,3 +480,34 @@ pub fn validate(op: Op) -> ExternResult<ValidateCallbackResult> {
         },
     }
 }
+
+// NOTE-DELETE-LINK-BASE (referenced from `dispatch_delete_link`)
+//
+// `dispatch_delete_link` takes `base_address` from the *DeleteLink* action, while hdi 0.7.3
+// -- the 0.6 line -- built `FlatOp::RegisterDeleteLink`'s `base_address` off the
+// *CreateLink* (`hdi-0.7.3/src/op.rs:511-531` destructured base, target and tag from
+// `create_link`). The divergence is deliberate and is provably inert, not merely inert
+// today: the `delete_link` host function fetches the CreateLink and copies the base off it,
+// and the guest cannot supply the value at all --
+// `holochain-0.7.0/src/core/ribosome/host_fn/delete_link.rs:27-31`:
+//
+//     // get the base address from the add link action
+//     // don't allow the wasm developer to get this wrong
+//     // it is never valid to have divergent base address for add/remove links
+//
+// So for any DeleteLink the HDK can author, the two provenances are the same bytes. Every
+// `validate_delete_link_*` below binds `_base` and never reads it anyway. Not worth
+// re-cutting a frozen DNA hash over.
+//
+// New zomes should prefer taking all three of base/target/tag from `original_action.data`
+// in the link-authority arm (as gamez does), because that form does not depend on the
+// host-side invariant. Do not follow hdi 0.8's `OpLink::base_address()` helper: for the
+// delete case it returns the DeleteLink action's base (`hdi-0.8.0/src/flat_op.rs:73`),
+// while `target_address()` and `tag()` correctly use `original_action`.
+//
+// This note lives at the end of the file on purpose. `wasm_error!` embeds `::core::line!()`
+// (holochain_wasmer_common-0.0.103/src/result.rs:144-151), so inserting lines ABOVE any
+// `wasm_error!` call changes the compiled wasm and therefore the DNA hash. Measured: an
+// 11-line comment block at `dispatch_delete_link` moved the canonical happ sha256 from
+// 45d72b1f...c28 to 736c5482...142. Placed here, with a zero-line trailing pointer at the
+// call site, the canonical bytes are unchanged.
