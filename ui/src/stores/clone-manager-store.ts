@@ -8,6 +8,7 @@ import {
   type CellId,
   type ProvisionedCell,
   type AppInfo,
+  type AgentPubKey,
 } from '@holochain/client';
 import { get, writable, type Writable } from "svelte/store";
 import { ProfilesClient, ProfilesStore } from '@holochain-open-dev/profiles';

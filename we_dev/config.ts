@@ -3,7 +3,7 @@ import { defineConfig } from '@theweave/cli';
 export default defineConfig({
   toolCurations: [
     {
-      url: 'https://raw.githubusercontent.com/lightningrodlabs/weave-tool-curation/refs/heads/test-0.14/0.14/lists/curations-0.14.json',
+      url: 'https://raw.githubusercontent.com/lightningrodlabs/weave-tool-curation/refs/heads/main/0.16/lists/curations-0.16.json',
       useLists: ['default'],
     },
   ],

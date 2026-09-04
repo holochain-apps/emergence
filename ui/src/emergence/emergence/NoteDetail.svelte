@@ -64,18 +64,18 @@
         <div class="post-header">
           <div class="header-left">
             {#if showAvatar}
-              <div class="avatar"><Avatar agentPubKey={$note.value.record.action.author}></Avatar></div>
+              <div class="avatar"><Avatar agentPubKey={$note.value.record.action.header.author}></Avatar></div>
             {/if}
             <div class="author-name">
               <!-- TODO: SEPERATE AUTHOR NAME AND AVATAR -->
             </div>
             {#if showTimestamp}
               <div class="post-date"> 
-                {timestampToStr($note.value.record.action.timestamp)}
+                {timestampToStr($note.value.record.action.header.timestamp)}
               </div>
             {/if}
           </div>
-          {#if encodeHashToBase64($note.value.record.action.author) === store.myPubKeyBase64 &&
+          {#if encodeHashToBase64($note.value.record.action.header.author) === store.myPubKeyBase64 &&
             !$note.value.record.entry.trashed
           }
             <div class="crud">

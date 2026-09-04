@@ -8,7 +8,7 @@ crate-type = ["cdylib", "rlib"]
 name = "file_storage_integrity"
 
 [dependencies]
-hc_zome_file_storage_integrity = { git = "https://github.com/holochain-open-dev/file-storage", branch = "main-0.7" }
+hc_zome_file_storage_integrity = { git = "https://github.com/holochain-open-dev/file-storage", tag = "v0.700.0" }
 hdi = { workspace = true }
 
 serde = { workspace = true }

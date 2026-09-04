@@ -96,7 +96,7 @@ let confirmDialog
 
   const copyWalToPocket = () => {
     const attachment: WAL = { hrl: [store.dnaHash, $session.original_hash], context: {} }
-    frameClient?.walToPocket(attachment)
+    frameClient?.assets.assetToPocket(attachment)
   }
 </script>
 

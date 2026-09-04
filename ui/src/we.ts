@@ -14,9 +14,6 @@ export const appletServices: AppletServices = {
     // Types of attachment that this Applet offers for other Applets to be created
     creatables: {
     },
-    // Types of UI widgets/blocks that this Applet supports
-    blockTypes: {    
-    },
     getAssetInfo: async (
       appletClient: AppClient,
       wal: WAL,

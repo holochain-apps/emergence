@@ -20,7 +20,7 @@ impl fmt::Display for RelationContent {
 }
 
 pub fn validate_create_link_relations(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     _base_address: AnyLinkableHash,
     _target_address: AnyLinkableHash,
     tag: LinkTag,
@@ -30,8 +30,8 @@ pub fn validate_create_link_relations(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_relations(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,

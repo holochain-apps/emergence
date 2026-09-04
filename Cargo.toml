@@ -9,14 +9,14 @@ members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
 exclude = ["src-tauri"]
 resolver = "2"
 
-# Pinned to the hdi 0.8.0-dev.13 / hdk 0.7.0-dev.19 / hsb 0.0.57 set, matching the
-# conductor shipped by the ASR plugin (holochain 0.7.0-dev.28). Both profiles and
-# file-storage main-0.7 are on this set (file-storage was bumped to hsb 0.0.57).
+# Exact pins. A rebuilt zome is a new DNA hash, so the frozen 0.7 DNA line must
+# never float: never relax these to caret ranges, and never bump them (including
+# for holochain 0.7.1) on this DNA line.
 [workspace.dependencies]
-hdi = "0.8.0-dev"
-hdk = "0.7.0-dev"
+hdi = "=0.8.0"
+hdk = "=0.7.0"
 serde = "1"
-holochain_serialized_bytes = "0.0.57"
+holochain_serialized_bytes = "=0.0.57"
 
 [workspace.dependencies.emergence]
 path = "dnas/emergence/zomes/coordinator/emergence"

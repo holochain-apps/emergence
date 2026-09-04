@@ -7,26 +7,26 @@ pub struct Map {
     pub tags: Vec<String>,
 }
 pub fn validate_create_map(
-    _action: EntryCreationAction,
+    _action: TypedAction<EntryCreationData>,
     _map: Map,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_update_map(
-    _action: Update,
+    _action: TypedAction<UpdateData>,
     _map: Map,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_map(
-    _action: Delete,
-    _original_action: EntryCreationAction,
+    _action: TypedAction<DeleteData>,
+    _original_action: TypedAction<EntryCreationData>,
     _original_map: Map,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_create_link_map_updates(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -56,8 +56,8 @@ pub fn validate_create_link_map_updates(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_map_updates(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,
@@ -69,7 +69,7 @@ pub fn validate_delete_link_map_updates(
     )
 }
 pub fn validate_create_link_all_maps(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     _base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -90,8 +90,8 @@ pub fn validate_create_link_all_maps(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_all_maps(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,

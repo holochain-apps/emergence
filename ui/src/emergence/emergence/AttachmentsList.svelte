@@ -37,7 +37,7 @@
       class:attachment-item-with-delete={allowDelete}
       class:attachment-item={!allowDelete}
     >
-      {#await frameClient.assetInfo(wal)}
+      {#await frameClient.assets.assetInfo(wal)}
         <div style="cursor:pointer; padding: 0 5px 0 5px; border: dashed 1px;margin-right:5px" title={`Resolving WAL: ${hrlToString(wal.hrl)}?${JSON.stringify(wal.context)}`}> ...</div>
       {:then data}
         {#if data}
@@ -47,7 +47,7 @@
                 e.stopPropagation()
                 try {
   //                embedLink = index
-                  await frameClient.openWal(wal)
+                  await frameClient.openAsset(wal)
                 } catch(e) {
                   alert(`Error opening link: ${e}`)
                 }

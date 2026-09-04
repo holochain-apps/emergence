@@ -1,11 +1,10 @@
 name: "test"
 on:
-  # Trigger the workflow on push or pull request,
-  # but only for the main branch
+  # Trigger the workflow on push or pull request to the maintained lines.
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, main-0.7 ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, main-0.7 ]
 
 jobs:
   testbuild:

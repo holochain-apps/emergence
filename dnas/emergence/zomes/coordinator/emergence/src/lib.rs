@@ -60,8 +60,10 @@ pub fn post_commit(committed_actions: Vec<SignedActionHashed>) {
     }
 }
 fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
-    match action.hashed.content.clone() {
-        Action::CreateLink(create_link) => {
+    // 0.7: Action is a struct { header, data }; the old enum variants are
+    // ActionData::*, matched on `.data`.
+    match action.hashed.content.data.clone() {
+        ActionData::CreateLink(create_link) => {
             if let Ok(Some(_link_type))
                 = LinkTypes::from_type(create_link.zome_index, create_link.link_type) {
                 // emit_signal(Signal::LinkCreated {
@@ -71,7 +73,7 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
             }
             Ok(())
         }
-        Action::DeleteLink(delete_link) => {
+        ActionData::DeleteLink(delete_link) => {
             let record = get(
                     delete_link.link_add_address.clone(),
                     GetOptions::local(),
@@ -82,8 +84,10 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
                         .to_string())
                     ),
                 )?;
-            match record.action() {
-                Action::CreateLink(create_link) => {
+            // `record.action()` returns a &Action, so borrow `.data` rather than
+            // moving out of a shared reference.
+            match &record.action().data {
+                ActionData::CreateLink(create_link) => {
                     if let Ok(Some(_link_type))
                         = LinkTypes::from_type(
                             create_link.zome_index,
@@ -105,7 +109,7 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
                 }
             }
         }
-        Action::Create(_create) => {
+        ActionData::Create(_create) => {
             if let Ok(Some(_app_entry)) = get_entry_for_action(&action.hashed.hash) {
                 // emit_signal(Signal::EntryCreated {
                 //     action,
@@ -114,7 +118,7 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
             }
             Ok(())
         }
-        Action::Update(update) => {
+        ActionData::Update(update) => {
             if let Ok(Some(_app_entry)) = get_entry_for_action(&action.hashed.hash) {
                 if let Ok(Some(_original_app_entry))
                     = get_entry_for_action(&update.original_action_address) {
@@ -127,7 +131,7 @@ fn signal_action(action: SignedActionHashed) -> ExternResult<()> {
             }
             Ok(())
         }
-        Action::Delete(delete) => {
+        ActionData::Delete(delete) => {
             if let Ok(Some(_original_app_entry))
                 = get_entry_for_action(&delete.deletes_address) {
                 // emit_signal(Signal::EntryDeleted {

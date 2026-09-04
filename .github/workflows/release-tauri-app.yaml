@@ -1,8 +1,9 @@
 name: "release-tauri-app"
+# Manual only. The 0.7 line's `v*` tags drive release-webhapp.yaml; the Tauri /
+# Android runtimes have NOT been migrated to Holochain 0.7 yet (Phase F), so a
+# tag-triggered run here would build and publish a broken desktop/mobile app.
 on:
-  push:
-    tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+  workflow_dispatch:
 
 permissions:
   contents: write

@@ -9,26 +9,26 @@ pub struct Note {
     pub trashed: bool,
 }
 pub fn validate_create_note(
-    _action: EntryCreationAction,
+    _action: TypedAction<EntryCreationData>,
     _note: Note,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_update_note(
-    _action: Update,
+    _action: TypedAction<UpdateData>,
     _note: Note,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_note(
-    _action: Delete,
-    _original_action: EntryCreationAction,
+    _action: TypedAction<DeleteData>,
+    _original_action: TypedAction<EntryCreationData>,
     _original_note: Note,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_create_link_note_updates(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -58,8 +58,8 @@ pub fn validate_create_link_note_updates(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_note_updates(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,
@@ -71,7 +71,7 @@ pub fn validate_delete_link_note_updates(
     )
 }
 pub fn validate_create_link_all_notes(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     _base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,

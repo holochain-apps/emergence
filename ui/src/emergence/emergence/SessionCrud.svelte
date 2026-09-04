@@ -152,7 +152,7 @@ function deleteLeader(index: number) {
   leaders = leaders
 }
 const addAttachment = async () => {
-    const wal = await frameClient.userSelectWal()
+    const wal = await frameClient.assets.userSelectAsset()
     if (wal) {
       links.push(weaveUrlFromWal(wal))
       links = links

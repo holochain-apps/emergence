@@ -1,6 +1,6 @@
 import { assert, test } from "vitest";
 
-import { runScenario, pause, CallableCell, createConductor, addAllAgentsToAllConductors, cleanAllConductors } from '@holochain/tryorama';
+import { runScenario, pause, CallableCell, createConductor, addAllAgentsToAllConductors, cleanAllConductors } from '@holochain-open-dev/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource,  fakeActionHash, fakeAgentPubKey, fakeEntryHash, EntryHash, AppCallZomeRequest, AppClient } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 

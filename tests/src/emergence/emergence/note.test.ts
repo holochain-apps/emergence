@@ -1,6 +1,6 @@
 import { assert, test } from "vitest";
 
-import { runScenario, pause, dhtSync, CallableCell } from '@holochain/tryorama';
+import { runScenario, pause, dhtSync, CallableCell } from '@holochain-open-dev/tryorama';
 import { NewEntryAction, ActionHash, Record, AppBundleSource, fakeDnaHash, fakeActionHash, fakeAgentPubKey, fakeEntryHash } from '@holochain/client';
 import { decode } from '@msgpack/msgpack';
 

@@ -39,7 +39,7 @@
   }
 
   const addAttachment = async () => {
-    const hrl = await frameClient.userSelectWal()
+    const hrl = await frameClient.assets.userSelectAsset()
     if (hrl) {
       _addAttachment(hrl)
     }

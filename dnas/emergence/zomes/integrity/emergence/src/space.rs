@@ -13,26 +13,26 @@ pub struct Space {
     pub tags: Vec<String>,
 }
 pub fn validate_create_space(
-    _action: EntryCreationAction,
+    _action: TypedAction<EntryCreationData>,
     _space: Space,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_update_space(
-    _action: Update,
+    _action: TypedAction<UpdateData>,
     _space: Space,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_space(
-    _action: Delete,
-    _original_action: EntryCreationAction,
+    _action: TypedAction<DeleteData>,
+    _original_action: TypedAction<EntryCreationData>,
     _original_space: Space,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_create_link_space_updates(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -62,8 +62,8 @@ pub fn validate_create_link_space_updates(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_space_updates(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,
@@ -75,7 +75,7 @@ pub fn validate_delete_link_space_updates(
     )
 }
 pub fn validate_create_link_all_spaces(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     _base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -96,8 +96,8 @@ pub fn validate_create_link_all_spaces(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_all_spaces(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,

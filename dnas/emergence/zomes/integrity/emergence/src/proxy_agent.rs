@@ -8,26 +8,26 @@ pub struct ProxyAgent {
     pub pic: Option<EntryHash>,
 }
 pub fn validate_create_proxy_agent(
-    _action: EntryCreationAction,
+    _action: TypedAction<EntryCreationData>,
     _proxy_agent: ProxyAgent,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_update_proxy_agent(
-    _action: Update,
+    _action: TypedAction<UpdateData>,
     _proxy_agent: ProxyAgent,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_proxy_agent(
-    _action: Delete,
-    _original_action: EntryCreationAction,
+    _action: TypedAction<DeleteData>,
+    _original_action: TypedAction<EntryCreationData>,
     _original_proxy_agent: ProxyAgent,
 ) -> ExternResult<ValidateCallbackResult> {
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_create_link_proxy_agent_updates(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -57,8 +57,8 @@ pub fn validate_create_link_proxy_agent_updates(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_proxy_agent_updates(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,
@@ -70,7 +70,7 @@ pub fn validate_delete_link_proxy_agent_updates(
     )
 }
 pub fn validate_create_link_all_proxy_agents(
-    _action: CreateLink,
+    _action: TypedAction<CreateLinkData>,
     _base_address: AnyLinkableHash,
     target_address: AnyLinkableHash,
     _tag: LinkTag,
@@ -91,8 +91,8 @@ pub fn validate_create_link_all_proxy_agents(
     Ok(ValidateCallbackResult::Valid)
 }
 pub fn validate_delete_link_all_proxy_agents(
-    _action: DeleteLink,
-    _original_action: CreateLink,
+    _action: TypedAction<DeleteLinkData>,
+    _original_action: TypedAction<CreateLinkData>,
     _base: AnyLinkableHash,
     _target: AnyLinkableHash,
     _tag: LinkTag,

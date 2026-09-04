@@ -231,12 +231,6 @@
             case "main":
               // here comes your rendering logic for the main view
               break;
-            case "block":
-              switch(weClient.renderInfo.view.block) {
-                default:
-                  throw new Error("Unknown applet-view block type:"+weClient.renderInfo.view.block);
-              }
-              break;
             case "asset":
               if (!weClient.renderInfo.view.recordInfo) {
                 throw new Error(
