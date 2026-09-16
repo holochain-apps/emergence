@@ -67,7 +67,7 @@ on:sl-request-close={(event)=>{
     {#if scanning}
       <div class="setting">
         <QrScanner
-          on:scan={(e) => { joiningCode = e.detail; scanning = false; }}
+          on:scan={(e) => { joiningCode = e.detail; scanning = false; join(); }}
           on:cancel={() => scanning = false}
         />
       </div>

@@ -4,6 +4,7 @@
   import '@shoelace-style/shoelace/dist/components/input/input.js';
   import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
   import SvgIcon from './SvgIcon.svelte';
+  import QrScanner from './QrScanner.svelte';
   import type { CloneManagerStore } from "../../stores/clone-manager-store";
   import { decodeDnaJoiningInfo } from "./dnaJoiningInfo";
   import { loadDefaultProfile } from "./defaultProfile";
@@ -19,6 +20,7 @@
   let saving = false;
   let error: string | undefined;
   let useDefaultProfile = true;
+  let scanning = false;
 
   $: createValid = networkName.length > 0;
   $: joinValid = joiningCode.length > 0;
@@ -56,6 +58,14 @@
       error = `${e}`;
     }
     saving = false;
+  }
+
+  // A scanned code has already been checked to be a joining code, so join
+  // straight away rather than leaving it in the text box for another tap.
+  function onScan(code: string) {
+    scanning = false;
+    joiningCode = code;
+    handleJoin();
   }
 
   async function handleJoin() {
@@ -146,7 +156,18 @@
           placeholder="Paste your joining code here"
           on:input={e => joiningCode = e.target.value}
         ></sl-input>
+        {#if !scanning}
+          <sl-button size="small" class="scan-button" disabled={saving} on:click={() => { error = undefined; scanning = true; }}>
+            Scan QR Code
+          </sl-button>
+        {/if}
       </div>
+
+      {#if scanning}
+        <div class="form-field">
+          <QrScanner on:scan={(e) => onScan(e.detail)} on:cancel={() => scanning = false} />
+        </div>
+      {/if}
 
       {#if hasDefaultProfile}
         <sl-checkbox checked={useDefaultProfile} on:sl-change={e => useDefaultProfile = e.target.checked} style="margin-bottom: 10px; --sl-color-text-primary: #d0d0e0;">
@@ -159,7 +180,7 @@
       {/if}
 
       <div class="controls">
-        <sl-button on:click={() => { mode = 'choose'; error = undefined; }}>Back</sl-button>
+        <sl-button on:click={() => { mode = 'choose'; scanning = false; error = undefined; }}>Back</sl-button>
         <sl-button
           variant="primary"
           disabled={!joinValid || saving}
@@ -186,6 +207,7 @@
     background: #1a1a2e;
     color: #f0f0f0;
     padding: 40px;
+    box-sizing: border-box;
   }
 
   .logo-area {
@@ -278,5 +300,9 @@
     color: #ff6b6b;
     margin-top: 10px;
     font-size: 14px;
+  }
+
+  .scan-button {
+    margin-top: 10px;
   }
 </style>
