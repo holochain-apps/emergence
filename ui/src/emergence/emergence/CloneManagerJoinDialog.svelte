@@ -5,12 +5,14 @@
   import SlDialog from "@shoelace-style/shoelace/dist/components/dialog/dialog.js";
   import SvgIcon from './SvgIcon.svelte';
   import { loadDefaultProfile } from './defaultProfile';
+  import QrScanner from './QrScanner.svelte';
 
   let dialog: SlDialog;
   let saving = false;
   let joiningCode = "";
   let useDefaultProfile = true;
   let error;
+  let scanning = false;
 
   $: hasDefaultProfile = loadDefaultProfile() !== null;
   
@@ -19,6 +21,7 @@
     dialog.show()
   };
   const close = () => {
+    scanning = false;
     joiningCode = "";
     error = undefined;
     dialog.hide();
@@ -54,8 +57,22 @@ on:sl-request-close={(event)=>{
   <div class='board-editor'>
     <div class="edit-title setting">
       <div class="title-text">Joining Code</div> <sl-input class='textarea' value={joiningCode}  on:input={e=> joiningCode = e.target.value}></sl-input>
+      {#if !scanning}
+        <sl-button size="small" style="align-self: flex-start; margin-top: 5px;" on:click={() => { error = undefined; scanning = true; }}>
+          Scan QR Code
+        </sl-button>
+      {/if}
     </div>
-    
+
+    {#if scanning}
+      <div class="setting">
+        <QrScanner
+          on:scan={(e) => { joiningCode = e.detail; scanning = false; }}
+          on:cancel={() => scanning = false}
+        />
+      </div>
+    {/if}
+
     {#if hasDefaultProfile}
       <sl-checkbox checked={useDefaultProfile} on:sl-change={e => useDefaultProfile = e.target.checked} style="margin-bottom: 10px;">
         Use default profile

@@ -37,7 +37,9 @@
     "emittery": "^1.0.1",
     "javascript-time-ago": "2.3.7",
     "js-base64": "^3.7.3",
+    "jsqr": "^1.4.0",
     "pluralize": "^8.0.0",
+    "qrcode": "~1.5.4",
     "sanitize-filename": "1.6.3",
     "svelte-cookie": "1.0.1",
     "svelte-d3-cloud": "^0.0.2",
@@ -49,6 +51,7 @@
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",
     "@tsconfig/svelte": "^3.0.0",
+    "@types/qrcode": "~1.5.5",
     "bestzip": "^2.2.0",
     "internal-ip": "^7.0.0",
     "svelte": "^3.55.1",
