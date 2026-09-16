@@ -4,7 +4,7 @@
   import '@shoelace-style/shoelace/dist/components/input/input.js';
   import '@shoelace-style/shoelace/dist/components/checkbox/checkbox.js';
   import SvgIcon from './SvgIcon.svelte';
-  import { markStewardClone, type CloneManagerStore } from "../../stores/clone-manager-store";
+  import type { CloneManagerStore } from "../../stores/clone-manager-store";
   import { decodeDnaJoiningInfo } from "./dnaJoiningInfo";
   import { loadDefaultProfile } from "./defaultProfile";
   import { get } from "svelte/store";
@@ -46,8 +46,6 @@
     error = undefined;
     try {
       const cloneCell = await cloneManagerStore.create(networkName);
-      // Only the creator of a network is its steward (gets the setup/config UI).
-      markStewardClone(cloneCell.cell_id[0], cloneCell.cell_id[1]);
       cloneManagerStore.activate(cloneCell.cell_id);
       cloneManagerStore.needsOnboarding.set(false);
       if (useDefaultProfile && hasDefaultProfile) {

@@ -142,14 +142,19 @@ export class CloneManagerStore {
     return cellsNormalized;
   }
   
-  create(name: string) {
-    return this.client.createCloneCell({
+  // Creates a new network and marks this agent as its steward, since only the
+  // creator gets the setup/config UI. Marking lives here so every entry point
+  // (onboarding, the Networks pane) gets it.
+  async create(name: string) {
+    const cloneCell = await this.client.createCloneCell({
       name,
       role_name: ROLE_NAME,
       modifiers: {
         network_seed: uuidv7(),
       }
     });
+    markStewardClone(cloneCell.cell_id[0], cloneCell.cell_id[1]);
+    return cloneCell;
   }
   
   join(name: string, networkSeed: string) {
