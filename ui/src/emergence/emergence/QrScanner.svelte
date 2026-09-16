@@ -15,6 +15,10 @@
   const dispatch = createEventDispatcher<{ scan: string; cancel: void }>();
 
   const hasLiveCamera = !!navigator.mediaDevices?.getUserMedia;
+  // On a phone the file input's `capture` opens the camera app; on a desktop
+  // it is ignored and a file picker opens instead, so label it honestly.
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  const photoLabel = isMobile ? "Take a Photo" : "Use a Photo";
 
   let video: HTMLVideoElement;
   let canvas: HTMLCanvasElement;
@@ -29,11 +33,24 @@
   });
   onDestroy(stopLive);
 
+  // Prefer the rear camera on a phone, but accept any camera. A desktop webcam
+  // has no facing mode, and WebKitGTK (the Linux Tauri webview) rejects the
+  // constraint with OverconstrainedError rather than ignoring it, so retry
+  // without it.
+  async function openCamera(): Promise<MediaStream> {
+    try {
+      return await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: { ideal: "environment" } },
+      });
+    } catch (e) {
+      if ((e as DOMException)?.name !== "OverconstrainedError") throw e;
+      return await navigator.mediaDevices.getUserMedia({ video: true });
+    }
+  }
+
   async function startLive() {
     try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment" },
-      });
+      stream = await openCamera();
       video.srcObject = stream;
       await video.play();
       timer = window.setInterval(scanFrame, 200);
@@ -128,7 +145,7 @@
       <div class="scanner-overlay"></div>
     </div>
   {:else}
-    <p class="hint">Take a photo of the QR code to join.</p>
+    <p class="hint">{isMobile ? "Take a photo of the QR code to join." : "Choose a picture of the QR code to join."}</p>
   {/if}
   <canvas bind:this={canvas}></canvas>
   <input
@@ -148,9 +165,9 @@
       {#if decodingPhoto}
         Reading photo...
       {:else if hasLiveCamera}
-        Take a Photo Instead
+        {photoLabel} Instead
       {:else}
-        Take a Photo
+        {photoLabel}
       {/if}
     </sl-button>
   </div>
