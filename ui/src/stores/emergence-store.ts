@@ -227,10 +227,13 @@ export class EmergenceStore {
     this.myPubKeyBase64 = encodeHashToBase64(this.client.client.myPubKey)
     client.client.on( 'signal', signal => {
         console.log("SIGNAL",signal)
+        // @holochain/client >= 0.19 wraps app signals as { type: "app", value: AppSignal }.
+        if (signal.type !== "app") return
+        const appSignal = signal.value
         // @ts-ignore
-        if (signal.zome_name == 'emergence' && signal.payload.message && signal.payload.message.type == "UpdateSettings") {
+        if (appSignal.zome_name == 'emergence' && appSignal.payload.message && appSignal.payload.message.type == "UpdateSettings") {
         // @ts-ignore
-        const settings = signal.payload.message
+        const settings = appSignal.payload.message
 
         delete settings.type
         // TODO any checking?
