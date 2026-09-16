@@ -37,7 +37,6 @@
     "emittery": "^1.0.1",
     "javascript-time-ago": "2.3.7",
     "js-base64": "^3.7.3",
-    "jsqr": "^1.4.0",
     "pluralize": "^8.0.0",
     "qrcode": "~1.5.4",
     "sanitize-filename": "1.6.3",
@@ -46,7 +45,8 @@
     "svelte-fa": "3.0.3",
     "svelte-multiselect": "^8.6.0",
     "svelte-watch-resize": "1.0.3",
-    "uuid": "^10.0.0"
+    "uuid": "^10.0.0",
+    "zxing-wasm": "^2.2.4"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^2.0.2",

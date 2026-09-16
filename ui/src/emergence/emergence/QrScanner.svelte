@@ -1,6 +1,7 @@
 <script lang="ts">
   import { createEventDispatcher, onDestroy, onMount } from "svelte";
-  import jsQR from "jsqr";
+  import { prepareZXingModule, readBarcodes } from "zxing-wasm/reader";
+  import zxingWasmUrl from "zxing-wasm/reader/zxing_reader.wasm?url";
   import { tryDecodeDnaJoiningInfo } from "./dnaJoiningInfo";
 
   // Reads a QR code holding a network joining code. Two paths:
@@ -8,11 +9,25 @@
   //    secure context, so it is unavailable when the UI is served over plain
   //    http (the Android dev build).
   //  - photo: a file input with `capture`, which on a phone opens the native
-  //    camera app and returns a still. Works in any context and is the
-  //    fallback when live video is unavailable or the user prefers it.
+  //    camera app and returns a still; on a desktop it opens a file picker.
+  //    Works in any context and is the fallback when live video is
+  //    unavailable or the user prefers it.
+  // Decoding uses ZXing (wasm). jsqr was tried first and could not read a real
+  // phone photo of a screen (tilt, blur, moiré) at any size; ZXing reads it in
+  // milliseconds.
   // Dispatches `scan` with the raw code string once one is found, or `cancel`
   // if the user gives up. The camera is released either way, and on unmount.
   const dispatch = createEventDispatcher<{ scan: string; cancel: void }>();
+
+  // Serve the wasm from our own bundle; the default fetches it from a CDN,
+  // which an offline or CSP-restricted app cannot do.
+  prepareZXingModule({
+    overrides: {
+      locateFile: (path: string, prefix: string) =>
+        path.endsWith(".wasm") ? zxingWasmUrl : prefix + path,
+    },
+    fireImmediately: true,
+  });
 
   const hasLiveCamera = !!navigator.mediaDevices?.getUserMedia;
   // On a phone the file input's `capture` opens the camera app; on a desktop
@@ -27,6 +42,7 @@
   let timer: number | undefined;
   let error = "";
   let decodingPhoto = false;
+  let decodingFrame = false;
 
   onMount(() => {
     if (hasLiveCamera) startLive();
@@ -73,15 +89,30 @@
 
   // Draw a source onto the hidden canvas, scaled down if wider than maxWidth,
   // and look for a QR code in it. Returns the code text or undefined.
-  function decodeSource(source: CanvasImageSource, width: number, height: number, maxWidth: number): string | undefined {
+  async function decodeSource(
+    source: CanvasImageSource,
+    width: number,
+    height: number,
+    maxWidth: number,
+  ): Promise<string | undefined> {
     const scale = Math.min(1, maxWidth / width);
     canvas.width = Math.round(width * scale);
     canvas.height = Math.round(height * scale);
     const ctx = canvas.getContext("2d", { willReadFrequently: true });
     if (!ctx) return undefined;
+    // A transparent PNG (some screenshots) would otherwise read as black.
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
     const image = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    return jsQR(image.data, image.width, image.height, { inversionAttempts: "dontInvert" })?.data;
+    const results = await readBarcodes(image, {
+      formats: ["QRCode"],
+      tryHarder: true,
+      tryRotate: true,
+      tryInvert: true,
+      maxNumberOfSymbols: 1,
+    });
+    return results[0]?.text;
   }
 
   // Accept the code if it is a joining code; otherwise report and return false.
@@ -99,12 +130,17 @@
     return true;
   }
 
-  function scanFrame() {
-    if (!stream || !video || video.videoWidth === 0) return;
-    const code = decodeSource(video, video.videoWidth, video.videoHeight, Infinity);
-    // Keep scanning silently while no code is in view.
-    if (code === undefined) return;
-    accept(code, "");
+  async function scanFrame() {
+    if (!stream || !video || video.videoWidth === 0 || decodingFrame) return;
+    decodingFrame = true;
+    try {
+      const code = await decodeSource(video, video.videoWidth, video.videoHeight, 1280);
+      // Keep scanning silently while no code is in view.
+      if (code !== undefined && stream) accept(code, "");
+    } catch (e) {
+      console.error("QR frame decode failed", e);
+    }
+    decodingFrame = false;
   }
 
   async function decodePhoto(file: File) {
@@ -113,8 +149,15 @@
     try {
       const bitmap = await createImageBitmap(file);
       try {
-        // Camera stills are several thousand pixels wide; downscale for speed.
-        accept(decodeSource(bitmap, bitmap.width, bitmap.height, 1200), "No QR code found in that photo");
+        // A downscaled pass first: it is fast and smooths camera noise and
+        // moiré; then full resolution (capped) in case the code is tiny.
+        let code: string | undefined;
+        for (const maxWidth of [1600, 4096]) {
+          code = await decodeSource(bitmap, bitmap.width, bitmap.height, maxWidth);
+          if (code !== undefined) break;
+        }
+        const size = `${bitmap.width}x${bitmap.height}`;
+        accept(code, `No QR code found in that ${size} photo`);
       } finally {
         bitmap.close();
       }
