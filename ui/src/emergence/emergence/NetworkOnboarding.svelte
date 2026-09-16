@@ -305,4 +305,50 @@
   .scan-button {
     margin-top: 10px;
   }
+
+  /* Phones: the full-size logo and spacing push the Join card off screen. */
+  @media (max-width: 600px), (max-height: 700px) {
+    .onboarding {
+      justify-content: flex-start;
+      padding: 20px 16px;
+    }
+
+    .logo-area {
+      width: 88px;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 22px;
+      text-align: center;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .choices {
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .choice-card {
+      width: auto;
+      padding: 16px;
+    }
+
+    .choice-card h3 {
+      margin: 8px 0 4px 0;
+    }
+
+    .form {
+      width: 100%;
+      max-width: none;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+  }
 </style>
