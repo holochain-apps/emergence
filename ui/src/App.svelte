@@ -852,6 +852,9 @@ let sessionSummary = true
     font-size: 11px;
     padding-top: 10px;
     opacity: .6;
+    /* Long setup messages wrap on a phone; keep them off the screen edges. */
+    margin: 0 20px;
+    text-align: center;
   }
 
   .network-button {
