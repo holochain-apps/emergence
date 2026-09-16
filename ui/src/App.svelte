@@ -365,14 +365,17 @@
 
     // for now everyone is a steward
 
+    let isSteward = false
+    if (!isWeaveContext()) {
+      // Standalone (tauri): only the agent that created this clone is its
+      // steward. A joiner is not, so it falls through to the sync-wait below
+      // ("stewards are configuring...") until the steward's config gossips in.
+      // Derived on every load, not only before configuration: otherwise a
+      // steward loses the Settings pane after any reload once set up.
+      isSteward = cloneManagerStore ? isStewardClone(get(cloneManagerStore.activeDnaHash), cloneManagerStore.client.myPubKey) : false
+    }
     if (!isConfigured()) {
-      let isSteward = false
-      if (!isWeaveContext()) {
-        // Standalone (tauri): only the agent that created this clone is its
-        // steward. A joiner is not, so it falls through to the sync-wait below
-        // ("stewards are configuring...") until the steward's config gossips in.
-        isSteward = cloneManagerStore ? isStewardClone(get(cloneManagerStore.activeDnaHash), cloneManagerStore.client.myPubKey) : false
-      } else {
+      if (isWeaveContext()) {
         if (weClient.renderInfo.type === 'applet-view') {
           const toolInstaller = await weClient.toolInstaller(weClient.renderInfo.appletHash);
           if (toolInstaller && encodeHashToBase64(toolInstaller)=== encodeHashToBase64(weClient.renderInfo.appletClient.myPubKey)) {
@@ -382,10 +385,10 @@
         const accountabilities = await weClient.myAccountabilitiesPerGroup()
         console.log("accountabilities",accountabilities )
       } 
-      if (isSteward) {
-        $store.setUIprops({amSteward:true})
-        await $store.setPane("admin")
-      }
+    }
+    if (isSteward) {
+      $store.setUIprops({amSteward:true})
+      if (!isConfigured()) await $store.setPane("admin")
     }
     // Keep polling while a non-steward joiner waits for the steward's config to
     // gossip in; stop once we're the steward or the network is configured.
