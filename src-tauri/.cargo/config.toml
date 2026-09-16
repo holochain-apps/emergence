@@ -2,3 +2,9 @@
 target = "x86_64-unknown-linux-gnu"
 
 [target]
+
+# runtime-tauri is a private repository for now. Cargo's built-in git client
+# can't use SSH keys or git credential helpers, so fetch git dependencies with the
+# git CLI, which uses the developer's own GitHub access.
+[net]
+git-fetch-with-cli = true

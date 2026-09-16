@@ -168,7 +168,43 @@
         "nixpkgs": [
           "holonix",
           "nixpkgs"
+        ],
+        "runtime-tauri": "runtime-tauri"
+      }
+    },
+    "runtime-tauri": {
+      "inputs": {
+        "flake-parts": [
+          "runtime-tauri",
+          "holonix",
+          "flake-parts"
+        ],
+        "holonix": [
+          "holonix"
+        ],
+        "nixpkgs": [
+          "runtime-tauri",
+          "holonix",
+          "nixpkgs"
+        ],
+        "rust-overlay": [
+          "runtime-tauri",
+          "holonix",
+          "rust-overlay"
         ]
+      },
+      "locked": {
+        "lastModified": 1789585892,
+        "narHash": "sha256-1tmkTKM/nr4mdS4QneqrTYbBnAzoV/4mpeVN4BHlir8=",
+        "ref": "refs/heads/main",
+        "rev": "8c4f5d2762077aec850235c6aed41f55c77270c9",
+        "revCount": 588,
+        "type": "git",
+        "url": "ssh://git@github.com/holochain/runtime-tauri"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@github.com/holochain/runtime-tauri"
       }
     },
     "rust-overlay": {

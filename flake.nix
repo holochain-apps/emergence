@@ -1,17 +1,21 @@
 {
   description = "Flake for Emergence (Holochain 0.7) development";
 
-  # Holochain 0.7 dev shell. holonix main-0.7 supplies the whole Holochain
-  # toolchain — holochain, hc, lair-keystore, hc-scaffold and
-  # kitsune2-bootstrap-srv — plus the Rust toolchain with the wasm32 target.
+  # holonix main-0.7 supplies the Holochain toolchain. runtime-tauri supplies the
+  # Tauri shells Emergence builds on: Rust with the wasm32 and Android targets,
+  # the holonix tools, nix-provided webkit/GTK (a host webkit mixed with the nix
+  # compiler fails to link), and for Android the SDK/NDK, JDK and cargo-ndk.
   #
-  # The June 2026 port carried a self-contained Tauri dev shell here (webkitgtk
-  # pin, rust-overlay override, p2p-shipyard removal). Tauri is deferred to
-  # Phase F of the 0.7 upgrade, and src-tauri is excluded from the cargo
-  # workspace, so that machinery is dropped for now: it was pure eval risk for a
-  # target nothing in Phases A-E builds.
+  #   nix develop               zomes, UI and the desktop app  (npm run start:tauri)
+  #   nix develop .#androidDev  the same plus Android           (npm run start:android)
   inputs = {
     holonix.url = "github:holochain/holonix?ref=main-0.7";
+
+    runtime-tauri = {
+      # SSH while runtime-tauri is private; github:holochain/runtime-tauri once public.
+      url = "git+ssh://git@github.com/holochain/runtime-tauri";
+      inputs.holonix.follows = "holonix";
+    };
 
     nixpkgs.follows = "holonix/nixpkgs";
     flake-parts.follows = "holonix/flake-parts";
@@ -19,29 +23,34 @@
 
   outputs = inputs@{ flake-parts, ... }: flake-parts.lib.mkFlake { inherit inputs; } {
     systems = builtins.attrNames inputs.holonix.devShells;
-    perSystem = { inputs', pkgs, ... }: {
-      formatter = pkgs.nixpkgs-fmt;
-
-      devShells.default = pkgs.mkShell {
-        inputsFrom = [ inputs'.holonix.devShells.default ];
-
-        packages = (with inputs'.holonix.packages; [
-          holochain
-          bootstrap-srv
-          lair-keystore
-          hc
+    perSystem = { inputs', pkgs, ... }:
+      let
+        # On top of runtime-tauri's shells, which already provide holochain, hc,
+        # lair-keystore, kitsune2-bootstrap-srv, Rust and binaryen (wasm-opt).
+        emergencePackages = (with inputs'.holonix.packages; [
+          hc-scaffold
+          hcterm
           hn-introspect
-          rust # Rust with the wasm32-unknown-unknown target for zome builds
         ]) ++ (with pkgs; [
           nodejs_24 # For UI development
-          binaryen # wasm-opt, for the optimised canonical zome build
           typescript
         ]);
 
-        shellHook = ''
-          export PS1='\[\033[1;34m\][emergence-0.7:\w]\$\[\033[0m\] '
-        '';
+        mkEmergenceShell = base: prompt: pkgs.mkShell {
+          inputsFrom = [ base ];
+          packages = emergencePackages;
+          shellHook = ''
+            export PS1='\[\033[1;34m\][${prompt}:\w]\$\[\033[0m\] '
+          '';
+        };
+      in
+      {
+        formatter = pkgs.nixpkgs-fmt;
+
+        devShells.default =
+          mkEmergenceShell inputs'.runtime-tauri.devShells.tauriDev "emergence-0.7";
+        devShells.androidDev =
+          mkEmergenceShell inputs'.runtime-tauri.devShells.tauriAndroidDev "emergence-0.7-android";
       };
-    };
   };
 }

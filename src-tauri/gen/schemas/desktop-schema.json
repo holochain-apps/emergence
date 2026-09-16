@@ -2363,31 +2363,43 @@
         {
           "description": "Default permissions for the in-process Holochain plugin\n#### This default permission set includes:\n\n- `allow-sign-zome-call`\n- `allow-app-request`",
           "type": "string",
-          "const": "holochain:default",
+          "const": "hc:default",
           "markdownDescription": "Default permissions for the in-process Holochain plugin\n#### This default permission set includes:\n\n- `allow-sign-zome-call`\n- `allow-app-request`"
         },
         {
           "description": "Enables the app_request command without any pre-configured scope.",
           "type": "string",
-          "const": "holochain:allow-app-request",
+          "const": "hc:allow-app-request",
           "markdownDescription": "Enables the app_request command without any pre-configured scope."
+        },
+        {
+          "description": "Enables the sign_payload command without any pre-configured scope.",
+          "type": "string",
+          "const": "hc:allow-sign-payload",
+          "markdownDescription": "Enables the sign_payload command without any pre-configured scope."
         },
         {
           "description": "Enables the sign_zome_call command without any pre-configured scope.",
           "type": "string",
-          "const": "holochain:allow-sign-zome-call",
+          "const": "hc:allow-sign-zome-call",
           "markdownDescription": "Enables the sign_zome_call command without any pre-configured scope."
         },
         {
           "description": "Denies the app_request command without any pre-configured scope.",
           "type": "string",
-          "const": "holochain:deny-app-request",
+          "const": "hc:deny-app-request",
           "markdownDescription": "Denies the app_request command without any pre-configured scope."
+        },
+        {
+          "description": "Denies the sign_payload command without any pre-configured scope.",
+          "type": "string",
+          "const": "hc:deny-sign-payload",
+          "markdownDescription": "Denies the sign_payload command without any pre-configured scope."
         },
         {
           "description": "Denies the sign_zome_call command without any pre-configured scope.",
           "type": "string",
-          "const": "holochain:deny-sign-zome-call",
+          "const": "hc:deny-sign-zome-call",
           "markdownDescription": "Denies the sign_zome_call command without any pre-configured scope."
         },
         {
