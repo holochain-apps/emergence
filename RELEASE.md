@@ -14,6 +14,14 @@ and 0.6 and 0.7 agents form disjoint networks. Nothing written on the 0.6 line
 carries over: an event's sessions, spaces, notes and attachments have to be
 re-entered on the 0.7 network. Everyone in a group has to upgrade together.
 
+DNA version 0.7.0 (Holochain 0.7.1, profiles 0.702.0, file-storage 0.701.0) is
+again a new network. Holochain 0.7.1 changed the capability-grant format, and
+0.7.0 and 0.7.1 conductors cannot gossip. This line cannot see data from the
+0.6.x line (`happ-v0.6.0`, Holochain 0.7.0), so a group has to upgrade together.
+It needs Moss 0.16.0-rc.1 or later. To carry contents over, use **Export** in
+the Admin pane (Import/Export section) on the 0.6.x install and **Import** on
+the 0.7.x one (import re-authors everything as the importing agent).
+
 ## Why the happ is frozen (never rebuilt)
 
 The zome wasm embeds the builder's absolute paths (`~/.cargo/...` and source
@@ -57,7 +65,9 @@ the new sha into `.happ-sha256`.
 ## Each release: cut a webhapp
 
 1. Bump `version` in `ui/package.json` (must be higher than the installed
-   version for Moss to offer it as an upgrade).
+   version for Moss to offer it as an upgrade). The Holochain 0.7.1 line
+   starts at `0.7.0` on curation versionBranch `0.7.x`; `0.6.x` was the
+   Holochain 0.7.0 network.
 2. Commit, then:
 
    ```bash
