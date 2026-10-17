@@ -9,12 +9,12 @@ members = ["dnas/*/zomes/coordinator/*", "dnas/*/zomes/integrity/*"]
 exclude = ["src-tauri"]
 resolver = "2"
 
-# Exact pins. A rebuilt zome is a new DNA hash, so the frozen 0.7 DNA line must
-# never float: never relax these to caret ranges, and never bump them (including
-# for holochain 0.7.1) on this DNA line.
+# Exact pins. A rebuilt zome is a new DNA hash, so a frozen DNA line must never
+# float: never relax these to caret ranges, and only bump them when deliberately
+# starting a new DNA line (as dnaVersion 0.7.0 did for Holochain 0.7.1).
 [workspace.dependencies]
-hdi = "=0.8.0"
-hdk = "=0.7.0"
+hdi = "=0.8.1"
+hdk = "=0.7.1"
 serde = "1"
 holochain_serialized_bytes = "=0.0.57"
 
