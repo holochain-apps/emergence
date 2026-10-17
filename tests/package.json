@@ -5,12 +5,12 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@holochain-open-dev/file-storage": "^0.700.0",
+    "@holochain-open-dev/file-storage": "^0.701.0",
     "@msgpack/msgpack": "^2.7.0",
-    "@holochain/client": "^0.21.0",
+    "@holochain/client": "^0.21.1",
     "typescript": "^5.9.3",
     "vitest": "^0.28.4",
-    "@holochain-open-dev/tryorama": "^0.20.0"
+    "@holochain-open-dev/tryorama": "^0.21.0"
   },
   "type": "module"
 }

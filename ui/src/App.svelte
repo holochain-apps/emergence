@@ -275,9 +275,6 @@
             case "main":
               // here comes your rendering logic for the cross-applet main view
               //break;
-            case "block":
-              //
-              //break;
             default:
               throw new Error("Unknown cross-group-view render type.")
           }

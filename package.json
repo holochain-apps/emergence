@@ -39,9 +39,9 @@
     "build:happ:release": "npm run build:zomes && npm run optimize:zomes && hc app pack workdir --recursive"
   },
   "devDependencies": {
-    "@holochain/hc-spin": "^0.700.0",
+    "@holochain/hc-spin": "^0.700.1-rc.0",
     "@tauri-apps/cli": "^2.11.2",
-    "@theweave/cli": "0.16.0-dev.5",
+    "@theweave/cli": "^0.16.0-rc.2",
     "bestzip": "^2.2.0",
     "concurrently": "^8.2.2",
     "concurrently-repeat": "^0.0.1",
@@ -61,7 +61,7 @@
     "update": "^0.7.4"
   },
   "overrides": {
-    "@holochain/client": "^0.21.0"
+    "@holochain/client": "^0.21.1"
   },
   "allowScripts": {
     "@theweave/cli": true,
